@@ -6,6 +6,8 @@ walkdb is a management tool of walking paths.
 -  postgresql
 -  postgis 1.5 or higher
 
+Postgresql has to be accessible from docker containers. so, configure network settings.
+
 ##1. create database and install postgis functions.
 
     % createdb walkdb -E utf8
@@ -19,11 +21,11 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
     % shp2pgsql -s 4326 -g the_geom -I -W sjis japan_ver80.shp areas > areas.sql
     % psql walkdb -f areas.sql
 
-##3. install web and api packages
+##3. build and run docker container
 
-    % git clone git@github.com:ssugiyama/walkdb-web.git web
-    % git clone git@github.com:ssugiyama/walkdb-api-node.git api
+    % docker build -t walkdb .
+    % docker run -d -p app_port:3000 -e NODE_ENV=production -e DB_URL=postgres://dbuser:dbpass@dbhost:5432/walkdb --name container_name walkdb
 
-Follow the instructions of the api package.
+You may access http://localhost:*app_port* . 
 
  demo: http://walk.asharpminor.com/
