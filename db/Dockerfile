@@ -1,23 +1,10 @@
-FROM ubuntu
-MAINTAINER Shinichi SUGIYAMA
+FROM mdillon/postgis
+MAINTAINER Shinichi SUGIYAMA <shin.sugi@gmail.com>
 
+WORKDIR /tmp
 RUN apt-get update
-RUN apt-get install -y curl git g++ python make libgeos++-dev
-
-# Set working directory.
-ENV HOME /root
-WORKDIR /root
-
-# install nodebrew
-RUN curl -L git.io/nodebrew | perl - setup
-ENV PATH $HOME/.nodebrew/current/bin:$PATH
-RUN echo 'export PATH=$HOME/.nodebrew/current/bin:$PATH' >> $HOME/.bashrc
-RUN nodebrew install-binary 0.10
-RUN nodebrew list | head -1 |xargs nodebrew use
-RUN git clone https://github.com/ssugiyama/walkdb-web.git web
-RUN git clone https://github.com/ssugiyama/walkdb-api-node.git api
-WORKDIR /root/api
-RUN npm install
-EXPOSE 3000
-CMD npm start
-
+RUN apt-get install -y unzip
+ADD schema.sql .
+ADD japan_ver80.zip .
+ADD walkdb-init.sh /docker-entrypoint-initdb.d/
+RUN chmod +x /docker-entrypoint-initdb.d/walkdb-init.sh
