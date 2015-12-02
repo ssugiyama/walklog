@@ -23,8 +23,7 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
     % cd api
     % docker build -t walkdb-api-node .
 	% docker run -d -v `pwd`/../web:/usr/src/web -p 3000:3000 \
-	    --link walkdb:walkdb -e POSTGRES_USER=walkdb -e POSTGRES_PASSWORD=pass \
-        --name walkdb-api-node walkdb-api-node
+	    --link walkdb:walkdb --name walkdb-api-node walkdb-api-node
 
 ## without docker
 
