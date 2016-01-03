@@ -1,29 +1,29 @@
-#walkdb
+#walklog
 
-walkdb is a management tool of walking paths.
+walklog is a management tool of walking paths.
 
 ## prerequisite
-    % git clone --recursive https://github.com/ssugiyama/walkdb.git
-    % cd walkdb
+    % git clone --recursive https://github.com/ssugiyama/walklog.git
+    % cd walklog
 
 visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into current directory.
 
 ## with docker
 
 ### data container
-    % docker create -v /var/lib/postgresql/data --name walkdb-data busybox
+    % docker create -v /var/lib/postgresql/data --name walklog-data busybox
 
 ### db container
-    % docker build -t walkdb .
-    % docker run -d --volumes-from walkdb-data \
-        -e POSTGRES_USER=walkdb -e POSTGRES_PASSWORD=pass \
-        --name walkdb walkdb
+    % docker build -t walklog .
+    % docker run -d --volumes-from walklog-data \
+        -e POSTGRES_USER=walklog -e POSTGRES_PASSWORD=pass \
+        --name walklog walklog
 
 ### api container
     % cd api
-    % docker build -t walkdb-api-node .
+    % docker build -t walklog-api-node .
 	% docker run -d -v `pwd`/../web:/usr/src/web -p 3000:3000 \
-	    --link walkdb:walkdb --name walkdb-api-node walkdb-api-node
+	    --link walklog:walklog --name walklog-api-node walklog-api-node
 
 ## without docker
 
@@ -35,19 +35,19 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
 
 ###1. create database and install postgis functions.
 
-    % createdb walkdb -E utf8
-    % psql walkdb -f $(POSTGIS_DIR)/postgis.sql
-    % psql walkdb -f $(POSTGIS_DIR)/spatial_ref_sys.sql
-    % psql walkdb -f schema.sql
+    % createdb walklog -E utf8
+    % psql walklog -f $(POSTGIS_DIR)/postgis.sql
+    % psql walklog -f $(POSTGIS_DIR)/spatial_ref_sys.sql
+    % psql walklog -f schema.sql
 
 ###2. setup areas table
     % unzip japan_ver80.zip
     % shp2pgsql -s 4326 -g the_geom -I -W sjis japan_ver80.shp areas > areas.sql
-    % psql walkdb -f areas.sql
+    % psql walklog -f areas.sql
 
 ###3. setup and start api server
     % npm install
-    % PORT=3000 WALKDB_URL=postgres://user:password@host:5432/walkdb npm start
+    % PORT=3000 WALKLOG_URL=postgres://user:password@host:5432/walklog npm start
 
 You may access http://localhost:3000 . 
 
