@@ -17,13 +17,13 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
     % docker build -t walklog .
     % docker run -d --volumes-from walklog-data \
         -e POSTGRES_USER=walklog -e POSTGRES_PASSWORD=pass \
-        --name walklog walklog
+        --name walklog-db walkloa-db
 
 ### api container
     % cd api
     % docker build -t walklog-api-node .
-	% docker run -d -v `pwd`/../web:/usr/src/web -p 3000:3000 \
-	    --link walklog:walklog --name walklog-api-node walklog-api-node
+    % docker run -d -v `pwd`/../web:/usr/src/web -p 3000:3000 \
+	    --link walklog:walklog --name walklog-api walklog-api
 
 ## without docker
 
