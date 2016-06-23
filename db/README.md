@@ -21,9 +21,9 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
 
 ### api container
     % cd api
-    % docker build -t walklog-api-node .
+    % docker build -t walklog-api .
     % docker run -d -v `pwd`/../web:/usr/src/web -p 3000:3000 \
-	    --link walklog:walklog --name walklog-api walklog-api
+	    --link walklog-db:walklog --name walklog-api walklog-api
 
 ## without docker
 
