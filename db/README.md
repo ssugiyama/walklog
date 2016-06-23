@@ -22,8 +22,10 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
 ### api container
     % cd api
     % docker build -t walklog-api .
-    % docker run -d -v `pwd`/../web:/usr/src/web -p 3000:3000 \
+    % docker run -d -p 3000:3000 \
 	    --link walklog-db:walklog --name walklog-api walklog-api
+
+if you wish to mount hostdir as webroot add **-v hostdir:/var/www/public** to docker run.
 
 ## without docker
 
@@ -46,7 +48,10 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
     % psql walklog -f areas.sql
 
 ###3. setup and start api server
-    % npm install
+    % cd api/web
+    % npm install && npm run build
+	% cd ..
+	% ln -s api/web/public .
     % PORT=3000 WALKLOG_URL=postgres://user:password@host:5432/walklog npm start
 
 You may access http://localhost:3000 . 
