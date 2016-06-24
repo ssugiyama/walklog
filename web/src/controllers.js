@@ -589,6 +589,7 @@
 
 	}
 	function prepareTwitter(data) {
+	    
 	    var href = location.protocol + "//" + location.host + "/?id=" + data.id;
 	    var body = data.date + ': ' + data.title + ' (' + $filter('number')(data.length, 1) + 'km)'; 
 	    var detail = body;
@@ -600,7 +601,22 @@
             elm.attr('data-text', detail);
             elm.attr('data-url', href);
             $('#twitter_div').html(elm);	    
-	    if (global.twttr) global.twttr.widgets.load();
+	    window.twttr = (function(d, s, id) {
+		var js, fjs = d.getElementsByTagName(s)[0],
+		    t = window.twttr || {};
+		if (d.getElementById(id)) return t;
+		js = d.createElement(s);
+		js.id = id;
+		js.src = "https://platform.twitter.com/widgets.js";
+		fjs.parentNode.insertBefore(js, fjs);
+		
+		t._e = [];
+		t.ready = function(f) {
+		    t._e.push(f);
+		};
+		
+		return t;
+	    }(document, "script", "twitter-wjs"));
 	}
         $scope.showPath = function (id) {
 	    var data = $scope.result[id];
