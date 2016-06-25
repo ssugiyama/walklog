@@ -6,5 +6,5 @@ require('./controllers.js')
 require('./application.scss');
 require('jquery-flot/jquery.flot.js');
 require('jquery-flot/jquery.flot.resize.js');
-
+require('./twitter.js');
 
