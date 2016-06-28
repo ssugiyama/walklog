@@ -1,4 +1,6 @@
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var webpack = require('webpack');
+		 
 module.exports = {
     entry : './src/entry.js',
     output : {
@@ -23,6 +25,13 @@ module.exports = {
 	    title: 'walklog',
 	    template: './src/index.html',
 	    filename: 'index.html'
+	}),
+	new webpack.optimize.UglifyJsPlugin({
+	    compress: {
+		warnings: false
+	    },
+	    sourceMap: false,
+	    mangle: false
 	})
     ]
 };
