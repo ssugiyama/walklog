@@ -8,24 +8,21 @@ walklog is a management tool of walking paths.
 
 visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into current directory.
 
-## with docker
-
-### data container
-    % docker create -v /var/lib/postgresql/data --name walklog-data busybox
-
 ### db container
-    % docker build -t walklog .
-    % docker run -d --volumes-from walklog-data \
+	% docker volume create walklog-data
+    % docker build -t walklog-db .
+    % docker run -d --volumes walklog-data:/var/lib/postgresql/data \
         -e POSTGRES_USER=walklog -e POSTGRES_PASSWORD=pass \
         --name walklog-db walkloa-db
 
-### api container
-    % cd api
-    % docker build -t walklog-api .
-    % docker run -d -p 3000:3000 \
-	    --link walklog-db:walklog --name walklog-api walklog-api
+### web container
+    % docker build -t walklog-web web
+	% docker create -v /var/www/public --name walklog-web walklog-web
 
-if you wish to mount hostdir as webroot add **-v hostdir:/var/www/public** to docker run.
+### api container
+    % docker build -t walklog-api api
+    % docker run -d -p 3000:3000 --volumes-from walklog-web\
+	    --link walklog-db:walklog --name walklog-api walklog-api
 
 ## without docker
 
@@ -48,10 +45,10 @@ if you wish to mount hostdir as webroot add **-v hostdir:/var/www/public** to do
     % psql walklog -f areas.sql
 
 ###3. setup and start api server
-    % cd api/web
+    % cd web
     % npm install && npm run build
-	% cd ..
-	% ln -s api/web/public .
+	% cd ../api
+	% ln -s ../web/public
     % PORT=3000 WALKLOG_URL=postgres://user:password@host:5432/walklog npm start
 
 You may access http://localhost:3000 . 
