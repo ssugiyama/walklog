@@ -1,0 +1,22 @@
+version: '2'
+services:
+  db:
+    build: .
+    volumes:
+      - data:/var/lib/postgresql/data
+  web:
+    build: web
+    volumes:
+      - public:/var/www/public
+  api:
+    build: api
+    volumes:
+      - public:/var/www/public
+    ports:
+      - 3000:3000
+    links:
+      - db:walklog
+
+volumes:
+  data:
+  public:

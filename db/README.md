@@ -8,22 +8,8 @@ walklog is a management tool of walking paths.
 
 visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into current directory.
 
-### db container
-	% docker create -v /var/lib/postgresql/data --name walklog-data busybox
-    % docker build -t walklog-db .
-    % docker run -d --volumes-from walklog-data \
-        -e POSTGRES_USER=walklog -e POSTGRES_PASSWORD=pass \
-        --name walklog-db walkloa-db
-
-### web container
-    % docker create -v /var/www/public --name walklog-public busybox
-    % docker build -t walklog-web web
-	% docker run --rm --volumes-from walklog-public walklog-web /bin/true
-
-### api container
-    % docker build -t walklog-api api
-    % docker run -d -p 3000:3000 --volumes-from walklog-public\
-	    --link walklog-db:walklog --name walklog-api walklog-api
+## without docker and docker-compose
+    % docker-compose up -d
 
 ## without docker
 
