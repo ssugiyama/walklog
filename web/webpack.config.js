@@ -1,4 +1,5 @@
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 var webpack = require('webpack');
 		 
 module.exports = {
@@ -32,6 +33,21 @@ module.exports = {
 	    },
 	    sourceMap: false,
 	    mangle: false
+	}),
+	new FaviconsWebpackPlugin({
+	    logo: './src/walklog.png',
+	    icons: {
+		android: true,
+		appleIcon: true,
+		appleStartup: false,
+		coast: false,
+		favicons: true,
+		firefox: false,
+		opengraph: false,
+		twitter: false,
+		yandex: false,
+		windows: false
+	    }
 	})
     ]
 };
