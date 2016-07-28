@@ -22,7 +22,7 @@ let middlewares = [
     routerMiddleware(browserHistory)
 ];
 
-if (process.env.NODE_ENV != production) {
+if (process.env.NODE_ENV != "production") {
     middlewares.push(loggerMiddleware);
 }
 
