@@ -32,7 +32,6 @@
 	var self = this;
 	
 	google.maps.event.addListener(this.drawingManager, 'polylinecomplete', function(polyline) {
-	    console.log('polylinecomp');
 	    if (self.selection && confirm('Will you append the path?')) {
 		polyline.getPath().forEach(function (elm) {
 		    self.selection.getPath().push(elm);
@@ -148,6 +147,10 @@
 	if (selection) this.bindTo('editable', selection);
     }
 
+    PathManager.prototype.getSelection = function () {
+	return this.selection;
+    }
+    
     PathManager.prototype.getEncodedSelection = function () {
 	if (this.selection) {
 	    return google.maps.geometry.encoding.encodePath(this.selection.getPath());

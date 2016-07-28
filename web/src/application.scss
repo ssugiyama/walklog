@@ -23,11 +23,12 @@ html, body {
     }
 }
 
-#main-row {
+.content {
     width: 100%;
     margin-bottom: 0;
     border: 0;
-    padding-left: 0;
+    padding-left: 0;	
+    width: 100%;
     transition: all 0.5s ease;
     &.open {
 	padding-left: $side_width;
@@ -37,7 +38,7 @@ html, body {
     }
 }
 
-#side {
+.side {
     padding-bottom: 16px;
     padding-top: 16px;
     z-index: 100;
@@ -93,7 +94,7 @@ html, body {
     overflow-x: hidden;
 }
 
-#main {
+.main {
     width: 100%;
     height: 100%;
     position: relative;
@@ -104,7 +105,7 @@ html, body {
     }
 }
 
-#map {
+.map {
     flex: 1 1 auto ;
     width: 100%;
     img { max-width: none; }    
@@ -167,7 +168,7 @@ tr {
     }
 }
 
-#twitter_div, #editButton {
+.twitter_div, .editButton {
     float: right;
     margin-right: 10px;
 }

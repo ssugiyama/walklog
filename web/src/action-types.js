@@ -1,0 +1,12 @@
+export const SEARCH = 'search';
+export const SET_SEARCH_FORM = 'set_search_form';
+export const SEARCH_START = 'search_start';
+export const SEARCH_RESULT = 'search_result';
+export const SET_PATH_MANAGER = 'set_path_manager';
+export const ADD_CITY = 'add_city';
+export const REMOVE_CITY = 'remove_city';
+export const SET_COMPONENT_PROCS = 'set_component_procs';
+export const SET_ADDITIONAL_VIEW = 'set_additional_view';
+export const SET_SELECTED_ITEM = 'set_selected_item';
+export const SET_SELECTED_INDEX = 'set_selected_index';
+export const SET_SELECTED_PATH = 'set_selected_path';

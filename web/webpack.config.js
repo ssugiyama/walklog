@@ -3,7 +3,7 @@ var FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 var webpack = require('webpack');
 		 
 module.exports = {
-    entry : './src/entry.js',
+    entry : './src/main.js',
     output : {
 	path: 'public',
 	filename: 'bundle.js'
@@ -14,6 +14,14 @@ module.exports = {
 		test: /\.scss$/,
 		loader: 'style-loader!css-loader!sass-loader'
 	    },
+	    {
+		test: /\.jsx?$/,
+		loader: 'babel-loader',
+		exclude: /node_modules/,
+		query:{
+		    presets: ['react', 'es2015']
+		}		
+	    },
 	    { test: /\.css$/, loader: 'style-loader!css-loader' },
 	    { test: /\.svg$/, loader: 'url-loader?mimetype=image/svg+xml' },
 	    { test: /\.woff$/, loader: 'url-loader?mimetype=application/font-woff' },
@@ -22,17 +30,13 @@ module.exports = {
 	    { test: /\.ttf$/, loader: 'url-loader?mimetype=application/font-woff' }]
     },
     plugins: [
+	new webpack.DefinePlugin({
+	    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),		
+	}),	
 	new HtmlWebpackPlugin({
 	    title: 'walklog',
 	    template: './src/index.html',
 	    filename: 'index.html'
-	}),
-	new webpack.optimize.UglifyJsPlugin({
-	    compress: {
-		warnings: false
-	    },
-	    sourceMap: false,
-	    mangle: false
 	}),
 	new FaviconsWebpackPlugin({
 	    logo: './src/walklog.png',
