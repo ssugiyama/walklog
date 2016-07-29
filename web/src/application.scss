@@ -210,3 +210,11 @@ tr {
     width: 100%;
     height: 100px;
 }
+
+.dropdown-menu > .disabled{
+    cursor: not-allowed;
+    a {
+        pointer-events: none;
+    }
+}
+

@@ -92,8 +92,8 @@ export default class NavBar extends Component {
             <b className="caret"></b>
             </a>
             <ul className="dropdown-menu">
-		<li><a onClick={ () => this.props.setAdditionalView('elevation') }  href="javascript:void(0)">with elevation</a></li>
-		<li><a onClick={ () => this.props.setAdditionalView('panorama')} href="javascript:void(0)">with street view</a></li>
+		<li className={this.props.selected_path == null ? 'disabled' : ''}><a onClick={ () => this.props.setAdditionalView('elevation') } href="javascript:void(0)">with elevation</a></li>
+		<li className={this.props.selected_path == null ? 'disabled' : ''}><a onClick={ () => this.props.setAdditionalView('panorama')} href="javascript:void(0)" >with street view</a></li>
 		<li><a onClick={ () => this.props.setAdditionalView(null) } href="javascript:void(0)" >map only</a></li>
             </ul>
             </li>
@@ -112,6 +112,7 @@ function mapStateToProps(state) {
 	openGeocodeModal: state.main.component_procs.openGeocodeModal,
 	setCurrentPosition: state.main.component_procs.setCurrentPosition,
 	path_manager: state.main.path_manager,
+	selected_path: state.main.selected_path,
     };
 }
 
