@@ -43,7 +43,7 @@ export default class NavBar extends Component {
                             <b className="caret"></b>
                         </a>
                         <ul className="dropdown-menu">
-                            <li><a onClick={this.handleNewWalk.bind(this)}  href="javascript:void(0)">new walk...</a></li>
+                            <li className={this.props.selected_path == null ? 'disabled' : ''}><a onClick={this.handleNewWalk.bind(this)}  href="javascript:void(0)">new walk...</a></li>
                             <li role="separator" className="divider"></li>
                             <li><a onClick={() => this.props.path_manager.set('editable', true)} href="javascript:void(0)">edit</a></li>
                             <li><a onClick={() => this.props.path_manager.deletePath() } href="javascript:void(0)">delete</a></li>
