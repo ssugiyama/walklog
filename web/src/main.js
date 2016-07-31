@@ -79,6 +79,12 @@ const mainReducer = function(state = initialState, action) {
 	    let search_form = Object.assign({}, initialState.search_form, query);
 	    return Object.assign({}, state, {search_form, do_search: true, show_on_map});
 	case ActionTypes.SET_SEARCH_FORM:
+	    if (action.payload.filter == 'hausdorff') {
+		action.payload.order = 'nearest_first';
+	    }
+	    else if (state.search_form.order == 'nearest_first') {
+		action.payload.order = 'newest_first';
+	    }
 	    search_form = Object.assign({}, state.search_form, action.payload);
 	    return Object.assign({}, state, {search_form});
 	case ActionTypes.SET_COMPONENT_PROCS:

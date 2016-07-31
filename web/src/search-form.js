@@ -43,10 +43,15 @@ class SearchForm extends Component {
 	    this.props.search(this.props);
 	}
     }
+    searchDisabled() {
+	if ((this.props.filter == 'hausdorff' || this.props.filter == 'crossing') && !this.props.searchPath) return true;
+	else if (this.props.filter == 'cities' && !this.props.cities) return true;	
+	else return false;
+    }
     render() {   
 	return (
 	    <form className="form-horizontal" role="form" onSubmit={this.handleSubmit.bind(this)}>
-		<input type="hidden" name="latitude" value="" />
+		<input type="hidden>" name="latitude" value="" />
 		<input type="hidden" name="longitude" value="" />
 		<input type="hidden" name="radius" value="" />
 		<input type="hidden" name="cities" value=""  />
@@ -116,9 +121,9 @@ class SearchForm extends Component {
 		    </div>
 		</div>
 		<div  className="form-group">
-		    <div className="col-xs-offset-2 col-xs-8">
-			<button className="btn btn-primary"><span className="glyphicon glyphicon-search"></span>search</button>
-			<input type="reset" value="reset" className="btn" />
+         	    <div className="col-xs-offset-2 col-xs-8">
+                        <button className="btn btn-primary" disabled={this.searchDisabled()}><span className="glyphicon glyphicon-search"></span>search</button>
+                        <input type="reset" value="reset" className="btn" />
 		    </div>
 		</div>
 	    </form>

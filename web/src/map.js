@@ -121,15 +121,17 @@ class Map extends Component {
 		}
 	    }
 	    this.cities = {};
-	    fetch('/cities?jcodes=' + this.props.cities)
-		.then(response => response.json())
-		.then(cities => {
-		    cities.forEach(city => {
-			let pg = this.toPolygon(city.jcode, city.the_geom);
-			pg.setMap(this.map);
+	    if (this.props.cities) {
+		fetch('/cities?jcodes=' + this.props.cities)
+		    .then(response => response.json())
+		    .then(cities => {
+			cities.forEach(city => {
+			    let pg = this.toPolygon(city.jcode, city.the_geom);
+			    pg.setMap(this.map);
+			})
 		    })
-		})
-		.catch(ex => alert(ex))
+		    .catch(ex => alert(ex))
+	    }
 	}
 	if (this.cities) {
 	    for (let id of Object.keys(this.cities)) {
@@ -171,7 +173,7 @@ class Map extends Component {
 	let index = cities.indexOf(id);
 	if (index >= 0){
 	    cities.splice(index, 1);
-	    this.props.setSearchForm('cities', cities.join(','));
+	    this.props.setSearchForm({'cities': cities.join(',')});
 	}
         pg.setMap(null);
         pg = null;
