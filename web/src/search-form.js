@@ -51,7 +51,7 @@ class SearchForm extends Component {
     render() {   
 	return (
 	    <form className="form-horizontal" role="form" onSubmit={this.handleSubmit.bind(this)}>
-		<input type="hidden>" name="latitude" value="" />
+		<input type="hidden" name="latitude" value="" />
 		<input type="hidden" name="longitude" value="" />
 		<input type="hidden" name="radius" value="" />
 		<input type="hidden" name="cities" value=""  />

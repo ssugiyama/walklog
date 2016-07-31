@@ -100,7 +100,6 @@ class Map extends Component {
 	};
 	this.props.setComponentProcs({showInfoWindow, hideInfoWindow, setStreetView, setCenter, setCurrentPosition, resizeMap});
 	this.updateWidgets();
-	this.handleResize();
 	window.addEventListener('resize', this.handleResize.bind(this));	
     }
     updateWidgets() {
@@ -144,6 +143,7 @@ class Map extends Component {
 		}
 	    }
 	}
+	this.handleResize();	
     }
     handleResize() {
 	setTimeout(() => {
