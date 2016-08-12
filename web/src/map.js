@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { setPathManagerAction, setSearchForm, setSelectedPath, setComponentProcs } from './actions'
 import { connect } from 'react-redux';
+import styles from './styles';
 
 const PathManager = require('./path-manager.js');
 
@@ -88,9 +89,6 @@ class Map extends Component {
 		alert("Geolocation is not supported by your browser");
 	    }
 	}
-	let resizeMap = () => {
-	    google.maps.event.trigger(this.map, 'resize');
-	};
 	let resetCities = () => {
             Object.keys(this.cities).forEach(id => {
                 this.cities[id].setMap(null);
@@ -98,9 +96,18 @@ class Map extends Component {
             this.cities = {};
 	    this.props.setSearchForm('cities', '');	    
 	};
-	this.props.setComponentProcs({showInfoWindow, hideInfoWindow, setStreetView, setCenter, setCurrentPosition, resizeMap});
+	this.props.setComponentProcs({showInfoWindow, hideInfoWindow, setStreetView, setCenter, setCurrentPosition});
 	this.updateWidgets();
 	window.addEventListener('resize', this.handleResize.bind(this));	
+    }
+    citiesChanges() {
+	let a = new Set(this.props.cities.split(/,/));
+	let b = new Set(Object.keys(this.cities || {}));
+	if (a.length !== b.length) return true;
+	for (let j of a) {
+	    if (!b.has(j)) return true;
+	}
+	return false;
     }
     updateWidgets() {
 	if (this.props.filter == 'neighborhood') {
@@ -112,7 +119,7 @@ class Map extends Component {
 	else {
 	    this.distanceWidget.setMap(null);
 	}
-	if (this.props.filter == 'cities') {
+	if (this.props.filter == 'cities' && this.citiesChanges()) {
 	    if (this.cities) {
 		for (let id of Object.keys(this.cities)) {
 		    let pg = this.cities[id];
@@ -143,7 +150,9 @@ class Map extends Component {
 		}
 	    }
 	}
-	this.handleResize();	
+	if ((this.props.filter == 'crossing' || this.props.filter == 'hausdorff') && this.props.searchPath != this.path_manager.getEncodedSelection()) {
+	    this.path_manager.showPath(this.props.searchPath, true);
+	}
     }
     handleResize() {
 	setTimeout(() => {
@@ -181,7 +190,7 @@ class Map extends Component {
     }
     render() {   
 	return (
-	    <div ref="map" className="map"></div>
+	    <div ref="map" style={styles.map}></div>
 	)
     }
 }
@@ -193,7 +202,7 @@ function mapStateToProps(state) {
 	longitude: state.main.search_form.longitude,
 	radius: state.main.search_form.radius,
 	cities: state.main.search_form.cities,
-	additional_view: state.main.additional_view,
+	searchPath: state.main.search_form.searchPath,
     }
 }
 

@@ -1,7 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setAdditionalView, setSearchForm } from './actions';
+import { setAdditionalView, setSearchForm, showSidebar } from './actions';
+import AppBar from 'material-ui/AppBar';
+import IconButton from 'material-ui/IconButton';
+import IconMenu from 'material-ui/IconMenu';
+import MenuItem from 'material-ui/MenuItem';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
+import Divider from 'material-ui/Divider';
 
 export default class NavBar extends Component {
     constructor(props) {
@@ -24,8 +31,73 @@ export default class NavBar extends Component {
     setRadius(r) {
 	this.props.setSearchForm({radius: r});
     }
+    handleShow() {
+	this.props.showSidebar(true);
+    }    
     render() {   
         return (
+	    <AppBar
+ 		title="walklog"
+		onLeftIconButtonTouchTap={this.handleShow.bind(this)}
+		iconElementRight={
+		    <IconMenu
+                        iconButtonElement={
+                            <IconButton><MoreVertIcon /></IconButton>
+		        }
+		    >
+		    <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>
+		    <MenuItem primaryText="path" rightIcon={<ArrowDropRight />}
+                        menuItems={[
+                            <MenuItem primaryText="edit" onTouchTap={() => this.props.path_manager.set('editable', true)} disabled={! this.props.selected_path} />,
+                            <MenuItem primaryText="delete" onTouchTap={() => this.props.path_manager.deletePath() }  disabled={! this.props.selected_path} />,
+                            <MenuItem primaryText="clear" onTouchTap={() => this.props.path_manager.deleteAll() } />,
+                            <MenuItem primaryText="export/import..." onTouchTap={() => this.props.openIOModal()} />,
+                        ]}
+
+		    />
+ 		    <MenuItem primaryText="geo" rightIcon={<ArrowDropRight />}
+	  	    menuItems={[
+			<MenuItem onTouchTap={ () => this.props.openGeocodeModal()} primaryText="geocode..." />,
+			<MenuItem onTouchTap={() => this.props.setCurrentPosition()} primaryText="geolocation" />
+		    ]} />
+	 	    { this.props.filter == 'cities' ? 			   
+                      <MenuItem onTouchTap={this.resetCities.bind(this)} primaryText="reset cities" /> : null }
+                    { this.props.filter == "neighborhood" ?
+		      <MenuItem primaryText="neighborhood"  rightIcon={<ArrowDropRight />}
+		      menuItems={[
+			  <MenuItem onTouchTap={this.setRadius.bind(this, 1000)}  primaryText="radius: 1km" />,
+			  <MenuItem onTouchTap={this.setRadius.bind(this, 500)}  primaryText="radius: 500m" />,
+			  <MenuItem onTouchTap={this.setRadius.bind(this, 250)}  primaryText="radius: 250m" />,
+			  <MenuItem onTouchTap={this.setRadius.bind(this, 100)}  primaryText="radius: 100m" />			  
+		      ]} /> : null }
+		    <Divider />
+		    <MenuItem primaryText={`Length: ${this.state.length.toFixed(1)}km`} disabled={true}/>
+		    </IconMenu>
+	    }
+		/>
+        );
+    }
+}
+
+function mapStateToProps(state) {
+    return {
+	filter: state.main.search_form.filter,
+	openWalkEditor: state.main.component_procs.openWalkEditor,
+	openIOModal: state.main.component_procs.openIOModal,
+	openGeocodeModal: state.main.component_procs.openGeocodeModal,
+	setCurrentPosition: state.main.component_procs.setCurrentPosition,
+	path_manager: state.main.path_manager,
+	selected_path: state.main.selected_path,
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({ setAdditionalView, setSearchForm, showSidebar }, dispatch);    
+ }
+
+export default connect(mapStateToProps, mapDispatchToProps)(NavBar);
+
+/*
             <nav className="navbar navbar-default navbar-static-top" id="nav" role="navigation">
                 <div className="navbar-header">
                     <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-content" aria-expanded="false">
@@ -100,24 +172,4 @@ export default class NavBar extends Component {
             </ul>
             </div>
             </nav>
-        );
-    }
-}
-
-function mapStateToProps(state) {
-    return {
-	filter: state.main.search_form.filter,
-	openWalkEditor: state.main.component_procs.openWalkEditor,
-	openIOModal: state.main.component_procs.openIOModal,
-	openGeocodeModal: state.main.component_procs.openGeocodeModal,
-	setCurrentPosition: state.main.component_procs.setCurrentPosition,
-	path_manager: state.main.path_manager,
-	selected_path: state.main.selected_path,
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setAdditionalView, setSearchForm }, dispatch);    
- }
-
-export default connect(mapStateToProps, mapDispatchToProps)(NavBar);
+*/

@@ -5,6 +5,26 @@ import { connect } from 'react-redux';
 import { setSearchForm, search} from './actions';
 import { push } from 'react-router-redux'
 import {browserHistory} from 'react-router'
+import FlatButton from 'material-ui/FlatButton';
+import SearchIcon from 'material-ui/svg-icons/action/search';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
+import TextField from 'material-ui/TextField';
+
+const order_options  = [
+    { label: 'newest first', value: 'newest_first' },
+    { label: 'oldest first', value: 'oldest_first' },    
+    { label: 'longest first', value: 'longest_first' },
+    { label: 'shortest first', value: 'shortest_first' },
+    { label: 'northernmost first', value: 'northernmost_first' },
+    { label: 'southernmostest first', value: 'southernmost_first' },
+    { label: 'easternmost first', value: 'easternmost_first' },
+    { label: 'westernmost first', value: 'westernmost_first' },        
+];
+
+const order_options_hausdorff = [
+    { label: 'nearest first', value: 'nearest_first' },    
+];
 
 class SearchForm extends Component {
     handleSubmit(e) {
@@ -25,14 +45,16 @@ class SearchForm extends Component {
 
 	let query = {}
 	keys.forEach(key => { query[key] = this.props[key] });
-	console.log(keys);
 	this.props.push({
 	    query
 	});
     }
-    handleChange(e) {
-	this.props.setSearchForm({[e.target.name]: e.target.value});
+    handleSelectChange(name, e, index, value) {
+	this.props.setSearchForm({[name]: value});
     }
+    handleTextChange(name, e) {
+	this.props.setSearchForm({[name]: e.target.value});
+    }    
     componentDidMount() {
 	if (this.props.do_search) {
 	    this.props.search(this.props);
@@ -56,75 +78,51 @@ class SearchForm extends Component {
 		<input type="hidden" name="radius" value="" />
 		<input type="hidden" name="cities" value=""  />
 		<input type="hidden" name="searchPath" value=""  />
-		<div id="filterBox" className="form-group">
-		    <div className="col-xs-offset-1 col-xs-10">
-			<select name="filter" className="form-control" value={this.props.filter} onChange={this.handleChange.bind(this)}>
-			    <option value="any">Filter</option>
-			    <option value="neighborhood">Neighborhood</option>
-			    <option value="cities">Cities</option>
-			    <option value="hausdorff">Hausdorff</option>
-			    <option value="crossing">Crossing</option>
-			</select>
-		    </div>
+		<div>
+		    <SelectField floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} fullWidth={true}>
+			<MenuItem value="any" primaryText="any" />
+			<MenuItem value="neighborhood" primaryText="Neighborhood" />
+			<MenuItem value="cities" primaryText="Cities" />
+			<MenuItem value="hausdorff" primaryText="Hausdorff" />
+			<MenuItem value="crossing" primaryText="Crossing" />
+		    </SelectField>
 		</div>
-		<div className="form-group">
-		    <div className="col-xs-offset-1 col-xs-5">
-			<select className="form-control" name="month" value={this.props.month} onChange={this.handleChange.bind(this)}>
-			    <option value="">Month</option>
-			    <option value="1">Jan</option>
-			    <option value="2">Feb</option>
-			    <option value="3">Mar</option>
-			    <option value="4">Apr</option>
-			    <option value="5">May</option>
-			    <option value="6">Jun</option>
-			    <option value="7">Jul</option>
-			    <option value="8">Aug</option>
-			    <option value="9">Sep</option>
-			    <option value="10">Oct</option>
-			    <option value="11">Nov</option>
-			    <option value="12">Dec</option>
-			</select>
-		    </div>
-		    <div className="col-xs-5">
-			<select className="form-control" name="year" value={this.props.year} onChange={this.handleChange.bind(this)}>
-			    <option value="">Year</option>
-			    {this.props.years.map(function (y) {
-				return <option value={y} key={y}>{y}</option>;
-			     })}			    
-			</select>
-		    </div>
+		<div>
+		    <SelectField floatingLabelText="month" floatingLabelFixed={true} value={this.props.month} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: "50%"}}>
+			<MenuItem value="" primaryText="-" />
+			<MenuItem value="1" primaryText="Jan" />
+			<MenuItem value="2" primaryText="Feb" />
+			<MenuItem value="3" primaryText="Mar" />
+			<MenuItem value="4" primaryText="Apr" />
+			<MenuItem value="5" primaryText="May" />
+			<MenuItem value="6" primaryText="Jun" />
+			<MenuItem value="7" primaryText="Jul" />
+			<MenuItem value="8" primaryText="Aug" />
+			<MenuItem value="9" primaryText="Sep" />
+			<MenuItem value="10" primaryText="Oct" />
+			<MenuItem value="11" primaryText="Nov" />
+			<MenuItem value="12" primaryText="Dec" />
+		    </SelectField>
+		    <SelectField floatingLabelText="year" floatingLabelFixed={true} value={this.props.year} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: "50%"}}>
+			<MenuItem value="" primaryText="-" />
+			{this.props.years.map(function (y) {
+			     return <MenuItem value={y} key={y} primaryText={y} />
+			 })}
+		    </SelectField>
 		</div>
-		<div className="form-group">
-		    <div className="col-xs-offset-1 col-xs-6">
-			<select name="order" className="form-control" value={this.props.order} onChange={this.handleChange.bind(this)}>
-			    {(this.props.filter == 'hausdorff') ?
-			    (
-			    <option value="nearest_first">nearest first</option>
+		<div>
+		    <SelectField floatingLabelText="order" value={this.props.order} onChange={this.handleSelectChange.bind(this, 'order')} style={{width: "50%", verticalAlign: 'bottom'}}>
+			{
+			    (this.props.filter == 'hausdorff' ? order_options_hausdorff : order_options).map(option => 
+				<MenuItem value={option.value} key={option.value} primaryText={option.label} />
 			    )
-			    :
-			     (<optgroup label="order">
-				 <option value="newest_first">newest first</option>
-				 <option value="oldest_first">oldest first</option>
-				 <option value="longest_first">longest first</option>
-				 <option value="shortest_first">shortest first</option>
-				 <option value="easternmost_first">easternmost first</option>
-				 <option value="westernmost_first">westernmost first</option>
-				 <option value="southernmost_first">southernmost first</option>
-				 <option value="northernmost_first">northernmost first</option>
-			     </optgroup>
-			     )
-			    }
-			</select>
-		    </div>
-		    <div className="col-xs-4">
-			<input type="text" className="form-control" defaultValue={this.props.limit} onChange={this.handleChange.bind(this)}/>
-		    </div>
+			}
+		    </SelectField>
+		    <TextField floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: "50%"}} />
 		</div>
-		<div  className="form-group">
-         	    <div className="col-xs-offset-2 col-xs-8">
-                        <button className="btn btn-primary" disabled={this.searchDisabled()}><span className="glyphicon glyphicon-search"></span>search</button>
-                        <input type="reset" value="reset" className="btn" />
-		    </div>
+		<div style={{textAlign: 'center'}}>
+ 	            <FlatButton label="search" primary={true} type="submit" icon={<SearchIcon />} />
+                    <FlatButton type="reset" secondary={true} label="reset" />
 		</div>
 	    </form>
 	);

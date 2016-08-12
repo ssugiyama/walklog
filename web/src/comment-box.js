@@ -5,6 +5,11 @@ import { Link } from 'react-router';
 import { push } from 'react-router-redux'
 import { setComponentProcs, setAdditionalView, setSelectedIndex, setSelectedItem } from './actions';
 import marked from 'marked';
+import IconButton from 'material-ui/IconButton';
+import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
+import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
+import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit';
+import styles from './styles';
 
 class CommentBox extends Component {
     handleEdit() {
@@ -49,19 +54,19 @@ class CommentBox extends Component {
 	    detail += ' "' +data.comment.replace(/[\n\r]/g, '').substring(0, 40) + '……"';
 	}
 	return (
-	    <div id="comment-box">
-            <div className="control">
-			<button className="btn btn-sm" disabled={this.props.selected_index <= 0} onClick={this.traverseItem.bind(this, -1)}><span className="glyphicon glyphicon-arrow-left"></span></button>
-            <button className="btn btn-sm" disabled={this.props.selected_index >= this.props.rows.length - 1 || this.props.selected_index == -1} onClick={this.traverseItem.bind(this, 1)}><span className="glyphicon glyphicon-arrow-right"></span></button>
-		    </div>
-                    <button className="close" onClick={this.handleClose.bind(this)}>&times;</button>
-		    <div className="body">
-			<button onClick={this.handleEdit.bind(this)} className="btn btn-xs btn-danger editButton" aria-hidden="true" type="button"><span className="glyphicon glyphicon-pencil"></span></button>
-	    <div ref="twitter" className="twitter_div"></div>	    
-		<h2 className="h5"><Link to={'/?id=' + data.id}>{title}</Link></h2>
-	    <div  dangerouslySetInnerHTML={createMarkup()} ></div>
-		    </div>
-		</div>	    
+	    <div>
+		<div style={styles.commentBoxControl}>
+		    <IconButton disabled={this.props.selected_index <= 0} onTouchTap={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
+		    <IconButton disabled={this.props.selected_index >= this.props.rows.length - 1} onTouchTap={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>		
+		    <IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>
+		    <div ref="twitter" style={styles.twitter}></div>	    
+		
+		</div>
+		<div style={styles.commentBoxBody}>
+		    <h4><Link to={'/?id=' + data.id}>{title}</Link></h4>
+		    <div  dangerouslySetInnerHTML={createMarkup()} ></div>
+		</div>
+	    </div>	    
 	);
     }
 }

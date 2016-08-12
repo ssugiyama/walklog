@@ -2,39 +2,22 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setComponentProcs } from './actions';
+import FlatButton from 'material-ui/FlatButton';
+import Dialog from 'material-ui/Dialog';
+import TextField from 'material-ui/TextField';
+import IconButton from 'material-ui/IconButton';
+import NavigationClose from 'material-ui/svg-icons/navigation/close';
+import styles from './styles';
 
 class IOModal extends Component {
     constructor(props) {
 	super(props);
-	this.state = {path_json: ''};
+	this.state = {path_json: '', open: false};
     }
-    componentDidMount() {
-	let textarea = $(this.refs.textarea);
-        textarea.on('click', function () {
-            this.select();
-        });
-        var reader = new FileReader();
-        reader.addEventListener('loadend', e => {
-            this.setState({path_json:  e.target.result});
-        });
-	
-        textarea.bind("drop", function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            var files = e.originalEvent.dataTransfer.files;
-            reader.readAsText(files[0]);
-        }).bind("dragenter", function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }).bind("dragover", function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        });
-	
+    componentDidMount() {   	
 	let openIOModal = () => {
-	    let state = {path_json: this.props.path_manager.selectionAsGeoJSON()};
+	    let state = {path_json: this.props.path_manager.selectionAsGeoJSON(), open: true};
 	    this.setState(state);	    
-	    $(this.refs.root).modal('show');
 	};
 	this.props.setComponentProcs({openIOModal});	
     }
@@ -46,26 +29,58 @@ class IOModal extends Component {
         });
         var path = new google.maps.MVCArray(pts);
         this.props.path_manager.showPath(path, true);
-	$(this.refs.root).modal('hide');	
+	this.handleClose();
+    }
+    handleClose() {
+	this.setState({ open: false });
+    }
+    initTextField(ref) {
+	if (!ref || this.reader) return;
+	let textarea = ref.getInputNode();
+	if (!textarea) return;
+	this.reader = new FileReader();
+	this.reader.addEventListener('loadend', e => {
+	    this.setState({path_json:  e.target.result});
+	});
+	
+	document.addEventListener("drop", (e) =>  {
+	    if (e.target === textarea) {
+		e.stopPropagation();
+		e.preventDefault();
+		var files = e.dataTransfer.files;
+		this.reader.readAsText(files[0]);
+	    }
+	});
+	document.addEventListener("dragenter", (e) =>  {
+	    if (e.target === textarea) {	    
+		e.stopPropagation();
+		e.preventDefault();
+	    }
+	});
+	document.addEventListener("dragover", (e) => {
+	    if (e.target === textarea) {
+		e.stopPropagation();
+		e.preventDefault();
+	    }
+	});
     }
     render() {
+	let actions = [
+	    <FlatButton onTouchTap={this.handleImport.bind(this)}  label="import" primary={true} />
+	];
+	// due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.	
 	return (
-	    <div ref="root" className="modal fade">
-            <div className="modal-dialog">
-            <div className="modal-content">
-            <div className="modal-header">
-            <button type="button" className="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 className="modal-title">Export/Import</h4>
-            </div>
-            <div className="modal-body">
-		<textarea ref="textarea" value={this.state.path_json} onChange={e => this.setState({path_json: e.target.value})}  placeholder="input text or drag JSON file."></textarea>
-            </div>
-            <div className="modal-footer">
-		<button type="button" className="btn btn-primary" onClick={this.handleImport.bind(this)}>Import</button>
-            </div>
-            </div>
-            </div>
-	    </div>
+	    <Dialog
+                title="Export/Import"
+		ref="root"
+		actions={actions}
+		modal={false}
+                open={this.state.open}
+                onRequestClose={this.handleClose.bind(this)}
+	    >
+		<TextField defaultValue={this.state.path_json} onBlur={ (e) => this.setState({path_json: e.target.value})} fullWidth={true}  multiLine={true} rows={6} rowsMax={6} ref={this.initTextField.bind(this)} onFocus={function(e) {e.target.select();}} hintText="input text or drag geojson file" />
+	    <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+            </Dialog>
 	);
     }
 }

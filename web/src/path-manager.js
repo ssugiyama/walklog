@@ -99,7 +99,7 @@
 		    if (ymax < elem.lat()) ymax = elem.lat();
 		}
             });
-            var center = new google.maps.LatLng((ymin+ymax)/2, (xmin+xmax)/2);
+            var center = new google.maps.LatLng((ymin+ymax)/2, xmin);
             this.map.panTo(center);
 	}
     }

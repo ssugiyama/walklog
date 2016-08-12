@@ -3,16 +3,31 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux'
 import { setComponentProcs, setSelectedItem } from './actions';
+import FlatButton from 'material-ui/FlatButton';
+import Dialog from 'material-ui/Dialog';
+import DatePicker from 'material-ui/DatePicker';
+import TextField from 'material-ui/TextField';
+import Toggle from 'material-ui/Toggle';
+import IconButton from 'material-ui/IconButton';
+import NavigationClose from 'material-ui/svg-icons/navigation/close';
+import styles from './styles';
 
 class WalkEditor extends Component {
     constructor(props) {
 	super(props);
-	this.state = {id: '', date: '', title: '', comment: ''};
+	this.state = {id: '', date: null, title: '', comment: '', open: false};
     }
     componentDidMount() {
 	let openWalkEditor = item => {
 	    let path = this.props.path_manager.getEncodedSelection();
 	    let update_path = this.props.update_path;
+	    let date;
+	    if (item.date) {
+		date = new Date(item.date);
+	    }
+	    else {
+		date = new Date();
+	    }
 	    if (path == null && this.state.id == '') {
 		alert('draw or select a path on map');
 		return;
@@ -20,14 +35,20 @@ class WalkEditor extends Component {
 	    else if (path == null) {
 		update_path = false;
 	    }
-	    let state = Object.assign({}, item, {path, update_path});
+	    let state = Object.assign({}, item, {path, update_path, open: true, date});
 	    this.setState(state);	    
-	    $(this.refs.root).modal('show');
 	};
 	this.props.setComponentProcs({openWalkEditor});
     }
-    handleSubmit(ev) {
-	ev.preventDefault();
+    handleClose() {
+	this.setState({ open: false });
+    }
+    handleSubmit() {
+	function formatDate(d) {
+	   return d.getFullYear()+
+	    ( "0" + ( d.getMonth()+1 ) ).slice(-2)+
+	    ( "0" + d.getDate() ).slice(-2);
+	}
 	let keys = ['date', 'title', 'comment'];
 	
 	if (! this.state.id || this.state.update_path) {
@@ -36,8 +57,8 @@ class WalkEditor extends Component {
 	if (this.state.id) {
 	    keys.push('id');
 	}
-    
-	let params = keys.map(key => `${key}=${encodeURIComponent(this.state[key])}`).join('&');	
+	let state = Object.assign({}, this.state, {date: formatDate(this.state.date)});
+	let params = keys.map(key => `${key}=${encodeURIComponent(state[key])}`).join('&');	
         fetch('/save', {
 	    method: 'POST',
 	    headers: {
@@ -47,9 +68,9 @@ class WalkEditor extends Component {
 	})
 	    .then(response => response.json())
 	    .then(json => {
-		$(this.refs.root).modal('hide');
 		let query = { id: json[0].id };
 		this.props.push( {query} );
+		this.handleClose();		
 	    })
 	    .catch(ex => alert(ex))
     }
@@ -58,67 +79,48 @@ class WalkEditor extends Component {
 	if (confirm('Are you sure to delete?')) {
             fetch('/destroy/' + this.state.id)
 		.then(() => {
-                    $(this.refs.root).modal('hide');
                     this.props.setSelectedItem(null);		    
 		    let query = { id: this.state.id };
 		    this.props.push( {query} );
+		    this.handleClose();		    
                 })
 		.catch(ex => alert(ex));
 	}
     }
-    handleChange(e) {
-        this.setState({[e.target.name]: e.target.name == 'update_path' ? e.target.checked : e.target.value});
+    handleChange(name, e, value) {
+        this.setState({[name]: value !== undefined ? value : e.target.value});
     }
     render() {
+	let actions = [];
+	actions.push (<FlatButton onTouchTap={this.handleSubmit.bind(this)}  label={ this.state.id ? 'update' : 'create' } primary={true} />);
+	if (this.state.id) {
+	    actions.push (<FlatButton label="delete" secondary={true} onTouchTap={this.handleDelete.bind(this)}/>);	    
+	}
+	// due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.	
 	return (
-	    <div className="modal fade" id="walk-editor" ref="root">
-	    <div className="modal-dialog">
-	    <div className="modal-content">
-	    <div className="modal-header">
-	    <button type="button" className="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	    <h4 className="modal-title">{ this.state.id ? 'Update Walk' : 'New Walk' }</h4>
-	    </div>
-	    <form onSubmit={this.handleSubmit.bind(this)} className="form-horizontal" role="form" ref="form">
-	    <div className="modal-body">
-	    <div className="form-group">
-	    <label className="control-label col-xs-3" htmlFor="date">date</label>
-	    <div className="col-xs-9">
-		<input type="text" name="date" value={this.state.date} onChange={this.handleChange.bind(this)} className="form-control" />
-	    </div>
-	    </div>
-	    <div className="form-group">
-	    <label className="control-label col-xs-3" htmlFor="title">title</label>
-	    <div className="col-xs-9">
-	    <input type="text" name="title" value={this.state.title} onChange={this.handleChange.bind(this)} className="form-control" />
-	    </div>
-	    </div>
-	    <div className="form-group">
-	    <label className="control-label col-xs-3" htmlFor="comment">comment<br />(markdown)</label>
-	    <div className="col-xs-9">
-	    <textarea name="comment" value={this.state.comment} onChange={this.handleChange.bind(this)} className="form-control" ></textarea>
-	    </div>
-	    </div>
-	    {
-		this.state.id ?	    
-		<div className="form-group">
-		<div className="col-xs-9 col-xs-offset-3">
-		    <input type="checkbox"  id="update_path" name="update_path" onChange={this.handleChange.bind(this)}  className="form-inline-control" checked={this.state.update_path} disabled={this.state.path == null} />
-		<label className="control-label" htmlFor="update_path">update path?</label>
+	    <Dialog
+                title={ this.state.id ? 'Update Walk' : 'New Walk' }
+		actions={actions}
+		modal={false}
+		open={this.state.open}
+                onRequestClose={this.handleClose.bind(this)}
+            >	    
+		<div>
+	            <DatePicker value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" floatingLabelText='date' floatingLabelFixed={true} fullWidth={true} autoOk={true} />
 		</div>
-		</div> : null
-	    }
-	    </div>
-	    <div  className="modal-footer">
-	    <button type="submit" className="btn btn-primary"><span className="glyphicon glyphicon-record"></span>{ this.state.id ? 'update' : 'create' }</button>
-	    {
-		this.state.id ?
-		(<button className="btn btn-danger" onClick={this.handleDelete.bind(this)}><span className="glyphicon glyphicon-remove"></span>delete</button>) : null
-	    }
-	    </div>
-	    </form>
-	    </div>
-	    </div>
-	    </div>
+		<div>
+  		    <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} floatingLabelText="title" floatingLabelFixed={true}  fullWidth={true} />
+		</div>
+		<div>
+   	            <TextField multiLine={true} rows={4} rowsMax={4}
+			       defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} floatingLabelText="comment" floatingLabelFixed={true} fullWidth={true} />
+		</div>
+		{
+		this.state.id ?	    
+		    <div><Toggle label="update path?" onToggle={this.handleChange.bind(this, 'update_path')}  toggled={this.state.update_path} disabled={this.state.path == null} /></div> : null
+		}
+		    <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>	    
+	    </Dialog>
 	);
     }
 }

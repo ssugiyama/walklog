@@ -3,14 +3,14 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setAdditionalView } from './actions';
 import marked from 'marked';
+import { Chart } from "chart.js";
+import styles from './styles';
 
 class ElevationBox extends Component {
     constructor(props) {
 	super(props);
 	this.elevator = new google.maps.ElevationService();
-    }
-    handleClose() {
-	this.props.setAdditionalView(null);
+	this.chart = null;
     }
     requestElevation(selected_path) {
         let path = [];
@@ -30,48 +30,79 @@ class ElevationBox extends Component {
     plotElevation(results, status) {
         if (status == google.maps.ElevationStatus.OK) {
             this.elevationResults = results;
-            var data = [];
-            for (var i = 0; i < results.length; i++) {
-                data.push([i, this.elevationResults[i].elevation]);
-            }
-            $.plot($(this.refs.body), [data], {
-                xaxis : {show: false},
-                colors : ['#ff0000'],
-                grid : {
-                    hoverable : true,
-                    backgroundColor: 'white'
-                },
-            });
+            let data = results.map(result => result.elevation);
+	    let labels = results.map(result => '');
+	    this.chart = new Chart(this.refs.root.getContext("2d"), {
+		type: 'line',
+		data: {
+		    labels,
+		    datasets:[ {
+			data,
+			borderWidth: 1,
+			borderColor: '#f00',
+			backgroundColor: 'rgba(255, 0, 0, 0.1)',
+			pointStyle: 'dot',
+			radius: 1
+		    }]
+		},
+		options: {
+		    legend: false,
+		    tooltips: {
+			enabled: false
+		    },
+		    hover: {
+			mode: 'x-axis',
+			onHover: this.handleHover.bind(this)
+		    }
+		}
+	    });
         }
     }
-    handleHover(event, pos, item) {
-        var elevation = this.elevationResults[~~pos.x];
-        if (!elevation) return;
-        var y = Math.round(elevation.elevation);
-	this.props.showInfoWindow(y + 'm', elevation.location);
+    handleHover(elms) {
+	if (elms.length == 0) {
+            this.props.hideInfoWindow();
+	}
+	else {
+            var elevation = this.elevationResults[elms[0]._index];
+            if (!elevation) return;
+            var y = Math.round(elevation.elevation);
+	    this.props.showInfoWindow(y + 'm', elevation.location);
+	}
     }
     handleMouseout() {
         this.props.hideInfoWindow();
     }
     componentDidMount() {
 	//	this.hoverListener = this.refs.body.addEventListener('plothover', this.handleHover.bind(this));
-	$(this.refs.body).on('plothover', this.handleHover.bind(this));
-	$(this.refs.body).on('mouseout', this.handleMouseout.bind(this));
-	this.requestElevation(this.props.selected_path);
+//	$(this.refs.body).on('plothover', this.handleHover.bind(this));
+//	$(this.refs.body).on('mouseout', this.handleMouseout.bind(this));
+//	this.requestElevation(this.props.selected_path);
     }
     componentWillUnmount() {
-	$(this.refs.body).off();
+//	$(this.refs.body).off();
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+	if (nextProps.selected_path !== this.props.selected_path) {
+	    return true;
+	}
+	else {
+	    return false;
+	}
     }
     componentWillReceiveProps(nextProps) {
+	if (this.chart) {
+	    this.chart.destroy();
+	    this.chart = null;
+	}
 	this.requestElevation(nextProps.selected_path);
     }
     render() {
-	return (
-            <div id="elevation-box">
-                <button className="close" onClick={this.handleClose.bind(this)}>&times;</button>
-                <div className="body" ref="body"></div>
-            </div>	    
-	);
+	if (this.props.selected_path) 
+	    return (
+		<canvas style={styles.elevationBox} ref="root"></canvas>
+	    );
+	else
+	    return null;
     }
 }
 

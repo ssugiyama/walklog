@@ -2,7 +2,12 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setAdditionalView } from './actions';
-import marked from 'marked';
+import IconButton from 'material-ui/IconButton';
+import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
+import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
+import AvFastForward from 'material-ui/svg-icons/av/fast-forward';
+import AvFastRewind from 'material-ui/svg-icons/av/fast-rewind';
+import styles from './styles';
 
 class PanoramaBox extends Component {
     constructor(props) {
@@ -69,7 +74,6 @@ class PanoramaBox extends Component {
             }
         });
 	google.maps.event.trigger(this.panorama, 'resize');
-        this.props.setCenter(pt);
     }
     componentDidMount() {
         this.panorama = new google.maps.StreetViewPanorama(this.refs.body,
@@ -78,26 +82,26 @@ class PanoramaBox extends Component {
 							       navigationControl: true,
 							       enableCloseButton: true,
 							   });
-	this.props.setStreetView(this.panorama);
-	this.initPanorama(this.props.selected_path);	
     }
     componentWillReceiveProps(nextProps) {
-	this.initPanorama(nextProps.selected_path);
+	if (this.props.setStreetView){
+	    this.props.setStreetView(this.panorama);	
+	    this.initPanorama(nextProps.selected_path);
+	}
     }
     componentWillUnmount() {
 //	this.props.setStreetView(null);
     }
     render() {
 	return (
-            <div id="panorama-box">
-                <button className="close" onClick={this.handleClose.bind(this)}>&times;</button>
-                <div className="body" ref="body"></div>
-                <div className="controls">
-                    <button className="btn btn-sm" onClick={ () => { this.showPanorama(this.state.panoramaIndex - 10) } }><span className="glyphicon glyphicon-fast-backward"></span></button>
-                    <button className="btn btn-sm" onClick={ () => { this.showPanorama(this.state.panoramaIndex - 1) }}><span className="glyphicon glyphicon-step-backward"></span></button>
+            <div>
+                <div style={styles.panoramaBoxBody} ref="body"></div>
+                <div style={styles.panoramaBoxControl}>
+                    <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 10) } }><AvFastRewind /></IconButton>
+                    <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 1) }}><NavigationArrowBack /></IconButton>
 		<span className="label label-info"><span>{ this.state.panoramaIndex+1 } </span> / <span>{ this.state.panoramaCount } </span></span>
-		    <button className="btn btn-sm" onClick={ () => { this.showPanorama(this.state.panoramaIndex + 1) }}><span className="glyphicon glyphicon-step-forward"></span></button>
-                    <button className="btn btn-sm" onClick={ () => { this.showPanorama(this.state.panoramaIndex + 10) }}><span className="glyphicon glyphicon-fast-forward"></span></button>
+		    <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 1) }}><NavigationArrowForward /></IconButton>
+                    <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 10) }}><AvFastForward /></IconButton>
                 </div>
             </div>	    
 	);

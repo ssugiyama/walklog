@@ -1,23 +1,29 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import NavBarContainer from './nav-bar';
-import ContentContainer from './content';
+import MapContainer from './map';
 import WalkEditorContainer from './walk-editor';
 import IOModalContainer from './io-modal';
 import GeocodeModalContainer from './geocode-modal';
 import { connect } from 'react-redux';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import SideBoxContainer from './side-box';
+
 class Body extends Component {
     componentDidMount() {
     }
     render() {   
 	return (
-	    <div>
-		<NavBarContainer />
-		<ContentContainer />
-		<WalkEditorContainer />
-		<IOModalContainer />
-		<GeocodeModalContainer />
-	    </div>
+            <MuiThemeProvider>
+		<div>
+		    <NavBarContainer />
+		    <MapContainer />
+		    <SideBoxContainer />		
+		    <WalkEditorContainer />
+		    <IOModalContainer />
+		    <GeocodeModalContainer />		
+		</div>
+	    </MuiThemeProvider>
 	);
     }
 }

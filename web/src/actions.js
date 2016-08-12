@@ -58,13 +58,6 @@ export function setPathManagerAction(manager) {
     }
 }
 
-export function setAdditionalView(view) {
-    return {
-	type: ActionTypes.SET_ADDITIONAL_VIEW,
-	view
-    }
-}
-
 export function setSelectedItem(item) {
     return {
 	type: ActionTypes.SET_SELECTED_ITEM,
@@ -86,5 +79,22 @@ export function setSelectedIndex(index) {
     }
 }
 
+export function showSidebar(open) {
+    return {
+	type: ActionTypes.SHOW_SIDEBAR,
+	open
+    }
+}
 
+export function finishShowOnMap() {
+    return {
+	type: ActionTypes.FINISH_SHOW_ON_MAP
+    };
+}
 
+export function setTabValue(value) {
+    return {
+	type: ActionTypes.SET_TAB_VALUE,
+	value
+    };
+}
