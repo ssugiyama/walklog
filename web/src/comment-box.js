@@ -46,7 +46,7 @@ class CommentBox extends Component {
 	let data = this.props.selected_item;
 	if (! data) return null;
 	let title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
-	let createMarkup = () => { return { __html: marked(data.comment) } };
+	let createMarkup = () => { return { __html: marked(data.comment || '') } };
 	let href = location.protocol + "//" + location.host + "/?id=" + data.id;
 	let body = data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)'; 
 	let detail = body;
