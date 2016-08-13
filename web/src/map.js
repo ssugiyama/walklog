@@ -150,7 +150,7 @@ class Map extends Component {
 		}
 	    }
 	}
-	if (this.props.filter == 'crossing' || this.props.filter == 'hausdorff') {
+	if ((this.props.filter == 'crossing' || this.props.filter == 'hausdorff') && this.props.searchPath && !this.path_manager.getSelection()) {
 	    this.path_manager.showPath(this.props.searchPath, true);
 	}
     }
