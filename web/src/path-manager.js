@@ -4,6 +4,15 @@
  */
 (function () {
     "use strict";
+    function pathEquals(a, b) {
+	if (a.getArray) a = a.getArray();
+	if (b.getArray) b = b.getArray();	
+	if (a.length != b.length) return false;
+	for (var i = 0; i < a.length; i++) {
+	    if (! a[i].equals(b[i])) return false;
+	}
+	return true;
+    }
 
     function PathManager(opt_options) {
 	var options = opt_options || {};
@@ -73,17 +82,29 @@
 	this.polylines = [];     
     }
 
+    PathManager.prototype.searchPolyline = function (path) {
+	for (var i = 0; i < this.polylines.length; i++) {
+            var pl = this.polylines[i];
+	    var p = pl.getPath();
+	    if (pathEquals(path, p)) return pl;
+	}
+	return null;
+    }
 
     PathManager.prototype.showPath = function (path, select) {
 	//    clearPath();
 	//    var pl = Walkrr.wkt2GMap(str);
-	var pl = new google.maps.Polyline({});
 	if (typeof(path) == 'string') {
 	    path = google.maps.geometry.encoding.decodePath(path);
 	}
-	pl.setPath(path);
+	
+	var pl = this.searchPolyline(path);
+	if (!pl) {
+	    pl = new google.maps.Polyline({});
+	    pl.setPath(path);
 
-	this.addPolyline(pl);
+	    this.addPolyline(pl);
+	}
 	if(select && pl.getPath().getLength() > 0) {
             this.set('selection', pl);
             var xmin, xmax, ymin, ymax;
