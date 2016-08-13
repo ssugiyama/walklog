@@ -51,6 +51,7 @@ class PanoramaBox extends Component {
 	
     }
     initPanorama(selected_path) {
+	if (! selected_path) return;
 	this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(selected_path);
 	this.setState({panoramaCount: this.panoramaPointsAndHeadings.length});
 	setTimeout(() => {this.showPanorama(0)}, 0);
