@@ -11,6 +11,22 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 
+const month_options = [
+    { label: '-', value: '' },
+    { label: 'Jan', value: 1 },
+    { label: 'Feb', value: 2 },
+    { label: 'Mar', value: 3 },
+    { label: 'Apr', value: 4 },
+    { label: 'May', value: 5 },
+    { label: 'Jun', value: 6 },
+    { label: 'Jul', value: 7 },
+    { label: 'Aug', value: 8 },
+    { label: 'Sep', value: 9 },
+    { label: 'Oct', value: 10 },
+    { label: 'Nov', value: 11 },
+    { label: 'Dec', value: 12 },    
+];
+
 const order_options  = [
     { label: 'newest first', value: 'newest_first' },
     { label: 'oldest first', value: 'oldest_first' },    
@@ -88,22 +104,12 @@ class SearchForm extends Component {
 		    </SelectField>
 		</div>
 		<div>
-		    <SelectField floatingLabelText="month" floatingLabelFixed={true} value={this.props.month} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: "50%"}}>
-			<MenuItem value="" primaryText="-" />
-			<MenuItem value="1" primaryText="Jan" />
-			<MenuItem value="2" primaryText="Feb" />
-			<MenuItem value="3" primaryText="Mar" />
-			<MenuItem value="4" primaryText="Apr" />
-			<MenuItem value="5" primaryText="May" />
-			<MenuItem value="6" primaryText="Jun" />
-			<MenuItem value="7" primaryText="Jul" />
-			<MenuItem value="8" primaryText="Aug" />
-			<MenuItem value="9" primaryText="Sep" />
-			<MenuItem value="10" primaryText="Oct" />
-			<MenuItem value="11" primaryText="Nov" />
-			<MenuItem value="12" primaryText="Dec" />
+		    <SelectField floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: "50%"}}>
+			{month_options.map(function (option) {
+			     return <MenuItem value={option.value} key={option.value} primaryText={option.label} />
+			 })}
 		    </SelectField>
-		    <SelectField floatingLabelText="year" floatingLabelFixed={true} value={this.props.year} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: "50%"}}>
+		    <SelectField floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: "50%"}}>
 			<MenuItem value="" primaryText="-" />
 			{this.props.years.map(function (y) {
 			     return <MenuItem value={y} key={y} primaryText={y} />
