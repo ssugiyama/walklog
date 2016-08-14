@@ -4,20 +4,11 @@
  */
 (function () {
     "use strict";
-    function pathEquals(a, b) {
-	if (a.getArray) a = a.getArray();
-	if (b.getArray) b = b.getArray();	
-	if (a.length != b.length) return false;
-	for (var i = 0; i < a.length; i++) {
-	    if (! a[i].equals(b[i])) return false;
-	}
-	return true;
-    }
 
     function PathManager(opt_options) {
 	var options = opt_options || {};
 	this.setValues(options);    
-	this.polylines = new Array();
+	this.polylines = new Object();
 
 	this.generalStyle = {strokeColor : "#0000ff", strokeOpacity: 0.5, zIndex: 10};
 	this.selectedStyle = {strokeColor : "#ff0000", strokeOpacity : 0.7, zIndex: 10};
@@ -61,44 +52,32 @@
 
     PathManager.prototype.deletePath = function (){
 	if(this.selection != null){
+	    var key = this.getEncodedSelection();
             this.selection.setMap(null);
             this.set('selection', null);
+	    delete this.polylines[key];
 	}
-	var newPolylines = [];
-	for (var i = 0; i < this.polylines.length; i++) {
-            var pl = this.polylines[i];
-            if(pl.getMap()) newPolylines.push(pl);
-	}        
-	this.polylines = newPolylines;    
-	
     }
 
     PathManager.prototype.deleteAll = function () {
 	this.set('selection', null);
-	for (var i = 0; i < this.polylines.length; i++) {
-            var pl = this.polylines[i];
+	for (var key in this.polylines) {
+	    var pl = this.polylines[key];
             pl.setMap(null);
+	    delete this.polylines[key];
 	}
-	this.polylines = [];     
     }
 
     PathManager.prototype.searchPolyline = function (path) {
-	for (var i = 0; i < this.polylines.length; i++) {
-            var pl = this.polylines[i];
-	    var p = pl.getPath();
-	    if (pathEquals(path, p)) return pl;
-	}
-	return null;
+	var key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
+	return this.polylines[key];;
     }
 
     PathManager.prototype.showPath = function (path, select) {
-	//    clearPath();
-	//    var pl = Walkrr.wkt2GMap(str);
+	var pl = this.searchPolyline(path);	
 	if (typeof(path) == 'string') {
 	    path = google.maps.geometry.encoding.decodePath(path);
 	}
-	
-	var pl = this.searchPolyline(path);
 	if (!pl) {
 	    pl = new google.maps.Polyline({});
 	    pl.setPath(path);
@@ -129,7 +108,8 @@
 
 	pl.setOptions(this.generalStyle);
 	pl.setMap(this.map);
-	this.polylines.push(pl);
+	var key = google.maps.geometry.encoding.encodePath(pl.getPath());
+	this.polylines[key] = pl;
 	var self = this;
 
 	google.maps.event.addListener(pl, 'click', function () {
