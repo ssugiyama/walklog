@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setComponentProcs } from './actions';
+import { openGeocodeModal, setCenter } from './actions';
 import FlatButton from 'material-ui/FlatButton';
 import Dialog from 'material-ui/Dialog';
 import DatePicker from 'material-ui/DatePicker';
@@ -14,31 +14,30 @@ import styles from './styles';
 class GeocodeModal extends Component {
     constructor(props) {
 	super(props);
-	this.state = {address: '', open: false};
+	this.state = {address: ''};
 	this.geocoder = new google.maps.Geocoder();
-    }
-    componentDidMount() {
-	let openGeocodeModal = () => {
-	    this.setState({address: '', open: true});
-	};
-	this.props.setComponentProcs({openGeocodeModal});	
     }
     handleSubmit(address = this.state.address) {
         this.geocoder.geocode( { 'address': address}, (results, status) =>  {
 	    if (status == google.maps.GeocoderStatus.OK) {
 		this.props.setCenter(results[0].geometry.location);
-		this.setState({ open:  false} );
+		this.handleClose();
 	    } else {
 		alert("Geocode was not successful for the following reason: " + status);
 	    }
 	});
     }
     handleClose() {
-	this.setState({ open: false });
-    }    
+	this.props.openGeocodeModal(false);
+    }
+    componentWillReceiveProps(nextProps) {
+	if (nextProps.open_geocode_modal&& !this.props.open_geocode_modal) {
+	    this.setState({address: ''});
+	}
+    }
     render() {
 	let actions = [
-	    <FlatButton onTouchTap={this.handleSubmit.bind(this)}  label="Move to" primary={true} />
+	    <FlatButton onTouchTap={this.handleSubmit.bind(this, null)}  label="Move to" primary={true} />
 	];
 	// due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
 	return (
@@ -46,7 +45,7 @@ class GeocodeModal extends Component {
                 title="Geocode"
 		actions={actions}
 		modal={false}
-		open={this.state.open}
+		open={this.props.open_geocode_modal}
                 onRequestClose={this.handleClose.bind(this)}
 	    >
 	    <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value) }} floatingLabelText="address" floatingLabelFixed={true}  fullWidth={true} />
@@ -57,11 +56,11 @@ class GeocodeModal extends Component {
 }
 
 function mapStateToProps(state) {
-    return { setCenter: state.main.component_procs.setCenter};
+    return { open_geocode_modal: state.main.open_geocode_modal };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setComponentProcs }, dispatch);
+    return bindActionCreators({ openGeocodeModal, setCenter }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(GeocodeModal);

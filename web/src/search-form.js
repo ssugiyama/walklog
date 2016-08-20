@@ -71,16 +71,6 @@ class SearchForm extends Component {
     handleTextChange(name, e) {
 	this.props.setSearchForm({[name]: e.target.value});
     }    
-    componentDidMount() {
-	if (this.props.do_search) {
-	    this.props.search(this.props);
-	}
-    }
-    componentDidUpdate() {
-	if (this.props.do_search) {
-	    this.props.search(this.props);
-	}
-    }
     searchDisabled() {
 	if ((this.props.filter == 'hausdorff' || this.props.filter == 'crossing') && !this.props.searchPath) return true;
 	else if (this.props.filter == 'cities' && !this.props.cities) return true;	
@@ -137,7 +127,7 @@ class SearchForm extends Component {
 
 
 function mapStateToProps(state) {
-    return Object.assign({}, state.main.search_form, { years: state.main.years, do_search: state.main.do_search });
+    return Object.assign({}, state.main.search_form, { years: state.main.years });
 }
 
 function mapDispatchToProps(dispatch) {

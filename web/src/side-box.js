@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
-import { getMoreAction, setAdditionalView, setSelectedItem, setSelectedIndex, showSidebar, finishShowOnMap, setTabValue } from './actions';
+import { getMoreItems, setAdditionalView, setSelectedItem, setSelectedIndex, showSidebar, setTabValue } from './actions';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
 import {Tabs, Tab} from 'material-ui/Tabs';

@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setAdditionalView } from './actions';
+import { setStreetView } from './actions';
 import IconButton from 'material-ui/IconButton';
 import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
 import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
@@ -28,17 +28,17 @@ class PanoramaBox extends Component {
     getPanoramaPointsAndHeadings(selected_path) {
         if (!selected_path) return null;
         let pph = [];
-        let path = selected_path.getPath();
-        let count = path.getLength();
+        let path = selected_path;
+        let count = path.length;
         let way = 0;
         let dsum = 0;
 	let pt2, h;
         for (let i= 0; i < count-1; i++) {
-            let pt1 = path.getAt(i);
-            pt2 = path.getAt(i+1);
+            let pt1 = path[i];
+            pt2 = path[i+1];
             let d = google.maps.geometry.spherical.computeDistanceBetween(pt1, pt2);
             h = google.maps.geometry.spherical.computeHeading(pt1, pt2);
-	    
+
             while(way < dsum+d ) {
                 let pt = this.interpolatePoints(pt1, pt2, (way - dsum)/d);
                 pph.push([pt, h]);
@@ -48,11 +48,12 @@ class PanoramaBox extends Component {
         }
         pph.push([pt2, h]);
         return pph;
-	
+
     }
     initPanorama(selected_path) {
 	if (! selected_path) return;
-	this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(selected_path);
+	let path = google.maps.geometry.encoding.decodePath(selected_path);
+	this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(path);
 	this.setState({panoramaCount: this.panoramaPointsAndHeadings.length});
 	setTimeout(() => {this.showPanorama(0)}, 0);
     }
@@ -76,6 +77,10 @@ class PanoramaBox extends Component {
         });
 	google.maps.event.trigger(this.panorama, 'resize');
     }
+    shouldComponentUpdate(nextProps, nextState) {
+	if (nextProps.selected_path != this.props.selected_path) return true;
+	return false;
+    }
     componentDidMount() {
         this.panorama = new google.maps.StreetViewPanorama(this.refs.body,
 							   {
@@ -83,15 +88,12 @@ class PanoramaBox extends Component {
 							       navigationControl: true,
 							       enableCloseButton: true,
 							   });
+	this.props.setStreetView(this.panorama);
     }
     componentWillReceiveProps(nextProps) {
-	if (this.props.setStreetView){
-	    this.props.setStreetView(this.panorama);	
+	if (nextProps.selected_path != this.props.selected_path) {
 	    this.initPanorama(nextProps.selected_path);
 	}
-    }
-    componentWillUnmount() {
-//	this.props.setStreetView(null);
     }
     render() {
 	return (
@@ -104,7 +106,7 @@ class PanoramaBox extends Component {
 		    <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 1) }}><NavigationArrowForward /></IconButton>
                     <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 10) }}><AvFastForward /></IconButton>
                 </div>
-            </div>	    
+            </div>
 	);
     }
 }
@@ -112,15 +114,11 @@ class PanoramaBox extends Component {
 function mapStateToProps(state) {
     return {
 	selected_path: state.main.selected_path,
-	showInfoWindow: state.main.component_procs.showInfoWindow,	
-	hideInfoWindow: state.main.component_procs.hideInfoWindow,
-	setStreetView: state.main.component_procs.setStreetView,
-	setCenter: state.main.component_procs.setCenter,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setAdditionalView }, dispatch);
+    return bindActionCreators({ setStreetView }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PanoramaBox);

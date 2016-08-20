@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setAdditionalView } from './actions';
+import { setInfoWindow } from './actions';
 import marked from 'marked';
 import { Chart } from "chart.js";
 import styles from './styles';
@@ -13,12 +13,9 @@ class ElevationBox extends Component {
 	this.chart = null;
     }
     requestElevation(selected_path) {
-        let path = [];
         if (!selected_path) return;
-        selected_path.getPath().forEach((elem,i) => {
-            path.push(elem);
-        });
-	
+	let path = google.maps.geometry.encoding.decodePath(selected_path);
+
         let pathRequest = {
             'path': path,
             'samples': 256
@@ -60,26 +57,14 @@ class ElevationBox extends Component {
     }
     handleHover(elms) {
 	if (elms.length == 0) {
-            this.props.hideInfoWindow();
+            this.props.setInfoWindow({open: false});
 	}
 	else {
             var elevation = this.elevationResults[elms[0]._index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
-	    this.props.showInfoWindow(y + 'm', elevation.location);
+	    this.props.setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
 	}
-    }
-    handleMouseout() {
-        this.props.hideInfoWindow();
-    }
-    componentDidMount() {
-	//	this.hoverListener = this.refs.body.addEventListener('plothover', this.handleHover.bind(this));
-//	$(this.refs.body).on('plothover', this.handleHover.bind(this));
-//	$(this.refs.body).on('mouseout', this.handleMouseout.bind(this));
-//	this.requestElevation(this.props.selected_path);
-    }
-    componentWillUnmount() {
-//	$(this.refs.body).off();
     }
     shouldComponentUpdate(nextProps, nextState) {
 	if (nextProps.selected_path !== this.props.selected_path) {
@@ -97,7 +82,7 @@ class ElevationBox extends Component {
 	this.requestElevation(nextProps.selected_path);
     }
     render() {
-	if (this.props.selected_path) 
+	if (this.props.selected_path)
 	    return (
 		<canvas style={styles.elevationBox} ref="root"></canvas>
 	    );
@@ -109,13 +94,11 @@ class ElevationBox extends Component {
 function mapStateToProps(state) {
     return {
 	selected_path: state.main.selected_path,
-	showInfoWindow: state.main.component_procs.showInfoWindow,	
-	hideInfoWindow: state.main.component_procs.hideInfoWindow,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setAdditionalView }, dispatch);
+    return bindActionCreators({ setInfoWindow }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ElevationBox);

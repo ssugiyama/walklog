@@ -8,60 +8,58 @@ export function setSearchForm(payload) {
     };
 }
 
-export function setComponentProcs(payload) {
-    return {
-	type: ActionTypes.SET_COMPONENT_PROCS,
-	payload
-    };
-}
-
-function searchStart(clear) {
+function searchStart() {
     return {
 	type: ActionTypes.SEARCH_START,
-	clear
     }
 }
 function searchResult(data, append) {
     return {
 	type: ActionTypes.SEARCH_RESULT,
 	data,
-	append
+	append,
     }
 }
 
-export function search(props) {
+export function search(props, show) {
     return dispatch => {
-	dispatch(searchStart(true));
+	dispatch(searchStart());
 	let keys = ['id', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
 	let params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
 	fetch('/search?' + params)
 	    .then(response => response.json())
-	    .then(json => dispatch(searchResult(json, false)))
+	    .then(data => {
+		dispatch(searchResult(data, false));
+		if (show == 'first' && data.rows.length > 0) {
+		    dispatch(setSelectedItem(data.rows[0], 0));
+		}
+		else if (show == 'all') {
+		    dispatch(showAllPaths(data.rows));
+		}
+	    })
 	    .catch(ex => alert(ex))
     }
 }
 
-export function getMoreAction(params) {
+export function getMoreItems(params, show, selected_index) {
     return dispatch => {
-	dispatch(searchStart(false));
 	fetch('/search?' + params)
 	    .then(response => response.json())
-	    .then(json => dispatch(searchResult(json, true)))
+	    .then(data => {
+		dispatch(searchResult(data, true));
+		if (show == 'first' && data.rows.length > 0) {
+		    dispatch(setSelectedItem(data.rows[0], selected_index));
+		}
+	    })
 	    .catch(ex => alert(ex))
     }
 }
 
-export function setPathManagerAction(manager) {
-    return {
-	type: ActionTypes.SET_PATH_MANAGER,
-	manager
-    }
-}
-
-export function setSelectedItem(item) {
+export function setSelectedItem(item, index) {
     return {
 	type: ActionTypes.SET_SELECTED_ITEM,
-	item
+	item,
+	index
     }
 }
 
@@ -72,29 +70,84 @@ export function setSelectedPath(path) {
     }
 }
 
-export function setSelectedIndex(index) {
+export function openSidebar(open) {
     return {
-	type: ActionTypes.SET_SELECTED_INDEX,
-	index
-    }
-}
-
-export function showSidebar(open) {
-    return {
-	type: ActionTypes.SHOW_SIDEBAR,
+	type: ActionTypes.OPEN_SIDEBAR,
 	open
     }
-}
-
-export function finishShowOnMap() {
-    return {
-	type: ActionTypes.FINISH_SHOW_ON_MAP
-    };
 }
 
 export function setTabValue(value) {
     return {
 	type: ActionTypes.SET_TAB_VALUE,
 	value
+    };
+}
+
+export function addPaths(paths) {
+    return {
+	type: ActionTypes.ADD_PATHS,
+	paths
+    };
+}
+
+export function deleteSelectedPath() {
+    return {
+	type: ActionTypes.DELETE_SELECTED_PATH
+    };
+}
+
+export function clearPaths() {
+    return {
+	type: ActionTypes.CLEAR_PATHS
+    };
+}
+
+export function setEditingPath() {
+    return {
+	type: ActionTypes.SET_EDITING_PATH
+    };
+}
+
+export function openWalkEditor(open, mode) {
+    return {
+	type: ActionTypes.OPEN_WALK_EDITOR,
+	open,
+	mode
+    }
+}
+
+export function openIOModal(open) {
+    return {
+	type: ActionTypes.OPEN_IO_MODAL,
+	open
+    }
+}
+
+export function openGeocodeModal(open) {
+    return {
+	type: ActionTypes.OPEN_GEOCODE_MODAL,
+	open
+    }
+}
+
+export function setStreetView(panorama) {
+    return {
+	type: ActionTypes.SET_STREET_VIEW,
+	panorama
+    }
+}
+
+export function setInfoWindow(payload) {
+    return {
+	type: ActionTypes.SET_INFO_WINDOW,
+	payload
+    };
+}
+
+export function setCenter(center) {
+    return {
+	type: ActionTypes.SET_CENTER,
+	center,
     };
 }

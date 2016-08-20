@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
-import { setPathManagerAction, setSearchForm, setSelectedPath, setComponentProcs } from './actions'
+import { setSearchForm, setSelectedPath, setCenter } from './actions'
 import { connect } from 'react-redux';
 import styles from './styles';
 
@@ -31,17 +31,21 @@ class Map extends Component {
 		    .then(json => this.addCity(json[0].jcode, json[0].the_geom))
 		    .catch(ex => alert(ex))
             }
-        });	
-	this.path_manager = new PathManager({map: this.map});	
-	this.props.setPathManagerAction(this.path_manager);
-	this.props.setSelectedPath(this.path_manager.getSelection());
-        google.maps.event.addListener(this.path_manager, 'length_changed', () => {
-	    this.props.setSelectedPath(this.path_manager.getSelection());	
+        });
+        google.maps.event.addListener(this.map, 'center_changed', () => {
+	    this.props.setCenter(this.map.getCenter());
 	});
-        google.maps.event.addListener(this.path_manager, 'selection_changed', () => {
-	    this.props.setSelectedPath(this.path_manager.getSelection());
-	});
-	
+	this.path_manager = new PathManager({map: this.map});
+	this.props.setSelectedPath(this.path_manager.getEncodedSelection());
+	let path_changed = () => {
+	    let next_path = this.path_manager.getEncodedSelection();
+	    if (this.props.selected_path != next_path) {
+		this.props.setSelectedPath(next_path);
+	    }
+	};
+        google.maps.event.addListener(this.path_manager, 'length_changed', path_changed);
+        google.maps.event.addListener(this.path_manager, 'selection_changed', path_changed);
+
         this.distanceWidget = new google.maps.Circle({
             strokeWeight: 2,
             editable: true,
@@ -62,43 +66,7 @@ class Map extends Component {
 	});
 
 	this.infoWindow = new google.maps.InfoWindow();
-	let showInfoWindow = (info, position) => {
-            this.infoWindow.open(this.map);
-            this.infoWindow.setPosition(position);
-            this.infoWindow.setContent(info);
-	};
-	let hideInfoWindow = () => {
-	    this.infoWindow.close();
-	};
-	let setStreetView = panorama => {
-	    this.map.setStreetView(panorama);
-	};
-	let setCenter = pt => {
-	    this.map.setCenter(pt);
-	}
-	let setCurrentPosition = () => {
-	    if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition( pos => {
-		    let center = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-		    this.map.setCenter(center);
-		}, () => {
-		    alert("Unable to retrieve your location");
-		});
-	    }
-	    else {
-		alert("Geolocation is not supported by your browser");
-	    }
-	}
-	let resetCities = () => {
-            Object.keys(this.cities).forEach(id => {
-                this.cities[id].setMap(null);
-            });
-            this.cities = {};
-	    this.props.setSearchForm('cities', '');	    
-	};
-	this.props.setComponentProcs({showInfoWindow, hideInfoWindow, setStreetView, setCenter, setCurrentPosition});
-	this.updateWidgets();
-	window.addEventListener('resize', this.handleResize.bind(this));	
+	window.addEventListener('resize', this.handleResize.bind(this));
     }
     citiesChanges() {
 	let a = new Set(this.props.cities.split(/,/));
@@ -109,7 +77,56 @@ class Map extends Component {
 	}
 	return false;
     }
-    updateWidgets() {
+    handleResize() {
+	setTimeout(() => {
+	    google.maps.event.trigger(this.map, 'resize');
+	}, 500);
+    }
+    updatePaths(paths) {
+	if (paths.size == 0) {
+	    this.path_manager.deleteAll();
+	}
+	else {
+	    for (let path of paths) {
+		this.path_manager.showPath(path, false);
+	    }
+	}
+    }
+    componentWillReceiveProps(nextProps) {
+	this.paths_changed = (nextProps.paths != this.props.paths);
+	if (nextProps.street_view != this.props.street_view) {
+	    this.map.setStreetView(nextProps.street_view);
+	}
+    }
+    componentWillUpdate(nextProps, nextState) {
+	if (nextProps.info_window != this.props.info_window) {
+
+	    if (nextProps.info_window.open) {
+		this.infoWindow.open(this.map);
+		this.infoWindow.setPosition(nextProps.info_window.position);
+		this.infoWindow.setContent(nextProps.info_window.message);
+	    }
+	    else {
+		this.infoWindow.close();
+	    }
+	}
+	if (nextProps.center && ! nextProps.center.equals(this.props.center)) {
+	    this.map.setCenter(nextProps.center);
+	}
+    }
+    componentDidUpdate() {
+	if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
+	    this.path_manager.showPath(this.props.selected_path, true);
+	}
+	else if (! this.props.selected_path) {
+	    this.path_manager.deletePath();
+	}
+	if (this.paths_changed) {
+	    this.updatePaths(this.props.paths);
+	}
+	if (this.props.editing_path) {
+	    this.path_manager.set('editable', true)
+	}
 	if (this.props.filter == 'neighborhood') {
 	    this.distanceWidget.setMap(this.map);
 	    this.distanceWidget.set('radius', parseFloat(this.props.radius));
@@ -150,17 +167,6 @@ class Map extends Component {
 		}
 	    }
 	}
-	if ((this.props.filter == 'crossing' || this.props.filter == 'hausdorff') && this.props.searchPath && !this.path_manager.getSelection()) {
-	    this.path_manager.showPath(this.props.searchPath, true);
-	}
-    }
-    handleResize() {
-	setTimeout(() => {
-	    google.maps.event.trigger(this.map, 'resize');
-	}, 500);	
-    }
-    componentDidUpdate() {
-	this.updateWidgets();
     }
     toPolygon(id, str) {
         let paths = str.split(" ").map(element => google.maps.geometry.encoding.decodePath(element));
@@ -168,7 +174,7 @@ class Map extends Component {
         pg.setPaths(paths);
         pg.setOptions(this.areaStyle);
         this.cities[id] = pg;
-        google.maps.event.addListener(pg, 'click',  this.removeCity.bind(this, id, pg));	
+        google.maps.event.addListener(pg, 'click',  this.removeCity.bind(this, id, pg));
 	return pg;
     }
     addCity(id, str) {
@@ -188,7 +194,7 @@ class Map extends Component {
         pg = null;
         delete this.cities[id];
     }
-    render() {   
+    render() {
 	return (
 	    <div ref="map" style={styles.map}></div>
 	)
@@ -202,12 +208,17 @@ function mapStateToProps(state) {
 	longitude: state.main.search_form.longitude,
 	radius: state.main.search_form.radius,
 	cities: state.main.search_form.cities,
-	searchPath: state.main.search_form.searchPath,
+	selected_path: state.main.selected_path,
+	editing_path: state.main.editing_path,
+	paths: state.main.paths,
+	street_view: state.main.street_view,
+	info_window: state.main.info_window,
+	center: state.main.center,
     }
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setPathManagerAction, setSearchForm, setSelectedPath, setComponentProcs}, dispatch);
+    return bindActionCreators({setSearchForm, setSelectedPath, setCenter}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);
