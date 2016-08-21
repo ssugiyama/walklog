@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
-import { getMoreItems, setAdditionalView, setSelectedItem, setSelectedIndex, showSidebar, setTabValue } from './actions';
+import { getMoreItems, setAdditionalView, setSelectedItem, setSelectedIndex, openSidebar, setTabValue } from './actions';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
 import {Tabs, Tab} from 'material-ui/Tabs';
@@ -28,9 +28,9 @@ class SideBox extends Component {
 	this.props.setTabValue(tab_value);
     }
     handleHide(e) {
-	this.props.showSidebar(false);
+	this.props.openSidebar(false);
     }
-    render() {   
+    render() {
 	return (
  	    <Drawer open={this.props.open_sidebar} width={350}>
 		<Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}>
@@ -41,11 +41,11 @@ class SideBox extends Component {
 		    <Tab label="visualization" value="visualization"  disabled={!this.props.selected_path}>
 			<h3>elevation</h3>
 			<ElevationBox />
-			<h3>street view</h3>			
+			<h3>street view</h3>
 			<PanoramaBox />
 		    </Tab>
 		</Tabs>
-		<IconButton style={closeButtonStyle} onTouchTap={this.handleHide.bind(this)}><NavigationClose color="white" /></IconButton>		
+		<IconButton style={closeButtonStyle} onTouchTap={this.handleHide.bind(this)}><NavigationClose color="white" /></IconButton>
 	    </Drawer>
 	);
     }
@@ -56,7 +56,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ showSidebar, setTabValue }, dispatch);
+    return bindActionCreators({ openSidebar, setTabValue }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SideBox);
