@@ -38,10 +38,11 @@ class SearchBox extends Component {
     }
     shouldComponentUpdate(nextProps, nextState) {
 	if (nextProps.rows != this.props.rows) return true;
+	if (nextState.show_distance != this.state.show_distance) return true;
 	return false;
     }
-    handleShowDistance(e) {
-	this.setState({show_distance: e.target.checked});
+    handleShowDistance(e, toggled) {
+	this.setState({show_distance: toggled});
     }
     render() {
 	return (
@@ -89,9 +90,7 @@ class SearchBox extends Component {
 }
 
 function mapStateToProps(state) {
-    return Object.assign({}, state.main.result, {
-	selected_index: state.main.selected_index
-    });
+    return Object.assign({}, state.main.result);
 }
 
 function mapDispatchToProps(dispatch) {
