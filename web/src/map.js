@@ -94,8 +94,8 @@ class Map extends Component {
     }
     componentWillReceiveProps(nextProps) {
 	this.paths_changed = (nextProps.paths != this.props.paths);
-	if (nextProps.street_view != this.props.street_view) {
-	    this.map.setStreetView(nextProps.street_view);
+	if (nextProps.panorama != this.props.panorama) {
+	    this.map.setStreetView(nextProps.panorama);
 	}
     }
     componentWillUpdate(nextProps, nextState) {
@@ -211,7 +211,7 @@ function mapStateToProps(state) {
 	selected_path: state.main.selected_path,
 	editing_path: state.main.editing_path,
 	paths: state.main.paths,
-	street_view: state.main.street_view,
+	panorama: state.main.panorama,
 	info_window: state.main.info_window,
 	center: state.main.center,
     }

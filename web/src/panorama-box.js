@@ -79,6 +79,8 @@ class PanoramaBox extends Component {
     }
     shouldComponentUpdate(nextProps, nextState) {
 	if (nextProps.selected_path != this.props.selected_path) return true;
+	if (nextState.panoramaIndex != this.state.panoramaIndex) return true;
+	if (nextState.panoramaCount != this.state.panoramaCount) return true;
 	return false;
     }
     componentDidMount() {

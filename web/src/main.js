@@ -93,6 +93,7 @@ const initialState = {
 	position: null
     },
     center: null,
+    panorama: null,
 }
 
 const mainReducer = function(state = initialState, action) {
