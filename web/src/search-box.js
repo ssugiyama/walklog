@@ -75,10 +75,10 @@ class SearchBox extends Component {
 		    <TableBody stripedRows  displayRowCheckbox={false}>
 			{ this.props.rows.map( (item, index) =>
 			    <TableRow key={index}>
-				<TableRowColumn style={td_styles[0]} className="hidden-xs id">{index+1}</TableRowColumn>
-				<TableRowColumn style={td_styles[1]} className="date">{item.date}</TableRowColumn>
-				<TableRowColumn style={td_styles[2]} className="name"><div>{item.title}</div></TableRowColumn>
-				<TableRowColumn style={td_styles[3]} className="way">{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableRowColumn>
+				<TableRowColumn style={td_styles[0]}>{index+1}</TableRowColumn>
+				<TableRowColumn style={td_styles[1]}>{item.date}</TableRowColumn>
+				<TableRowColumn style={td_styles[2]}>{item.title}</TableRowColumn>
+				<TableRowColumn style={td_styles[3]}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableRowColumn>
 			    </TableRow>)
 			}
 		    </TableBody>
