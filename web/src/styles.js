@@ -30,7 +30,7 @@ export default {
     },
     panoramaBoxBody: {
 	width: '100%',
-	height: 250
+	height: 214
     },
     panoramaBoxControl: {
 	width: '100%',

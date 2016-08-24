@@ -13,6 +13,9 @@ import PanoramaBox from './panorama-box';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
 import NavigationClose from 'material-ui/svg-icons/navigation/close';
+import SearchIcon from 'material-ui/svg-icons/action/search';
+import DescriptionIcon from 'material-ui/svg-icons/action/description';
+import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
 
 const closeButtonStyle = {
     position: 'absolute',
@@ -25,27 +28,25 @@ class SideBox extends Component {
     }
     handleTabChange(tab_value) {
 	if (typeof(tab_value) !== 'string') return;
-	this.props.setTabValue(tab_value);
-    }
-    handleHide(e) {
-	this.props.openSidebar(false);
+        if (tab_value == 'close') this.props.openSidebar(false);
+        else this.props.setTabValue(tab_value);
     }
     render() {
 	return (
- 	    <Drawer open={this.props.open_sidebar} width={350}>
-		<Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}>
-		    <Tab label="Search" value="search">
+ 	    <Drawer open={this.props.open_sidebar} width={300}>
+		<Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)} >
+		    <Tab icon={<NavigationClose />} value="close" />
+		    <Tab icon={<SearchIcon />} value="search" >
 			<SearchBox />
 		    </Tab>
-		    <Tab label="comment" value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
-		    <Tab label="visualization" value="visualization"  disabled={!this.props.selected_path}>
+		    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
+		    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.selected_path}>
 			<h3>elevation</h3>
 			<ElevationBox />
 			<h3>street view</h3>
 			<PanoramaBox />
 		    </Tab>
 		</Tabs>
-		<IconButton style={closeButtonStyle} onTouchTap={this.handleHide.bind(this)}><NavigationClose color="white" /></IconButton>
 	    </Drawer>
 	);
     }
