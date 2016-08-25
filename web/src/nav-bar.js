@@ -10,7 +10,7 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
 import Divider from 'material-ui/Divider';
 
-export default class NavBar extends Component {
+class NavBar extends Component {
     constructor(props) {
 	super(props);
 	this.state = {length: 0};
