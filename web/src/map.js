@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux';
 import { setSearchForm, setSelectedPath, setCenter } from './actions'
 import { connect } from 'react-redux';
 import styles from './styles';
-
+import SideBoxContainer from './side-box';
 const PathManager = require('./path-manager.js');
 
 class Map extends Component {

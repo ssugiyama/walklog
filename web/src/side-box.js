@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
-import { getMoreItems, setAdditionalView, setSelectedItem, setSelectedIndex, openSidebar, setTabValue } from './actions';
+import { getMoreItems, setAdditionalView, setSelectedItem, setSelectedIndex, setTabValue } from './actions';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
 import {Tabs, Tab} from 'material-ui/Tabs';
@@ -16,6 +16,7 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import SearchIcon from 'material-ui/svg-icons/action/search';
 import DescriptionIcon from 'material-ui/svg-icons/action/description';
 import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
+import styles from './styles';
 
 const closeButtonStyle = {
     position: 'absolute',
@@ -28,14 +29,12 @@ class SideBox extends Component {
     }
     handleTabChange(tab_value) {
 	if (typeof(tab_value) !== 'string') return;
-        if (tab_value == 'close') this.props.openSidebar(false);
-        else this.props.setTabValue(tab_value);
+        this.props.setTabValue(tab_value);
     }
     render() {
 	return (
- 	    <Drawer open={this.props.open_sidebar} width={300}>
-		<Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)} >
-		    <Tab icon={<NavigationClose />} value="close" />
+ 	    <Drawer open={this.props.open_sidebar} width={300} containerStyle={styles.sideBox}>
+		<Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}   style={styles.tabs}>
 		    <Tab icon={<SearchIcon />} value="search" >
 			<SearchBox />
 		    </Tab>
@@ -57,7 +56,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ openSidebar, setTabValue }, dispatch);
+    return bindActionCreators({ setTabValue }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SideBox);

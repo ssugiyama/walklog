@@ -70,10 +70,9 @@ export function setSelectedPath(path) {
     }
 }
 
-export function openSidebar(open) {
+export function toggleSidebar() {
     return {
-	type: ActionTypes.OPEN_SIDEBAR,
-	open
+	type: ActionTypes.TOGGLE_SIDEBAR,
     }
 }
 

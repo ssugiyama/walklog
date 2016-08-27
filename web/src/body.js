@@ -12,16 +12,16 @@ import SideBoxContainer from './side-box';
 class Body extends Component {
     componentDidMount() {
     }
-    render() {   
+    render() {
 	return (
             <MuiThemeProvider>
 		<div>
 		    <NavBarContainer />
+		    <SideBoxContainer />
 		    <MapContainer />
-		    <SideBoxContainer />		
 		    <WalkEditorContainer />
 		    <IOModalContainer />
-		    <GeocodeModalContainer />		
+		    <GeocodeModalContainer />
 		</div>
 	    </MuiThemeProvider>
 	);
@@ -34,7 +34,6 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-	handleSubmit: () => { dispatch(increment()) }
     }
 }
 

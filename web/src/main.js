@@ -156,9 +156,9 @@ const mainReducer = function(state = initialState, action) {
 		let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
 		return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false});
 	    }
-	case ActionTypes.OPEN_SIDEBAR:
+	case ActionTypes.TOGGLE_SIDEBAR:
 	    {
-		let open_sidebar = action.open;
+		let open_sidebar = !state.open_sidebar;
 		return Object.assign({}, state, {open_sidebar});
 	    }
 	case ActionTypes.OPEN_WALK_EDITOR:

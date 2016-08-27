@@ -1,3 +1,5 @@
+const appBarHeight = 64;
+
 export default {
     body: {
 	width: '100%',
@@ -5,9 +7,15 @@ export default {
 	overflow: 'hidden',
 	margin: 0
     },
+    sideBox: {
+	marginTop: appBarHeight,
+    },
+    tabs: {
+	marginBottom: appBarHeight,
+    },
     map: {
 	position: 'absolute',
-	top: 64,
+	top: appBarHeight,
 	left: 0,
 	right: 0,
 	bottom: 0,

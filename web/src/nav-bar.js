@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setEditingPath, setSearchForm, openSidebar, deleteSelectedPath, clearPaths, openWalkEditor, openIOModal, openGeocodeModal, setCenter } from './actions';
+import { setEditingPath, setSearchForm, toggleSidebar, deleteSelectedPath, clearPaths, openWalkEditor, openIOModal, openGeocodeModal, setCenter } from './actions';
 import AppBar from 'material-ui/AppBar';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
@@ -50,7 +50,7 @@ class NavBar extends Component {
 	this.props.setSearchForm({radius: r});
     }
     handleShow() {
-	this.props.openSidebar(true);
+	this.props.toggleSidebar();
     }
     render() {
         return (
@@ -105,7 +105,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setSearchForm, openSidebar, setEditingPath, deleteSelectedPath, clearPaths, openWalkEditor, openIOModal, openGeocodeModal, setCenter }, dispatch);
+    return bindActionCreators({ setSearchForm, toggleSidebar, setEditingPath, deleteSelectedPath, clearPaths, openWalkEditor, openIOModal, openGeocodeModal, setCenter }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar);
