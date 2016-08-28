@@ -40,9 +40,7 @@ class SideBox extends Component {
 		    </Tab>
 		    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
 		    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.selected_path}>
-			<h3>elevation</h3>
 			<ElevationBox />
-			<h3>street view</h3>
 			<PanoramaBox />
 		    </Tab>
 		</Tabs>

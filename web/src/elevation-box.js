@@ -84,7 +84,10 @@ class ElevationBox extends Component {
     render() {
 	if (this.props.selected_path)
 	    return (
-		<canvas style={styles.elevationBox} ref="root"></canvas>
+		<div>
+		    <h3>elevation</h3>
+		    <canvas style={styles.elevationBox} ref="root"></canvas>
+		</div>
 	    );
 	else
 	    return null;

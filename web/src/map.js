@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter } from './actions'
+import { setSearchForm, setSelectedPath, setCenter, setStreetView } from './actions'
 import { connect } from 'react-redux';
 import styles from './styles';
 import SideBoxContainer from './side-box';
@@ -94,8 +94,11 @@ class Map extends Component {
     }
     componentWillReceiveProps(nextProps) {
 	this.paths_changed = (nextProps.paths != this.props.paths);
-	if (nextProps.panorama != this.props.panorama) {
+	if (nextProps.panorama != this.map.getStreetView()) {
 	    this.map.setStreetView(nextProps.panorama);
+	    if (nextProps.panorama === null) {
+		this.props.setStreetView(this.map.getStreetView());
+	    }
 	}
     }
     componentWillUpdate(nextProps, nextState) {
@@ -218,7 +221,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, setSelectedPath, setCenter}, dispatch);
+    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

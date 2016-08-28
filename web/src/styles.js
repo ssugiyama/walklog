@@ -45,6 +45,14 @@ export default {
 	textAlign: 'center',
 	height: 36
     },
+    panoramaBoxTitle: {
+	float: "left"
+    },
+    panoramaBoxOverlayToggle: {
+	width: 120,
+	float: "right",
+	marginTop: 40,
+    },
     dialogCloseButton: {
 	position: 'absolute',
 	right: -10,
