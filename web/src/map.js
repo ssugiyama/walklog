@@ -26,7 +26,7 @@ class Map extends Component {
             }
             else if(this.props.filter == 'cities') {
 		let params = `latitude=${event.latLng.lat()}&longitude=${event.latLng.lng()}`
-		fetch('/cities?' + params)
+		fetch('/api/cities?' + params)
 		    .then(response => response.json())
 		    .then(json => this.addCity(json[0].jcode, json[0].the_geom))
 		    .catch(ex => alert(ex))
@@ -148,7 +148,7 @@ class Map extends Component {
 	    }
 	    this.cities = {};
 	    if (this.props.cities) {
-		fetch('/cities?jcodes=' + this.props.cities)
+		fetch('/api/cities?jcodes=' + this.props.cities)
 		    .then(response => response.json())
 		    .then(cities => {
 			cities.forEach(city => {

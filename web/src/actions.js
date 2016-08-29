@@ -26,7 +26,7 @@ export function search(props, show) {
 	dispatch(searchStart());
 	let keys = ['id', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
 	let params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
-	fetch('/search?' + params)
+	fetch('/api/search?' + params)
 	    .then(response => response.json())
 	    .then(data => {
 		dispatch(searchResult(data, false));
@@ -43,7 +43,7 @@ export function search(props, show) {
 
 export function getMoreItems(params, show, selected_index) {
     return dispatch => {
-	fetch('/search?' + params)
+	fetch('/api/search?' + params)
 	    .then(response => response.json())
 	    .then(data => {
 		dispatch(searchResult(data, true));

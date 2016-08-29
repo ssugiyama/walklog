@@ -36,7 +36,7 @@ class WalkEditor extends Component {
 	}
 	let state = Object.assign({}, this.state, {date: formatDate(this.state.date)});
 	let params = keys.map(key => `${key}=${encodeURIComponent(state[key])}`).join('&');
-        fetch('/save', {
+        fetch('/api/save', {
 	    method: 'POST',
 	    headers: {
 		'Content-Type': 'application/x-www-form-urlencoded',
@@ -54,7 +54,7 @@ class WalkEditor extends Component {
     handleDelete(e) {
 	e.preventDefault();
 	if (confirm('Are you sure to delete?')) {
-            fetch('/destroy/' + this.state.id)
+            fetch('/api/destroy/' + this.state.id)
 		.then(() => {
                     this.props.setSelectedItem(null);
 		    let query = { id: this.state.id };
