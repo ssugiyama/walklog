@@ -206,23 +206,23 @@ let isFirstLocation = true;
 const dataFetchMiddleware = store => next => {
     return action => {
         // Fetch data on update location
-	if (action.type === LOCATION_CHANGE) {
-		if (!isFirstLocation || typeof(window) =='undefined') {
-			let state = store.getState();
-			let query = Object.assign({}, action.payload.query);
-			let show_on_map = query.show || (query.id && 'first')
-			delete query['show'];
-			let search_form = Object.assign({}, initialState.search_form, query);
-			if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !state.main.selected_path && search_form.searchPath) {
-			next(setSelectedPath(search_form.searchPath));
-			}
-			next(setSearchForm(search_form));
-			next(search(search_form, show_on_map));
+		if (action.type === LOCATION_CHANGE) {
+			if (!window.___PRELOADED_STATE__ ||  !isFirstLocation) {
+				let state = store.getState();
+				let query = Object.assign({}, action.payload.query);
+				let show_on_map = query.show || (query.id && 'first')
+				delete query['show'];
+				let search_form = Object.assign({}, initialState.search_form, query);
+				if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !state.main.selected_path && search_form.searchPath) {
+					next(setSelectedPath(search_form.searchPath));
+				}
+				next(setSearchForm(search_form));
+				next(search(search_form, show_on_map));
 			}
 			isFirstLocation = false;
-        }
-        return next(action);
-    };
+		}
+		return next(action);
+	};
 }
 
 let middlewares = [
