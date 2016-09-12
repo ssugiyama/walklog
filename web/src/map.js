@@ -4,7 +4,8 @@ import { setSearchForm, setSelectedPath, setCenter, setStreetView } from './acti
 import { connect } from 'react-redux';
 import styles from './styles';
 import SideBoxContainer from './side-box';
-const PathManager = require('./path-manager.js');
+
+const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
 
 class Map extends Component {
     componentDidMount() {
@@ -33,10 +34,9 @@ class Map extends Component {
             }
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
-	    this.props.setCenter(this.map.getCenter());
+	    this.props.setCenter(this.map.getCenter());		
 	});
 	this.path_manager = new PathManager({map: this.map});
-	this.props.setSelectedPath(this.path_manager.getEncodedSelection());
 	let path_changed = () => {
 	    let next_path = this.path_manager.getEncodedSelection();
 	    if (this.props.selected_path != next_path) {
@@ -67,6 +67,7 @@ class Map extends Component {
 
 	this.infoWindow = new google.maps.InfoWindow();
 	window.addEventListener('resize', this.handleResize.bind(this));
+	this.componentDidUpdate();
     }
     citiesChanges() {
 	let a = new Set(this.props.cities.split(/,/));

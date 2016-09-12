@@ -15,7 +15,6 @@ class GeocodeModal extends Component {
     constructor(props) {
 	super(props);
 	this.state = {address: ''};
-	this.geocoder = new google.maps.Geocoder();
     }
     handleSubmit(address = this.state.address) {
         this.geocoder.geocode( { 'address': address}, (results, status) =>  {
@@ -30,6 +29,9 @@ class GeocodeModal extends Component {
     handleClose() {
 	this.props.openGeocodeModal(false);
     }
+	componentDidMount() {
+		this.geocoder = new google.maps.Geocoder();
+	}
     componentWillReceiveProps(nextProps) {
 	if (nextProps.open_geocode_modal&& !this.props.open_geocode_modal) {
 	    this.setState({address: ''});

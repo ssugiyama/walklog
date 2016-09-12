@@ -1,5 +1,6 @@
 // actions
 import * as ActionTypes from './action-types'
+require('isomorphic-fetch');
 
 export function setSearchForm(payload) {
     return {
@@ -21,12 +22,12 @@ function searchResult(data, append) {
     }
 }
 
-export function search(props, show) {
+export function search(props, show, prefix = '/') {
     return dispatch => {
 	dispatch(searchStart());
 	let keys = ['id', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
 	let params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
-	fetch('/api/search?' + params)
+	return fetch(prefix + 'api/search?' + params)
 	    .then(response => response.json())
 	    .then(data => {
 		dispatch(searchResult(data, false));

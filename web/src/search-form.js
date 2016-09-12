@@ -85,7 +85,7 @@ class SearchForm extends Component {
 		<input type="hidden" name="cities" value=""  />
 		<input type="hidden" name="searchPath" value=""  />
 		<div>
-		    <SelectField floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} fullWidth={true}>
+		    <SelectField id="search_form_filter" floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} fullWidth={true}>
 			<MenuItem value="any" primaryText="any" />
 			<MenuItem value="neighborhood" primaryText="Neighborhood" />
 			<MenuItem value="cities" primaryText="Cities" />
@@ -94,12 +94,12 @@ class SearchForm extends Component {
 		    </SelectField>
 		</div>
 		<div>
-		    <SelectField floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: "50%"}}>
+		    <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: "50%"}}>
 			{month_options.map(function (option) {
 			     return <MenuItem value={option.value} key={option.value} primaryText={option.label} />
 			 })}
 		    </SelectField>
-		    <SelectField floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: "50%"}}>
+		    <SelectField id="search_form_year" floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: "50%"}}>
 			<MenuItem value="" primaryText="-" />
 			{this.props.years.map(function (y) {
 			     return <MenuItem value={y} key={y} primaryText={y} />
@@ -107,14 +107,14 @@ class SearchForm extends Component {
 		    </SelectField>
 		</div>
 		<div>
-		    <SelectField floatingLabelText="order" value={this.props.order} onChange={this.handleSelectChange.bind(this, 'order')} style={{width: "50%", verticalAlign: 'bottom'}}>
+		    <SelectField id="search_form_order" floatingLabelText="order" value={this.props.order} onChange={this.handleSelectChange.bind(this, 'order')} style={{width: "50%", verticalAlign: 'bottom'}}>
 			{
 			    (this.props.filter == 'hausdorff' ? order_options_hausdorff : order_options).map(option => 
 				<MenuItem value={option.value} key={option.value} primaryText={option.label} />
 			    )
 			}
 		    </SelectField>
-		    <TextField floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: "50%"}} />
+		    <TextField id="search_form_limit" floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: "50%"}} />
 		</div>
 		<div style={{textAlign: 'center'}}>
  	            <FlatButton label="search" primary={true} type="submit" icon={<SearchIcon />} />

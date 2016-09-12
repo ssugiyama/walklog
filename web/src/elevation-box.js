@@ -3,13 +3,13 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import marked from 'marked';
-import { Chart } from "chart.js";
+
+const Chart = typeof window !== 'undefined' ? require("chart.js").Chart : {};
 import styles from './styles';
 
 class ElevationBox extends Component {
     constructor(props) {
 	super(props);
-	this.elevator = new google.maps.ElevationService();
 	this.chart = null;
     }
     requestElevation(selected_path) {
@@ -74,6 +74,10 @@ class ElevationBox extends Component {
 	    return false;
 	}
     }
+	componentDidMount() {
+		this.elevator = new google.maps.ElevationService();
+		this.requestElevation(this.props.selected_path);
+	}
     componentWillReceiveProps(nextProps) {
 	if (this.chart) {
 	    this.chart.destroy();

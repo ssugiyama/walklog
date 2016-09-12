@@ -14,7 +14,7 @@ import styles from './styles';
 class PanoramaBox extends Component {
     constructor(props) {
 	super(props);
-        this.streetViewService = new google.maps.StreetViewService();
+           
 	this.panoramaInterval = 50;
 	this.state = {
 	    panoramaIndex: 0,
@@ -57,12 +57,14 @@ class PanoramaBox extends Component {
             dsum += d;
         }
         pph.push([pt2, h]);
-        return pph;
+        return pph; 
 
     }
     initPanorama(selected_path) {
 	if (! selected_path) {
-	    this.props.panorama.setVisible(false);
+        if (this.props.panorama) {
+	        this.props.panorama.setVisible(false);
+        }
 	    return;
 	}
 	let path = google.maps.geometry.encoding.decodePath(selected_path);
@@ -98,13 +100,15 @@ class PanoramaBox extends Component {
 	return false;
     }
     componentDidMount() {
+        this.streetViewService = new google.maps.StreetViewService();
         this.panorama = new google.maps.StreetViewPanorama(this.refs.body,
 							   {
 							       addressControl: true,
 							       navigationControl: true,
 							       enableCloseButton: false,
 							   });
-	this.props.setStreetView(this.panorama);
+	    this.props.setStreetView(this.panorama);
+        if (this.props.selected_path) this.initPanorama(this.props.selected_path);
     }
     componentWillReceiveProps(nextProps) {
 	if (nextProps.selected_path != this.props.selected_path) {
