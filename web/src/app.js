@@ -46,7 +46,7 @@ export const initialState = {
     open_geocode_modal: false,
     tab_value: 'search',
     street_view: null,
-    paths: new Set(),
+    paths: {},
     info_window: {
 		open: false,
 		message: null,
@@ -92,8 +92,8 @@ const mainReducer = function(state = initialState, action) {
 		let selected_item = action.item;
 		let selected_index = action.index;
 		let selected_path = selected_item ? selected_item.path : state.selected_path;
-		let paths = new Set(state.paths);
-		paths.add(selected_path);
+		let paths = Object.assign({}, state.paths);
+		paths[selected_path] = true;
 		let tab_value;
 		if (!selected_item) {
 		    tab_value = 'search';
@@ -102,19 +102,19 @@ const mainReducer = function(state = initialState, action) {
 		    tab_value = 'comment';
 		}
 		let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-		return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path});
+		return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path, paths});
 	}
     case ActionTypes.SET_SELECTED_PATH:
 	{
 		let selected_path = action.path;
 		let tab_value = state.tab_value;
-		let paths = new Set(state.paths);
-		if (selected_path) paths.add(selected_path);
+		let paths = Object.assign({}, state.paths);
+		if (selected_path) paths[selected_path] = true;
 		if (!selected_path && tab_value == 'visualization') {
 		    tab_value = 'search';
 		}
 		let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-		return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false});
+		return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false, paths});
 	}
 	case ActionTypes.TOGGLE_SIDEBAR:
 	{
@@ -144,17 +144,17 @@ const mainReducer = function(state = initialState, action) {
 	}
 	case ActionTypes.ADD_PATHS:
 	{
-		let paths = new Set(state.paths);
+		let paths = Object.assign({}, state.paths);
 		for (let path of action.paths) {
-		    paths.add(path);
+		    paths[path] = true;
 		}
 		return Object.assign({}, state, {paths});
 	}
 	case ActionTypes.DELETE_SELECTED_PATH:
 	{
 		let tab_value = state.tab_value;
-		let paths = new Set(state.paths);
-		paths.delete(state.selected_path);
+		let paths = Object.assign({}, state.paths);
+		delete paths[state.selected_path];
 		if (tab_value == 'visualization') {
 		    tab_value = 'search';
 		}
@@ -166,7 +166,7 @@ const mainReducer = function(state = initialState, action) {
 		if (tab_value == 'visualization') {
 		    tab_value = 'search';
 		}
-		return Object.assign({}, state, {selected_path: null, paths: new Set(), tab_value});
+		return Object.assign({}, state, {selected_path: null, paths: {}, tab_value});
 	}
 	case ActionTypes.SET_EDITING_PATH:
 	{
