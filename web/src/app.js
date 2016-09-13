@@ -16,27 +16,24 @@ for (let y = currentYear; y >= 1997; y--) {
 }
 
 export const initialState = {
-	url_prefix: '',
     search_form: {
-	id: '',
-	date: '',
-	filter: "any",
-	month: "",
-	year: "",
-	order: "newest_first",
-	limit: "20",
-	latitude: 35.690,
-	longitude: 139.70,
-	radius: 500,
-	cities: '',
-    },
-    component_procs: {
+		id: '',
+		date: '',
+		filter: "any",
+		month: "",
+		year: "",
+		order: "newest_first",
+		limit: "20",
+		latitude: 35.690,
+		longitude: 139.70,
+		radius: 500,
+		cities: '',
     },
     result: {
-	rows: [],
-	count: 0,
-	params: '',
-	show_distance: false,
+		rows: [],
+		count: 0,
+		params: '',
+		show_distance: false,
     },
     years: years,
     selected_item: null,
@@ -51,9 +48,9 @@ export const initialState = {
     street_view: null,
     paths: new Set(),
     info_window: {
-	open: false,
-	message: null,
-	position: null
+		open: false,
+		message: null,
+		position: null
     },
     center: null,
     panorama: null,
@@ -89,9 +86,9 @@ const mainReducer = function(state = initialState, action) {
 		    result = { rows: action.data.rows, count: action.data.count, params: action.data.params };
 		}
 		return Object.assign({}, state, {result});
-	    }
-        case ActionTypes.SET_SELECTED_ITEM:
-	    {
+	}
+    case ActionTypes.SET_SELECTED_ITEM:
+	{
 		let selected_item = action.item;
 		let selected_index = action.index;
 		let selected_path = selected_item ? selected_item.path : state.selected_path;
@@ -106,9 +103,9 @@ const mainReducer = function(state = initialState, action) {
 		}
 		let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
 		return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path});
-	    }
-        case ActionTypes.SET_SELECTED_PATH:
-	    {
+	}
+    case ActionTypes.SET_SELECTED_PATH:
+	{
 		let selected_path = action.path;
 		let tab_value = state.tab_value;
 		let paths = new Set(state.paths);
@@ -207,7 +204,7 @@ const dataFetchMiddleware = store => next => {
     return action => {
         // Fetch data on update location
 		if (action.type === LOCATION_CHANGE) {
-			if (!window.___PRELOADED_STATE__ ||  !isFirstLocation) {
+			if (!window.__PRELOADED_STATE__ ||  !isFirstLocation) {
 				let state = store.getState();
 				let query = Object.assign({}, action.payload.query);
 				let show_on_map = query.show || (query.id && 'first')
