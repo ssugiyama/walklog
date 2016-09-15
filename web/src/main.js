@@ -1,6 +1,4 @@
 require('./twitter.js');
-const injectTapEventPlugin = require("react-tap-event-plugin");
-injectTapEventPlugin();
 
 import { Provider } from 'react-redux'
 import React  from 'react';

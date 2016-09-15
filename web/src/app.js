@@ -9,6 +9,9 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, setSearchForm, setSelectedPath } from './actions';
 import BodyContainer from './body';
 
+const injectTapEventPlugin = require("react-tap-event-plugin");
+injectTapEventPlugin();
+
 let currentYear = (new Date()).getFullYear();
 let years = [];
 for (let y = currentYear; y >= 1997; y--) {
