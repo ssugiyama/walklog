@@ -4,15 +4,13 @@ services:
     build: .
     volumes:
       - data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
   web:
     build: web
     volumes:
       - public:/var/www/public
-      - ./web/src:/var/www/src
-  api:
-    build: api
-    volumes:
-      - public:/var/www/public
+      - ./api/web/src:/var/www/src
     ports:
       - 3000:3000
     links:

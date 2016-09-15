@@ -33,9 +33,8 @@ visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download
 
 ###3. setup and start api server
     % cd web
-    % npm install && npm run build
-	% cd ../api
-	% ln -s ../web/public
+    % npm install && npm run build-cli && npm run build-svr
+    % cp -a assets/* public
     % PORT=3000 WALKLOG_URL=postgres://user:password@host:5432/walklog npm start
 
 You may access http://localhost:3000 . 
