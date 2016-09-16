@@ -10,7 +10,7 @@ export default function handleSSR(req, res) {
     global.navigator = {
         userAgent: req.headers['user-agent']
     };
-    let prefix = `${req.protocol}://${req.get('host')}${req.path}`
+    let prefix = `http://localhost:${req.app.get("port")}/`
     match({ routes, location: req.url }, (err, redirect, renderProps) => {
         if (err) {
             res.status(500).send(err.message);
