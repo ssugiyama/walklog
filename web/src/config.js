@@ -2,6 +2,7 @@ export default {
     "site_name": "walklog",
     "twitter_site": "@chez_sugi",
     "og_image": "/walklog.png",
+    "google_api_key": "",
     "icon_tags": [
         '<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">',
         '<link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">',

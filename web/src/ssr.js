@@ -38,16 +38,17 @@ export default function handleSSR(req, res) {
                 let state = store.getState();
                 let title = config.site_name;
                 let description = '';
-                
+                let google_api_key = config.google_api_key;
                 if (show_on_map == 'first' && state.main.selected_item) {
                     let data = state.main.selected_item;
                     title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title
                     description = data.comment.replace(/[\n\r]/g, '').substring(0, 40) + '...';
                 }
                 var bind = Object.assign({
-                    html: html,
-                    title: title,
-                    description: description,
+                    html,
+                    title,
+                    description,
+                    google_api_key,
                     preloadedState: state
                 }, config);
                 
