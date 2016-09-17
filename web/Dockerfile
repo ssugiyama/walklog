@@ -6,6 +6,7 @@ ADD package.json webpack.config.js setup.sh index.js /var/www/
 ADD lib /var/www/lib
 ADD views /var/www/views
 ADD src /var/www/src
+ADD assets /var/www/assets
 WORKDIR /var/www
 RUN npm install
 RUN npm run build-svr
