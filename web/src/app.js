@@ -221,7 +221,7 @@ const dataFetchMiddleware = store => next => {
         // Fetch data on update location
 		if (action.type === LOCATION_CHANGE) {
 			if (!window.__PRELOADED_STATE__ ||  !isFirstLocation) {
-				match({ routes, location: action.payload.pathname }, (err, redirect, renderProps) => {
+				match({ routes, location: action.payload.pathname + action.payload.search }, (err, redirect, renderProps) => {
 					if (err || redirect || !renderProps) return;
 					let state = store.getState();
 					handleRoute(renderProps, state.main.selected_path, '/', next);
