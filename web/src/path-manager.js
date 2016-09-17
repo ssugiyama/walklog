@@ -21,7 +21,7 @@ export default class PathManager extends google.maps.MVCObject {
 	this.set('prevSelection', null);
 	google.maps.event.addListener(this.drawingManager, 'polylinecomplete', polyline => {
 	    if (this.selection && confirm('Will you append the path?')) {
-		polyline.getPath().forEach(function (elm) {
+		polyline.getPath().forEach(elm => {
 		    this.selection.getPath().push(elm);
 		});
 		polyline.setMap(null);
