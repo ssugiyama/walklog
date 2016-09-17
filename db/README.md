@@ -29,7 +29,7 @@ edit web/src/config.js
 
 ## with docker
     % docker-compose up -d
-    % docker-compose run web /var/www/setup.sh
+    % docker-compose run --rm web /var/www/setup.sh
 
 ## without docker 
 
