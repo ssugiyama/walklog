@@ -246,9 +246,15 @@ if (process.env.NODE_ENV != "production") {
 const createStoreWithMiddleware = applyMiddleware(
     ...middlewares
 )(createStore);
-
-const preloadedState = typeof(window) !== 'undefined' ?  window.__PRELOADED_STATE__ : null; 
-export const store =  preloadedState ?  createStoreWithMiddleware(reducers, preloadedState) : createStoreWithMiddleware(reducers);
+ 
+export function configureStore(state) {
+	if (state) {
+		return createStoreWithMiddleware(reducers, state) 
+	}
+	else {
+		return createStoreWithMiddleware(reducers);
+	}
+}
 
 export const routes = <Route path="/" component={BodyContainer}>
   <Route path="/:id" />

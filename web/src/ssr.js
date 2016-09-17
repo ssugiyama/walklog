@@ -1,7 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import React from 'react';
 import { Provider } from 'react-redux';
-import {store, routes, handleRoute}  from './app'
+import {configureStore, routes, handleRoute}  from './app'
 import { Route,  RouterContext, match } from 'react-router'
 import { setSelectedItem } from './actions';
 import config from './config'
@@ -19,8 +19,9 @@ export default function handleSSR(req, res) {
         } else if (!renderProps) {
             res.status(404).send('Not found');
         } else {
-            store.dispatch(setSelectedItem(null));
-            handleRoute(renderProps, false, prefix, store.dispatch).then(() => {  
+            let store = configureStore(); 
+            handleRoute(renderProps, false, prefix, store.dispatch).then(() => {
+                
                 const html = renderToString(
                     <Provider store={store}>
                         <RouterContext {...renderProps}></RouterContext>
