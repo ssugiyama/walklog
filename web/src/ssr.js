@@ -28,16 +28,19 @@ export default function handleSSR(req, res) {
                 let title = config.site_name;
                 let description = '';
                 let google_api_key = config.google_api_key;
+                let canonical = '/';
                 if (state.main.selected_item) {
                     let data = state.main.selected_item;
                     title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title
                     description = data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...';
+                    canonical = '/' + data.id;
                 }
                 var bind = Object.assign({
                     html,
                     title,
                     description,
                     google_api_key,
+                    canonical,
                     preloadedState: state
                 }, config);
                 
