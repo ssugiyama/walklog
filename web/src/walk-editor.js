@@ -45,8 +45,7 @@ class WalkEditor extends Component {
 	})
 	    .then(response => response.json())
 	    .then(json => {
-		let query = { id: json[0].id };
-		this.props.push( {query} );
+		this.props.push( '/' + json[0].id );
 		this.handleClose();
 	    })
 	    .catch(ex => alert(ex))
