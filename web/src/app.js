@@ -208,7 +208,7 @@ export function handleRoute(renderProps, isPathSelected, prefix, next) {
 	let show_on_map = query.show || (query.id && 'first')
 	delete query['show'];
 	let search_form = Object.assign({}, initialState.search_form, query);
-	if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !isPathselected && search_form.searchPath) {
+	if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !isPathSelected && search_form.searchPath) {
 		next(setSelectedPath(search_form.searchPath));
 	}
 	next(setSearchForm(search_form));
