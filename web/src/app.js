@@ -1,7 +1,7 @@
 import * as ActionTypes from './action-types'
 import React  from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router'
+import { Router, Route, IndexRoute, browserHistory, match } from 'react-router'
 import { syncHistoryWithStore, routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux'
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
@@ -18,7 +18,7 @@ for (let y = currentYear; y >= 1997; y--) {
     years.push(y);
 }
 
-export const initialState = {
+const initialState = {
     search_form: {
 		id: '',
 		date: '',
@@ -202,22 +202,30 @@ const reducers = combineReducers({
 
 const loggerMiddleware = createLogger();
 
+export function handleRoute(renderProps, isPathSelected, prefix, next) {
+	let query = Object.assign({}, renderProps.location.query);
+	if (renderProps.params.id) query.id = renderProps.params.id;
+	let show_on_map = query.show || (query.id && 'first')
+	delete query['show'];
+	let search_form = Object.assign({}, initialState.search_form, query);
+	if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !isPathselected && search_form.searchPath) {
+		next(setSelectedPath(search_form.searchPath));
+	}
+	next(setSearchForm(search_form));
+	return next(search(search_form, show_on_map, prefix));
+}  
+
 let isFirstLocation = true;
 const dataFetchMiddleware = store => next => {
     return action => {
         // Fetch data on update location
 		if (action.type === LOCATION_CHANGE) {
 			if (!window.__PRELOADED_STATE__ ||  !isFirstLocation) {
-				let state = store.getState();
-				let query = Object.assign({}, action.payload.query);
-				let show_on_map = query.show || (query.id && 'first')
-				delete query['show'];
-				let search_form = Object.assign({}, initialState.search_form, query);
-				if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !state.main.selected_path && search_form.searchPath) {
-					next(setSelectedPath(search_form.searchPath));
-				}
-				next(setSearchForm(search_form));
-				next(search(search_form, show_on_map));
+				match({ routes, location: action.payload.pathname }, (err, redirect, renderProps) => {
+					if (err || redirect || !renderProps) return;
+					let state = store.getState();
+					handleRoute(renderProps, state.main.selected_path, '/', next);
+				})
 			}
 			isFirstLocation = false;
 		}
@@ -242,5 +250,8 @@ const createStoreWithMiddleware = applyMiddleware(
 const preloadedState = typeof(window) !== 'undefined' ?  window.__PRELOADED_STATE__ : null; 
 export const store =  preloadedState ?  createStoreWithMiddleware(reducers, preloadedState) : createStoreWithMiddleware(reducers);
 
-export const routes = <Route path="/" component={BodyContainer} />;
+export const routes = <Route path="/" component={BodyContainer}>
+  <Route path="/:id" />
+</Route>
+;
 
