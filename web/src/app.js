@@ -37,6 +37,7 @@ const initialState = {
 		count: 0,
 		params: '',
 		show_distance: false,
+		error: null,
     },
     years: years,
     selected_item: null,
@@ -83,10 +84,10 @@ const mainReducer = function(state = initialState, action) {
 	{
 		let result;
 		if (action.append) {
-		    result = { rows: state.result.rows.concat(action.data.rows), count: state.result.count, params: action.data.params };
+		    result = { rows: state.result.rows.concat(action.data.rows), count: state.result.count, params: action.data.params, error: action.data.error };
 		}
 		else {
-		    result = { rows: action.data.rows, count: action.data.count, params: action.data.params };
+		    result = { rows: action.data.rows || [], count: action.data.count, params: action.data.params, error: action.data.error };
 		}
 		return Object.assign({}, state, {result});
 	}

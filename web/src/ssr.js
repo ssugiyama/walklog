@@ -18,6 +18,8 @@ export default function handleSSR(req, res) {
             res.redirect(302, redirect.pathname + redirect.search);
         } else if (!renderProps) {
             res.status(404).send('Not found');
+        } else if (renderProps.params.id && !renderProps.params.id.match(/^\d+$/)) {
+            res.status(404).send('Not found');
         } else {
             let store = configureStore(); 
             handleRoute(renderProps, false, prefix, store.dispatch).then(() => {

@@ -118,6 +118,8 @@ api.get('/search', function(req, res){
             params: params,
             rows:  result.rows.map(function (row) { return row.asObject(true); })
         });
+    }).catch (function (reason) {
+        res.status(500).json({error: reason})
     });
 });
 
@@ -135,6 +137,8 @@ api.get('/cities', function(req, res){
         where  : where
     }).then(function (result) {
         res.json(result.map(function (obj) { return obj.asObject(); }));
+    }).catch (function (reason) {
+        res.status(500).json({error: reason})
     });
 });
 
@@ -162,12 +166,15 @@ api.post('/save', function(req, res) {
     }
     models.sequelize.query(query, {model: Walk, replacements: values}).then(function (rows) {
         res.json(rows.map(function (row) { return row.asObject(true); } ));
+    }).catch (function (reason) {
+        res.status(500).json({error: reason})
     });
-
 });
 
 api.get('/destroy/:id', function(req, res) {
     Walk.destroy({where : { id : req.params.id } }).then(function () {
         res.end('');
+    }).catch (function (reason) {
+        res.status(500).json({error: reason})
     });
 });

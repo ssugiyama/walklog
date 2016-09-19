@@ -30,15 +30,15 @@ export function search(props, show, prefix = '/') {
 	return fetch(prefix + 'api/search?' + params)
 	    .then(response => response.json())
 	    .then(data => {
-		dispatch(searchResult(data, false));
-		if (show == 'first' && data.rows.length > 0) {
-		    dispatch(setSelectedItem(data.rows[0], 0));
-		}
-		else if (show == 'all') {
-		    dispatch(showAllPaths(data.rows));
-		}
+			dispatch(searchResult(data, false));
+			if (!data.error && show == 'first' && data.rows.length > 0) {
+				dispatch(setSelectedItem(data.rows[0], 0));
+			}
+			else if (!data.error && show == 'all') {
+				dispatch(showAllPaths(data.rows));
+			}
 	    })
-	    .catch(ex => alert(ex))
+	    .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)) })
     }
 }
 
@@ -47,12 +47,16 @@ export function getMoreItems(params, show, selected_index) {
 	fetch('/api/search?' + params)
 	    .then(response => response.json())
 	    .then(data => {
-		dispatch(searchResult(data, true));
-		if (show == 'first' && data.rows.length > 0) {
-		    dispatch(setSelectedItem(data.rows[0], selected_index));
-		}
+			if (data.error) {
+				dispatch(searchResult(null, data.error.message, false));
+				return;
+			}
+			dispatch(searchResult(data, true));
+			if (show == 'first' && data.rows.length > 0) {
+				dispatch(setSelectedItem(data.rows[0], selected_index));
+			}
 	    })
-	    .catch(ex => alert(ex))
+	   .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)) })
     }
 }
 

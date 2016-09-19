@@ -52,16 +52,21 @@ class SearchBox extends Component {
 		    <strong>
 			{
 			    ( () => {
-				switch (this.props.count) {
-				    case null:
-					return <span>successfully saved</span>;
-				    case 0:
-					return <span>No results</span>;
-				    case 1:
-					return <span>1 / 1 item</span>;
-				    default:
-					return <span>{this.props.rows.length}  / {this.props.count}  items</span>;
-				}
+					if (this.props.error) {
+						return <span>error: {this.props.error.message}</span>;
+					}
+					else {
+						switch (this.props.count) {
+							case null:
+							return <span>successfully saved</span>;
+							case 0:
+							return <span>No results</span>;
+							case 1:
+							return <span>1 / 1 item</span>;
+							default:
+							return <span>{this.props.rows.length}  / {this.props.count}  items</span>;
+						}
+					}
 			    })()
 			}
 
