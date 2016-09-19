@@ -38,6 +38,7 @@ const initialState = {
 		params: '',
 		show_distance: false,
 		error: null,
+		searching: false,
     },
     years: years,
     selected_item: null,
@@ -77,18 +78,13 @@ const mainReducer = function(state = initialState, action) {
 	}
 	case ActionTypes.SEARCH_START:
 	{
-		let result = { rows: [], count: 0, params: '' };
+		let result = { rows: [], count: 0, params: '', searching: true };
 		return Object.assign({}, state, {result});
 	}
 	case ActionTypes.SEARCH_RESULT:
 	{
-		let result;
-		if (action.append) {
-		    result = { rows: state.result.rows.concat(action.data.rows), count: state.result.count, params: action.data.params, error: action.data.error };
-		}
-		else {
-		    result = { rows: action.data.rows || [], count: action.data.count, params: action.data.params, error: action.data.error };
-		}
+		let result = { count: action.data.count, params: action.data.params, error: action.data.error, searching: false };
+		result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
 		return Object.assign({}, state, {result});
 	}
     case ActionTypes.SET_SELECTED_ITEM:

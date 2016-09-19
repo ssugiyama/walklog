@@ -55,6 +55,9 @@ class SearchBox extends Component {
 					if (this.props.error) {
 						return <span>error: {this.props.error.message}</span>;
 					}
+					else if (this.props.searching) {
+						return <span>Searching now...</span>;
+					}
 					else {
 						switch (this.props.count) {
 							case null:
