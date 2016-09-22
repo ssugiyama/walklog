@@ -10,21 +10,19 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import SideBoxContainer from './side-box';
 
 class Body extends Component {
-    componentDidMount() {
-    }
     render() {
-	return (
+        return (
             <MuiThemeProvider>
-		<div>
-		    <NavBarContainer />
-		    <SideBoxContainer />
-		    <MapContainer />
-		    <WalkEditorContainer />
-		    <IOModalContainer />
-		    <GeocodeModalContainer />
-		</div>
-	    </MuiThemeProvider>
-	);
+                <div>
+                    <NavBarContainer />
+                    <SideBoxContainer />
+                    <MapContainer />
+                    <WalkEditorContainer />
+                    <IOModalContainer />
+                    <GeocodeModalContainer />
+                </div>
+            </MuiThemeProvider>
+        );
     }
 }
 

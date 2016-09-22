@@ -9,12 +9,12 @@ import styles from './styles';
 
 class ElevationBox extends Component {
     constructor(props) {
-	super(props);
-	this.chart = null;
+        super(props);
+        this.chart = null;
     }
     requestElevation(selected_path) {
         if (!selected_path) return;
-	let path = google.maps.geometry.encoding.decodePath(selected_path);
+        let path = google.maps.geometry.encoding.decodePath(selected_path);
 
         let pathRequest = {
             'path': path,
@@ -28,79 +28,79 @@ class ElevationBox extends Component {
         if (status == google.maps.ElevationStatus.OK) {
             this.elevationResults = results;
             let data = results.map(result => result.elevation);
-	    let labels = results.map(result => '');
-	    this.chart = new Chart(this.refs.root.getContext("2d"), {
-		type: 'line',
-		data: {
-		    labels,
-		    datasets:[ {
-			data,
-			borderWidth: 1,
-			borderColor: '#f00',
-			backgroundColor: 'rgba(255, 0, 0, 0.1)',
-			pointStyle: 'dot',
-			radius: 1
-		    }]
-		},
-		options: {
-		    legend: false,
-		    tooltips: {
-			enabled: false
-		    },
-		    hover: {
-			mode: 'x-axis',
-			onHover: this.handleHover.bind(this)
-		    }
-		}
-	    });
+            let labels = results.map(result => '');
+            this.chart = new Chart(this.refs.root.getContext("2d"), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets:[ {
+                        data,
+                        borderWidth: 1,
+                        borderColor: '#f00',
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        pointStyle: 'dot',
+                        radius: 1
+                    }]
+                },
+                options: {
+                    legend: false,
+                    tooltips: {
+                        enabled: false
+                    },
+                    hover: {
+                        mode: 'x-axis',
+                        onHover: this.handleHover.bind(this)
+                    }
+                }
+            });
         }
     }
     handleHover(elms) {
-	if (elms.length == 0) {
+        if (elms.length == 0) {
             this.props.setInfoWindow({open: false});
-	}
-	else {
+        }
+        else {
             var elevation = this.elevationResults[elms[0]._index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
-	    this.props.setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
-	}
+            this.props.setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
+        }
     }
     shouldComponentUpdate(nextProps, nextState) {
-	if (nextProps.selected_path !== this.props.selected_path) {
-	    return true;
-	}
-	else {
-	    return false;
-	}
+        if (nextProps.selected_path !== this.props.selected_path) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
-	componentDidMount() {
-		this.elevator = new google.maps.ElevationService();
-		this.requestElevation(this.props.selected_path);
-	}
+    componentDidMount() {
+        this.elevator = new google.maps.ElevationService();
+        this.requestElevation(this.props.selected_path);
+    }
     componentWillReceiveProps(nextProps) {
-	if (this.chart) {
-	    this.chart.destroy();
-	    this.chart = null;
-	}
-	this.requestElevation(nextProps.selected_path);
+        if (this.chart) {
+            this.chart.destroy();
+            this.chart = null;
+        }
+        this.requestElevation(nextProps.selected_path);
     }
     render() {
-	if (this.props.selected_path)
-	    return (
-		<div>
-		    <h3>elevation</h3>
-		    <canvas style={styles.elevationBox} ref="root"></canvas>
-		</div>
-	    );
-	else
-	    return null;
+        if (this.props.selected_path)
+            return (
+                <div>
+                    <h3>elevation</h3>
+                    <canvas style={styles.elevationBox} ref="root"></canvas>
+                </div>
+            );
+        else
+            return null;
     }
 }
 
 function mapStateToProps(state) {
     return {
-	selected_path: state.main.selected_path,
+        selected_path: state.main.selected_path,
     };
 }
 

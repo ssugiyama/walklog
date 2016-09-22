@@ -13,47 +13,47 @@ import styles from './styles';
 
 class GeocodeModal extends Component {
     constructor(props) {
-	super(props);
-	this.state = {address: ''};
+        super(props);
+        this.state = {address: ''};
     }
     handleSubmit(address = this.state.address) {
         this.geocoder.geocode( { 'address': address}, (results, status) =>  {
-	    if (status == google.maps.GeocoderStatus.OK) {
-		this.props.setCenter(results[0].geometry.location);
-		this.handleClose();
-	    } else {
-		alert("Geocode was not successful for the following reason: " + status);
-	    }
-	});
+            if (status == google.maps.GeocoderStatus.OK) {
+                this.props.setCenter(results[0].geometry.location);
+                this.handleClose();
+            } else {
+                alert("Geocode was not successful for the following reason: " + status);
+            }
+        });
     }
     handleClose() {
-	this.props.openGeocodeModal(false);
+        this.props.openGeocodeModal(false);
     }
-	componentDidMount() {
-		this.geocoder = new google.maps.Geocoder();
-	}
+    componentDidMount() {
+        this.geocoder = new google.maps.Geocoder();
+    }
     componentWillReceiveProps(nextProps) {
-	if (nextProps.open_geocode_modal&& !this.props.open_geocode_modal) {
-	    this.setState({address: ''});
-	}
+        if (nextProps.open_geocode_modal&& !this.props.open_geocode_modal) {
+            this.setState({address: ''});
+        }
     }
     render() {
-	let actions = [
-	    <FlatButton onTouchTap={this.handleSubmit.bind(this, null)}  label="Move to" primary={true} />
-	];
-	// due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
-	return (
-	    <Dialog
+        let actions = [
+            <FlatButton onTouchTap={this.handleSubmit.bind(this, null)}  label="Move to" primary={true} />
+        ];
+        // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
+        return (
+            <Dialog
                 title="Geocode"
-		actions={actions}
-		modal={false}
-		open={this.props.open_geocode_modal}
+                actions={actions}
+                modal={false}
+                open={this.props.open_geocode_modal}
                 onRequestClose={this.handleClose.bind(this)}
-	    >
-	    <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value) }} floatingLabelText="address" floatingLabelFixed={true}  fullWidth={true} />
-	    <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+            >
+                <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value) }} floatingLabelText="address" floatingLabelFixed={true}  fullWidth={true} />
+                <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
             </Dialog>
-	);
+        );
     }
 }
 

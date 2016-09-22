@@ -21,79 +21,79 @@ const td_styles = [
 
 class SearchBox extends Component {
     constructor(props) {
-	super(props);
-	this.state = {show_distance: false};
+        super(props);
+        this.state = {show_distance: false};
     }
     handleShowAll() {
-	this.props.addPaths(this.props.rows.map(row => row.path));
+        this.props.addPaths(this.props.rows.map(row => row.path));
     }
     handleGetMore() {
-	this.props.getMoreItems(this.props.params);
+        this.props.getMoreItems(this.props.params);
     }
     handleSelect(selectedRows) {
-	if (selectedRows.length == 0) return;
-	let index = selectedRows[0];
-	let item = this.props.rows[index];
-	this.props.setSelectedItem(item, index);
+        if (selectedRows.length == 0) return;
+        let index = selectedRows[0];
+        let item = this.props.rows[index];
+        this.props.setSelectedItem(item, index);
     }
     shouldComponentUpdate(nextProps, nextState) {
-	if (nextProps.rows != this.props.rows) return true;
-	if (nextState.show_distance != this.state.show_distance) return true;
-	return false;
+        if (nextProps.rows != this.props.rows) return true;
+        if (nextState.show_distance != this.state.show_distance) return true;
+        return false;
     }
     handleShowDistance(e, toggled) {
-	this.setState({show_distance: toggled});
+        this.setState({show_distance: toggled});
     }
     render() {
-	return (
-	    <div className="sidebar">
-		<SearchFormContainer />
-		<div>
-		    <strong>
-			{
-			    ( () => {
-					if (this.props.error) {
-						return <span>error: {this.props.error.message}</span>;
-					}
-					else if (this.props.searching) {
-						return <span>Searching now...</span>;
-					}
-					else {
-						switch (this.props.count) {
-							case null:
-							return <span>successfully saved</span>;
-							case 0:
-							return <span>No results</span>;
-							case 1:
-							return <span>1 / 1 item</span>;
-							default:
-							return <span>{this.props.rows.length}  / {this.props.count}  items</span>;
-						}
-					}
-			    })()
-			}
+        return (
+            <div className="sidebar">
+                <SearchFormContainer />
+                <div>
+                    <strong>
+                        {
+                            ( () => {
+                                if (this.props.error) {
+                                    return <span>error: {this.props.error.message}</span>;
+                                }
+                                else if (this.props.searching) {
+                                    return <span>Searching now...</span>;
+                                }
+                                else {
+                                    switch (this.props.count) {
+                                        case null:
+                                            return <span>successfully saved</span>;
+                                        case 0:
+                                            return <span>No results</span>;
+                                        case 1:
+                                            return <span>1 / 1 item</span>;
+                                        default:
+                                            return <span>{this.props.rows.length}  / {this.props.count}  items</span>;
+                                    }
+                                }
+                            })()
+                        }
 
-		    </strong> :
-	    { this.props.rows.length > 0 ? (<FlatButton onTouchTap={ this.handleShowAll.bind(this) } label="show all paths" />) : null }
-	    { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
-	      <Toggle
-		  label="show hausdorff distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> : null }
-		</div>
-		<Table onRowSelection={this.handleSelect.bind(this)} style={{cursor: 'pointer'}}>
-		    <TableBody stripedRows  displayRowCheckbox={false}>
-			{ this.props.rows.map( (item, index) =>
-			    <TableRow key={index}>
-				<TableRowColumn style={td_styles[0]}>{index+1}</TableRowColumn>
-				<TableRowColumn style={td_styles[1]}>{item.date}</TableRowColumn>
-				<TableRowColumn style={td_styles[2]}>{item.title}</TableRowColumn>
-				<TableRowColumn style={td_styles[3]}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableRowColumn>
-			    </TableRow>)
-			}
-		    </TableBody>
-		</Table>
-		{ this.props.params ? <FlatButton style={{width: '100%'}} onTouchTap={this.handleGetMore.bind(this)} label="more" /> : null }
-	    </div>
-	);
+                    </strong> :
+            { this.props.rows.length > 0 ? (<FlatButton onTouchTap={ this.handleShowAll.bind(this) } label="show all paths" />) : null }
+            { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
+              <Toggle
+                  label="show hausdorff distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> : null }
+                </div>
+                <Table onRowSelection={this.handleSelect.bind(this)} style={{cursor: 'pointer'}}>
+                    <TableBody stripedRows  displayRowCheckbox={false}>
+                        { this.props.rows.map( (item, index) =>
+                            <TableRow key={index}>
+                                <TableRowColumn style={td_styles[0]}>{index+1}</TableRowColumn>
+                                <TableRowColumn style={td_styles[1]}>{item.date}</TableRowColumn>
+                                <TableRowColumn style={td_styles[2]}>{item.title}</TableRowColumn>
+                                <TableRowColumn style={td_styles[3]}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableRowColumn>
+                            </TableRow>)
+                        }
+                    </TableBody>
+                </Table>
+                { this.props.params ? <FlatButton style={{width: '100%'}} onTouchTap={this.handleGetMore.bind(this)} label="more" /> : null }
+            </div>
+        );
     }
 }
 

@@ -22,9 +22,9 @@ class WalkEditor extends Component {
     }
     handleSubmit() {
 	function formatDate(d) {
-	   return d.getFullYear()+
-	    ( "0" + ( d.getMonth()+1 ) ).slice(-2)+
-	    ( "0" + d.getDate() ).slice(-2);
+	    return d.getFullYear()+
+	      ( "0" + ( d.getMonth()+1 ) ).slice(-2)+
+	      ( "0" + d.getDate() ).slice(-2);
 	}
 	let keys = ['date', 'title', 'comment'];
 
@@ -101,36 +101,36 @@ class WalkEditor extends Component {
 	return (
 	    <Dialog
                 title={ this.props.walk_editor_mode == 'update' ? 'Update Walk' : 'New Walk' }
-		actions={actions}
-		modal={false}
-		open={this.props.open_walk_editor}
+                actions={actions}
+                modal={false}
+                open={this.props.open_walk_editor}
                 onRequestClose={this.handleClose.bind(this)}
             >
-		<div>
-	            <DatePicker value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" floatingLabelText='date' floatingLabelFixed={true} fullWidth={true} autoOk={true} />
-		</div>
-		<div>
-  		    <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} floatingLabelText="title" floatingLabelFixed={true}  fullWidth={true} />
-		</div>
-		<div>
-   	            <TextField multiLine={true} rows={4} rowsMax={4}
-			       defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} floatingLabelText="comment" floatingLabelFixed={true} fullWidth={true} />
-		</div>
-		{
-		    this.props.walk_editor_mode == 'update' ?
-		    <div><Toggle label="update path?" onToggle={this.handleChange.bind(this, 'update_path')}  toggled={this.state.update_path} disabled={this.state.path == null} /></div> : null
-		}
-		    <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
-	    </Dialog>
-	);
+                <div>
+                    <DatePicker value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" floatingLabelText='date' floatingLabelFixed={true} fullWidth={true} autoOk={true} />
+                </div>
+                <div>
+                    <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} floatingLabelText="title" floatingLabelFixed={true}  fullWidth={true} />
+                </div>
+                <div>
+                    <TextField multiLine={true} rows={4} rowsMax={4}
+                               defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} floatingLabelText="comment" floatingLabelFixed={true} fullWidth={true} />
+                </div>
+                {
+                    this.props.walk_editor_mode == 'update' ?
+                    <div><Toggle label="update path?" onToggle={this.handleChange.bind(this, 'update_path')}  toggled={this.state.update_path} disabled={this.state.path == null} /></div> : null
+                }
+                    <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+            </Dialog>
+        );
     }
 }
 
 function mapStateToProps(state) {
     return { selected_path: state.main.selected_path,
-	     selected_item: state.main.selected_item,
-	     open_walk_editor: state.main.open_walk_editor,
-	     walk_editor_mode: state.main.walk_editor_mode,
+             selected_item: state.main.selected_item,
+             open_walk_editor: state.main.open_walk_editor,
+             walk_editor_mode: state.main.walk_editor_mode,
     };
 }
 

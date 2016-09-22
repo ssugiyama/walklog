@@ -27,8 +27,8 @@ sequelize.define('walks', {
         primaryKey: true
     },
     date:   Sequelize.STRING,
-    title: 	Sequelize.STRING,
-    comment:	Sequelize.STRING,
+    title:      Sequelize.STRING,
+    comment:    Sequelize.STRING,
     length: {
         type: Sequelize.FLOAT,
     },
@@ -41,30 +41,30 @@ sequelize.define('walks', {
 }, {
     underscored: true,
     classMethods: {
-    	getPoint: function (x, y) {
-    	   return util.format('SRID=%d;POINT(%d %d)', SRID, x, y);
-    	},
+        getPoint: function (x, y) {
+            return util.format('SRID=%d;POINT(%d %d)', SRID, x, y);
+        },
         decodePath: function (path) {
             var json = { type: 'LineString', coordinates: encoder.decode(path), crs:{type:"name",properties:{name: "EPSG:" + SRID }} };
             return wkx.Geometry.parseGeoJSON(json).toEwkt();
         },
-    	getPathExtent: function (path) {
-    	    var points = encoder.decode(path);
-    	    return points.reduce(function (pv, cv) {
-    		if (pv.xmax === undefined || pv.xmax < cv[0] ) pv.xmax = cv[0];
-    		if (pv.xmin === undefined || pv.xmin > cv[0] ) pv.xmin = cv[0];
-    		if (pv.ymax === undefined || pv.ymax < cv[1] ) pv.ymax = cv[1];
-    		if (pv.ymin === undefined || pv.ymin > cv[1] ) pv.ymin = cv[1];
-    		return pv;
-    	    }, {});
-    	}
+        getPathExtent: function (path) {
+            var points = encoder.decode(path);
+            return points.reduce(function (pv, cv) {
+                if (pv.xmax === undefined || pv.xmax < cv[0] ) pv.xmax = cv[0];
+                if (pv.xmin === undefined || pv.xmin > cv[0] ) pv.xmin = cv[0];
+                if (pv.ymax === undefined || pv.ymax < cv[1] ) pv.ymax = cv[1];
+                if (pv.ymin === undefined || pv.ymin > cv[1] ) pv.ymin = cv[1];
+                return pv;
+            }, {});
+        }
     },
     instanceMethods: {
-    	encodedPath: function () {
-    	    return encoder.encode(this.path.coordinates);
-    	},
-    	asObject: function (includePath) {
-    	    return {
+        encodedPath: function () {
+            return encoder.encode(this.path.coordinates);
+        },
+        asObject: function (includePath) {
+            return {
                 id:         this.id,
                 date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
                 title:      this.title,
@@ -74,13 +74,13 @@ sequelize.define('walks', {
                 created_at: this.created_at,
                 updated_at: this.updated_at,
                 distance:   this.distance
-    	    };
-    	}
+            };
+        }
     }
 });
 
 sequelize.define('areas', {
-    jcode:	{
+    jcode:      {
         type:       Sequelize.INTEGER,
         primaryKey: true
     },
@@ -89,16 +89,16 @@ sequelize.define('areas', {
     timestamps:  false,
     underscored: true,
     instanceMethods: {
-    	encodedGeom: function () {
-    	    return  this.the_geom.coordinates.map(function (polygones) {
-    		return encoder.encode(polygones[0]);
-    	    }).join(' ');
-    	},
-    	asObject: function () {
-    	    return {
-    		    jcode:     this.jcode,
-    		    the_geom : this.encodedGeom()
-    	    };
-    	}
+        encodedGeom: function () {
+            return  this.the_geom.coordinates.map(function (polygones) {
+                return encoder.encode(polygones[0]);
+            }).join(' ');
+        },
+        asObject: function () {
+            return {
+                jcode:     this.jcode,
+                the_geom : this.encodedGeom()
+            };
+        }
     }
 });

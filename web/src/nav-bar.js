@@ -38,69 +38,68 @@ class NavBar extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-	this.setState({ length:  this.computeLength(nextProps.selected_path)});
+        this.setState({ length:  this.computeLength(nextProps.selected_path)});
     }
     handleNewWalk() {
-	this.props.openWalkEditor(true, 'create');
+        this.props.openWalkEditor(true, 'create');
     }
     resetCities() {
-	this.props.setSearchForm({cities: ''});
+        this.props.setSearchForm({cities: ''});
     }
     setRadius(r) {
-	this.props.setSearchForm({radius: r});
+        this.props.setSearchForm({radius: r});
     }
     handleShow() {
-	this.props.toggleSidebar();
+        this.props.toggleSidebar();
     }
     render() {
         return (
-	    <AppBar
- 		title="walklog"
-		onLeftIconButtonTouchTap={this.handleShow.bind(this)}
-		iconElementRight={
-		    <IconMenu
+            <AppBar
+                title="walklog"
+                onLeftIconButtonTouchTap={this.handleShow.bind(this)}
+                iconElementRight={
+                    <IconMenu
                         iconButtonElement={
                             <IconButton><MoreVertIcon /></IconButton>
-		        }
-		    >
-		    <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>
-		    <MenuItem primaryText="path" rightIcon={<ArrowDropRight />}
-                        menuItems={[
-                            <MenuItem primaryText="edit" onTouchTap={() => this.props.setEditingPath() } disabled={! this.props.selected_path} />,
-                            <MenuItem primaryText="delete" onTouchTap={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path} />,
-                            <MenuItem primaryText="clear" onTouchTap={() => this.props.clearPaths() } />,
-                            <MenuItem primaryText="export/import..." onTouchTap={() => this.props.openIOModal(true)} />,
-                        ]}
-
-		    />
- 		    <MenuItem primaryText="geo" rightIcon={<ArrowDropRight />}
-	  	    menuItems={[
-			<MenuItem onTouchTap={ () => this.props.openGeocodeModal(true)} primaryText="geocode..." />,
-			<MenuItem onTouchTap={this.setCurrentPosition.bind(this)} primaryText="geolocation" />
-		    ]} />
-	 	    { this.props.filter == 'cities' ?
-                      <MenuItem onTouchTap={this.resetCities.bind(this)} primaryText="reset cities" /> : null }
-                    { this.props.filter == "neighborhood" ?
-		      <MenuItem primaryText="neighborhood"  rightIcon={<ArrowDropRight />}
-		      menuItems={[
-			  <MenuItem onTouchTap={this.setRadius.bind(this, 1000)}  primaryText="radius: 1km" />,
-			  <MenuItem onTouchTap={this.setRadius.bind(this, 500)}  primaryText="radius: 500m" />,
-			  <MenuItem onTouchTap={this.setRadius.bind(this, 250)}  primaryText="radius: 250m" />,
-			  <MenuItem onTouchTap={this.setRadius.bind(this, 100)}  primaryText="radius: 100m" />
-		      ]} /> : null }
-		    <Divider />
-		    <MenuItem primaryText={`Length: ${this.state.length.toFixed(1)}km`} disabled={true}/>
-		    </IconMenu>
-	    }
-		/>
+                    }>
+                        <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>
+                        <MenuItem primaryText="path" rightIcon={<ArrowDropRight />}
+                            menuItems={[
+                                <MenuItem primaryText="edit" onTouchTap={() => this.props.setEditingPath() } disabled={! this.props.selected_path} />,
+                                <MenuItem primaryText="delete" onTouchTap={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path} />,
+                                <MenuItem primaryText="clear" onTouchTap={() => this.props.clearPaths() } />,
+                                <MenuItem primaryText="export/import..." onTouchTap={() => this.props.openIOModal(true)} />,
+                            ]}
+                        />
+                        <MenuItem primaryText="geo" rightIcon={<ArrowDropRight />}
+                            menuItems={[
+                                <MenuItem onTouchTap={ () => this.props.openGeocodeModal(true)} primaryText="geocode..." />,
+                                <MenuItem onTouchTap={this.setCurrentPosition.bind(this)} primaryText="geolocation" />
+                            ]}
+                        />
+                        { this.props.filter == 'cities' ?
+                          <MenuItem onTouchTap={this.resetCities.bind(this)} primaryText="reset cities" /> : null }
+                        { this.props.filter == "neighborhood" ?
+                          <MenuItem primaryText="neighborhood"  rightIcon={<ArrowDropRight />}
+                              menuItems={[
+                                  <MenuItem onTouchTap={this.setRadius.bind(this, 1000)}  primaryText="radius: 1km" />,
+                                  <MenuItem onTouchTap={this.setRadius.bind(this, 500)}  primaryText="radius: 500m" />,
+                                  <MenuItem onTouchTap={this.setRadius.bind(this, 250)}  primaryText="radius: 250m" />,
+                                  <MenuItem onTouchTap={this.setRadius.bind(this, 100)}  primaryText="radius: 100m" />
+                           ]} /> : null }
+                         <Divider />
+                         <MenuItem primaryText={`Length: ${this.state.length.toFixed(1)}km`} disabled={true}/>
+                     </IconMenu>
+                 }
+            />
         );
     }
 }
 
 function mapStateToProps(state) {
     return {
-	filter: state.main.search_form.filter,
-	selected_path: state.main.selected_path,
+        filter: state.main.search_form.filter,
+        selected_path: state.main.selected_path,
     };
 }
 

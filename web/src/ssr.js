@@ -21,9 +21,9 @@ export default function handleSSR(req, res) {
         } else if (renderProps.params.id && !renderProps.params.id.match(/^\d+$/)) {
             res.status(404).send('Not found');
         } else {
-            let store = configureStore(); 
+            let store = configureStore();
             handleRoute(renderProps, false, prefix, store.dispatch).then(() => {
-                
+
                 const html = renderToString(
                     <Provider store={store}>
                         <RouterContext {...renderProps}></RouterContext>
@@ -48,10 +48,9 @@ export default function handleSSR(req, res) {
                     canonical,
                     preloadedState: state
                 }, config);
-                
+
                 res.render('index', bind);
             }).catch(ex => console.log(ex))
         }
     })
 }
-    

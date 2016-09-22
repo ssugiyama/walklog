@@ -25,27 +25,27 @@ const closeButtonStyle = {
 };
 class SideBox extends Component {
     constructor(props) {
-	super(props);
+        super(props);
     }
     handleTabChange(tab_value) {
-	if (typeof(tab_value) !== 'string') return;
+        if (typeof(tab_value) !== 'string') return;
         this.props.setTabValue(tab_value);
     }
     render() {
-	return (
- 	    <Drawer open={this.props.open_sidebar} width={300} containerStyle={styles.sideBox}>
-		<Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}   style={styles.tabs}>
-		    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
-			<Tab icon={<SearchIcon />} value="search" >
-			<SearchBox />
-		    </Tab>
-		    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.selected_path}>
-			<ElevationBox />
-			<PanoramaBox />
-		    </Tab>
-		</Tabs>
-	    </Drawer>
-	);
+        return (
+            <Drawer open={this.props.open_sidebar} width={300} containerStyle={styles.sideBox}>
+                <Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}   style={styles.tabs}>
+                    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
+                    <Tab icon={<SearchIcon />} value="search" >
+                        <SearchBox />
+                    </Tab>
+                    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.selected_path}>
+                        <ElevationBox />
+                        <PanoramaBox />
+                    </Tab>
+                </Tabs>
+            </Drawer>
+        );
     }
 }
 

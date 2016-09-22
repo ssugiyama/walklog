@@ -7,8 +7,8 @@ var express = require('express')
 ,   Area    = models.sequelize.models.areas;
 
 /*
-* GET home page.
-*/
+ * GET home page.
+ */
 
 var api = express.Router();
 module.exports = api;
@@ -93,7 +93,7 @@ api.get('/search', function(req, res){
 
             attributes.push([util.format("ST_HausdorffDistance(ST_Transform(path, %d), ST_Transform('%s'::Geometry, %d))/1000", models.SRID_FOR_SIMILAR_SEARCH, linestring, models.SRID_FOR_SIMILAR_SEARCH), 'distance']);
             exprs.push('ST_Within(path, ST_SetSRID(ST_MakeBox2d(?, ?), ?))',
-                'ST_HausdorffDistance(ST_Transform(path, ?), ST_Transform(?::Geometry, ?)) < ?');
+                       'ST_HausdorffDistance(ST_Transform(path, ?), ST_Transform(?::Geometry, ?)) < ?');
             values.push(lb, rt, models.SRID, models.SRID_FOR_SIMILAR_SEARCH, linestring, models.SRID_FOR_SIMILAR_SEARCH, max_distance);
         }
     }
