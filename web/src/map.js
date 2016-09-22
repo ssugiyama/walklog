@@ -139,7 +139,7 @@ class Map extends Component {
         else {
             this.distanceWidget.setMap(null);
         }
-        if (this.props.filter == 'cities' && this.citiesChanges()) {
+        if (this.props.filter == 'cities' && this.citiesChanges() && ! this.fetchingCities) {
             if (this.cities) {
                 for (let id of Object.keys(this.cities)) {
                     let pg = this.cities[id];
@@ -148,6 +148,7 @@ class Map extends Component {
             }
             this.cities = {};
             if (this.props.cities) {
+		this.fetchingCities = true;
                 fetch('/api/cities?jcodes=' + this.props.cities)
                     .then(response => response.json())
                     .then(cities => {
@@ -156,7 +157,12 @@ class Map extends Component {
                             pg.setMap(this.map);
                         })
                     })
-                    .catch(ex => alert(ex))
+                    .catch(ex => {
+			alert(ex);
+		    })
+		    .then(() => {
+			this.fetchingCities = false;
+		    })
             }
         }
         if (this.cities) {
