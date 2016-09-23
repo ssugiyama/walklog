@@ -19,6 +19,7 @@ for (let y = currentYear; y >= 1997; y--) {
 }
 
 const initialState = {
+    action_queue: [],
     search_form: {
         id: '',
         date: '',
@@ -51,7 +52,6 @@ const initialState = {
     open_geocode_modal: false,
     tab_value: 'search',
     street_view: null,
-    paths: {},
     info_window: {
         open: false,
         message: null,
@@ -92,8 +92,6 @@ const mainReducer = function(state = initialState, action) {
                 let selected_item = action.item;
                 let selected_index = action.index;
                 let selected_path = selected_item ? selected_item.path : state.selected_path;
-                let paths = Object.assign({}, state.paths);
-                paths[selected_path] = true;
                 let tab_value;
                 if (!selected_item) {
                     tab_value = 'search';
@@ -102,19 +100,17 @@ const mainReducer = function(state = initialState, action) {
                     tab_value = 'comment';
                 }
                 let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-                return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path, paths});
+                return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path});
             }
         case ActionTypes.SET_SELECTED_PATH:
             {
                 let selected_path = action.path;
                 let tab_value = state.tab_value;
-                let paths = Object.assign({}, state.paths);
-                if (selected_path) paths[selected_path] = true;
                 if (!selected_path && tab_value == 'visualization') {
                     tab_value = 'search';
                 }
                 let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-                return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false, paths});
+                return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false});
             }
         case ActionTypes.TOGGLE_SIDEBAR:
             {
@@ -144,29 +140,25 @@ const mainReducer = function(state = initialState, action) {
             }
         case ActionTypes.ADD_PATHS:
             {
-                let paths = Object.assign({}, state.paths);
-                for (let path of action.paths) {
-                    paths[path] = true;
-                }
-                return Object.assign({}, state, {paths});
+		let action_queue = state.action_queue.concat(action);
+                return Object.assign({}, state, {action_queue});
             }
         case ActionTypes.DELETE_SELECTED_PATH:
             {
                 let tab_value = state.tab_value;
-                let paths = Object.assign({}, state.paths);
-                delete paths[state.selected_path];
                 if (tab_value == 'visualization') {
                     tab_value = 'search';
                 }
-                return Object.assign({}, state, {selected_path: null, paths, tab_value});
+                return Object.assign({}, state, {selected_path: null, tab_value});
             }
         case ActionTypes.CLEAR_PATHS:
             {
                 let tab_value = state.tab_value;
+		let action_queue = state.action_queue.concat(action);
                 if (tab_value == 'visualization') {
                     tab_value = 'search';
                 }
-                return Object.assign({}, state, {selected_path: null, paths: {}, tab_value});
+                return Object.assign({}, state, {selected_path: null, action_queue, tab_value});
             }
         case ActionTypes.SET_EDITING_PATH:
             {
@@ -187,6 +179,11 @@ const mainReducer = function(state = initialState, action) {
                 let center = action.center;
                 return Object.assign({}, state, {center});
             }
+        case ActionTypes.REMOVE_FROM_ACTION_QUEUE:
+	    {
+		let action_queue = state.action_queue.slice(0, -1);
+                return Object.assign({}, state, {action_queue});
+	    }
         default:
             return state;
     }

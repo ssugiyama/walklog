@@ -1,9 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setStreetView } from './actions'
+import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue } from './actions'
 import { connect } from 'react-redux';
 import styles from './styles';
 import SideBoxContainer from './side-box';
+import * as ActionTypes from './action-types'
 
 const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
 
@@ -83,16 +84,6 @@ class Map extends Component {
             google.maps.event.trigger(this.map, 'resize');
         }, 500);
     }
-    updatePaths(paths) {
-        if (Object.keys(paths).length == 0) {
-            this.path_manager.deleteAll();
-        }
-        else {
-            for (let path in paths) {
-                this.path_manager.showPath(path, false);
-            }
-        }
-    }
     componentWillReceiveProps(nextProps) {
         this.paths_changed = (nextProps.paths != this.props.paths);
         if (nextProps.panorama != this.map.getStreetView()) {
@@ -117,6 +108,22 @@ class Map extends Component {
             this.map.setCenter(nextProps.center);
         }
     }
+    processActionQueue() {
+	let len = this.props.action_queue.length;
+	if (len == 0) return;
+	let action = this.props.action_queue[len-1];
+	if (action.type == ActionTypes.ADD_PATHS) {
+            for (let path of action.paths) {
+		console.log(path)
+		this.path_manager.showPath(path, false);
+            }
+	    this.props.removeFromActionQueue();
+	}
+	else if (action.type == ActionTypes.CLEAR_PATHS) {
+            this.path_manager.deleteAll();
+	    this.props.removeFromActionQueue();
+	}
+    }
     componentDidUpdate() {
         if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
             this.path_manager.showPath(this.props.selected_path, true);
@@ -124,9 +131,7 @@ class Map extends Component {
         else if (! this.props.selected_path) {
             this.path_manager.deletePath();
         }
-        if (this.paths_changed) {
-            this.updatePaths(this.props.paths);
-        }
+	this.processActionQueue();
         if (this.props.editing_path) {
             this.path_manager.set('editable', true)
         }
@@ -219,7 +224,7 @@ function mapStateToProps(state) {
         cities: state.main.search_form.cities,
         selected_path: state.main.selected_path,
         editing_path: state.main.editing_path,
-        paths: state.main.paths,
+        action_queue: state.main.action_queue,
         panorama: state.main.panorama,
         info_window: state.main.info_window,
         center: state.main.center,
@@ -227,7 +232,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView}, dispatch);
+    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

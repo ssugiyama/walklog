@@ -18,3 +18,4 @@ export const OPEN_GEOCODE_MODAL = 'open_geocode_modal';
 export const SET_STREET_VIEW = 'set_street_view';
 export const SET_INFO_WINDOW = 'set_info_window';
 export const SET_CENTER = 'set_center';
+export const REMOVE_FROM_ACTION_QUEUE = 'remove_from_action_queue';

@@ -155,3 +155,9 @@ export function setCenter(center) {
         center,
     };
 }
+
+export function removeFromActionQueue() {
+    return {
+	type: ActionTypes.REMOVE_FROM_ACTION_QUEUE,
+    };
+}
