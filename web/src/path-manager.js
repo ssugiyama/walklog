@@ -1,3 +1,5 @@
+const jsSHA = require("jssha");
+
 export default class PathManager extends google.maps.MVCObject {
     constructor(opt_options) {
         super();
@@ -35,9 +37,16 @@ export default class PathManager extends google.maps.MVCObject {
         });
     }
 
+    pathToHash(path) {
+	let key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
+	let obj = new jsSHA("SHA-1", "TEXT");
+	obj.update(key);
+	return obj.getHash("B64");
+    }
+
     deletePath() {
         if(this.selection != null){
-            var key = this.getEncodedSelection();
+            var key = this.pathToHash(this.getEncodedSelection());
             this.selection.setMap(null);
             this.set('selection', null);
             delete this.polylines[key];
@@ -54,7 +63,7 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     searchPolyline(path) {
-        var key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
+        var key = this.pathToHash(path);
         return this.polylines[key];;
     }
 
@@ -63,15 +72,17 @@ export default class PathManager extends google.maps.MVCObject {
         if (typeof(path) == 'string') {
             path = google.maps.geometry.encoding.decodePath(path);
         }
+
         if (!pl) {
             pl = new google.maps.Polyline({});
             pl.setPath(path);
             this.addPolyline(pl);
         }
-        if(select && pl.getPath().getLength() > 0) {
+        if(select && path.length > 0) {
             this.set('selection', pl);
             var xmin, xmax, ymin, ymax;
-            pl.getPath().forEach(function (elem, i){
+            for (let i = 0; i < path.length; i++ ) {
+		let elem = path[i];
                 if (i == 0) {
                     xmin = xmax = elem.lng();
                     ymin = ymax = elem.lat();
@@ -82,7 +93,7 @@ export default class PathManager extends google.maps.MVCObject {
                     if (ymin > elem.lat()) ymin = elem.lat();
                     if (ymax < elem.lat()) ymax = elem.lat();
                 }
-            });
+            }
             var center = new google.maps.LatLng((ymin+ymax)/2, xmin);
             this.map.panTo(center);
         }
@@ -91,7 +102,7 @@ export default class PathManager extends google.maps.MVCObject {
     addPolyline(pl){
         pl.setOptions(this.generalStyle);
         pl.setMap(this.map);
-        var key = google.maps.geometry.encoding.encodePath(pl.getPath());
+        var key = this.pathToHash(pl.getPath());
         this.polylines[key] = pl;
         google.maps.event.addListener(pl, 'click', () => {
             this.set('selection', pl);

@@ -114,7 +114,6 @@ class Map extends Component {
 	let action = this.props.action_queue[len-1];
 	if (action.type == ActionTypes.ADD_PATHS) {
             for (let path of action.paths) {
-		console.log(path)
 		this.path_manager.showPath(path, false);
             }
 	    this.props.removeFromActionQueue();
