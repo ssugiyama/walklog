@@ -47,6 +47,7 @@
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",
-    "wkx": "git://github.com/cschwarz/wkx.git"
+    "wkx": "git://github.com/cschwarz/wkx.git",
+    "sitemap": "*"
   }
 }
