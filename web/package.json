@@ -29,7 +29,7 @@
     "isomorphic-fetch": "^2.2.1",
     "jssha": "^2.2.0",
     "marked": "^0.3.5",
-    "material-ui": "^0.15.4",
+    "material-ui": "^0.16.0",
     "morgan": "*",
     "pg": "*",
     "pg-hstore": "*",
