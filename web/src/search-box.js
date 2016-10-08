@@ -10,6 +10,7 @@ import Toggle from 'material-ui/Toggle';
 const td_common_style = {
     paddingLeft: 2,
     paddingRight: 2,
+    overflow: 'hidden',
 };
 
 const td_styles = [
