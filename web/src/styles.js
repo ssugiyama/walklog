@@ -26,7 +26,11 @@ export default {
     },
     commentBoxBody: {
         padding: '10px 20px',
-        fontSize: '85%'
+        fontSize: '85%',
+	lineHeight: '1.65',
+	letterSpacing: '.1em',
+	textAlign: 'justify',
+	textIndent: '1.2em'
     },
     commentBoxControl: {
         width: '100%',
