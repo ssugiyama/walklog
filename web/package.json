@@ -38,16 +38,15 @@
     "react-redux": "^4.4.5",
     "react-router": "^2.5.2",
     "react-router-redux": "^4.0.5",
-    "react-tap-event-plugin": "^1.0.0",
+    "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.5.2",
     "redux-logger": "^2.6.1",
     "redux-react-router": "^1.0.0-beta3",
     "redux-thunk": "^2.1.0",
-    "sequelize": "*",
+    "sequelize": "^3.25.0",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",
-    "wkx": "git://github.com/cschwarz/wkx.git",
-    "sitemap": "*"
+    "sitemap": "^1.8.2"
   }
 }
