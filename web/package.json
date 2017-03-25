@@ -46,7 +46,7 @@
     "sequelize": "^3.25.0",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.1",
+    "webpack": "^2.2.0",
     "sitemap": "^1.8.2"
   }
 }

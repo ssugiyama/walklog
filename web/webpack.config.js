@@ -3,11 +3,11 @@ var webpack = require('webpack');
 module.exports = {
     entry : './src/main.js',
     output : {
-	path: 'public',
+	path: __dirname + '/public',
 	filename: 'bundle.js'
     },
     module: {
-        loaders: [
+        rules: [
 	    {
 		test: /\.jsx?$/,
 		loader: 'babel-loader',
@@ -17,10 +17,5 @@ module.exports = {
 		}
 	    },
 	]
-    },
-    plugins: [
-	new webpack.DefinePlugin({
-	    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-	})
-    ]
+    }
 };
