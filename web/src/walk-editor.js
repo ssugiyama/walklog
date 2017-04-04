@@ -38,6 +38,7 @@ class WalkEditor extends Component {
 	let params = keys.map(key => `${key}=${encodeURIComponent(state[key])}`).join('&');
         fetch('/api/save', {
 	    method: 'POST',
+	    credentials: 'include',
 	    headers: {
 		'Content-Type': 'application/x-www-form-urlencoded',
 	    },
