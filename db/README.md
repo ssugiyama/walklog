@@ -8,7 +8,9 @@ walklog is a management tool of walking paths.
 
 visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into current directory.
 
-edit web/src/config.js
+    % cp web/src/config.js.sample web/src/config.js
+
+and edit.
 
     export default {
         "site_name": "walklog",
@@ -47,8 +49,8 @@ edit web/src/config.js
     % psql walklog -f schema.sql
 
 ###2. setup areas table
-    % unzip japan_ver80.zip
-    % shp2pgsql -s 4326 -g the_geom -I -W sjis japan_ver80.shp areas > areas.sql
+    % unzip japan_ver81.zip
+    % shp2pgsql -s 4326 -g the_geom -I -W sjis japan_ver81.shp areas > areas.sql
     % psql walklog -f areas.sql
 
 ###3. setup and start api server
