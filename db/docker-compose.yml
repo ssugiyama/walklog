@@ -14,7 +14,8 @@ services:
       - 3000:3000
     links:
       - db:walklog
-
+    depends_on:
+      - db
 volumes:
   data:
   public:
