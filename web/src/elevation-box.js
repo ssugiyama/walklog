@@ -48,14 +48,15 @@ class ElevationBox extends Component {
                         enabled: false
                     },
                     hover: {
-                        mode: 'x-axis',
+                        intersect: false,
+                        mode: 'index',
                         onHover: this.handleHover.bind(this)
                     }
                 }
             });
         }
     }
-    handleHover(elms) {
+    handleHover(ev, elms) {
         if (elms.length == 0) {
             this.props.setInfoWindow({open: false});
         }
