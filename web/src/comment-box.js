@@ -1,8 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import { push } from 'react-router-redux'
+import { push } from 'react-router-redux';
 import { setTabValue, setSelectedItem, getMoreItems, openWalkEditor } from './actions';
 import marked from 'marked';
 import IconButton from 'material-ui/IconButton';
@@ -19,7 +19,7 @@ class CommentBox extends Component {
     prepareTwitter() {
         let data = this.props.selected_item;
         if (! data) return;
-        let href = location.protocol + "//" + location.host + "/" + data.id;
+        let href = location.protocol + '//' + location.host + '/' + data.id;
         let body = data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)';
         this.refs.twitter.innerHTML = `<a href="https://twitter.com/share" ref="twitter_button" class="twitter-share-button" data-lang="en"  data-size="small" data-hashtags="walklog" data-text='${body}' data-url="${href}" >Tweet</a>`;
         if (window.twttr.widgets) window.twttr.widgets.load();
@@ -51,11 +51,7 @@ class CommentBox extends Component {
         let data = this.props.selected_item;
         if (! data) return null;
         let title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
-        let createMarkup = () => { return { __html: marked(data.comment || '') } };
-        let detail = title;
-        if (data.comment) {
-            detail += ' "' +data.comment.replace(/[\n\r]/g, '').substring(0, 40) + '……"';
-        }
+        let createMarkup = () => { return { __html: marked(data.comment || '') }; };
         return (
             <div>
                 <div style={styles.commentBoxControl}>

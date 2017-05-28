@@ -1,15 +1,14 @@
-import * as ActionTypes from './action-types'
-import React  from 'react';
-import ReactDOM from 'react-dom';
-import { Router, Route, IndexRoute, browserHistory, match } from 'react-router'
-import { syncHistoryWithStore, routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux'
+import React from 'react';
+import * as ActionTypes from './action-types';
+import { Route, browserHistory, match } from 'react-router';
+import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, setSearchForm, setSelectedPath } from './actions';
 import BodyContainer from './body';
 
-const injectTapEventPlugin = require("react-tap-event-plugin");
+const injectTapEventPlugin = require('react-tap-event-plugin');
 injectTapEventPlugin();
 
 let currentYear = (new Date()).getFullYear();
@@ -23,11 +22,11 @@ const initialState = {
     search_form: {
         id: '',
         date: '',
-        filter: "any",
-        month: "",
-        year: "",
-        order: "newest_first",
-        limit: "20",
+        filter: 'any',
+        month: '',
+        year: '',
+        order: 'newest_first',
+        limit: '20',
         latitude: 35.690,
         longitude: 139.70,
         radius: 500,
@@ -59,147 +58,145 @@ const initialState = {
     },
     center: null,
     panorama: null,
-}
+};
 
 const mainReducer = function(state = initialState, action) {
-    let result;
-
     switch (action.type) {
-        case ActionTypes.SET_SEARCH_FORM:
-            {
-                if (action.payload.filter == 'hausdorff') {
-                    action.payload.order = 'nearest_first';
-                }
-                else if (state.search_form.order == 'nearest_first') {
-                    action.payload.order = 'newest_first';
-                }
-                let search_form = Object.assign({}, state.search_form, action.payload);
-                return Object.assign({}, state, {search_form});
+    case ActionTypes.SET_SEARCH_FORM:
+        {
+            if (action.payload.filter == 'hausdorff') {
+                action.payload.order = 'nearest_first';
             }
-        case ActionTypes.SEARCH_START:
-            {
-                let result = { rows: [], count: 0, params: '', searching: true };
-                return Object.assign({}, state, {result});
+            else if (state.search_form.order == 'nearest_first') {
+                action.payload.order = 'newest_first';
             }
-        case ActionTypes.SEARCH_RESULT:
-            {
-                let result = { count: action.data.count, params: action.data.params, error: action.data.error, searching: false };
-                result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
-                return Object.assign({}, state, {result});
+            let search_form = Object.assign({}, state.search_form, action.payload);
+            return Object.assign({}, state, {search_form});
+        }
+    case ActionTypes.SEARCH_START:
+        {
+            let result = { rows: [], count: 0, params: '', searching: true };
+            return Object.assign({}, state, {result});
+        }
+    case ActionTypes.SEARCH_RESULT:
+        {
+            let result = { count: action.data.count, params: action.data.params, error: action.data.error, searching: false };
+            result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
+            return Object.assign({}, state, {result});
+        }
+    case ActionTypes.SET_SELECTED_ITEM:
+        {
+            let selected_item = action.item;
+            let selected_index = action.index;
+            let selected_path = selected_item ? selected_item.path : state.selected_path;
+            let tab_value;
+            if (!selected_item) {
+                tab_value = 'search';
             }
-        case ActionTypes.SET_SELECTED_ITEM:
-            {
-                let selected_item = action.item;
-                let selected_index = action.index;
-                let selected_path = selected_item ? selected_item.path : state.selected_path;
-                let tab_value;
-                if (!selected_item) {
-                    tab_value = 'search';
-                }
-                else {
-                    tab_value = 'comment';
-                }
-                let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-                return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path});
+            else {
+                tab_value = 'comment';
             }
-        case ActionTypes.SET_SELECTED_PATH:
-            {
-                let selected_path = action.path;
-                let tab_value = state.tab_value;
-                if (!selected_path && tab_value == 'visualization') {
-                    tab_value = 'search';
-                }
-                let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-                return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false});
+            let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
+            return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path});
+        }
+    case ActionTypes.SET_SELECTED_PATH:
+        {
+            let selected_path = action.path;
+            let tab_value = state.tab_value;
+            if (!selected_path && tab_value == 'visualization') {
+                tab_value = 'search';
             }
-        case ActionTypes.TOGGLE_SIDEBAR:
-            {
-                let open_sidebar = !state.open_sidebar;
-                return Object.assign({}, state, {open_sidebar});
+            let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
+            return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false});
+        }
+    case ActionTypes.TOGGLE_SIDEBAR:
+        {
+            let open_sidebar = !state.open_sidebar;
+            return Object.assign({}, state, {open_sidebar});
+        }
+    case ActionTypes.OPEN_WALK_EDITOR:
+        {
+            let open_walk_editor = action.open;
+            let walk_editor_mode = action.mode;
+            return Object.assign({}, state, {open_walk_editor, walk_editor_mode});
+        }
+    case ActionTypes.OPEN_IO_MODAL:
+        {
+            let open_io_modal = action.open;
+            return Object.assign({}, state, {open_io_modal});
+        }
+    case ActionTypes.OPEN_GEOCODE_MODAL:
+        {
+            let open_geocode_modal = action.open;
+            return Object.assign({}, state, {open_geocode_modal});
+        }
+    case ActionTypes.SET_TAB_VALUE:
+        {
+            let tab_value = action.value;
+            return Object.assign({}, state, {tab_value});
+        }
+    case ActionTypes.ADD_PATHS:
+        {
+            let action_queue = state.action_queue.concat(action);
+            return Object.assign({}, state, {action_queue});
+        }
+    case ActionTypes.DELETE_SELECTED_PATH:
+        {
+            let tab_value = state.tab_value;
+            if (tab_value == 'visualization') {
+                tab_value = 'search';
             }
-        case ActionTypes.OPEN_WALK_EDITOR:
-            {
-                let open_walk_editor = action.open;
-                let walk_editor_mode = action.mode;
-                return Object.assign({}, state, {open_walk_editor, walk_editor_mode});
+            return Object.assign({}, state, {selected_path: null, tab_value});
+        }
+    case ActionTypes.CLEAR_PATHS:
+        {
+            let tab_value = state.tab_value;
+            let action_queue = state.action_queue.concat(action);
+            if (tab_value == 'visualization') {
+                tab_value = 'search';
             }
-        case ActionTypes.OPEN_IO_MODAL:
-            {
-                let open_io_modal = action.open;
-                return Object.assign({}, state, {open_io_modal});
-            }
-        case ActionTypes.OPEN_GEOCODE_MODAL:
-            {
-                let open_geocode_modal = action.open;
-                return Object.assign({}, state, {open_geocode_modal});
-            }
-        case ActionTypes.SET_TAB_VALUE:
-            {
-                let tab_value = action.value;
-                return Object.assign({}, state, {tab_value});
-            }
-        case ActionTypes.ADD_PATHS:
-            {
-		let action_queue = state.action_queue.concat(action);
-                return Object.assign({}, state, {action_queue});
-            }
-        case ActionTypes.DELETE_SELECTED_PATH:
-            {
-                let tab_value = state.tab_value;
-                if (tab_value == 'visualization') {
-                    tab_value = 'search';
-                }
-                return Object.assign({}, state, {selected_path: null, tab_value});
-            }
-        case ActionTypes.CLEAR_PATHS:
-            {
-                let tab_value = state.tab_value;
-		let action_queue = state.action_queue.concat(action);
-                if (tab_value == 'visualization') {
-                    tab_value = 'search';
-                }
-                return Object.assign({}, state, {selected_path: null, action_queue, tab_value});
-            }
-        case ActionTypes.SET_EDITING_PATH:
-            {
-                return Object.assign({}, state, {editing_path: true});
-            }
-        case ActionTypes.SET_STREET_VIEW:
-            {
-                let panorama = action.panorama;
-                return Object.assign({}, state, {panorama});
-            }
-        case ActionTypes.SET_INFO_WINDOW:
-            {
-                let info_window = action.payload;
-                return Object.assign({}, state, {info_window});
-            }
-        case ActionTypes.SET_CENTER:
-            {
-                let center = action.center;
-                return Object.assign({}, state, {center});
-            }
-        case ActionTypes.REMOVE_FROM_ACTION_QUEUE:
-	    {
-		let action_queue = state.action_queue.slice(0, -1);
-                return Object.assign({}, state, {action_queue});
-	    }
-        default:
-            return state;
+            return Object.assign({}, state, {selected_path: null, action_queue, tab_value});
+        }
+    case ActionTypes.SET_EDITING_PATH:
+        {
+            return Object.assign({}, state, {editing_path: true});
+        }
+    case ActionTypes.SET_STREET_VIEW:
+        {
+            let panorama = action.panorama;
+            return Object.assign({}, state, {panorama});
+        }
+    case ActionTypes.SET_INFO_WINDOW:
+        {
+            let info_window = action.payload;
+            return Object.assign({}, state, {info_window});
+        }
+    case ActionTypes.SET_CENTER:
+        {
+            let center = action.center;
+            return Object.assign({}, state, {center});
+        }
+    case ActionTypes.REMOVE_FROM_ACTION_QUEUE:
+        {
+            let action_queue = state.action_queue.slice(0, -1);
+            return Object.assign({}, state, {action_queue});
+        }
+    default:
+        return state;
     }
-}
+};
 
 const reducers = combineReducers({
     main: mainReducer,
     routing: routerReducer
-})
+});
 
 const loggerMiddleware = createLogger();
 
 export function handleRoute(renderProps, isPathSelected, prefix, next) {
     let query = Object.assign({}, renderProps.location.query);
     if (renderProps.params.id) query.id = renderProps.params.id;
-    let show_on_map = query.show || (query.id && 'first')
+    let show_on_map = query.show || (query.id && 'first');
     delete query['show'];
     let search_form = Object.assign({}, initialState.search_form, query);
     if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !isPathSelected && search_form.searchPath) {
@@ -219,13 +216,13 @@ const dataFetchMiddleware = store => next => {
                     if (err || redirect || !renderProps) return;
                     let state = store.getState();
                     handleRoute(renderProps, state.main.selected_path, '/', next);
-                })
+                });
             }
             isFirstLocation = false;
         }
         return next(action);
     };
-}
+};
 
 let middlewares = [
     routerMiddleware(browserHistory),
@@ -233,7 +230,7 @@ let middlewares = [
     thunkMiddleware,
 ];
 
-if (process.env.NODE_ENV != "production") {
+if (process.env.NODE_ENV != 'production') {
     middlewares.push(loggerMiddleware);
 }
 
@@ -243,7 +240,7 @@ const createStoreWithMiddleware = applyMiddleware(
 
 export function configureStore(state) {
     if (state) {
-        return createStoreWithMiddleware(reducers, state)
+        return createStoreWithMiddleware(reducers, state);
     }
     else {
         return createStoreWithMiddleware(reducers);

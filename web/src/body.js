@@ -1,5 +1,4 @@
-import React, { Component, PropTypes } from 'react';
-import { bindActionCreators } from 'redux';
+import React, { Component } from 'react';
 import NavBarContainer from './nav-bar';
 import MapContainer from './map';
 import WalkEditorContainer from './walk-editor';
@@ -32,7 +31,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-    }
+    };
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Body);

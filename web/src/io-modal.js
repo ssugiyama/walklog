@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { openIOModal, setSelectedPath } from './actions';
@@ -14,7 +14,7 @@ class IOModal extends Component {
         super(props);
         this.state = {path_json: ''};
     }
-    handleImport(e) {
+    handleImport() {
         var obj = JSON.parse(this.state.path_json);
         var coordinates = obj.coordinates;
         var pts = coordinates.map(function (item) {
@@ -36,7 +36,7 @@ class IOModal extends Component {
             this.setState({path_json:  e.target.result});
         });
 
-        document.addEventListener("drop", (e) =>  {
+        document.addEventListener('drop', (e) =>  {
             if (e.target === textarea) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -44,13 +44,13 @@ class IOModal extends Component {
                 this.reader.readAsText(files[0]);
             }
         });
-        document.addEventListener("dragenter", (e) =>  {
+        document.addEventListener('dragenter', (e) =>  {
             if (e.target === textarea) {
                 e.stopPropagation();
                 e.preventDefault();
             }
         });
-        document.addEventListener("dragover", (e) => {
+        document.addEventListener('dragover', (e) => {
             if (e.target === textarea) {
                 e.stopPropagation();
                 e.preventDefault();

@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { openGeocodeModal, setCenter } from './actions';
@@ -22,7 +22,7 @@ class GeocodeModal extends Component {
                 this.props.setCenter(results[0].geometry.location);
                 this.handleClose();
             } else {
-                alert("Geocode was not successful for the following reason: " + status);
+                alert('Geocode was not successful for the following reason: ' + status);
             }
         });
     }
@@ -50,7 +50,7 @@ class GeocodeModal extends Component {
                 open={this.props.open_geocode_modal}
                 onRequestClose={this.handleClose.bind(this)}
             >
-                <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value) }} floatingLabelText="address" floatingLabelFixed={true}  fullWidth={true} />
+                <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value); }} floatingLabelText="address" floatingLabelFixed={true}  fullWidth={true} />
                 <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
             </Dialog>
         );

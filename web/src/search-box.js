@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
@@ -61,14 +61,14 @@ class SearchBox extends Component {
                                 }
                                 else {
                                     switch (this.props.count) {
-                                        case null:
-                                            return <span>successfully saved</span>;
-                                        case 0:
-                                            return <span>No results</span>;
-                                        case 1:
-                                            return <span>1 / 1 item</span>;
-                                        default:
-                                            return <span>{this.props.rows.length}  / {this.props.count}  items</span>;
+                                    case null:
+                                        return <span>successfully saved</span>;
+                                    case 0:
+                                        return <span>No results</span>;
+                                    case 1:
+                                        return <span>1 / 1 item</span>;
+                                    default:
+                                        return <span>{this.props.rows.length}  / {this.props.count}  items</span>;
                                     }
                                 }
                             })()

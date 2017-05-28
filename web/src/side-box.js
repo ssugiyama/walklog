@@ -1,8 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
-import { getMoreItems, setAdditionalView, setSelectedItem, setSelectedIndex, setTabValue } from './actions';
+import { setTabValue } from './actions';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
 import {Tabs, Tab} from 'material-ui/Tabs';
@@ -18,11 +18,6 @@ import DescriptionIcon from 'material-ui/svg-icons/action/description';
 import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
 import styles from './styles';
 
-const closeButtonStyle = {
-    position: 'absolute',
-    left: -10,
-    top: -10,
-};
 class SideBox extends Component {
     constructor(props) {
         super(props);

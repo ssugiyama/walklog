@@ -1,10 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
 import { setSearchForm, search} from './actions';
-import { push } from 'react-router-redux'
-import {browserHistory} from 'react-router'
+import { push } from 'react-router-redux';
 import FlatButton from 'material-ui/FlatButton';
 import SearchIcon from 'material-ui/svg-icons/action/search';
 import SelectField from 'material-ui/SelectField';
@@ -47,20 +46,20 @@ class SearchForm extends Component {
         e.preventDefault();
         let keys = ['filter', 'year', 'month', 'order', 'limit'];
         switch (this.props.filter) {
-            case 'neighborhood':
-                keys.push('radius', 'longitude', 'latitude');
-                break;
-            case 'cities':
-                keys.push('cities');
-                break;
-            case 'crossing':
-            case 'hausdorff':
-                keys.push('searchPath');
-                break;
+        case 'neighborhood':
+            keys.push('radius', 'longitude', 'latitude');
+            break;
+        case 'cities':
+            keys.push('cities');
+            break;
+        case 'crossing':
+        case 'hausdorff':
+            keys.push('searchPath');
+            break;
         }
 
-        let query = {}
-        keys.forEach(key => { query[key] = this.props[key] });
+        let query = {};
+        keys.forEach(key => { query[key] = this.props[key]; });
         this.props.push({
             query
         });
@@ -94,27 +93,27 @@ class SearchForm extends Component {
                     </SelectField>
                 </div>
                 <div>
-                    <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: "50%"}}>
+                    <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: '50%'}}>
                         {month_options.map(function (option) {
-                             return <MenuItem value={option.value} key={option.value} primaryText={option.label} />
-                         })}
+                            return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
+                        })}
                     </SelectField>
-                    <SelectField id="search_form_year" floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: "50%"}}>
+                    <SelectField id="search_form_year" floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: '50%'}}>
                         <MenuItem value="" primaryText="-" />
                         {this.props.years.map(function (y) {
-                             return <MenuItem value={y} key={y} primaryText={y} />
-                         })}
+                            return <MenuItem value={y} key={y} primaryText={y} />;
+                        })}
                     </SelectField>
                 </div>
                 <div>
-                    <SelectField id="search_form_order" floatingLabelText="order" value={this.props.order} onChange={this.handleSelectChange.bind(this, 'order')} style={{width: "50%", verticalAlign: 'bottom'}}>
+                    <SelectField id="search_form_order" floatingLabelText="order" value={this.props.order} onChange={this.handleSelectChange.bind(this, 'order')} style={{width: '50%', verticalAlign: 'bottom'}}>
                         {
                             (this.props.filter == 'hausdorff' ? order_options_hausdorff : order_options).map(option =>
                                 <MenuItem value={option.value} key={option.value} primaryText={option.label} />
                             )
                         }
                     </SelectField>
-                    <TextField id="search_form_limit" floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: "50%"}} />
+                    <TextField id="search_form_limit" floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: '50%'}} />
                 </div>
                 <div style={{textAlign: 'center'}}>
                     <FlatButton label="search" primary={true} type="submit" icon={<SearchIcon />} />

@@ -1,10 +1,10 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue } from './actions'
+import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue } from './actions';
 import { connect } from 'react-redux';
 import styles from './styles';
 import SideBoxContainer from './side-box';
-import * as ActionTypes from './action-types'
+import * as ActionTypes from './action-types';
 
 const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
 
@@ -27,11 +27,11 @@ class Map extends Component {
                 this.distanceWidget.setCenter(event.latLng);
             }
             else if(this.props.filter == 'cities') {
-                let params = `latitude=${event.latLng.lat()}&longitude=${event.latLng.lng()}`
+                let params = `latitude=${event.latLng.lat()}&longitude=${event.latLng.lng()}`;
                 fetch('/api/cities?' + params)
                     .then(response => response.json())
-                    .then(json => this.addCity(json[0].jcode, json[0].the_geom))
-                    .catch(ex => alert(ex))
+                    .then(json => this.addCity(json[0].jcode))
+                    .catch(ex => alert(ex));
             }
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
@@ -109,19 +109,19 @@ class Map extends Component {
         }
     }
     processActionQueue() {
-	let len = this.props.action_queue.length;
-	if (len == 0) return;
-	let action = this.props.action_queue[len-1];
-	if (action.type == ActionTypes.ADD_PATHS) {
+        let len = this.props.action_queue.length;
+        if (len == 0) return;
+        let action = this.props.action_queue[len-1];
+        if (action.type == ActionTypes.ADD_PATHS) {
             for (let path of action.paths) {
-		this.path_manager.showPath(path, false);
+                this.path_manager.showPath(path, false);
             }
-	    this.props.removeFromActionQueue();
-	}
-	else if (action.type == ActionTypes.CLEAR_PATHS) {
+            this.props.removeFromActionQueue();
+        }
+        else if (action.type == ActionTypes.CLEAR_PATHS) {
             this.path_manager.deleteAll();
-	    this.props.removeFromActionQueue();
-	}
+            this.props.removeFromActionQueue();
+        }
     }
     componentDidUpdate() {
         if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
@@ -130,9 +130,9 @@ class Map extends Component {
         else if (! this.props.selected_path) {
             this.path_manager.deletePath();
         }
-	this.processActionQueue();
+        this.processActionQueue();
         if (this.props.editing_path) {
-            this.path_manager.set('editable', true)
+            this.path_manager.set('editable', true);
         }
         if (this.props.filter == 'neighborhood') {
             this.distanceWidget.setMap(this.map);
@@ -152,21 +152,21 @@ class Map extends Component {
             }
             this.cities = {};
             if (this.props.cities) {
-		this.fetchingCities = true;
+                this.fetchingCities = true;
                 fetch('/api/cities?jcodes=' + this.props.cities)
                     .then(response => response.json())
                     .then(cities => {
                         cities.forEach(city => {
                             let pg = this.toPolygon(city.jcode, city.the_geom);
                             pg.setMap(this.map);
-                        })
+                        });
                     })
                     .catch(ex => {
-			alert(ex);
-		    })
-		    .then(() => {
-			this.fetchingCities = false;
-		    })
+                        alert(ex);
+                    })
+                    .then(() => {
+                        this.fetchingCities = false;
+                    });
             }
         }
         if (this.cities) {
@@ -182,7 +182,7 @@ class Map extends Component {
         }
     }
     toPolygon(id, str) {
-        let paths = str.split(" ").map(element => google.maps.geometry.encoding.decodePath(element));
+        let paths = str.split(' ').map(element => google.maps.geometry.encoding.decodePath(element));
         let pg =  new google.maps.Polygon({});
         pg.setPaths(paths);
         pg.setOptions(this.areaStyle);
@@ -190,7 +190,7 @@ class Map extends Component {
         google.maps.event.addListener(pg, 'click',  this.removeCity.bind(this, id, pg));
         return pg;
     }
-    addCity(id, str) {
+    addCity(id) {
         if (this.cities === undefined) this.cities = {};
         if (this.cities[id]) return;
         let cities = this.props.cities.split(/,/).filter(elm => elm).concat(id).join(',');
@@ -210,7 +210,7 @@ class Map extends Component {
     render() {
         return (
             <div ref="map" style={styles.map}></div>
-        )
+        );
     }
 }
 
@@ -227,7 +227,7 @@ function mapStateToProps(state) {
         panorama: state.main.panorama,
         info_window: state.main.info_window,
         center: state.main.center,
-    }
+    };
 }
 
 function mapDispatchToProps(dispatch) {

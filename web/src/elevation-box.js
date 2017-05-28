@@ -1,10 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
-import marked from 'marked';
 
-const Chart = typeof window !== 'undefined' ? require("chart.js").Chart : {};
+const Chart = typeof window !== 'undefined' ? require('chart.js').Chart : {};
 import styles from './styles';
 
 class ElevationBox extends Component {
@@ -19,7 +18,7 @@ class ElevationBox extends Component {
         let pathRequest = {
             'path': path,
             'samples': 256
-        }
+        };
         this.elevator.getElevationAlongPath(pathRequest, (results, status) => {
             this.plotElevation(results, status);
         });
@@ -29,7 +28,7 @@ class ElevationBox extends Component {
             this.elevationResults = results;
             let data = results.map(result => result.elevation);
             let labels = results.map(result => '');
-            this.chart = new Chart(this.refs.root.getContext("2d"), {
+            this.chart = new Chart(this.refs.root.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels,

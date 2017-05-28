@@ -1,4 +1,4 @@
-const jsSHA = require("jssha");
+const jsSHA = require('jssha');
 
 export default class PathManager extends google.maps.MVCObject {
     constructor(opt_options) {
@@ -6,8 +6,8 @@ export default class PathManager extends google.maps.MVCObject {
         var options = opt_options || {};
         this.setValues(options);
         this.polylines = new Object();
-        this.generalStyle = {strokeColor : "#0000ff", strokeOpacity: 0.5, zIndex: 10};
-        this.selectedStyle = {strokeColor : "#ff0000", strokeOpacity : 0.7, zIndex: 10};
+        this.generalStyle = {strokeColor : '#0000ff', strokeOpacity: 0.5, zIndex: 10};
+        this.selectedStyle = {strokeColor : '#ff0000', strokeOpacity : 0.7, zIndex: 10};
         this.drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.POLYLINE,
             drawingControl: true,
@@ -38,10 +38,10 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     pathToHash(path) {
-	let key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
-	let obj = new jsSHA("SHA-1", "TEXT");
-	obj.update(key);
-	return obj.getHash("B64");
+        let key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
+        let obj = new jsSHA('SHA-1', 'TEXT');
+        obj.update(key);
+        return obj.getHash('B64');
     }
 
     deletePath() {
@@ -64,7 +64,7 @@ export default class PathManager extends google.maps.MVCObject {
 
     searchPolyline(path) {
         var key = this.pathToHash(path);
-        return this.polylines[key];;
+        return this.polylines[key];
     }
 
     showPath(path, select) {
@@ -82,7 +82,7 @@ export default class PathManager extends google.maps.MVCObject {
             this.set('selection', pl);
             var xmin, xmax, ymin, ymax;
             for (let i = 0; i < path.length; i++ ) {
-		let elem = path[i];
+                let elem = path[i];
                 if (i == 0) {
                     xmin = xmax = elem.lng();
                     ymin = ymax = elem.lat();
@@ -132,8 +132,6 @@ export default class PathManager extends google.maps.MVCObject {
 
         if (selection) {
             selection.setOptions(this.selectedStyle);
-            var path = this.selection.getPath();
-            var len = path.getLength();
         }
         this.updateLength();
         this.unbind('editable');
@@ -157,7 +155,7 @@ export default class PathManager extends google.maps.MVCObject {
         if (this.selection)
             this.set('length', google.maps.geometry.spherical.computeLength(this.selection.getPath())/1000);
         else
-            this.set('length', "");
+            this.set('length', '');
     }
     selectionAsGeoJSON() {
         if (this.selection) {
@@ -169,5 +167,5 @@ export default class PathManager extends google.maps.MVCObject {
             });
         }
         return '';
-    };
+    }
 }

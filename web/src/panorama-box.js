@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setStreetView } from './actions';
@@ -20,7 +20,7 @@ class PanoramaBox extends Component {
             panoramaIndex: 0,
             panoramaCount: 0,
             overlay: false,
-        }
+        };
     }
     handleOverlayChange(e, toggled) {
         if (toggled) {
@@ -70,7 +70,7 @@ class PanoramaBox extends Component {
         let path = google.maps.geometry.encoding.decodePath(selected_path);
         this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(path);
         this.setState({panoramaCount: this.panoramaPointsAndHeadings.length});
-        setTimeout(() => {this.showPanorama(0)}, 0);
+        setTimeout(() => {this.showPanorama(0);}, 0);
     }
     showPanorama(index) {
         if (index < 0) index = 0;
@@ -101,12 +101,11 @@ class PanoramaBox extends Component {
     }
     componentDidMount() {
         this.streetViewService = new google.maps.StreetViewService();
-        this.panorama = new google.maps.StreetViewPanorama(this.refs.body,
-                                                           {
-                                                               addressControl: true,
-                                                               navigationControl: true,
-                                                               enableCloseButton: false,
-                                                           });
+        this.panorama = new google.maps.StreetViewPanorama(this.refs.body, {
+            addressControl: true,
+            navigationControl: true,
+            enableCloseButton: false,
+        });
         this.props.setStreetView(this.panorama);
         if (this.props.selected_path) this.initPanorama(this.props.selected_path);
     }
@@ -124,12 +123,11 @@ class PanoramaBox extends Component {
                         label="overlay" toggled={this.state.overlay} onToggle={this.handleOverlayChange.bind(this)} style={styles.panoramaBoxOverlayToggle}/></div>
                     <div style={styles.panoramaBoxBody} ref="body"></div>
                     <div style={styles.panoramaBoxControl}>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 10) } }><AvFastRewind /></IconButton>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 1) }}><NavigationArrowBack /></IconButton>
+                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 10); } }><AvFastRewind /></IconButton>
+                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 1); }}><NavigationArrowBack /></IconButton>
                         <span className="label label-info"><span>{ this.state.panoramaIndex+1 } </span> / <span>{ this.state.panoramaCount } </span></span>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 1) }}><NavigationArrowForward /></IconButton>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 10) }}><AvFastForward /></IconButton>
-
+                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 1); }}><NavigationArrowForward /></IconButton>
+                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 10); }}><AvFastForward /></IconButton>
                     </div>
             </div>
         );

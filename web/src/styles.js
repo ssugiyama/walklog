@@ -27,10 +27,10 @@ export default {
     commentBoxBody: {
         padding: '10px 20px',
         fontSize: '85%',
-	lineHeight: '1.65',
-	letterSpacing: '.1em',
-	textAlign: 'justify',
-	textIndent: '1.2em'
+        lineHeight: '1.65',
+        letterSpacing: '.1em',
+        textAlign: 'justify',
+        textIndent: '1.2em'
     },
     commentBoxControl: {
         width: '100%',
@@ -50,11 +50,11 @@ export default {
         height: 36
     },
     panoramaBoxTitle: {
-        float: "left"
+        float: 'left'
     },
     panoramaBoxOverlayToggle: {
         width: 120,
-        float: "right",
+        float: 'right',
         marginTop: 40,
     },
     dialogCloseButton: {

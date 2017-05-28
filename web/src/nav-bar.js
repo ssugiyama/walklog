@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setEditingPath, setSearchForm, toggleSidebar, deleteSelectedPath, clearPaths, openWalkEditor, openIOModal, openGeocodeModal, setCenter } from './actions';
@@ -12,29 +12,29 @@ import Divider from 'material-ui/Divider';
 
 class NavBar extends Component {
     constructor(props) {
-	super(props);
-	this.state = {length: 0};
+        super(props);
+        this.state = {length: 0};
     }
     computeLength(selected_path) {
-	if (selected_path) {
-	    return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selected_path))/1000;
-	}
-	else {
-	    return 0;
-	}
+        if (selected_path) {
+            return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selected_path))/1000;
+        }
+        else {
+            return 0;
+        }
     }
     setCurrentPosition() {
-	if (navigator.geolocation) {
-	    navigator.geolocation.getCurrentPosition( pos => {
-		let center = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-		this.props.setCenter(center);
-	    }, () => {
-		alert("Unable to retrieve your location");
-	    });
-	}
-	else {
-	    alert("Geolocation is not supported by your browser");
-	}
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition( pos => {
+                let center = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+                this.props.setCenter(center);
+            }, () => {
+                alert('Unable to retrieve your location');
+            });
+        }
+        else {
+            alert('Geolocation is not supported by your browser');
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -79,14 +79,14 @@ class NavBar extends Component {
                         />
                         { this.props.filter == 'cities' ?
                           <MenuItem onTouchTap={this.resetCities.bind(this)} primaryText="reset cities" /> : null }
-                        { this.props.filter == "neighborhood" ?
+                        { this.props.filter == 'neighborhood' ?
                           <MenuItem primaryText="neighborhood"  rightIcon={<ArrowDropRight />}
                               menuItems={[
                                   <MenuItem onTouchTap={this.setRadius.bind(this, 1000)}  primaryText="radius: 1km" />,
                                   <MenuItem onTouchTap={this.setRadius.bind(this, 500)}  primaryText="radius: 500m" />,
                                   <MenuItem onTouchTap={this.setRadius.bind(this, 250)}  primaryText="radius: 250m" />,
                                   <MenuItem onTouchTap={this.setRadius.bind(this, 100)}  primaryText="radius: 100m" />
-                           ]} /> : null }
+                              ]} /> : null }
                          <Divider />
                          <MenuItem primaryText={`Length: ${this.state.length.toFixed(1)}km`} disabled={true}/>
                      </IconMenu>

@@ -1,5 +1,5 @@
 // actions
-import * as ActionTypes from './action-types'
+import * as ActionTypes from './action-types';
 require('isomorphic-fetch');
 
 export function setSearchForm(payload) {
@@ -12,14 +12,14 @@ export function setSearchForm(payload) {
 function searchStart() {
     return {
         type: ActionTypes.SEARCH_START,
-    }
+    };
 }
 function searchResult(data, append) {
     return {
         type: ActionTypes.SEARCH_RESULT,
         data,
         append,
-    }
+    };
 }
 
 export function search(props, show, prefix = '/') {
@@ -38,8 +38,8 @@ export function search(props, show, prefix = '/') {
                     dispatch(showAllPaths(data.rows));
                 }
             })
-            .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)) })
-    }
+            .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
+    };
 }
 
 export function getMoreItems(params, show, selected_index) {
@@ -56,8 +56,8 @@ export function getMoreItems(params, show, selected_index) {
                     dispatch(setSelectedItem(data.rows[0], selected_index));
                 }
             })
-            .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)) })
-    }
+            .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
+    };
 }
 
 export function setSelectedItem(item, index) {
@@ -65,20 +65,20 @@ export function setSelectedItem(item, index) {
         type: ActionTypes.SET_SELECTED_ITEM,
         item,
         index
-    }
+    };
 }
 
 export function setSelectedPath(path) {
     return {
         type: ActionTypes.SET_SELECTED_PATH,
         path
-    }
+    };
 }
 
 export function toggleSidebar() {
     return {
         type: ActionTypes.TOGGLE_SIDEBAR,
-    }
+    };
 }
 
 export function setTabValue(value) {
@@ -118,28 +118,28 @@ export function openWalkEditor(open, mode) {
         type: ActionTypes.OPEN_WALK_EDITOR,
         open,
         mode
-    }
+    };
 }
 
 export function openIOModal(open) {
     return {
         type: ActionTypes.OPEN_IO_MODAL,
         open
-    }
+    };
 }
 
 export function openGeocodeModal(open) {
     return {
         type: ActionTypes.OPEN_GEOCODE_MODAL,
         open
-    }
+    };
 }
 
 export function setStreetView(panorama) {
     return {
         type: ActionTypes.SET_STREET_VIEW,
         panorama
-    }
+    };
 }
 
 export function setInfoWindow(payload) {
@@ -158,6 +158,6 @@ export function setCenter(center) {
 
 export function removeFromActionQueue() {
     return {
-	type: ActionTypes.REMOVE_FROM_ACTION_QUEUE,
+        type: ActionTypes.REMOVE_FROM_ACTION_QUEUE,
     };
 }

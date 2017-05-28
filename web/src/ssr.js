@@ -1,16 +1,15 @@
-import { renderToString } from 'react-dom/server';
 import React from 'react';
+import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import {configureStore, routes, handleRoute}  from './app'
-import { Route,  RouterContext, match } from 'react-router'
-import { setSelectedItem } from './actions';
-import config from './config'
+import {configureStore, routes, handleRoute}  from './app';
+import { RouterContext, match } from 'react-router';
+import config from './config';
 
 export default function handleSSR(req, res) {
     global.navigator = {
         userAgent: req.headers['user-agent']
     };
-    let prefix = `http://localhost:${req.app.get("port")}/`
+    let prefix = `http://localhost:${req.app.get('port')}/`;
     match({ routes, location: req.url }, (err, redirect, renderProps) => {
         if (err) {
             res.status(500).send(err.message);
@@ -28,7 +27,7 @@ export default function handleSSR(req, res) {
                     <Provider store={store}>
                         <RouterContext {...renderProps}></RouterContext>
                     </Provider>
-                )
+                );
                 let state = store.getState();
                 let title = config.site_name;
                 let description = '';
@@ -36,7 +35,7 @@ export default function handleSSR(req, res) {
                 let canonical = '/';
                 if (state.main.selected_item) {
                     let data = state.main.selected_item;
-                    title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title
+                    title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
                     description = data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...';
                     canonical = '/' + data.id;
                 }
@@ -50,7 +49,7 @@ export default function handleSSR(req, res) {
                 }, config);
 
                 res.render('index', bind);
-            }).catch(ex => console.log(ex))
+            }).catch(ex => console.log(ex));
         }
-    })
+    });
 }
