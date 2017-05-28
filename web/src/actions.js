@@ -35,7 +35,7 @@ export function search(props, show, prefix = '/') {
                     dispatch(setSelectedItem(data.rows[0], 0));
                 }
                 else if (!data.error && show == 'all') {
-                    dispatch(showAllPaths(data.rows));
+                    dispatch(addPaths(data.rows.map(row => row.path)));
                 }
             })
             .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
