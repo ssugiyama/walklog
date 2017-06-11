@@ -23,10 +23,7 @@ class Map extends Component {
 
         this.map = new google.maps.Map(this.refs.map, options);
         google.maps.event.addListener(this.map, 'click', event => {
-            if (this.props.open_sidebar) {
-                this.props.toggleSidebar();
-            }
-            else if (this.props.filter == 'neighborhood'){
+            if (this.props.filter == 'neighborhood'){
                 this.distanceWidget.setCenter(event.latLng);
             }
             else if (this.props.filter == 'cities') {
@@ -35,9 +32,6 @@ class Map extends Component {
                     .then(response => response.json())
                     .then(json => this.addCity(json[0].jcode))
                     .catch(ex => alert(ex));
-            }
-            else {
-                this.props.toggleSidebar();
             }
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
@@ -194,12 +188,7 @@ class Map extends Component {
         pg.setOptions(this.areaStyle);
         this.cities[id] = pg;
         google.maps.event.addListener(pg, 'click',  event => {
-            if (this.props.open_sidebar) {
-                this.props.toggleSidebar(); 
-            }
-            else {
-                this.removeCity(id, pg);
-            }
+            this.removeCity(id, pg);
         });
         return pg;
     }
