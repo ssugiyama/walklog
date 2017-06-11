@@ -7,12 +7,6 @@ export default {
         overflow: 'hidden',
         margin: 0
     },
-    sideBox: {
-        marginTop: appBarHeight,
-    },
-    tabs: {
-        marginBottom: appBarHeight,
-    },
     map: {
         position: 'absolute',
         top: appBarHeight,
