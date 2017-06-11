@@ -73,15 +73,36 @@ api.get('/search', function(req, res){
             values.push(lb, rt,  center, radius);
         }
         else if (req.query.filter == 'cities') {
+            if (!req.query.cities) {
+                res.json({
+                    count: 0,
+                    rows: []
+                });
+                return;
+            }
             var cities = req.query.cities.split(/,/).map(function (elm) { return "'" + elm + "'"; }).join(',');
             exprs.push("EXISTS (SELECT * FROM areas WHERE jcode IN (" + cities + ") AND path && the_geom AND ST_Intersects(path, the_geom))");
         }
         else if (req.query.filter == 'crossing') {
+            if (!req.query.searchPath) {
+                res.json({
+                    count: 0,
+                    rows: []
+                });
+                return;
+            }
             var linestring = Walk.decodePath(req.query.searchPath);
             exprs.push("path && ?", "ST_Intersects(path, ?)");
             values.push(linestring, linestring);
         }
         else if (req.query.filter == 'hausdorff') {
+            if (!req.query.searchPath) {
+                res.json({
+                    count: 0,
+                    rows: []
+                });
+                return;
+            }
             var max_distance = req.query.max_distance || 4000;
             linestring = Walk.decodePath(req.query.searchPath);
             extent     = Walk.getPathExtent(req.query.searchPath);
