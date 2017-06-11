@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
-import { setSearchForm, search} from './actions';
+import { setSearchForm, search, toggleSidebar, setTabValue} from './actions';
 import { push } from 'react-router-redux';
 import FlatButton from 'material-ui/FlatButton';
 import SearchIcon from 'material-ui/svg-icons/action/search';
@@ -42,8 +42,7 @@ const order_options_hausdorff = [
 ];
 
 class SearchForm extends Component {
-    handleSubmit(e) {
-        e.preventDefault();
+    componentDidUpdate(prevProps, prevState) {
         let keys = ['filter', 'year', 'month', 'order', 'limit'];
         switch (this.props.filter) {
         case 'neighborhood':
@@ -57,12 +56,17 @@ class SearchForm extends Component {
             keys.push('searchPath');
             break;
         }
+        if (keys.every(key => prevProps[key] == this.props[key])) return;
 
         let query = {};
         keys.forEach(key => { query[key] = this.props[key]; });
         this.props.push({
             query
-        });
+        });     
+        this.props.setTabValue('search');
+        if (!this.props.open_sidebar) {
+            setTimeout(this.props.toggleSidebar.bind(this), 1000);
+        }
     }
     handleSelectChange(name, e, index, value) {
         this.props.setSearchForm({[name]: value});
@@ -70,14 +74,9 @@ class SearchForm extends Component {
     handleTextChange(name, e) {
         this.props.setSearchForm({[name]: e.target.value});
     }
-    searchDisabled() {
-        if ((this.props.filter == 'hausdorff' || this.props.filter == 'crossing') && !this.props.searchPath) return true;
-        else if (this.props.filter == 'cities' && !this.props.cities) return true;
-        else return false;
-    }
     render() {
         return (
-            <form className="form-horizontal" role="form" onSubmit={this.handleSubmit.bind(this)}>
+            <form className="form-horizontal" role="form">
                 <input type="hidden" name="latitude" value="" />
                 <input type="hidden" name="longitude" value="" />
                 <input type="hidden" name="radius" value="" />
@@ -116,7 +115,6 @@ class SearchForm extends Component {
                     <TextField id="search_form_limit" floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: '50%'}} />
                 </div>
                 <div style={{textAlign: 'center'}}>
-                    <FlatButton label="search" primary={true} type="submit" icon={<SearchIcon />} />
                     <FlatButton type="reset" secondary={true} label="reset" />
                 </div>
             </form>
@@ -126,11 +124,14 @@ class SearchForm extends Component {
 
 
 function mapStateToProps(state) {
-    return Object.assign({}, state.main.search_form, { years: state.main.years });
+    return Object.assign({}, state.main.search_form, { 
+        years: state.main.years, 
+        open_sidebar: state.main.open_sidebar 
+    });
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, search, push}, dispatch);
+    return bindActionCreators({setSearchForm, search, push, toggleSidebar, setTabValue}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SearchForm);

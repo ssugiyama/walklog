@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar } from './actions';
 import { connect } from 'react-redux';
 import styles from './styles';
 import SideBoxContainer from './side-box';
@@ -23,15 +23,21 @@ class Map extends Component {
 
         this.map = new google.maps.Map(this.refs.map, options);
         google.maps.event.addListener(this.map, 'click', event => {
-            if(this.props.filter == 'neighborhood'){
+            if (this.props.open_sidebar) {
+                this.props.toggleSidebar();
+            }
+            else if (this.props.filter == 'neighborhood'){
                 this.distanceWidget.setCenter(event.latLng);
             }
-            else if(this.props.filter == 'cities') {
+            else if (this.props.filter == 'cities') {
                 let params = `latitude=${event.latLng.lat()}&longitude=${event.latLng.lng()}`;
                 fetch('/api/cities?' + params)
                     .then(response => response.json())
                     .then(json => this.addCity(json[0].jcode))
                     .catch(ex => alert(ex));
+            }
+            else {
+                this.props.toggleSidebar();
             }
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
@@ -187,7 +193,14 @@ class Map extends Component {
         pg.setPaths(paths);
         pg.setOptions(this.areaStyle);
         this.cities[id] = pg;
-        google.maps.event.addListener(pg, 'click',  this.removeCity.bind(this, id, pg));
+        google.maps.event.addListener(pg, 'click',  event => {
+            if (this.props.open_sidebar) {
+                this.props.toggleSidebar(); 
+            }
+            else {
+                this.removeCity(id, pg);
+            }
+        });
         return pg;
     }
     addCity(id) {
@@ -227,11 +240,12 @@ function mapStateToProps(state) {
         panorama: state.main.panorama,
         info_window: state.main.info_window,
         center: state.main.center,
+        open_sidebar: state.main.open_sidebar,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue}, dispatch);
+    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

@@ -30,10 +30,10 @@ class SideBox extends Component {
         return (
             <Drawer open={this.props.open_sidebar} width={300} containerStyle={styles.sideBox}>
                 <Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}   style={styles.tabs}>
-                    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
                     <Tab icon={<SearchIcon />} value="search" >
                         <SearchBox />
                     </Tab>
+                    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
                     <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.selected_path}>
                         <ElevationBox />
                         <PanoramaBox />
