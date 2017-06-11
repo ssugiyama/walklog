@@ -8,10 +8,10 @@ export default {
         margin: 0
     },
     sideBox: {
-        marginTop: appBarHeight,
+        marginTop: appBarHeight + 1,
     },
     tabs: {
-        marginBottom: appBarHeight,
+        marginBottom: appBarHeight + 1,
     },
     map: {
         position: 'absolute',
