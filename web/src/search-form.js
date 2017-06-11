@@ -64,8 +64,17 @@ class SearchForm extends Component {
             query
         });     
         this.props.setTabValue('search');
-        if (!this.props.open_sidebar) {
-            setTimeout(this.props.toggleSidebar.bind(this), 1000);
+        if (this.props.open_sidebar) {
+            if ( prevProps.filter != this.props.filter 
+                && ['neighborhood', 'cities', 'hausdorff', 'crossing'].some(item => item == this.props.filter)) {
+                setTimeout(this.props.toggleSidebar.bind(this), 1000);
+            }           
+        }
+        else {
+            if (! (query.filter == 'cities' && ! query.cities) && 
+                ! ((query.filter == 'crossing' || query.filter == 'hausdorff') && ! query.searchPath)) {
+                setTimeout(this.props.toggleSidebar.bind(this), 1000);
+            }
         }
     }
     handleSelectChange(name, e, index, value) {
