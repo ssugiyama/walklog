@@ -18,7 +18,10 @@ class Map extends Component {
             disableDoubleClickZoom: true,
             scaleControl: true,
             scrollwheel : false,
-            streetViewControl: true
+            streetViewControl: true,
+            mapTypeControlOptions: {
+                position: google.maps.ControlPosition.TOP_RIGHT
+            }
         };
 
         this.map = new google.maps.Map(this.refs.map, options);
