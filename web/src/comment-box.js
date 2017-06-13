@@ -8,7 +8,6 @@ import marked from 'marked';
 import IconButton from 'material-ui/IconButton';
 import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
 import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
-import ActionHome from 'material-ui/svg-icons/action/home';
 import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit';
 import styles from './styles';
 
@@ -43,10 +42,6 @@ class CommentBox extends Component {
             this.props.setSelectedItem(this.props.rows[index], index);
         }
     }
-    goHome() {
-        this.props.push({});
-        this.props.setTabValue('search');
-    }
     render() {
         let data = this.props.selected_item;
         if (! data) return null;
@@ -56,7 +51,6 @@ class CommentBox extends Component {
             <div>
                 <div style={styles.commentBoxControl}>
                     <IconButton disabled={this.props.selected_index <= 0} onTouchTap={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
-                    <IconButton onTouchTap={this.goHome.bind(this)}><ActionHome /></IconButton>
                     <IconButton disabled={this.props.selected_index >= this.props.count - 1} onTouchTap={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
                     <IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>
                     <div ref="twitter" style={styles.twitter}></div>

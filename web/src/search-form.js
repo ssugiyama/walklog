@@ -9,6 +9,8 @@ import SearchIcon from 'material-ui/svg-icons/action/search';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
+import IconButton from 'material-ui/IconButton';
+import NavigationRefresh from 'material-ui/svg-icons/navigation/refresh';
 
 const month_options = [
     { label: '-', value: '' },
@@ -83,6 +85,9 @@ class SearchForm extends Component {
     handleTextChange(name, e) {
         this.props.setSearchForm({[name]: e.target.value});
     }
+    reset() {
+        this.props.push({});
+    }
     render() {
         return (
             <form className="form-horizontal" role="form">
@@ -92,13 +97,14 @@ class SearchForm extends Component {
                 <input type="hidden" name="cities" value=""  />
                 <input type="hidden" name="searchPath" value=""  />
                 <div>
-                    <SelectField id="search_form_filter" floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} fullWidth={true}>
+                    <SelectField id="search_form_filter" floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} style={{width: '80%'}}>
                         <MenuItem value="any" primaryText="any" />
                         <MenuItem value="neighborhood" primaryText="Neighborhood" />
                         <MenuItem value="cities" primaryText="Cities" />
                         <MenuItem value="hausdorff" primaryText="Hausdorff" />
                         <MenuItem value="crossing" primaryText="Crossing" />
                     </SelectField>
+                    <IconButton onTouchTap={this.reset.bind(this)}><NavigationRefresh /></IconButton>
                 </div>
                 <div>
                     <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: '50%'}}>
