@@ -161,3 +161,24 @@ export function removeFromActionQueue() {
         type: ActionTypes.REMOVE_FROM_ACTION_QUEUE,
     };
 }
+
+export function setPanoramaCount(count) {
+    return {
+        type: ActionTypes.SET_PANORAMA_COUNT,
+        count,
+    };
+}
+
+export function setPanoramaIndex(index) {
+    return {
+        type: ActionTypes.SET_PANORAMA_INDEX,
+        index,
+    };
+}
+
+export function setOverlay(overlay) {
+    return {
+        type: ActionTypes.SET_OVERLAY,
+        overlay,
+    };
+}

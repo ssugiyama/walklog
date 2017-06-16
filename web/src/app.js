@@ -58,6 +58,9 @@ const initialState = {
     },
     center: null,
     panorama: null,
+    panorama_index: 0,
+    panorama_count: 0,
+    overlay: false,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -180,6 +183,23 @@ const mainReducer = function(state = initialState, action) {
         {
             let action_queue = state.action_queue.slice(0, -1);
             return Object.assign({}, state, {action_queue});
+        }
+    case ActionTypes.SET_PANORAMA_COUNT:
+        {
+            let panorama_count = action.count;
+            return Object.assign({}, state, {panorama_count});
+        }
+    case ActionTypes.SET_PANORAMA_INDEX:
+        {
+            let panorama_index = action.index;
+            if (panorama_index < 0) panorama_index = 0;
+            else if(panorama_index >=  state.panorama_count) panorama_index = state.panorama_count -1;
+            return Object.assign({}, state, {panorama_index});
+        }
+    case ActionTypes.SET_OVERLAY:
+        {
+            let overlay = action.overlay;
+            return Object.assign({}, state, {overlay});
         }
     default:
         return state;

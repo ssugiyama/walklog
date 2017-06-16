@@ -1,4 +1,5 @@
 const appBarHeight = 64;
+const bottomBarHeight = 56;
 
 export default {
     body: {
@@ -18,7 +19,16 @@ export default {
         top: appBarHeight,
         left: 0,
         right: 0,
+        bottom: bottomBarHeight,
+    },
+    bottomBar: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
         bottom: 0,
+    },
+    bottomBarGroup: {
+        margin: 'auto',
     },
     elevationBox: {
         width: '100%',

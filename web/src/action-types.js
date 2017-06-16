@@ -19,3 +19,6 @@ export const SET_STREET_VIEW = 'set_street_view';
 export const SET_INFO_WINDOW = 'set_info_window';
 export const SET_CENTER = 'set_center';
 export const REMOVE_FROM_ACTION_QUEUE = 'remove_from_action_queue';
+export const SET_PANORAMA_COUNT = 'set_panorama_count';
+export const SET_PANORAMA_INDEX = 'set_panorama_index';
+export const SET_OVERLAY = 'set_overlay';

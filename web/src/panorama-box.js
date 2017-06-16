@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setStreetView } from './actions';
+import { setStreetView, toggleSidebar, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
 import IconButton from 'material-ui/IconButton';
 import Toggle from 'material-ui/Toggle';
 import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
@@ -16,21 +16,9 @@ class PanoramaBox extends Component {
         super(props);
 
         this.panoramaInterval = 50;
-        this.state = {
-            panoramaIndex: 0,
-            panoramaCount: 0,
-            overlay: false,
-        };
     }
     handleOverlayChange(e, toggled) {
-        if (toggled) {
-            this.props.setStreetView(null);
-        }
-        else {
-            this.props.setStreetView(this.panorama);
-        }
-        this.setState({overlay: toggled});
-        this.showPanorama(this.state.panoramaIndex);
+        this.props.setOverlay(toggled);
     }
     interpolatePoints(pt1, pt2, r) {
         return new google.maps.LatLng(r*pt2.lat() + (1-r)*pt1.lat(), r*pt2.lng() + (1-r)*pt1.lng());
@@ -69,17 +57,15 @@ class PanoramaBox extends Component {
         }
         let path = google.maps.geometry.encoding.decodePath(selected_path);
         this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(path);
-        this.setState({panoramaCount: this.panoramaPointsAndHeadings.length});
-        setTimeout(() => {this.showPanorama(0);}, 0);
+        this.props.setPanoramaCount(this.panoramaPointsAndHeadings.length);
+        // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
+        this.props.setPanoramaIndex(0);
     }
-    showPanorama(index) {
-        if (index < 0) index = 0;
-        else if(index >=  this.state.panoramaCount) index = this.state.panoramaCount -1;
-
-        this.setState({panoramaIndex: index});
-        var item = this.panoramaPointsAndHeadings[index];
-        var pt = item[0];
-        var heading = item[1];
+    showPanorama() {
+        let index = this.props.panorama_index;
+        let item = this.panoramaPointsAndHeadings[index];
+        let pt = item[0];
+        let heading = item[1];
         this.streetViewService.getPanoramaByLocation(pt, 50, (data, status) => {
             if (status == google.maps.StreetViewStatus.OK) {
                 this.props.panorama.setPano(data.location.pano);
@@ -94,10 +80,20 @@ class PanoramaBox extends Component {
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.selected_path != this.props.selected_path) return true;
-        if (nextState.panoramaIndex != this.state.panoramaIndex) return true;
-        if (nextState.panoramaCount != this.state.panoramaCount) return true;
-        if (nextState.overlay != this.state.overlay) return true;
+        if (nextProps.panorama_index != this.props.panorama_index) return true;
+        if (nextProps.panorama_count != this.props.panorama_count) return true;
+        if (nextProps.overlay != this.props.overlay) return true;
         return false;
+    }
+    componentDidUpdate(prevProps) {
+        this.showPanorama();
+        if (this.props.overlay) {
+            this.props.setStreetView(null);
+            if (this.props.open_sidebar) this.props.toggleSidebar();
+        }
+        else {
+            this.props.setStreetView(this.panorama);
+        }
     }
     componentDidMount() {
         this.streetViewService = new google.maps.StreetViewService();
@@ -120,14 +116,14 @@ class PanoramaBox extends Component {
                 <div>
                     <h3 style={styles.panoramaBoxTitle}>street view </h3>
                     <Toggle
-                        label="overlay" toggled={this.state.overlay} onToggle={this.handleOverlayChange.bind(this)} style={styles.panoramaBoxOverlayToggle}/></div>
+                        label="overlay" toggled={this.props.overlay} onToggle={this.handleOverlayChange.bind(this)} style={styles.panoramaBoxOverlayToggle}/></div>
                     <div style={styles.panoramaBoxBody} ref="body"></div>
                     <div style={styles.panoramaBoxControl}>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 10); } }><AvFastRewind /></IconButton>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex - 1); }}><NavigationArrowBack /></IconButton>
-                        <span className="label label-info"><span>{ this.state.panoramaIndex+1 } </span> / <span>{ this.state.panoramaCount } </span></span>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 1); }}><NavigationArrowForward /></IconButton>
-                        <IconButton onTouchTap={ () => { this.showPanorama(this.state.panoramaIndex + 10); }}><AvFastForward /></IconButton>
+                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
+                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                        <span className="label label-info"><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
+                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
                     </div>
             </div>
         );
@@ -138,11 +134,15 @@ function mapStateToProps(state) {
     return {
         selected_path: state.main.selected_path,
         panorama: state.main.panorama,
+        open_sidebar: state.main.open_sidebar,
+        panorama_index: state.main.panorama_index,
+        panorama_count: state.main.panorama_count,
+        overlay: state.main.overlay,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setStreetView }, dispatch);
+    return bindActionCreators({ setStreetView, toggleSidebar, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PanoramaBox);
