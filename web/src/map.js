@@ -26,11 +26,7 @@ class Map extends Component {
 
         this.map = new google.maps.Map(this.refs.map, options);
         google.maps.event.addListener(this.map, 'click', event => {
-            let point = this.fromLatLngToPixel(event.latLng);
-            if (point.x < 20 || point.x > this.map.getDiv().clientWidth - 20) {
-                this.props.toggleSidebar();
-            }
-            else if (this.props.filter == 'neighborhood'){
+            if (this.props.filter == 'neighborhood'){
                 this.distanceWidget.setCenter(event.latLng);
             }
             else if (this.props.filter == 'cities') {
@@ -215,21 +211,6 @@ class Map extends Component {
         pg.setMap(null);
         pg = null;
         delete this.cities[id];
-    }
-    fromLatLngToPixel(latLng) {
-        let scale = Math.pow(2, this.map.getZoom());
-        let proj = this.map.getProjection();
-        let bounds = this.map.getBounds();
-
-        let nw =  proj.fromLatLngToPoint(
-            new google.maps.LatLng(
-                bounds.getNorthEast().lat(),
-                bounds.getSouthWest().lng()
-        ));
-        let point = proj.fromLatLngToPoint(latLng);
-        return new google.maps.Point(
-            Math.floor((point.x - nw.x) * scale),
-            Math.floor((point.y - nw.y) * scale));
     }
     render() {
         return (
