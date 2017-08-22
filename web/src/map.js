@@ -20,7 +20,12 @@ class Map extends Component {
             scrollwheel : false,
             streetViewControl: true,
             mapTypeControlOptions: {
-                position: google.maps.ControlPosition.TOP_RIGHT
+                position: google.maps.ControlPosition.TOP_RIGHT,
+                mapTypeIds: [ google.maps.MapTypeId.ROADMAP, 
+                    google.maps.MapTypeId.SATELLITE, 
+                    google.maps.MapTypeId.TERRAIN, 
+                    'gsi' ],
+                style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             }
         };
 
@@ -68,7 +73,19 @@ class Map extends Component {
                 radius: this.distanceWidget.getRadius()
             });
         });
-
+        this.map.mapTypes.set('gsi', this.gsiMapOption());
+        const gsiLogo = document.createElement('div');
+        gsiLogo.innerHTML = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" >地理院タイル</a>';
+        gsiLogo.style.display = 'none';
+        google.maps.event.addListener( this.map, 'maptypeid_changed', () => {
+            const currentMapTypeID = this.map.getMapTypeId();
+            if ( currentMapTypeID == 'gsi' ) {
+                gsiLogo.style.display = 'inline';
+            } else {
+                gsiLogo.style.display = 'none';
+            }
+        });
+        this.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
         this.infoWindow = new google.maps.InfoWindow();
         window.addEventListener('resize', this.handleResize.bind(this));
         this.componentDidUpdate();
@@ -216,6 +233,28 @@ class Map extends Component {
         return (
             <div ref="map" style={styles.map}></div>
         );
+    }
+    gsiMapOption() {
+        const tileType = 'std';
+        const tileExtension = 'png';
+        const zoomMax = 18;
+        const zoomMin = 5;        
+        return {
+            name: '地理院地図',
+            tileSize: new google.maps.Size(256, 256),
+            minZoom: zoomMin,
+            maxZoom: zoomMax,
+            getTile: (tileCoord, zoom, ownerDocument) => {
+                const img = ownerDocument.createElement("img");
+                img.id = 'gsi-map-layer-image';
+                img.style.width = '256px';
+                img.style.height = '256px';
+                const x = (tileCoord.x % Math.pow(2, zoom)).toString();
+                const y = tileCoord.y.toString();
+                img.src = `http://cyberjapandata.gsi.go.jp/xyz/${tileType}/${zoom}/${x}/${y}.${tileExtension}`;
+                return img;
+            }
+        }
     }
 }
 
