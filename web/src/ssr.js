@@ -9,7 +9,7 @@ export default function handleSSR(req, res) {
     global.navigator = {
         userAgent: req.headers['user-agent']
     };
-    let prefix = `http://localhost:${req.app.get('port')}/`;
+    const prefix = `http://localhost:${req.app.get('port')}/`;
     match({ routes, location: req.url }, (err, redirect, renderProps) => {
         if (err) {
             res.status(500).send(err.message);
@@ -20,7 +20,7 @@ export default function handleSSR(req, res) {
         } else if (renderProps.params.id && !renderProps.params.id.match(/^\d+$/)) {
             res.status(404).send('Not found');
         } else {
-            let store = configureStore();
+            const store = configureStore();
             handleRoute(renderProps, false, prefix, store.dispatch).then(() => {
 
                 const html = renderToString(
@@ -28,10 +28,10 @@ export default function handleSSR(req, res) {
                         <RouterContext {...renderProps}></RouterContext>
                     </Provider>
                 );
-                let state = store.getState();
+                const state = store.getState();
                 let title = config.site_name;
                 let description = '';
-                let google_api_key = config.google_api_key;
+                const google_api_key = config.google_api_key;
                 let canonical = '/';
                 if (state.main.selected_item) {
                     let data = state.main.selected_item;

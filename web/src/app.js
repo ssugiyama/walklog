@@ -11,8 +11,8 @@ import BodyContainer from './body';
 const injectTapEventPlugin = require('react-tap-event-plugin');
 injectTapEventPlugin();
 
-let currentYear = (new Date()).getFullYear();
-let years = [];
+const currentYear = (new Date()).getFullYear();
+const years = [];
 for (let y = currentYear; y >= 1997; y--) {
     years.push(y);
 }
@@ -73,25 +73,25 @@ const mainReducer = function(state = initialState, action) {
             else if (state.search_form.order == 'nearest_first') {
                 action.payload.order = 'newest_first';
             }
-            let search_form = Object.assign({}, state.search_form, action.payload);
+            const search_form = Object.assign({}, state.search_form, action.payload);
             return Object.assign({}, state, {search_form});
         }
     case ActionTypes.SEARCH_START:
         {
-            let result = { rows: [], count: 0, params: '', searching: true };
+            const result = { rows: [], count: 0, params: '', searching: true };
             return Object.assign({}, state, {result});
         }
     case ActionTypes.SEARCH_RESULT:
         {
-            let result = { count: action.data.count, params: action.data.params, error: action.data.error, searching: false };
+            const result = { count: action.data.count, params: action.data.params, error: action.data.error, searching: false };
             result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
             return Object.assign({}, state, {result});
         }
     case ActionTypes.SET_SELECTED_ITEM:
         {
-            let selected_item = action.item;
-            let selected_index = action.index;
-            let selected_path = selected_item ? selected_item.path : state.selected_path;
+            const selected_item = action.item;
+            const selected_index = action.index;
+            const selected_path = selected_item ? selected_item.path : state.selected_path;
             let tab_value;
             if (!selected_item) {
                 tab_value = 'search';
@@ -99,48 +99,48 @@ const mainReducer = function(state = initialState, action) {
             else {
                 tab_value = 'comment';
             }
-            let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
+            const search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
             return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path});
         }
     case ActionTypes.SET_SELECTED_PATH:
         {
-            let selected_path = action.path;
+            const selected_path = action.path;
             let tab_value = state.tab_value;
             if (!selected_path && tab_value == 'visualization') {
                 tab_value = 'search';
             }
-            let search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
+            const search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
             return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false});
         }
     case ActionTypes.TOGGLE_SIDEBAR:
         {
-            let open_sidebar = !state.open_sidebar;
+            const open_sidebar = !state.open_sidebar;
             return Object.assign({}, state, {open_sidebar});
         }
     case ActionTypes.OPEN_WALK_EDITOR:
         {
-            let open_walk_editor = action.open;
-            let walk_editor_mode = action.mode;
+            const open_walk_editor = action.open;
+            const walk_editor_mode = action.mode;
             return Object.assign({}, state, {open_walk_editor, walk_editor_mode});
         }
     case ActionTypes.OPEN_IO_MODAL:
         {
-            let open_io_modal = action.open;
+            const open_io_modal = action.open;
             return Object.assign({}, state, {open_io_modal});
         }
     case ActionTypes.OPEN_GEOCODE_MODAL:
         {
-            let open_geocode_modal = action.open;
+            const open_geocode_modal = action.open;
             return Object.assign({}, state, {open_geocode_modal});
         }
     case ActionTypes.SET_TAB_VALUE:
         {
-            let tab_value = action.value;
+            const tab_value = action.value;
             return Object.assign({}, state, {tab_value});
         }
     case ActionTypes.ADD_PATHS:
         {
-            let action_queue = state.action_queue.concat(action);
+            const action_queue = state.action_queue.concat(action);
             return Object.assign({}, state, {action_queue});
         }
     case ActionTypes.DELETE_SELECTED_PATH:
@@ -154,7 +154,7 @@ const mainReducer = function(state = initialState, action) {
     case ActionTypes.CLEAR_PATHS:
         {
             let tab_value = state.tab_value;
-            let action_queue = state.action_queue.concat(action);
+            const action_queue = state.action_queue.concat(action);
             if (tab_value == 'visualization') {
                 tab_value = 'search';
             }
@@ -166,27 +166,27 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SET_STREET_VIEW:
         {
-            let panorama = action.panorama;
+            const panorama = action.panorama;
             return Object.assign({}, state, {panorama});
         }
     case ActionTypes.SET_INFO_WINDOW:
         {
-            let info_window = action.payload;
+            const info_window = action.payload;
             return Object.assign({}, state, {info_window});
         }
     case ActionTypes.SET_CENTER:
         {
-            let center = action.center;
+            const center = action.center;
             return Object.assign({}, state, {center});
         }
     case ActionTypes.REMOVE_FROM_ACTION_QUEUE:
         {
-            let action_queue = state.action_queue.slice(0, -1);
+            const action_queue = state.action_queue.slice(0, -1);
             return Object.assign({}, state, {action_queue});
         }
     case ActionTypes.SET_PANORAMA_COUNT:
         {
-            let panorama_count = action.count;
+            const panorama_count = action.count;
             return Object.assign({}, state, {panorama_count});
         }
     case ActionTypes.SET_PANORAMA_INDEX:
@@ -198,7 +198,7 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SET_OVERLAY:
         {
-            let overlay = action.overlay;
+            const overlay = action.overlay;
             return Object.assign({}, state, {overlay});
         }
     default:
@@ -214,11 +214,11 @@ const reducers = combineReducers({
 const loggerMiddleware = createLogger();
 
 export function handleRoute(renderProps, isPathSelected, prefix, next) {
-    let query = Object.assign({}, renderProps.location.query);
+    const query = Object.assign({}, renderProps.location.query);
     if (renderProps.params.id) query.id = renderProps.params.id;
-    let show_on_map = query.show || (query.id && 'first');
+    const show_on_map = query.show || (query.id && 'first');
     delete query['show'];
-    let search_form = Object.assign({}, initialState.search_form, query);
+    const search_form = Object.assign({}, initialState.search_form, query);
     if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !isPathSelected && search_form.searchPath) {
         next(setSelectedPath(search_form.searchPath));
     }
@@ -234,7 +234,7 @@ const dataFetchMiddleware = store => next => {
             if (!isFirstLocation) {
                 match({ routes, location: action.payload.pathname + action.payload.search }, (err, redirect, renderProps) => {
                     if (err || redirect || !renderProps) return;
-                    let state = store.getState();
+                    const state = store.getState();
                     handleRoute(renderProps, state.main.selected_path, '/', next);
                 });
             }
@@ -244,7 +244,7 @@ const dataFetchMiddleware = store => next => {
     };
 };
 
-let middlewares = [
+const middlewares = [
     routerMiddleware(browserHistory),
     dataFetchMiddleware,
     thunkMiddleware,

@@ -25,20 +25,20 @@ class PanoramaBox extends Component {
     }
     getPanoramaPointsAndHeadings(selected_path) {
         if (!selected_path) return null;
-        let pph = [];
-        let path = selected_path;
-        let count = path.length;
+        const pph = [];
+        const path = selected_path;
+        const count = path.length;
         let way = 0;
         let dsum = 0;
         let pt2, h;
         for (let i= 0; i < count-1; i++) {
             let pt1 = path[i];
             pt2 = path[i+1];
-            let d = google.maps.geometry.spherical.computeDistanceBetween(pt1, pt2);
+            const d = google.maps.geometry.spherical.computeDistanceBetween(pt1, pt2);
             h = google.maps.geometry.spherical.computeHeading(pt1, pt2);
 
             while(way < dsum+d ) {
-                let pt = this.interpolatePoints(pt1, pt2, (way - dsum)/d);
+                const pt = this.interpolatePoints(pt1, pt2, (way - dsum)/d);
                 pph.push([pt, h]);
                 way += this.panoramaInterval;
             }
@@ -55,17 +55,17 @@ class PanoramaBox extends Component {
             }
             return;
         }
-        let path = google.maps.geometry.encoding.decodePath(selected_path);
+        const path = google.maps.geometry.encoding.decodePath(selected_path);
         this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(path);
         this.props.setPanoramaCount(this.panoramaPointsAndHeadings.length);
         // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
         this.props.setPanoramaIndex(0);
     }
     showPanorama() {
-        let index = this.props.panorama_index;
-        let item = this.panoramaPointsAndHeadings[index];
-        let pt = item[0];
-        let heading = item[1];
+        const index = this.props.panorama_index;
+        const item = this.panoramaPointsAndHeadings[index];
+        const pt = item[0];
+        const heading = item[1];
         this.streetViewService.getPanoramaByLocation(pt, 50, (data, status) => {
             if (status == google.maps.StreetViewStatus.OK) {
                 this.props.panorama.setPano(data.location.pano);

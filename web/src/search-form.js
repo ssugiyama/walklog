@@ -45,7 +45,7 @@ const order_options_hausdorff = [
 
 class SearchForm extends Component {
     componentDidUpdate(prevProps, prevState) {
-        let keys = ['filter', 'year', 'month', 'order', 'limit'];
+        const keys = ['filter', 'year', 'month', 'order', 'limit'];
         switch (this.props.filter) {
         case 'neighborhood':
             keys.push('radius', 'longitude', 'latitude');
@@ -60,7 +60,7 @@ class SearchForm extends Component {
         }
         if (keys.every(key => prevProps[key] == this.props[key])) return;
 
-        let query = {};
+        const query = {};
         keys.forEach(key => { query[key] = this.props[key]; });
         this.props.push({
             query

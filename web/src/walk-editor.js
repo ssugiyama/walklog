@@ -26,7 +26,7 @@ class WalkEditor extends Component {
             ( '0' + ( d.getMonth()+1 ) ).slice(-2)+
             ( '0' + d.getDate() ).slice(-2);
         }
-        let keys = ['date', 'title', 'comment'];
+        const keys = ['date', 'title', 'comment'];
 
         if (! this.state.id || this.state.update_path) {
             keys.push('path');
@@ -34,8 +34,8 @@ class WalkEditor extends Component {
         if (this.state.id) {
             keys.push('id');
         }
-        let state = Object.assign({}, this.state, {date: formatDate(this.state.date)});
-        let params = keys.map(key => `${key}=${encodeURIComponent(state[key])}`).join('&');
+        const state = Object.assign({}, this.state, {date: formatDate(this.state.date)});
+        const params = keys.map(key => `${key}=${encodeURIComponent(state[key])}`).join('&');
         fetch('/api/save', {
             method: 'POST',
             credentials: 'include',
@@ -57,7 +57,7 @@ class WalkEditor extends Component {
             fetch('/api/destroy/' + this.state.id)
                 .then(() => {
                     this.props.setSelectedItem(null);
-                    let query = { id: this.state.id };
+                    const query = { id: this.state.id };
                     this.props.push( {query} );
                     this.handleClose();
                 })
@@ -70,7 +70,7 @@ class WalkEditor extends Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps.open_walk_editor && !this.props.open_walk_editor) {
 
-            let path = nextProps.selected_path;
+            const path = nextProps.selected_path;
             let item, update_path, date;
 
             if (nextProps.walk_editor_mode == 'update') {
@@ -88,12 +88,12 @@ class WalkEditor extends Component {
             else if (path == null) {
                 update_path = false;
             }
-            let state = Object.assign({}, item, {path, update_path, date});
+            const state = Object.assign({}, item, {path, update_path, date});
             this.setState(state);
         }
     }
     render() {
-        let actions = [];
+        const actions = [];
         actions.push (<FlatButton onTouchTap={this.handleSubmit.bind(this)}  label={ this.props.walk_editor_mode || 'create' } primary={true} />);
         if (this.props.walk_editor_mode == 'update') {
             actions.push (<FlatButton label="delete" secondary={true} onTouchTap={this.handleDelete.bind(this)}/>);

@@ -29,7 +29,7 @@ class IOModal extends Component {
     }
     initTextField(ref) {
         if (!ref || this.reader) return;
-        let textarea = ref.getInputNode();
+        const textarea = ref.getInputNode();
         if (!textarea) return;
         this.reader = new FileReader();
         this.reader.addEventListener('loadend', e => {
@@ -59,7 +59,7 @@ class IOModal extends Component {
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.open_io_modal && !this.props.open_io_modal) {
-            let path_json = nextProps.selected_path ? JSON.stringify({
+            const path_json = nextProps.selected_path ? JSON.stringify({
                 type: 'LineString',
                 coordinates: google.maps.geometry.encoding.decodePath(nextProps.selected_path).map(p => [p.lng(), p.lat()])
             }) : '';
@@ -67,7 +67,7 @@ class IOModal extends Component {
         }
     }
     render() {
-        let actions = [
+        const actions = [
             <FlatButton onTouchTap={this.handleImport.bind(this)}  label="import" primary={true} />
         ];
         // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.

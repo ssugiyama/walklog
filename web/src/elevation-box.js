@@ -13,9 +13,9 @@ class ElevationBox extends Component {
     }
     requestElevation(selected_path) {
         if (!selected_path) return;
-        let path = google.maps.geometry.encoding.decodePath(selected_path);
+        const path = google.maps.geometry.encoding.decodePath(selected_path);
 
-        let pathRequest = {
+        const pathRequest = {
             'path': path,
             'samples': 256
         };
@@ -26,8 +26,8 @@ class ElevationBox extends Component {
     plotElevation(results, status) {
         if (status == google.maps.ElevationStatus.OK) {
             this.elevationResults = results;
-            let data = results.map(result => result.elevation);
-            let labels = results.map(result => '');
+            const data = results.map(result => result.elevation);
+            const labels = results.map(result => '');
             this.chart = new Chart(this.refs.root.getContext('2d'), {
                 type: 'line',
                 data: {

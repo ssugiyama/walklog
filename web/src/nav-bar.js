@@ -16,7 +16,7 @@ class NavBar extends Component {
     setCurrentPosition() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition( pos => {
-                let center = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+                const center = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
                 this.props.setCenter(center);
             }, () => {
                 alert('Unable to retrieve your location');

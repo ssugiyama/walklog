@@ -34,8 +34,8 @@ class SearchBox extends Component {
     }
     handleSelect(selectedRows) {
         if (selectedRows.length == 0) return;
-        let index = selectedRows[0];
-        let item = this.props.rows[index];
+        const index = selectedRows[0];
+        const item = this.props.rows[index];
         this.props.setSelectedItem(item, index);
     }
     shouldComponentUpdate(nextProps, nextState) {

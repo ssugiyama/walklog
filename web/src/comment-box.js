@@ -16,10 +16,10 @@ class CommentBox extends Component {
         this.props.openWalkEditor(true, 'update');
     }
     prepareTwitter() {
-        let data = this.props.selected_item;
+        const data = this.props.selected_item;
         if (! data) return;
-        let href = location.protocol + '//' + location.host + '/' + data.id;
-        let body = data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)';
+        const href = location.protocol + '//' + location.host + '/' + data.id;
+        const body = data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)';
         this.refs.twitter.innerHTML = `<a href="https://twitter.com/share" ref="twitter_button" class="twitter-share-button" data-lang="en"  data-size="small" data-hashtags="walklog" data-text='${body}' data-url="${href}" >Tweet</a>`;
         if (window.twttr.widgets) window.twttr.widgets.load();
     }
@@ -34,7 +34,7 @@ class CommentBox extends Component {
         this.prepareTwitter();
     }
     traverseItem(delta) {
-        let index = this.props.selected_index + delta;
+        const index = this.props.selected_index + delta;
         if (index >= this.props.rows.length) {
             this.props.getMoreItems(this.props.params, 'first', index);
         }
@@ -43,10 +43,10 @@ class CommentBox extends Component {
         }
     }
     render() {
-        let data = this.props.selected_item;
+        const data = this.props.selected_item;
         if (! data) return null;
-        let title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
-        let createMarkup = () => { return { __html: marked(data.comment || '') }; };
+        const title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
+        const createMarkup = () => { return { __html: marked(data.comment || '') }; };
         return (
             <div>
                 <div style={styles.commentBoxControl}>

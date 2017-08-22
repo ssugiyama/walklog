@@ -38,7 +38,7 @@ class GeocodeModal extends Component {
         }
     }
     render() {
-        let actions = [
+        const actions = [
             <FlatButton onTouchTap={this.handleSubmit.bind(this, null)}  label="Move to" primary={true} />
         ];
         // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.

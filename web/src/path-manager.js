@@ -3,7 +3,7 @@ const jsSHA = require('jssha');
 export default class PathManager extends google.maps.MVCObject {
     constructor(opt_options) {
         super();
-        var options = opt_options || {};
+        const options = opt_options || {};
         this.setValues(options);
         this.polylines = new Object();
         this.generalStyle = {strokeColor : '#0000ff', strokeOpacity: 0.5, zIndex: 10};
@@ -38,8 +38,8 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     pathToHash(path) {
-        let key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
-        let obj = new jsSHA('SHA-1', 'TEXT');
+        const key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
+        const obj = new jsSHA('SHA-1', 'TEXT');
         obj.update(key);
         return obj.getHash('B64');
     }
@@ -80,9 +80,9 @@ export default class PathManager extends google.maps.MVCObject {
         }
         if(select && path.length > 0) {
             this.set('selection', pl);
-            var xmin, xmax, ymin, ymax;
+            let xmin, xmax, ymin, ymax;
             for (let i = 0; i < path.length; i++ ) {
-                let elem = path[i];
+                const elem = path[i];
                 if (i == 0) {
                     xmin = xmax = elem.lng();
                     ymin = ymax = elem.lat();
@@ -94,7 +94,7 @@ export default class PathManager extends google.maps.MVCObject {
                     if (ymax < elem.lat()) ymax = elem.lat();
                 }
             }
-            var center = new google.maps.LatLng((ymin+ymax)/2, xmin);
+            const center = new google.maps.LatLng((ymin+ymax)/2, xmin);
             this.map.panTo(center);
         }
     }
@@ -102,7 +102,7 @@ export default class PathManager extends google.maps.MVCObject {
     addPolyline(pl){
         pl.setOptions(this.generalStyle);
         pl.setMap(this.map);
-        var key = this.pathToHash(pl.getPath());
+        const key = this.pathToHash(pl.getPath());
         this.polylines[key] = pl;
         google.maps.event.addListener(pl, 'click', () => {
             this.set('selection', pl);
@@ -122,12 +122,12 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     selection_changed(){
-        var prevSelection = this.get('prevSelection');
+        const prevSelection = this.get('prevSelection');
         if (prevSelection){
             prevSelection.setOptions(this.generalStyle);
             prevSelection.setEditable(false);
         }
-        var selection = this.get('selection');
+        const selection = this.get('selection');
         this.set('prevSelection', selection);
 
         if (selection) {
