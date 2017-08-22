@@ -1,27 +1,27 @@
 'use strict';
 
 function encode_float(f) {
-    var n = Math.round(f*100000);
+    let n = Math.round(f*100000);
     n <<= 1;
     if (n < 0) n = -n-1;
-    var ar = [];
+    const ar = [];
     do {
-        var k = n & 0x1F;
-        n >>= 5
+        const k = n & 0x1F;
+        n >>= 5;
         ar.push(k);
     } while( n > 0 );
-    for (var i = 0; i < ar.length; i++) {
+    for (let i = 0; i < ar.length; i++) {
         if (i < ar.length -1) ar[i] |= 0x20;
-        ar[i] += 63
+        ar[i] += 63;
     }
     return ar;
 }
 
 exports.encode = function (path) {
-    var prevx = 0;
-    var prevy = 0;
-    return path.map(function (point, i) {
-        var ar = encode_float(point[1]-prevy).concat(encode_float(point[0]-prevx));
+    let prevx = 0;
+    let prevy = 0;
+    return path.map(function (point) {
+        const ar = encode_float(point[1]-prevy).concat(encode_float(point[0]-prevx));
         prevx = point[0];
         prevy = point[1];
         return new Buffer(ar).toString('ascii');
@@ -29,12 +29,12 @@ exports.encode = function (path) {
 };
 
 exports.decode = function (str) {
-    var fs = []
-    var buf = new Buffer(str, 'ascii');
-    var n = 0, j = 0;
-    for (var i = 0; i < buf.length; i++ ) {
-        var k = buf[i] - 63;
-        var is_last = ((k & 0x20) === 0);
+    const fs = [];
+    const buf = new Buffer(str, 'ascii');
+    let n = 0, j = 0;
+    for (let i = 0; i < buf.length; i++ ) {
+        let k = buf[i] - 63;
+        let is_last = ((k & 0x20) === 0);
         k &= 0x1f;
         n |= (k << (j*5));
         if (is_last) {
@@ -44,9 +44,9 @@ exports.decode = function (str) {
             j += 1;
         }
     }
-    var points = [];
-    var p1 = 0, p2 = 0;
-    var f1, f2;
+    const points = [];
+    let p1 = 0, p2 = 0;
+    let f1, f2;
     while ((f1 = fs.shift()) !== undefined) {
         f2 = fs.shift();
         p1 += f1;

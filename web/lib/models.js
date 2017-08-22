@@ -1,19 +1,19 @@
-var Sequelize = require('sequelize');
-var encoder = require("./path_encoder");
-var wkx     = require("wkx");
-var util    = require("util");
-var moment  = require("moment");
+const Sequelize = require('sequelize');
+const encoder = require('./path_encoder');
+const wkx     = require('wkx');
+const util    = require('util');
+const moment  = require('moment');
 
-var EARTH_RADIUS = 6370986;
-var SRID = 4326;
+const EARTH_RADIUS = 6370986;
+const SRID = 4326;
 
 exports.SRID = SRID;
 exports.EARTH_RADIUS = EARTH_RADIUS;
 exports.SRID_FOR_SIMILAR_SEARCH = 32662;
 
-var db_url = process.env.WALKLOG_URL || "postgres://postgres@db/postgres";
+const db_url = process.env.WALKLOG_URL || 'postgres://postgres@db/postgres';
 
-var sequelize = new Sequelize(db_url, {
+const sequelize = new Sequelize(db_url, {
     dialect: 'postgres',
     omitNull: true,
     native: false
@@ -45,11 +45,11 @@ sequelize.define('walks', {
             return util.format('SRID=%d;POINT(%d %d)', SRID, x, y);
         },
         decodePath: function (path) {
-            var json = { type: 'LineString', coordinates: encoder.decode(path), crs:{type:"name",properties:{name: "EPSG:" + SRID }} };
+            const json = { type: 'LineString', coordinates: encoder.decode(path), crs:{type:'name',properties:{name: 'EPSG:' + SRID }} };
             return wkx.Geometry.parseGeoJSON(json).toEwkt();
         },
         getPathExtent: function (path) {
-            var points = encoder.decode(path);
+            const points = encoder.decode(path);
             return points.reduce(function (pv, cv) {
                 if (pv.xmax === undefined || pv.xmax < cv[0] ) pv.xmax = cv[0];
                 if (pv.xmin === undefined || pv.xmin > cv[0] ) pv.xmin = cv[0];
