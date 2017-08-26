@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { toggleSidebar, openWalkEditor, openGeocodeModal, setCenter } from './actions';
+import { toggleSidebar, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths,  openIOModal } from './actions';
 import AppBar from 'material-ui/AppBar';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
@@ -44,6 +44,14 @@ class NavBar extends Component {
                             <IconButton><MoreVertIcon /></IconButton>
                     }>
                         <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>
+                        <MenuItem primaryText="path" rightIcon={<ArrowDropRight />}
+                            menuItems={[
+                                <MenuItem primaryText="edit" onTouchTap={() => this.props.setEditingPath() } disabled={! this.props.selected_path} />,
+                                <MenuItem primaryText="delete" onTouchTap={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path} />,
+                                <MenuItem primaryText="clear" onTouchTap={() => this.props.clearPaths() } />,
+                                <MenuItem primaryText="export/import..." onTouchTap={() => this.props.openIOModal(true)} />,
+                            ]}
+                        />
                         <MenuItem primaryText="geo" rightIcon={<ArrowDropRight />}
                             menuItems={[
                                 <MenuItem onTouchTap={ () => this.props.openGeocodeModal(true)} primaryText="geocode..." />,
@@ -64,7 +72,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleSidebar, openWalkEditor, openGeocodeModal, setCenter }, dispatch);
+    return bindActionCreators({ toggleSidebar, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths,  openIOModal }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar);
