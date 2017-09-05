@@ -9,6 +9,12 @@ export function setSearchForm(payload) {
     };
 }
 
+export function resetSearchForm() {
+    return {
+        type: ActionTypes.RESET_SEARCH_FORM,
+    };
+}
+
 function searchStart() {
     return {
         type: ActionTypes.SEARCH_START,

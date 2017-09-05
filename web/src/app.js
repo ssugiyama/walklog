@@ -76,6 +76,11 @@ const mainReducer = function(state = initialState, action) {
             const search_form = Object.assign({}, state.search_form, action.payload);
             return Object.assign({}, state, {search_form});
         }
+    case ActionTypes.RESET_SEARCH_FORM:
+        {
+            const search_form = Object.assign({}, initialState.search_form);
+            return Object.assign({}, state, {search_form});
+        }
     case ActionTypes.SEARCH_START:
         {
             const result = { rows: [], count: 0, params: '', searching: true };

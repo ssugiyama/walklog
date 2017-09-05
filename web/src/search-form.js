@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
-import { setSearchForm, search, toggleSidebar, setTabValue} from './actions';
-import { push } from 'react-router-redux';
+import { setSearchForm, resetSearchForm, search, toggleSidebar, setTabValue} from './actions';
 import FlatButton from 'material-ui/FlatButton';
 import SearchIcon from 'material-ui/svg-icons/action/search';
 import SelectField from 'material-ui/SelectField';
@@ -62,9 +61,7 @@ class SearchForm extends Component {
 
         const query = {};
         keys.forEach(key => { query[key] = this.props[key]; });
-        this.props.push({
-            query
-        });     
+        this.props.search(query, false);
         this.props.setTabValue('search');
         if (this.props.open_sidebar) {
             if ( prevProps.filter != this.props.filter 
@@ -86,7 +83,7 @@ class SearchForm extends Component {
         this.props.setSearchForm({[name]: e.target.value});
     }
     reset() {
-        this.props.push({});
+        this.props.resetSearchForm();
     }
     render() {
         return (
@@ -143,7 +140,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, search, push, toggleSidebar, setTabValue}, dispatch);
+    return bindActionCreators({setSearchForm, resetSearchForm, search, toggleSidebar, setTabValue}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SearchForm);

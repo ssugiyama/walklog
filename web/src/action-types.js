@@ -1,5 +1,6 @@
 export const SEARCH = Symbol('search');
 export const SET_SEARCH_FORM = Symbol('set_search_form');
+export const RESET_SEARCH_FORM = Symbol('reset_search_form');
 export const SEARCH_START = Symbol('search_start');
 export const SEARCH_RESULT = Symbol('search_result');
 export const ADD_CITY = Symbol('add_city');
