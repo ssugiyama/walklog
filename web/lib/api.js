@@ -124,18 +124,39 @@ api.get('/search', function(req, res){
         where  : where,
         offset : offset,
         limit  : limit
-    }).then(function ( result) {
+    }).then(function (result) {
         let params = null;
         if (result.count > offset + limit) {
             const q = Object.keys(req.query).filter(function (e) { return e != 'offset';}).map( function (e) { return e + '=' + req.query[e]; });
             q.push('offset=' +  (offset + limit));
             params = q.join('&');
         }
-        res.json({
-            count: result.count,
-            params: params,
-            rows:  result.rows.map(function (row) { return row.asObject(true); })
-        });
+        let prev_id, next_id;
+        if (req.query.id) {
+            models.sequelize.query('SELECT id FROM walks where id > ? order by id limit 1',
+                { replacements: [req.query.id], type: models.sequelize.QueryTypes.SELECT }
+            ).then(ids => {
+                if (ids.length > 0) next_id = ids[0].id;
+                return models.sequelize.query('SELECT id FROM walks where id < ? order by id desc limit 1',
+                    { replacements: [req.query.id], type: models.sequelize.QueryTypes.SELECT }
+                );
+            }).then(ids => {
+                if (ids.length > 0) prev_id = ids[0].id;
+                res.json({
+                    count: result.count,
+                    params: params,
+                    rows:  result.rows.map(function (row) { return row.asObject(true); }),
+                    next_id: next_id,
+                    prev_id: prev_id
+                });
+            });
+        } else {
+            res.json({
+                count: result.count,
+                params: params,
+                rows:  result.rows.map(function (row) { return row.asObject(true); })
+            });
+        }
     }).catch (function (reason) {
         res.status(500).json({error: reason});
     });

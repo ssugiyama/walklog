@@ -1,6 +1,7 @@
 // actions
 import * as ActionTypes from './action-types';
 require('isomorphic-fetch');
+import { push } from 'react-router-redux';
 
 export function setSearchForm(payload) {
     return {
@@ -48,7 +49,7 @@ export function search(props, show, prefix = '/') {
     };
 }
 
-export function getMoreItems(params, show, selected_index) {
+export function getMoreItems(params, show) {
     return dispatch => {
         fetch('/api/search?' + params)
             .then(response => response.json())
@@ -59,7 +60,7 @@ export function getMoreItems(params, show, selected_index) {
                 }
                 dispatch(searchResult(data, true));
                 if (show == 'first' && data.rows.length > 0) {
-                    dispatch(setSelectedItem(data.rows[0], selected_index));
+                    dispatch(push('/' + data.rows[0].id));
                 }
             })
             .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });

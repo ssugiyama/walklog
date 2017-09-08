@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
 import { push } from 'react-router-redux';
 import { setTabValue, setSelectedItem, getMoreItems, openWalkEditor } from './actions';
 import marked from 'marked';
@@ -35,11 +34,15 @@ class CommentBox extends Component {
     }
     traverseItem(delta) {
         const index = this.props.selected_index + delta;
-        if (index >= this.props.rows.length) {
-            this.props.getMoreItems(this.props.params, 'first', index);
+        if (this.props.next_id && delta < 0) {
+            this.props.push('/' + this.props.next_id);
+        } else if (this.props.prev_id && delta > 0) {
+            this.props.push('/' + this.props.prev_id);
+        } else if (index >= this.props.rows.length) {
+            this.props.getMoreItems(this.props.params, 'first');
         }
         else {
-            this.props.setSelectedItem(this.props.rows[index], index);
+            this.props.push('/' + this.props.rows[index].id);
         }
     }
     render() {
@@ -50,13 +53,13 @@ class CommentBox extends Component {
         return (
             <div>
                 <div style={styles.commentBoxControl}>
-                    <IconButton disabled={this.props.selected_index <= 0} onTouchTap={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
-                    <IconButton disabled={this.props.selected_index >= this.props.count - 1} onTouchTap={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
+                    <IconButton disabled={!this.props.next_id && this.props.selected_index <= 0} onTouchTap={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
+                    <IconButton disabled={!this.props.prev_id && this.props.selected_index >= this.props.count - 1} onTouchTap={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
                     <IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>
                     <div ref="twitter" style={styles.twitter}></div>
                 </div>
                 <div style={styles.commentBoxBody}>
-                    <h4><Link to={'/' + data.id}>{title}</Link></h4>
+                    <h4>{title}></h4>
                     <div  dangerouslySetInnerHTML={createMarkup()} ></div>
                 </div>
             </div>
@@ -71,6 +74,8 @@ function mapStateToProps(state) {
         rows: state.main.result.rows,
         count: state.main.result.count,
         params: state.main.result.params,
+        next_id: state.main.result.next_id,
+        prev_id: state.main.result.prev_id,
     };
 }
 

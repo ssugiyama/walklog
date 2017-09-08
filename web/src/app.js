@@ -5,7 +5,7 @@ import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-r
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { search, setSearchForm, setSelectedPath } from './actions';
+import { search, setSearchForm, setSelectedPath, setSelectedItem } from './actions';
 import BodyContainer from './body';
 
 const injectTapEventPlugin = require('react-tap-event-plugin');
@@ -39,6 +39,8 @@ const initialState = {
         show_distance: false,
         error: null,
         searching: false,
+        next_id: null,
+        prev_id: null,
     },
     years: years,
     selected_item: null,
@@ -88,7 +90,14 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SEARCH_RESULT:
         {
-            const result = { count: action.data.count, params: action.data.params, error: action.data.error, searching: false };
+            const result = { 
+                count: action.data.count,
+                params: action.data.params,
+                error: action.data.error,
+                searching: false,
+                next_id: action.data.next_id,
+                prev_id: action.data.prev_id,
+            };
             result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
             return Object.assign({}, state, {result});
         }
@@ -218,9 +227,15 @@ const reducers = combineReducers({
 
 const loggerMiddleware = createLogger();
 
-export function handleRoute(renderProps, isPathSelected, prefix, next) {
+export function handleRoute(renderProps, isPathSelected, prefix, rows, next) {
     const query = Object.assign({}, renderProps.location.query);
-    if (renderProps.params.id) query.id = renderProps.params.id;
+    if (renderProps.params.id) {
+        const index = rows.findIndex(row => row.id == renderProps.params.id);
+        if (index >= 0) {
+            return next(setSelectedItem(rows[index], index));
+        }
+        query.id = renderProps.params.id;
+    }
     const show_on_map = query.show || (query.id && 'first');
     delete query['show'];
     const search_form = Object.assign({}, initialState.search_form, query);
@@ -240,7 +255,7 @@ const dataFetchMiddleware = store => next => {
                 match({ routes, location: action.payload.pathname + action.payload.search }, (err, redirect, renderProps) => {
                     if (err || redirect || !renderProps) return;
                     const state = store.getState();
-                    handleRoute(renderProps, state.main.selected_path, '/', next);
+                    handleRoute(renderProps, state.main.selected_path, '/', state.main.result.rows, next);
                 });
             }
             isFirstLocation = false;

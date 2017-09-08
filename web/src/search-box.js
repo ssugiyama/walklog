@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
 import { getMoreItems, addPaths, setSelectedItem, toggleSidebar } from './actions';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import FlatButton from 'material-ui/FlatButton';
@@ -36,7 +37,7 @@ class SearchBox extends Component {
         if (selectedRows.length == 0) return;
         const index = selectedRows[0];
         const item = this.props.rows[index];
-        this.props.setSelectedItem(item, index);
+        this.props.push( '/' + item.id );
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.rows != this.props.rows) return true;
@@ -104,7 +105,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ getMoreItems, setSelectedItem, addPaths, toggleSidebar }, dispatch);
+    return bindActionCreators({ getMoreItems, setSelectedItem, addPaths, toggleSidebar, push }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SearchBox);

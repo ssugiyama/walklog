@@ -21,7 +21,7 @@ export default function handleSSR(req, res) {
             res.status(404).send('Not found');
         } else {
             const store = configureStore();
-            handleRoute(renderProps, false, prefix, store.dispatch).then(() => {
+            handleRoute(renderProps, false, prefix, [], store.dispatch).then(() => {
 
                 const html = renderToString(
                     <Provider store={store}>
@@ -39,7 +39,7 @@ export default function handleSSR(req, res) {
                     description = data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...';
                     canonical = '/' + data.id;
                 }
-                var bind = Object.assign({
+                const bind = Object.assign({
                     html,
                     title,
                     description,
