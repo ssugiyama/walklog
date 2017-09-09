@@ -43,6 +43,10 @@ const order_options_hausdorff = [
 ];
 
 class SearchForm extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {force_search: false};
+    }
     componentDidUpdate(prevProps, prevState) {
         const keys = ['filter', 'year', 'month', 'order', 'limit'];
         switch (this.props.filter) {
@@ -57,8 +61,8 @@ class SearchForm extends Component {
             keys.push('searchPath');
             break;
         }
-        if (keys.every(key => prevProps[key] == this.props[key])) return;
-
+        if (!this.state.force_search && keys.every(key => prevProps[key] == this.props[key])) return;
+        this.setState({force_search: false});
         const query = {};
         keys.forEach(key => { query[key] = this.props[key]; });
         this.props.search(query, false);
@@ -84,6 +88,7 @@ class SearchForm extends Component {
     }
     reset() {
         this.props.resetSearchForm();
+        this.setState({force_search: true});
     }
     render() {
         return (
