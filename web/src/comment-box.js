@@ -55,7 +55,9 @@ class CommentBox extends Component {
                 <div style={styles.commentBoxControl}>
                     <IconButton disabled={!this.props.next_id && this.props.selected_index <= 0} onTouchTap={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
                     <IconButton disabled={!this.props.prev_id && this.props.selected_index >= this.props.count - 1} onTouchTap={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
-                    <IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>
+                    {
+                        this.props.admin ? (<IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
+                    }
                     <div ref="twitter" style={styles.twitter}></div>
                 </div>
                 <div style={styles.commentBoxBody}>
@@ -76,6 +78,7 @@ function mapStateToProps(state) {
         params: state.main.result.params,
         next_id: state.main.result.next_id,
         prev_id: state.main.result.prev_id,
+        admin: state.main.admin,
     };
 }
 

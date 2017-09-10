@@ -3,17 +3,19 @@
  * Module dependencies.
  */
 
-var express    = require('express');
-var bodyParser = require('body-parser');
-var api        = require('./lib/api.js');
-var http       = require('http');
-var path       = require('path');
-var morgan     = require('morgan');
-var app        = express();
-var handleSSR  = require('./dist/ssr').default;
-var models     = require('./lib/models');
-var Walk       = models.sequelize.models.walks;
-var sitemap    = require('sitemap');
+const express    = require('express');
+const bodyParser = require('body-parser');
+const api        = require('./lib/api.js');
+const http       = require('http');
+const path       = require('path');
+const morgan     = require('morgan');
+const app        = express();
+const handleSSR  = require('./dist/ssr').default;
+const models     = require('./lib/models');
+const Walk       = models.sequelize.models.walks;
+const sitemap    = require('sitemap');
+const session    = require('express-session');
+const config     = require(./dist/config');
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
@@ -22,16 +24,27 @@ app.use(morgan());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('trust proxy', 1); // trust first proxy
 
 if ('development' == app.get('env')) {
-    var errorhandler = require('errorhandler');
+    const errorhandler = require('errorhandler');
     app.use(errorhandler());
 }
+
+const sess = {
+    secret: config.session_secret,
+    cookie: {
+        maxAge: config.session_max_age,
+        secure: 'auto'
+    }
+};
+
+app.use(session(sess))
 
 app.use('/api', api);
 
 app.use('/sitemap.xml', function(req, res) {
-    var sm = sitemap.createSitemap({});
+    const sm = sitemap.createSitemap({});
     Walk.findAll({
         attributes: ['d'],
         where: {

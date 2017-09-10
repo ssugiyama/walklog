@@ -25,6 +25,7 @@
     "ejs": "^2.5.2",
     "errorhandler": "*",
     "express": "4.*",
+    "express-session": "^1.15.5",
     "file-loader": "^0.9.0",
     "isomorphic-fetch": "^2.2.1",
     "jssha": "^2.2.0",

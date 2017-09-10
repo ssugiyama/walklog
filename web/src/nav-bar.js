@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { toggleSidebar, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths,  openIOModal } from './actions';
+import { toggleSidebar, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths,  openIOModal, setAdmin } from './actions';
 import AppBar from 'material-ui/AppBar';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
@@ -32,6 +32,16 @@ class NavBar extends Component {
     handleShow() {
         this.props.toggleSidebar();
     }
+    login_or_logout() {
+        const api = this.props.admin ? '/api/logout' : '/api/login';
+        fetch(api, {
+            credentials: 'include',
+        }).then(() => {
+            this.props.setAdmin(!this.props.admin);
+        }).catch(ex => {
+            alert(ex);
+        });
+    }
     render() {
         return (
             <AppBar
@@ -43,7 +53,10 @@ class NavBar extends Component {
                         iconButtonElement={
                             <IconButton><MoreVertIcon /></IconButton>
                     }>
-                        <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>
+                        <MenuItem primaryText={this.props.admin ? 'quit admin' : 'admin...'}  onTouchTap={this.login_or_logout.bind(this)} />
+                        {
+                            this.props.admin ? ( <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>): null
+                        }
                         <MenuItem primaryText="path" rightIcon={<ArrowDropRight />}
                             menuItems={[
                                 <MenuItem primaryText="edit" onTouchTap={() => this.props.setEditingPath() } disabled={! this.props.selected_path} />,
@@ -68,11 +81,12 @@ class NavBar extends Component {
 function mapStateToProps(state) {
     return {
         selected_path: state.main.selected_path,
+        admin: state.main.admin,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleSidebar, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths,  openIOModal }, dispatch);
+    return bindActionCreators({ toggleSidebar, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths,  openIOModal, setAdmin }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar);

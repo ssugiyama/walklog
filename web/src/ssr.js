@@ -2,6 +2,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import {configureStore, routes, handleRoute}  from './app';
+import {setAdmin} from './actions';
 import { RouterContext, match } from 'react-router';
 import config from './config';
 
@@ -21,8 +22,10 @@ export default function handleSSR(req, res) {
             res.status(404).send('Not found');
         } else {
             const store = configureStore();
-            handleRoute(renderProps, false, prefix, [], store.dispatch).then(() => {
-
+            handleRoute(renderProps, false, prefix, [], store.dispatch)
+            .then(() => {
+                store.dispatch(setAdmin(req.session.is_admin));
+            }).then(() => {
                 const html = renderToString(
                     <Provider store={store}>
                         <RouterContext {...renderProps}></RouterContext>

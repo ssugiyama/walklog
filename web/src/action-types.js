@@ -23,3 +23,4 @@ export const REMOVE_FROM_ACTION_QUEUE = Symbol('remove_from_action_queue');
 export const SET_PANORAMA_COUNT = Symbol('set_panorama_count');
 export const SET_PANORAMA_INDEX = Symbol('set_panorama_index');
 export const SET_OVERLAY = Symbol('set_overlay');
+export const SET_ADMIN = Symbol('set_admin');

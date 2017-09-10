@@ -63,6 +63,7 @@ const initialState = {
     panorama_index: 0,
     panorama_count: 0,
     overlay: false,
+    admin: false,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -214,6 +215,11 @@ const mainReducer = function(state = initialState, action) {
         {
             const overlay = action.overlay;
             return Object.assign({}, state, {overlay});
+        }
+    case ActionTypes.SET_ADMIN:
+        {
+            const admin = action.admin;
+            return Object.assign({}, state, {admin});
         }
     default:
         return state;

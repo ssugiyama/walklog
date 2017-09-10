@@ -12,5 +12,7 @@ export default {
         '<link rel="shortcut icon" href="/icons/favicon.ico">',
         '<meta name="msapplication-config" content="/icons/browserconfig.xml">',
         '<meta name="theme-color" content="#ffffff'>'
-    ]
+    ],
+    'session_secret': 'keyboard cat',
+    'session_max_age': 7*24*60*60*1000,
 };

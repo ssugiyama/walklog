@@ -189,3 +189,11 @@ export function setOverlay(overlay) {
         overlay,
     };
 }
+
+export function setAdmin(admin) {
+    return {
+        type: ActionTypes.SET_ADMIN,
+        admin,
+    };
+}
+

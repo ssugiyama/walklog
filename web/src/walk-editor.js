@@ -43,9 +43,14 @@ class WalkEditor extends Component {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: params
-        })
-        .then(response => response.json())
-        .then(json => {
+        }).then(response => {
+            if (!response.ok) {
+                throw Error(response.statusText);
+            }
+            return response;
+        }).then(
+            response => response.json()
+        ).then(json => {
             this.props.push( '/' + json[0].id );
             this.handleClose();
         })
@@ -55,14 +60,18 @@ class WalkEditor extends Component {
         e.preventDefault();
         if (confirm('Are you sure to delete?')) {
             fetch('/api/destroy/' + this.state.id, {
-                    credentials: 'include'
-                }).then(() => {
+                credentials: 'include',
+            }).then(response => {
+                    if (!response.ok) {
+                        throw Error(response.statusText);
+                    }
+                    return response;
+            }).then(() => {
                     this.props.setSelectedItem(null);
                     const query = { id: this.state.id };
                     this.props.push( {query} );
                     this.handleClose();
-                })
-                .catch(ex => alert(ex));
+            }).catch(ex => alert(ex));
         }
     }
     handleChange(name, e, value) {

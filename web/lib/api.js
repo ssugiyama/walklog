@@ -21,7 +21,6 @@ api.get('/version', function(req, res){
     });
 });
 
-
 api.get('/search', function(req, res){
     const order_hash = {
         'newest_first'       : 'date desc',
@@ -183,6 +182,11 @@ api.get('/cities', function(req, res){
 });
 
 api.post('/save', function(req, res) {
+    if (! req.session.is_admin) {
+        res.status(403);
+        return;
+    }
+
     const linestring = req.body.path ? Walk.decodePath(req.body.path) : null;
     let query;
     let values;
@@ -208,9 +212,23 @@ api.post('/save', function(req, res) {
 });
 
 api.get('/destroy/:id', function(req, res) {
+    if (! req.session.is_admin) {
+        res.status(403);
+        return;
+    }
     Walk.destroy({where : { id : req.params.id } }).then(function () {
         res.end('');
     }).catch (function (reason) {
         res.status(500).json({error: reason});
     });
+});
+
+api.get('/login', function(req, res) {
+    req.session.is_admin = 1;
+    res.end('');
+});
+
+api.get('/logout', function(req, res) {
+    delete req.session.is_admin;
+    res.end('');
 });
