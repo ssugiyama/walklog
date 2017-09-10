@@ -59,8 +59,8 @@ class CommentBox extends Component {
                     <div ref="twitter" style={styles.twitter}></div>
                 </div>
                 <div style={styles.commentBoxBody}>
-                    <h4>{title}</h4>
-                    <div  dangerouslySetInnerHTML={createMarkup()} ></div>
+                    <h4 style={styles.commentBoxTitle}>{title}</h4>
+                    <div style={styles.commentBoxText} dangerouslySetInnerHTML={createMarkup()} ></div>
                 </div>
             </div>
         );
