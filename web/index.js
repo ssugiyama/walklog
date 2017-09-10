@@ -15,7 +15,7 @@ const models     = require('./lib/models');
 const Walk       = models.sequelize.models.walks;
 const sitemap    = require('sitemap');
 const session    = require('express-session');
-const config     = require(./dist/config');
+const config     = require('./dist/config');
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
