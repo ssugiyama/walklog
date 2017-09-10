@@ -54,8 +54,9 @@ class WalkEditor extends Component {
     handleDelete(e) {
         e.preventDefault();
         if (confirm('Are you sure to delete?')) {
-            fetch('/api/destroy/' + this.state.id)
-                .then(() => {
+            fetch('/api/destroy/' + this.state.id, {
+                    credentials: 'include'
+                }).then(() => {
                     this.props.setSelectedItem(null);
                     const query = { id: this.state.id };
                     this.props.push( {query} );
