@@ -197,3 +197,9 @@ export function setAdmin(admin) {
     };
 }
 
+export function openMessage(message) {
+    return {
+        type: ActionTypes.OPEN_MESSAGE,
+        message,
+    };    
+}

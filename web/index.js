@@ -15,6 +15,7 @@ const models     = require('./lib/models');
 const Walk       = models.sequelize.models.walks;
 const sitemap    = require('sitemap');
 const session    = require('express-session');
+const auth       = require('./lib/auth');
 const config     = require('./dist/config').default;
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -39,9 +40,13 @@ const sess = {
     }
 };
 
-app.use(session(sess))
+app.use(session(sess));
+app.use(auth.passport.initialize());
+app.use(auth.passport.session());
 
 app.use('/api', api);
+
+app.use('/auth', auth.router);
 
 app.use('/sitemap.xml', function(req, res) {
     const sm = sitemap.createSitemap({});

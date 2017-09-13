@@ -33,14 +33,8 @@ class NavBar extends Component {
         this.props.toggleSidebar();
     }
     login_or_logout() {
-        const api = this.props.admin ? '/api/logout' : '/api/login';
-        fetch(api, {
-            credentials: 'include',
-        }).then(() => {
-            this.props.setAdmin(!this.props.admin);
-        }).catch(ex => {
-            alert(ex);
-        });
+        const url = this.props.admin ? '/auth/logout' : '/auth/twitter';
+        window.location.href = url;
     }
     render() {
         return (
@@ -53,7 +47,7 @@ class NavBar extends Component {
                         iconButtonElement={
                             <IconButton><MoreVertIcon /></IconButton>
                     }>
-                        <MenuItem primaryText={this.props.admin ? 'quit admin' : 'admin...'}  onTouchTap={this.login_or_logout.bind(this)} />
+                        <MenuItem primaryText={this.props.admin ? 'logout' : 'login with twitter'}  onTouchTap={this.login_or_logout.bind(this)} />
                         {
                             this.props.admin ? ( <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>): null
                         }

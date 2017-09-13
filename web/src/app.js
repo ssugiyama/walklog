@@ -64,6 +64,7 @@ const initialState = {
     panorama_count: 0,
     overlay: false,
     admin: false,
+    message: null,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -220,6 +221,11 @@ const mainReducer = function(state = initialState, action) {
         {
             const admin = action.admin;
             return Object.assign({}, state, {admin});
+        }
+    case ActionTypes.OPEN_MESSAGE:
+        {
+            const message = action.message;
+            return Object.assign({}, state, {message});
         }
     default:
         return state;

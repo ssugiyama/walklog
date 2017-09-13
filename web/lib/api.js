@@ -182,7 +182,7 @@ api.get('/cities', function(req, res){
 });
 
 api.post('/save', function(req, res) {
-    if (! req.session.is_admin) {
+    if (! req.user) {
         res.status(403);
         return;
     }
@@ -212,7 +212,7 @@ api.post('/save', function(req, res) {
 });
 
 api.get('/destroy/:id', function(req, res) {
-    if (! req.session.is_admin) {
+    if (! req.user) {
         res.status(403);
         return;
     }
@@ -221,14 +221,4 @@ api.get('/destroy/:id', function(req, res) {
     }).catch (function (reason) {
         res.status(500).json({error: reason});
     });
-});
-
-api.get('/login', function(req, res) {
-    req.session.is_admin = 1;
-    res.end('');
-});
-
-api.get('/logout', function(req, res) {
-    delete req.session.is_admin;
-    res.end('');
 });

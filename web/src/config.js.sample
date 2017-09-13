@@ -15,4 +15,8 @@ export default {
     ],
     'session_secret': 'keyboard cat',
     'session_max_age': 7*24*60*60*1000,
+    'twitter_consumer_key': '',
+    'twitter_consumer_secret': '',
+    'twitter_callback_url': 'http://localhost:3000/auth/twitter/callback',
+    'twitter_allowed_users': null,
 };
