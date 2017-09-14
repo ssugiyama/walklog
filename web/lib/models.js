@@ -21,7 +21,21 @@ const sequelize = new Sequelize(db_url, {
 
 exports.sequelize = sequelize;
 
-sequelize.define('walks', {
+const Users = sequelize.define('users', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true
+    },
+    strategy: Sequelize.TEXT,
+    passport_id: Sequelize.INTEGER,
+    username:   Sequelize.STRING,
+    photo:      Sequelize.STRING,
+    profile:    Sequelize.TEXT,
+}, {
+    underscored: true,
+});
+
+const Walks = sequelize.define('walks', {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true
@@ -73,11 +87,14 @@ sequelize.define('walks', {
                 path :      (includePath && this.path) ? this.encodedPath() : null,
                 created_at: this.created_at,
                 updated_at: this.updated_at,
-                distance:   this.distance
+                distance:   this.distance,
+                user:       this.user,   
             };
         }
     }
 });
+
+Walks.belongsTo(Users);
 
 sequelize.define('areas', {
     jcode:      {

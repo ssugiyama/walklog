@@ -2,9 +2,12 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import {configureStore, routes, handleRoute}  from './app';
-import {setAdmin, openMessage} from './actions';
+import {setCurrentUser, setUsers, openMessage} from './actions';
 import { RouterContext, match } from 'react-router';
 import config from './config';
+import models from '../lib/models';
+
+const Users = models.sequelize.models.users;
 
 export default function handleSSR(req, res) {
     global.navigator = {
@@ -28,9 +31,9 @@ export default function handleSSR(req, res) {
                     const msg = req.session.messages.pop();
                     store.dispatch(openMessage(msg));
                 }
-            }).then(() => {
-                store.dispatch(setAdmin(req.user != null));
-            }).then(() => {
+            }).then(() => store.dispatch(setCurrentUser(req.user)))
+            .then(() => Users.findAll().then(users => store.dispatch(setUsers(users))))
+            .then(() => {
                 const html = renderToString(
                     <Provider store={store}>
                         <RouterContext {...renderProps}></RouterContext>

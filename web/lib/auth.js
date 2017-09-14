@@ -2,12 +2,15 @@ const express = require('express');
 const passport = require('passport');
 const TwitterStrategy = require('passport-twitter').Strategy;
 const config     = require('../dist/config').default;
+const models   = require('./models');
 /*
  * GET home page.
  */
 
 const auth = express.Router();
 exports.router = auth;
+
+const Users = models.sequelize.models.users;
 
 passport.use(new TwitterStrategy({
     consumerKey: config.twitter_consumer_key,
@@ -18,15 +21,19 @@ passport.use(new TwitterStrategy({
         done(null, false, {message: 'Sorry! Allowed users only.'});
         return;
     }
-    done(null, profile, {message: `Logged in as ${profile.username}.`});
+    Users.findOrCreate({
+        where: {strategy: 'twitter', passport_id: profile.id},
+        defaults: { username: profile.username, photo: profile.photos[0].value, profile: JSON.stringify(profile)}
+    }).then((user) => done(null, user, {message: `Logged in as ${profile.username}.`}));
 }
 ));
 
 passport.serializeUser(function(user, done) {
-    done(null, user);
+    console.log(user);
+    done(null, user[0].id);
 });
 passport.deserializeUser(function(obj, done) {
-    done(null, obj);
+    Users.findById(obj).then(user => done(null, user));
 });
 
 exports.passport = passport;

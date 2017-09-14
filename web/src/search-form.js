@@ -48,7 +48,7 @@ class SearchForm extends Component {
         this.state = {force_search: false};
     }
     componentDidUpdate(prevProps, prevState) {
-        const keys = ['filter', 'year', 'month', 'order', 'limit'];
+        const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
         switch (this.props.filter) {
         case 'neighborhood':
             keys.push('radius', 'longitude', 'latitude');
@@ -109,16 +109,24 @@ class SearchForm extends Component {
                     <IconButton onTouchTap={this.reset.bind(this)}><NavigationRefresh /></IconButton>
                 </div>
                 <div>
+                    <SelectField id="search_form_user" floatingLabelText="user" value={this.props.user} onChange={this.handleSelectChange.bind(this, 'user')}>
+                        <MenuItem value="" primaryText="-" />
+                        {this.props.users.map(function (u) {
+                             return <MenuItem value={u.id} primaryText={u.username} />;
+                         })}
+                    </SelectField>
+                </div>
+                <div>
                     <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: '50%'}}>
                         {month_options.map(function (option) {
-                            return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
-                        })}
+                             return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
+                         })}
                     </SelectField>
                     <SelectField id="search_form_year" floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: '50%'}}>
                         <MenuItem value="" primaryText="-" />
                         {this.props.years.map(function (y) {
-                            return <MenuItem value={y} key={y} primaryText={y} />;
-                        })}
+                             return <MenuItem value={y} key={y} primaryText={y} />;
+                         })}
                     </SelectField>
                 </div>
                 <div>
@@ -140,7 +148,8 @@ class SearchForm extends Component {
 function mapStateToProps(state) {
     return Object.assign({}, state.main.search_form, { 
         years: state.main.years, 
-        open_sidebar: state.main.open_sidebar 
+        open_sidebar: state.main.open_sidebar ,
+        users: state.main.users,
     });
 }
 

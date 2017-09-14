@@ -31,6 +31,7 @@ const initialState = {
         longitude: 139.70,
         radius: 500,
         cities: '',
+        user: '',
     },
     result: {
         rows: [],
@@ -63,8 +64,9 @@ const initialState = {
     panorama_index: 0,
     panorama_count: 0,
     overlay: false,
-    admin: false,
     message: null,
+    users: [],
+    current_user: null,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -217,10 +219,15 @@ const mainReducer = function(state = initialState, action) {
             const overlay = action.overlay;
             return Object.assign({}, state, {overlay});
         }
-    case ActionTypes.SET_ADMIN:
+    case ActionTypes.SET_CURRENT_USER:
         {
-            const admin = action.admin;
-            return Object.assign({}, state, {admin});
+            const current_user = action.user;
+            return Object.assign({}, state, {current_user});
+        }
+    case ActionTypes.SET_USERS:
+        {
+            const users = action.users;
+            return Object.assign({}, state, {users});
         }
     case ActionTypes.OPEN_MESSAGE:
         {

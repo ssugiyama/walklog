@@ -41,6 +41,13 @@ export default {
     commentBoxTitle: {
         fontSize: '90%'
     },
+    commentBoxAuthor: {
+        fontSize: '80%',
+        textAlign: 'right',
+    },
+    commentBoxAuthorPhoto: {
+        width: '16px',
+    },        
     commentBoxText: {
         textIndent: '1.2em',
         fontSize: '85%',

@@ -190,10 +190,17 @@ export function setOverlay(overlay) {
     };
 }
 
-export function setAdmin(admin) {
+export function setCurrentUser(user) {
     return {
-        type: ActionTypes.SET_ADMIN,
-        admin,
+        type: ActionTypes.SET_CURRENT_USER,
+        user,
+    };
+}
+
+export function setUsers(users) {
+    return {
+        type: ActionTypes.SET_USERS,
+        users,
     };
 }
 

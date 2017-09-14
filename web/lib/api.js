@@ -1,8 +1,9 @@
 const express = require('express')
-,   models  = require('./models')
-,   fs      = require('fs')
-,   Walk    = models.sequelize.models.walks
-,   Area    = models.sequelize.models.areas;
+  ,   models  = require('./models')
+  ,   fs      = require('fs')
+  ,   Walk    = models.sequelize.models.walks
+  ,   Area    = models.sequelize.models.areas
+  ,   Users   = models.sequelize.models.users;
 
 /*
  * GET home page.
@@ -38,7 +39,7 @@ api.get('/search', function(req, res){
     const order = order_hash[req.query.order] || 'date desc';
     const attributes = ['id', 'date', 'title', 'comment', 'path', 'length'];
     if (req.query.id) {
-        exprs.push('id = ?');
+        exprs.push('walks.id = ?');
         values.push(req.query.id);
     }
     else if (req.query.date) {
@@ -46,6 +47,10 @@ api.get('/search', function(req, res){
         values.push(req.query.date);
     }
     else {
+        if (req.query.user) {
+            exprs.push('user_id = ?');
+            values.push(parseInt(req.query.user));
+        }
         if (req.query.year) {
             exprs.push('extract(year from DATE) = ?');
             values.push(parseInt(req.query.year));
@@ -122,7 +127,8 @@ api.get('/search', function(req, res){
         order  : order,
         where  : where,
         offset : offset,
-        limit  : limit
+        limit  : limit,
+        include: [{ model: Users }]
     }).then(function (result) {
         let params = null;
         if (result.count > offset + limit) {
@@ -192,17 +198,17 @@ api.post('/save', function(req, res) {
     let values;
     if (req.body.id) {
         if (linestring) {
-            query = 'UPDATE walks SET date = ?, title = ?, "comment" = ?, path = ?, length = ST_LENGTH(?, TRUE)/1000, updated_at = NOW() WHERE id = ? RETURNING *';
-            values = [req.body.date, req.body.title, req.body.comment, linestring, linestring, req.body.id];
+            query = 'UPDATE walks SET date = ?, title = ?, "comment" = ?, path = ?, length = ST_LENGTH(?, TRUE)/1000, updated_at = NOW() WHERE id = ? AND user_id = ?RETURNING *';
+            values = [req.body.date, req.body.title, req.body.comment, linestring, linestring, req.body.id, req.user.id];
         }
         else {
-            query = 'UPDATE walks SET date = ?, title = ?, "comment" = ?, updated_at = NOW() WHERE id = ? RETURNING *';
-            values = [req.body.date, req.body.title, req.body.comment, req.body.id];
+            query = 'UPDATE walks SET date = ?, title = ?, "comment" = ?, updated_at = NOW() WHERE id = ? AND user_id = ? RETURNING *';
+            values = [req.body.date, req.body.title, req.body.comment, req.body.id, req.user.id];
         }
     }
     else {
-        query = 'INSERT INTO walks (date, title, "comment", path, length, created_at, updated_at) VALUES(?, ?, ?, ?, ST_LENGTH(?, TRUE)/1000, NOW(), NOW()) RETURNING *';
-        values = [req.body.date, req.body.title, req.body.comment, linestring, linestring];
+        query = 'INSERT INTO walks (user_id, date, title, "comment", path, length, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ST_LENGTH(?, TRUE)/1000, NOW(), NOW()) RETURNING *';
+        values = [req.user.id, req.body.date, req.body.title, req.body.comment, linestring, linestring];
     }
     models.sequelize.query(query, {model: Walk, replacements: values}).then(function (rows) {
         res.json(rows.map(function (row) { return row.asObject(true); } ));
