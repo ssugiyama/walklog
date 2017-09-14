@@ -112,21 +112,21 @@ class SearchForm extends Component {
                     <SelectField id="search_form_user" floatingLabelText="user" value={this.props.user} onChange={this.handleSelectChange.bind(this, 'user')}>
                         <MenuItem value="" primaryText="-" />
                         {this.props.users.map(function (u) {
-                             return <MenuItem value={u.id} primaryText={u.username} />;
-                         })}
+                            return <MenuItem value={u.id} key={u.id} primaryText={u.username} />;
+                        })}
                     </SelectField>
                 </div>
                 <div>
                     <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: '50%'}}>
                         {month_options.map(function (option) {
-                             return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
-                         })}
+                            return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
+                        })}
                     </SelectField>
                     <SelectField id="search_form_year" floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: '50%'}}>
                         <MenuItem value="" primaryText="-" />
                         {this.props.years.map(function (y) {
-                             return <MenuItem value={y} key={y} primaryText={y} />;
-                         })}
+                            return <MenuItem value={y} key={y} primaryText={y} />;
+                        })}
                     </SelectField>
                 </div>
                 <div>

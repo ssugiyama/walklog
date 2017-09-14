@@ -1,5 +1,6 @@
 export default {
     'site_name': 'walklog',
+    'base_url': 'http://localhost:3000',
     'twitter_site': '@chez_sugi',
     'og_image': 'https://walk.asharpminor.com/walklog.png',
     'google_api_key': '',
@@ -17,6 +18,5 @@ export default {
     'session_max_age': 7*24*60*60*1000,
     'twitter_consumer_key': '',
     'twitter_consumer_secret': '',
-    'twitter_callback_url': 'http://localhost:3000/auth/twitter/callback',
     'twitter_allowed_users': null,
 };

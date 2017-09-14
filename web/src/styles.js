@@ -42,7 +42,7 @@ export default {
         fontSize: '90%'
     },
     commentBoxAuthor: {
-        fontSize: '80%',
+        fontSize: '85%',
         textAlign: 'right',
     },
     commentBoxAuthorPhoto: {

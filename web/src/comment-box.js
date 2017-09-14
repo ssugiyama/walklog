@@ -56,13 +56,15 @@ class CommentBox extends Component {
                     <IconButton disabled={!this.props.next_id && this.props.selected_index <= 0} onTouchTap={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
                     <IconButton disabled={!this.props.prev_id && this.props.selected_index >= this.props.count - 1} onTouchTap={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
                     {
-                        this.props.current_user && this.props.current_user.id == data.user.id ? (<IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
+                        this.props.current_user && data.user && this.props.current_user.id == data.user.id ? (<IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                     }
                     <div ref="twitter" style={styles.twitter}></div>
                 </div>
                 <div style={styles.commentBoxBody}>
                     <h4 style={styles.commentBoxTitle}>{title}</h4>
-                    <div style={styles.commentBoxAuthor}><img style={styles.commentBoxAuthorPhoto} src={data.user.photo} /><span>{data.user.username}</span></div> 
+                    {
+                        data.user ? (<div style={styles.commentBoxAuthor}><img style={styles.commentBoxAuthorPhoto} src={data.user.photo} /><span>{data.user.username}</span></div>) : null
+                    }
                     <div style={styles.commentBoxText} dangerouslySetInnerHTML={createMarkup()} ></div>
                 </div>
             </div>

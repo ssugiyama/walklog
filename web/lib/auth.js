@@ -15,7 +15,7 @@ const Users = models.sequelize.models.users;
 passport.use(new TwitterStrategy({
     consumerKey: config.twitter_consumer_key,
     consumerSecret: config.twitter_consumer_secret,
-    callbackURL: config.twitter_callback_url,
+    callbackURL: config.base_url + '/auth/twitter/callback',
 }, function(token, tokenSecret, profile, done) {
     if (config.twitter_allowed_users && !config.twitter_allowed_users.includes(profile.username)) {
         done(null, false, {message: 'Sorry! Allowed users only.'});
@@ -24,13 +24,12 @@ passport.use(new TwitterStrategy({
     Users.findOrCreate({
         where: {strategy: 'twitter', passport_id: profile.id},
         defaults: { username: profile.username, photo: profile.photos[0].value, profile: JSON.stringify(profile)}
-    }).then((user) => done(null, user, {message: `Logged in as ${profile.username}.`}));
+    }).spread((user) => done(null, user, {message: `Logged in as ${profile.username}.`}));
 }
 ));
 
 passport.serializeUser(function(user, done) {
-    console.log(user);
-    done(null, user[0].id);
+    done(null, user.id);
 });
 passport.deserializeUser(function(obj, done) {
     Users.findById(obj).then(user => done(null, user));
