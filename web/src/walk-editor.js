@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
-import { setSelectedItem, openWalkEditor } from './actions';
+import { setSelectedItem, openWalkEditor, setForceFetch } from './actions';
 import FlatButton from 'material-ui/FlatButton';
 import Dialog from 'material-ui/Dialog';
 import DatePicker from 'material-ui/DatePicker';
@@ -51,6 +51,7 @@ class WalkEditor extends Component {
         }).then(
             response => response.json()
         ).then(json => {
+            this.props.setForceFetch(true);
             this.props.push( '/' + json[0].id );
             this.handleClose();
         })
@@ -62,15 +63,16 @@ class WalkEditor extends Component {
             fetch('/api/destroy/' + this.state.id, {
                 credentials: 'include',
             }).then(response => {
-                    if (!response.ok) {
-                        throw Error(response.statusText);
-                    }
-                    return response;
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response;
             }).then(() => {
-                    this.props.setSelectedItem(null);
-                    const query = { id: this.state.id };
-                    this.props.push( {query} );
-                    this.handleClose();
+                this.props.setForceFetch(true);
+                this.props.setSelectedItem(null);
+                const query = { id: this.state.id };
+                this.props.push( '/' +  );
+                this.handleClose();
             }).catch(ex => alert(ex));
         }
     }
@@ -147,7 +149,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ push, setSelectedItem, openWalkEditor }, dispatch);
+    return bindActionCreators({ push, setSelectedItem, openWalkEditor, setForceFetch }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(WalkEditor);
