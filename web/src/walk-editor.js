@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
-import { setSelectedItem, openWalkEditor, setForceFetch } from './actions';
+import { setSelectedItem, openWalkEditor } from './actions';
 import FlatButton from 'material-ui/FlatButton';
 import Dialog from 'material-ui/Dialog';
 import DatePicker from 'material-ui/DatePicker';
@@ -23,8 +23,8 @@ class WalkEditor extends Component {
     handleSubmit() {
         function formatDate(d) {
             return d.getFullYear()+
-            ( '0' + ( d.getMonth()+1 ) ).slice(-2)+
-            ( '0' + d.getDate() ).slice(-2);
+              ( '0' + ( d.getMonth()+1 ) ).slice(-2)+
+              ( '0' + d.getDate() ).slice(-2);
         }
         const keys = ['date', 'title', 'comment'];
 
@@ -51,11 +51,10 @@ class WalkEditor extends Component {
         }).then(
             response => response.json()
         ).then(json => {
-            this.props.setForceFetch(true);
-            this.props.push( '/' + json[0].id );
+            this.props.push({pathname: '/' + json[0].id, force_fetch: 1 });
             this.handleClose();
         })
-        .catch(ex => alert(ex));
+          .catch(ex => alert(ex));
     }
     handleDelete(e) {
         e.preventDefault();
@@ -68,10 +67,9 @@ class WalkEditor extends Component {
                 }
                 return response;
             }).then(() => {
-                this.props.setForceFetch(true);
                 this.props.setSelectedItem(null);
                 const query = { id: this.state.id };
-                this.props.push( '/' +  );
+                this.props.push({pathname: '/' + this.state.id, force_fetch: 1 });
                 this.handleClose();
             }).catch(ex => alert(ex));
         }
@@ -113,28 +111,28 @@ class WalkEditor extends Component {
         // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
         return (
             <Dialog
-                    title={ this.props.walk_editor_mode == 'update' ? 'Update Walk' : 'New Walk' }
-                    actions={actions}
-                    modal={false}
-                    open={this.props.open_walk_editor}
-                    onRequestClose={this.handleClose.bind(this)}
-                >
-                    <div>
-                        <DatePicker value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" floatingLabelText='date' floatingLabelFixed={true} fullWidth={true} autoOk={true} />
-                    </div>
-                    <div>
-                        <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} floatingLabelText="title" floatingLabelFixed={true}  fullWidth={true} />
-                    </div>
-                    <div>
-                        <TextField multiLine={true} rows={4} rowsMax={4}
-                                defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} floatingLabelText="comment" floatingLabelFixed={true} fullWidth={true} />
-                    </div>
-                    {
-                        this.props.walk_editor_mode == 'update' ?
-                        <div><Toggle label="update path?" onToggle={this.handleChange.bind(this, 'update_path')}  toggled={this.state.update_path} disabled={this.state.path == null} /></div> : null
-                    }
-                        <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
-                </Dialog>
+                title={ this.props.walk_editor_mode == 'update' ? 'Update Walk' : 'New Walk' }
+                actions={actions}
+                modal={false}
+                open={this.props.open_walk_editor}
+                onRequestClose={this.handleClose.bind(this)}
+            >
+                <div>
+                    <DatePicker value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" floatingLabelText='date' floatingLabelFixed={true} fullWidth={true} autoOk={true} />
+                </div>
+                <div>
+                    <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} floatingLabelText="title" floatingLabelFixed={true}  fullWidth={true} />
+                </div>
+                <div>
+                    <TextField multiLine={true} rows={4} rowsMax={4}
+                               defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} floatingLabelText="comment" floatingLabelFixed={true} fullWidth={true} />
+                </div>
+                {
+                    this.props.walk_editor_mode == 'update' ?
+                    <div><Toggle label="update path?" onToggle={this.handleChange.bind(this, 'update_path')}  toggled={this.state.update_path} disabled={this.state.path == null} /></div> : null
+                }
+                <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+            </Dialog>
         );
     }
 }
@@ -149,7 +147,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ push, setSelectedItem, openWalkEditor, setForceFetch }, dispatch);
+    return bindActionCreators({ push, setSelectedItem, openWalkEditor }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(WalkEditor);

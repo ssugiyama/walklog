@@ -5,7 +5,7 @@ import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-r
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { search, setSearchForm, setSelectedPath, setSelectedItem, setForceFetch } from './actions';
+import { search, setSearchForm, setSelectedPath, setSelectedItem } from './actions';
 import BodyContainer from './body';
 
 const injectTapEventPlugin = require('react-tap-event-plugin');
@@ -67,7 +67,6 @@ const initialState = {
     message: null,
     users: [],
     current_user: null,
-    force_fetch: false,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -235,11 +234,6 @@ const mainReducer = function(state = initialState, action) {
             const message = action.message;
             return Object.assign({}, state, {message});
         }
-    case ActionTypes.SET_FORCE_FETCH:
-        {
-            const force_fetch = action.force;
-            return Object.assign({}, state, {force_fetch});
-        }
     default:
         return state;
     }
@@ -252,16 +246,15 @@ const reducers = combineReducers({
 
 const loggerMiddleware = createLogger();
 
-export function handleRoute(renderProps, isPathSelected, prefix, rows, force_fetch, next) {
+export function handleRoute(renderProps, isPathSelected, prefix, rows, next) {
     const query = Object.assign({}, renderProps.location.query);
     if (renderProps.params.id) {
-        if (!force_fetch) {
+        if (!query.force_fetch) {
             const index = rows.findIndex(row => row.id == renderProps.params.id);
             if (index >= 0) {
                 return next(setSelectedItem(rows[index], index));
             }
         }
-        next(setForceFetch(false));
         query.id = renderProps.params.id;
     }
     const show_on_map = query.show || (query.id && 'first');
@@ -283,7 +276,7 @@ const dataFetchMiddleware = store => next => {
                 match({ routes, location: action.payload.pathname + action.payload.search }, (err, redirect, renderProps) => {
                     if (err || redirect || !renderProps) return;
                     const state = store.getState();
-                    handleRoute(renderProps, state.main.selected_path, '/', state.main.result.rows, state.main.force_fetch, next);
+                    handleRoute(renderProps, state.main.selected_path, '/', state.main.result.rows, next);
                 });
             }
             isFirstLocation = false;

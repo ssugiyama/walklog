@@ -25,7 +25,7 @@ export default function handleSSR(req, res) {
             res.status(404).send('Not found');
         } else {
             const store = configureStore();
-            handleRoute(renderProps, false, prefix, [], true, store.dispatch)
+            handleRoute(renderProps, false, prefix, [], store.dispatch)
             .then(() =>{
                 if (req.session.messages && req.session.messages.length > 0) {
                     const msg = req.session.messages.pop();

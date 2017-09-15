@@ -210,10 +210,3 @@ export function openMessage(message) {
         message,
     };    
 }
-
-export function setForceFetch(force) {
-    return {
-        type: ActionTypes.SET_FORCE_FETCH,
-        force,
-    };      
-}

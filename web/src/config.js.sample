@@ -2,7 +2,6 @@ export default {
     'site_name': 'walklog',
     'base_url': 'http://localhost:3000',
     'twitter_site': '@chez_sugi',
-    'og_image': 'https://walk.asharpminor.com/walklog.png',
     'google_api_key': '',
     'icon_tags': [
         '<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">',

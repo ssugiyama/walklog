@@ -9,7 +9,6 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
-import NavigationRefresh from 'material-ui/svg-icons/navigation/refresh';
 
 const month_options = [
     { label: '-', value: '' },
@@ -99,34 +98,31 @@ class SearchForm extends Component {
                 <input type="hidden" name="cities" value=""  />
                 <input type="hidden" name="searchPath" value=""  />
                 <div>
-                    <SelectField id="search_form_filter" floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} style={{width: '80%'}}>
+                    <SelectField id="search_form_filter" floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} style={{width: '50%'}}>
                         <MenuItem value="any" primaryText="any" />
                         <MenuItem value="neighborhood" primaryText="Neighborhood" />
                         <MenuItem value="cities" primaryText="Cities" />
                         <MenuItem value="hausdorff" primaryText="Hausdorff" />
                         <MenuItem value="crossing" primaryText="Crossing" />
                     </SelectField>
-                    <IconButton onTouchTap={this.reset.bind(this)}><NavigationRefresh /></IconButton>
-                </div>
-                <div>
-                    <SelectField id="search_form_user" floatingLabelText="user" value={this.props.user} onChange={this.handleSelectChange.bind(this, 'user')}>
+                    <SelectField id="search_form_user" floatingLabelText="user" floatingLabelFixed={true} value={this.props.user} onChange={this.handleSelectChange.bind(this, 'user')} style={{width: '50%'}}>
                         <MenuItem value="" primaryText="-" />
                         {this.props.users.map(function (u) {
-                            return <MenuItem value={u.id} key={u.id} primaryText={u.username} />;
-                        })}
+                             return <MenuItem value={u.id} key={u.id} primaryText={u.username} />;
+                         })}
                     </SelectField>
                 </div>
                 <div>
                     <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: '50%'}}>
                         {month_options.map(function (option) {
-                            return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
-                        })}
+                             return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
+                         })}
                     </SelectField>
                     <SelectField id="search_form_year" floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: '50%'}}>
                         <MenuItem value="" primaryText="-" />
                         {this.props.years.map(function (y) {
-                            return <MenuItem value={y} key={y} primaryText={y} />;
-                        })}
+                             return <MenuItem value={y} key={y} primaryText={y} />;
+                         })}
                     </SelectField>
                 </div>
                 <div>
@@ -138,6 +134,9 @@ class SearchForm extends Component {
                         }
                     </SelectField>
                     <TextField id="search_form_limit" floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: '50%'}} />
+                </div>
+                <div>
+                    <FlatButton label="Reset" secondary={true} onTouchTap={this.reset.bind(this)} style={{width: '100%'}} />
                 </div>
             </form>
         );
