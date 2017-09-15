@@ -16,7 +16,6 @@ and edit web/src/config.js.
         'site_name': 'walklog',
         'base_url': 'http://localhost:3000',
         'twitter_site': '@chez_sugi',
-        'og_image': 'https://walk.asharpminor.com/walklog.png',
         'google_api_key': '',
         'icon_tags': [
             '<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">',
@@ -34,6 +33,10 @@ and edit web/src/config.js.
         'twitter_consumer_secret': '',
         'twitter_allowed_users': null,
     };
+
+- `google_api_key` : needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
+- `twitter_consumer_key` and `twitter_consumer_secret`: needed for twitter authentication. get at https://apps.twtter.com
+- `'twitter_allowed_users` : specify array of screennames if restrict the users who can login
 
 ## with docker
     % docker-compose up -d
