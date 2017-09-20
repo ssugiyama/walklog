@@ -51,7 +51,7 @@ class WalkEditor extends Component {
         }).then(
             response => response.json()
         ).then(json => {
-            this.props.push({pathname: '/' + json[0].id, force_fetch: 1 });
+            this.props.push({pathname: '/' + json[0].id, query: {force_fetch: 1} });
             this.handleClose();
         })
           .catch(ex => alert(ex));
@@ -69,7 +69,7 @@ class WalkEditor extends Component {
             }).then(() => {
                 this.props.setSelectedItem(null);
                 const query = { id: this.state.id };
-                this.props.push({pathname: '/' + this.state.id, force_fetch: 1 });
+                this.props.push({pathname: '/' + this.state.id, query: {force_fetch: 1} });
                 this.handleClose();
             }).catch(ex => alert(ex));
         }
