@@ -47,6 +47,7 @@ const initialState = {
     selected_item: null,
     selected_path: null,
     selected_index: -1,
+    highlighted_path: null,
     editing_path: false,
     open_sidebar: true,
     open_walk_editor: false,
@@ -109,7 +110,7 @@ const mainReducer = function(state = initialState, action) {
         {
             const selected_item = action.item;
             const selected_index = action.index;
-            const selected_path = selected_item ? selected_item.path : state.selected_path;
+            const highlighted_path = selected_item ? selected_item.path : state.selected_path;
             let tab_value;
             if (!selected_item) {
                 tab_value = 'search';
@@ -117,8 +118,7 @@ const mainReducer = function(state = initialState, action) {
             else {
                 tab_value = 'comment';
             }
-            const search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-            return Object.assign({}, state, {search_form, selected_index, selected_item, tab_value, selected_path});
+            return Object.assign({}, state, {selected_index, selected_item, tab_value, highlighted_path});
         }
     case ActionTypes.SET_SELECTED_PATH:
         {

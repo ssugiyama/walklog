@@ -34,7 +34,7 @@ class SideBox extends Component {
                         <SearchBox />
                     </Tab>
                     <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
-                    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.selected_path}>
+                    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.highlighted_path}>
                         <ElevationBox />
                         <PanoramaBox />
                     </Tab>
@@ -45,7 +45,7 @@ class SideBox extends Component {
 }
 
 function mapStateToProps(state) {
-    return Object.assign({}, { open_sidebar: state.main.open_sidebar, selected_path: state.main.selected_path, selected_item: state.main.selected_item, tab_value: state.main.tab_value });
+    return Object.assign({}, { open_sidebar: state.main.open_sidebar, highlighted_path: state.main.highlighted_path, selected_item: state.main.selected_item, tab_value: state.main.tab_value });
 }
 
 function mapDispatchToProps(dispatch) {

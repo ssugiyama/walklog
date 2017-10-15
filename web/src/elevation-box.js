@@ -11,9 +11,9 @@ class ElevationBox extends Component {
         super(props);
         this.chart = null;
     }
-    requestElevation(selected_path) {
-        if (!selected_path) return;
-        const path = google.maps.geometry.encoding.decodePath(selected_path);
+    requestElevation(highlighted_path) {
+        if (!highlighted_path) return;
+        const path = google.maps.geometry.encoding.decodePath(highlighted_path);
 
         const pathRequest = {
             'path': path,
@@ -35,8 +35,8 @@ class ElevationBox extends Component {
                     datasets:[ {
                         data,
                         borderWidth: 1,
-                        borderColor: '#f00',
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        borderColor: '#c000c0',
+                        backgroundColor: 'rgba(192, 0, 192, 0.1)',
                         pointStyle: 'dot',
                         radius: 1
                     }]
@@ -67,7 +67,7 @@ class ElevationBox extends Component {
         }
     }
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.selected_path !== this.props.selected_path) {
+        if (nextProps.highlighted_path !== this.props.highlighted_path) {
             return true;
         }
         else {
@@ -76,17 +76,17 @@ class ElevationBox extends Component {
     }
     componentDidMount() {
         this.elevator = new google.maps.ElevationService();
-        this.requestElevation(this.props.selected_path);
+        this.requestElevation(this.props.highlighted_path);
     }
     componentWillReceiveProps(nextProps) {
         if (this.chart) {
             this.chart.destroy();
             this.chart = null;
         }
-        this.requestElevation(nextProps.selected_path);
+        this.requestElevation(nextProps.highlighted_path);
     }
     render() {
-        if (this.props.selected_path)
+        if (this.props.highlighted_path)
             return (
                 <div>
                     <h3>elevation</h3>
@@ -100,7 +100,7 @@ class ElevationBox extends Component {
 
 function mapStateToProps(state) {
     return {
-        selected_path: state.main.selected_path,
+        highlighted_path: state.main.highlighted_path,
     };
 }
 

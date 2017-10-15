@@ -23,10 +23,10 @@ class PanoramaBox extends Component {
     interpolatePoints(pt1, pt2, r) {
         return new google.maps.LatLng(r*pt2.lat() + (1-r)*pt1.lat(), r*pt2.lng() + (1-r)*pt1.lng());
     }
-    getPanoramaPointsAndHeadings(selected_path) {
-        if (!selected_path) return null;
+    getPanoramaPointsAndHeadings(highlighted_path) {
+        if (!highlighted_path) return null;
         const pph = [];
-        const path = selected_path;
+        const path = highlighted_path;
         const count = path.length;
         let way = 0;
         let dsum = 0;
@@ -48,14 +48,14 @@ class PanoramaBox extends Component {
         return pph;
 
     }
-    initPanorama(selected_path) {
-        if (! selected_path) {
+    initPanorama(highlighted_path) {
+        if (! highlighted_path) {
             if (this.props.panorama) {
                 this.props.panorama.setVisible(false);
             }
             return;
         }
-        const path = google.maps.geometry.encoding.decodePath(selected_path);
+        const path = google.maps.geometry.encoding.decodePath(highlighted_path);
         this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(path);
         this.props.setPanoramaCount(this.panoramaPointsAndHeadings.length);
         // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
@@ -79,7 +79,7 @@ class PanoramaBox extends Component {
         google.maps.event.trigger(this.props.panorama, 'resize');
     }
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.selected_path != this.props.selected_path) return true;
+        if (nextProps.highlighted_path != this.props.highlighted_path) return true;
         if (nextProps.panorama_index != this.props.panorama_index) return true;
         if (nextProps.panorama_count != this.props.panorama_count) return true;
         if (nextProps.overlay != this.props.overlay) return true;
@@ -103,11 +103,11 @@ class PanoramaBox extends Component {
             enableCloseButton: false,
         });
         this.props.setStreetView(this.panorama);
-        if (this.props.selected_path) this.initPanorama(this.props.selected_path);
+        if (this.props.highlighted_path) this.initPanorama(this.props.highlighted_path);
     }
     componentWillReceiveProps(nextProps) {
-        if (nextProps.selected_path != this.props.selected_path) {
-            this.initPanorama(nextProps.selected_path);
+        if (nextProps.highlighted_path != this.props.highlighted_path) {
+            this.initPanorama(nextProps.highlighted_path);
         }
     }
     render() {
@@ -132,7 +132,7 @@ class PanoramaBox extends Component {
 
 function mapStateToProps(state) {
     return {
-        selected_path: state.main.selected_path,
+        highlighted_path: state.main.highlighted_path,
         panorama: state.main.panorama,
         open_sidebar: state.main.open_sidebar,
         panorama_index: state.main.panorama_index,

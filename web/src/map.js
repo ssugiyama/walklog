@@ -134,7 +134,7 @@ class Map extends Component {
         const action = this.props.action_queue[len-1];
         if (action.type == ActionTypes.ADD_PATHS) {
             for (let path of action.paths) {
-                this.path_manager.showPath(path, false);
+                this.path_manager.showPath(path, false, false);
             }
             this.props.removeFromActionQueue();
         }
@@ -149,6 +149,9 @@ class Map extends Component {
         }
         else if (! this.props.selected_path) {
             this.path_manager.deletePath();
+        }
+        if (this.props.highlighted_path && this.props.highlighted_path != this.path_manager.getEncodedHighlight()) {
+            this.path_manager.showPath(this.props.highlighted_path, false, true);
         }
         this.processActionQueue();
         if (this.props.editing_path) {
@@ -266,6 +269,7 @@ function mapStateToProps(state) {
         radius: state.main.search_form.radius,
         cities: state.main.search_form.cities,
         selected_path: state.main.selected_path,
+        highlighted_path: state.main.highlighted_path,
         editing_path: state.main.editing_path,
         action_queue: state.main.action_queue,
         panorama: state.main.panorama,

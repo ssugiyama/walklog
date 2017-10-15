@@ -8,6 +8,7 @@ export default class PathManager extends google.maps.MVCObject {
         this.polylines = new Object();
         this.generalStyle = {strokeColor : '#0000ff', strokeOpacity: 0.5, zIndex: 10};
         this.selectedStyle = {strokeColor : '#ff0000', strokeOpacity : 0.7, zIndex: 10};
+        this.highlightedStyle = {strokeColor : '#c000c0', strokeOpacity : 0.7, zIndex: 10};
         this.drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.POLYLINE,
             drawingControl: true,
@@ -21,6 +22,7 @@ export default class PathManager extends google.maps.MVCObject {
         this.drawingManager.setMap(this.map);
         this.set('length', 0);
         this.set('prevSelection', null);
+        this.set('prevHighlight', null);
         google.maps.event.addListener(this.drawingManager, 'polylinecomplete', polyline => {
             if (this.selection && confirm('Will you append the path?')) {
                 polyline.getPath().forEach(elm => {
@@ -67,7 +69,7 @@ export default class PathManager extends google.maps.MVCObject {
         return this.polylines[key];
     }
 
-    showPath(path, select) {
+    showPath(path, select, highlight) {
         var pl = this.searchPolyline(path);
         if (typeof(path) == 'string') {
             path = google.maps.geometry.encoding.decodePath(path);
@@ -78,8 +80,12 @@ export default class PathManager extends google.maps.MVCObject {
             pl.setPath(path);
             this.addPolyline(pl);
         }
-        if(select && path.length > 0) {
-            this.set('selection', pl);
+        if((select || highlight) && path.length > 0) {
+            if (select) {
+                this.set('selection', pl);
+            } else if (highlight) {
+                this.set('highlight', pl)
+            }
             let xmin, xmax, ymin, ymax;
             for (let i = 0; i < path.length; i++ ) {
                 const elem = path[i];
@@ -124,7 +130,7 @@ export default class PathManager extends google.maps.MVCObject {
     selection_changed(){
         const prevSelection = this.get('prevSelection');
         if (prevSelection){
-            prevSelection.setOptions(this.generalStyle);
+            prevSelection.setOptions(this.prevSelection == this.highlight ? this.highlightedStyle : this.generalStyle);
             prevSelection.setEditable(false);
         }
         const selection = this.get('selection');
@@ -148,6 +154,28 @@ export default class PathManager extends google.maps.MVCObject {
         }
         else {
             return null;
+        }
+    }
+
+    getEncodedHighlight() {
+        if (this.highlight) {
+            return google.maps.geometry.encoding.encodePath(this.highlight.getPath());
+        }
+        else {
+            return null;
+        }
+    }
+
+    highlight_changed(){
+        const prevHighlight = this.get('prevHighlight');
+        if (prevHighlight){
+            prevHighlight.setOptions(this.prevHighlight == this.selection ? this.selectedStyle : this.generalStyle);
+        }
+        const highlight = this.get('highlight');
+        this.set('prevHighlight', highlight);
+
+        if (highlight) {
+            highlight.setOptions(this.highlightedStyle);
         }
     }
 
