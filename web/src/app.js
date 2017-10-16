@@ -52,6 +52,7 @@ const initialState = {
     open_sidebar: true,
     open_walk_editor: false,
     open_io_modal: false,
+    open_snackbar: false,
     open_geocode_modal: false,
     tab_value: 'search',
     street_view: null,
@@ -65,7 +66,7 @@ const initialState = {
     panorama_index: 0,
     panorama_count: 0,
     overlay: false,
-    message: null,
+    message: '',
     users: [],
     current_user: null,
 };
@@ -229,11 +230,16 @@ const mainReducer = function(state = initialState, action) {
             const users = action.users;
             return Object.assign({}, state, {users});
         }
-    case ActionTypes.OPEN_MESSAGE:
+    case ActionTypes.SET_MESSAGE:
         {
             const message = action.message;
             return Object.assign({}, state, {message});
         }
+    case ActionTypes.OPEN_SNACKBAR:
+        {
+            const open_snackbar = action.open;
+            return Object.assign({}, state, {open_snackbar});
+        }    
     default:
         return state;
     }

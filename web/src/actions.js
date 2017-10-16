@@ -204,9 +204,16 @@ export function setUsers(users) {
     };
 }
 
-export function openMessage(message) {
+export function setMessage(message) {
     return {
-        type: ActionTypes.OPEN_MESSAGE,
+        type: ActionTypes.SET_MESSAGE,
         message,
     };    
+}
+
+export function openSnackbar(open) {
+    return {
+        type: ActionTypes.OPEN_SNACKBAR,
+        open,
+    };   
 }

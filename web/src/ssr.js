@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import {configureStore, routes, handleRoute}  from './app';
-import {setCurrentUser, setUsers, openMessage} from './actions';
+import {setCurrentUser, setUsers, setMessage, openSnackbar} from './actions';
 import { RouterContext, match } from 'react-router';
 import config from './config';
 import models from '../lib/models';
@@ -28,8 +28,9 @@ export default function handleSSR(req, res) {
             handleRoute(renderProps, false, prefix, [], store.dispatch)
             .then(() =>{
                 if (req.session.messages && req.session.messages.length > 0) {
-                    const msg = req.session.messages.pop();
-                    store.dispatch(openMessage(msg));
+                    const msg = req.session.messages.pop() || '';
+                    store.dispatch(setMessage(msg));
+                    store.dispatch(openSnackbar(true));
                 }
             }).then(() => store.dispatch(setCurrentUser(req.user)))
             .then(() => Users.findAll().then(users => store.dispatch(setUsers(users))))

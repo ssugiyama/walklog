@@ -25,4 +25,5 @@ export const SET_PANORAMA_INDEX = Symbol('set_panorama_index');
 export const SET_OVERLAY = Symbol('set_overlay');
 export const SET_CURRENT_USER = Symbol('set_current_user');
 export const SET_USERS = Symbol('set_users');
-export const OPEN_MESSAGE = Symbol('open_message');
+export const SET_MESSAGE = Symbol('set_message');
+export const OPEN_SNACKBAR = Symbol('open_snackbar'); 
