@@ -87,6 +87,9 @@ class Map extends Component {
         });
         this.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
         this.infoWindow = new google.maps.InfoWindow();
+        if (window.localStorage.selected_path) {
+            this.props.setSelectedPath(window.localStorage.selected_path);
+        }
         window.addEventListener('resize', this.handleResize.bind(this));
         this.componentDidUpdate();
     }

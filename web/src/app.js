@@ -124,6 +124,9 @@ const mainReducer = function(state = initialState, action) {
     case ActionTypes.SET_SELECTED_PATH:
         {
             const selected_path = action.path;
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.selected_path = selected_path;
+            }
             let tab_value = state.tab_value;
             if (!selected_path && tab_value == 'visualization') {
                 tab_value = 'search';
@@ -165,6 +168,9 @@ const mainReducer = function(state = initialState, action) {
     case ActionTypes.DELETE_SELECTED_PATH:
         {
             let tab_value = state.tab_value;
+            if (typeof window !== 'undefined' && window.localStorage) {
+                delete window.localStorage.selected_path;
+            }
             if (tab_value == 'visualization') {
                 tab_value = 'search';
             }
@@ -173,6 +179,9 @@ const mainReducer = function(state = initialState, action) {
     case ActionTypes.CLEAR_PATHS:
         {
             let tab_value = state.tab_value;
+            if (typeof window !== 'undefined' && window.localStorage) {
+                delete window.localStorage.selected_path;
+            }
             const action_queue = state.action_queue.concat(action);
             if (tab_value == 'visualization') {
                 tab_value = 'search';
