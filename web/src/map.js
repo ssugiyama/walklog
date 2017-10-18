@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
 import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar } from './actions';
 import { connect } from 'react-redux';
@@ -91,6 +92,9 @@ class Map extends Component {
             this.props.setSelectedPath(window.localStorage.selected_path);
         }
         window.addEventListener('resize', this.handleResize.bind(this));
+        this.refs.upload.addEventListener('change', e => {
+            this.processUpload(e);
+        });
         this.componentDidUpdate();
     }
     citiesChanges() {
@@ -143,6 +147,19 @@ class Map extends Component {
         }
         else if (action.type == ActionTypes.CLEAR_PATHS) {
             this.path_manager.deleteAll();
+            this.props.removeFromActionQueue();
+        }
+        else if (action.type == ActionTypes.DOWNLOAD_PATH) {
+            const content = this.path_manager.selectionAsGeoJSON();
+            const blob = new Blob([ content ], { 'type' : 'application/json' });
+            const elem = ReactDOM.findDOMNode(this.refs.download);
+            elem.href = window.URL.createObjectURL(blob);
+            setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
+            this.props.removeFromActionQueue();
+        }
+        else if (action.type == ActionTypes.UPLOAD_PATH) {
+            const elem = ReactDOM.findDOMNode(this.refs.upload);
+            setTimeout(() => elem.click(), 0);
             this.props.removeFromActionQueue();
         }
     }
@@ -235,9 +252,27 @@ class Map extends Component {
         pg = null;
         delete this.cities[id];
     }
+    processUpload(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.addEventListener('loadend', e => {
+            const obj = JSON.parse(e.target.result);
+            const coordinates = obj.coordinates;
+            const pts = coordinates.map(function (item) {
+                return new google.maps.LatLng(item[1], item[0]);
+            });
+            const path = google.maps.geometry.encoding.encodePath(new google.maps.MVCArray(pts));
+            this.props.setSelectedPath(path);
+        });
+        reader.readAsText(file);
+    }
     render() {
         return (
-            <div ref="map" style={styles.map}></div>
+            <div>
+                <div ref="map" style={styles.map}></div>
+                <a ref="download" style={{display: 'none'}} download='walklog.json'></a>
+                <input ref="upload" type="file" style={{display: 'none'}} />
+            </div>
         );
     }
     gsiMapOption() {

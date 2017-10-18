@@ -217,3 +217,15 @@ export function openSnackbar(open) {
         open,
     };   
 }
+
+export function downloadPath() {
+    return {
+        type: ActionTypes.DOWNLOAD_PATH,
+    };
+}
+
+export function uploadPath() {
+    return {
+        type: ActionTypes.UPLOAD_PATH,
+    };
+}

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setPanoramaCount, setPanoramaIndex, setOverlay, 
-    setEditingPath, deleteSelectedPath, clearPaths, openIOModal, setSearchForm } from './actions';
+    setEditingPath, deleteSelectedPath, clearPaths, openIOModal, setSearchForm, downloadPath, uploadPath } from './actions';
 import IconButton from 'material-ui/IconButton';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
@@ -15,6 +15,8 @@ import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forwa
 import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
 import AvFastForward from 'material-ui/svg-icons/av/fast-forward';
 import AvFastRewind from 'material-ui/svg-icons/av/fast-rewind';
+import FileDownload from 'material-ui/svg-icons/file/file-download';
+import FileUpload from 'material-ui/svg-icons/file/file-upload';
 import MapsMap from 'material-ui/svg-icons/maps/map';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import styles from './styles';
@@ -82,6 +84,8 @@ class BottomBar extends Component {
                     <IconButton tooltip="edit" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.setEditingPath() } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
                     <IconButton tooltip="delete" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}><ActionDelete /></IconButton>
                     <IconButton tooltip="clear all" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.clearPaths() }><NavigationRefresh /></IconButton>
+                    <IconButton tooltip="download" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
+                    <IconButton tooltip="upload" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.uploadPath() }><FileUpload /></IconButton>
                     <IconButton tooltip="export/import..." tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.openIOModal(true)}><ActionSwapVert /></IconButton>
                     <span className="label label-info">{`${this.state.length.toFixed(1)}km`}</span>
                 </ToolbarGroup>            
@@ -112,6 +116,8 @@ function mapDispatchToProps(dispatch) {
         setEditingPath, 
         deleteSelectedPath, 
         clearPaths, 
+        downloadPath,
+        uploadPath,
         openIOModal,
         setSearchForm,
     }, dispatch);

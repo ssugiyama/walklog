@@ -188,6 +188,12 @@ const mainReducer = function(state = initialState, action) {
             }
             return Object.assign({}, state, {selected_path: null, action_queue, tab_value});
         }
+    case ActionTypes.DOWNLOAD_PATH:
+    case ActionTypes.UPLOAD_PATH:
+        {
+            const action_queue = state.action_queue.concat(action);
+            return Object.assign({}, state, {action_queue});
+        }
     case ActionTypes.SET_EDITING_PATH:
         {
             return Object.assign({}, state, {editing_path: true});
