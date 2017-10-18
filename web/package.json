@@ -31,7 +31,7 @@
     "morgan": "*",
     "passport": "^0.4.0",
     "passport-twitter": "^1.0.4",
-    "pg": "*",
+    "pg": "^6.4.2",
     "pg-hstore": "*",
     "react": "^15.2.0",
     "react-dom": "^15.2.0",
