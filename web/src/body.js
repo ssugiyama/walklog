@@ -3,7 +3,6 @@ import NavBarContainer from './nav-bar';
 import MapContainer from './map';
 import BottomBarContainer from './bottom-bar';
 import WalkEditorContainer from './walk-editor';
-import IOModalContainer from './io-modal';
 import GeocodeModalContainer from './geocode-modal';
 import { connect } from 'react-redux';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -25,7 +24,6 @@ class Body extends Component {
                     <MapContainer />
                     <BottomBarContainer />
                     <WalkEditorContainer />
-                    <IOModalContainer />
                     <GeocodeModalContainer />
                     <Snackbar
                         open={this.props.open_snackbar}

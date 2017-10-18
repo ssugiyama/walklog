@@ -51,7 +51,6 @@ const initialState = {
     editing_path: false,
     open_sidebar: true,
     open_walk_editor: false,
-    open_io_modal: false,
     open_snackbar: false,
     open_geocode_modal: false,
     tab_value: 'search',
@@ -144,11 +143,6 @@ const mainReducer = function(state = initialState, action) {
             const open_walk_editor = action.open;
             const walk_editor_mode = action.mode;
             return Object.assign({}, state, {open_walk_editor, walk_editor_mode});
-        }
-    case ActionTypes.OPEN_IO_MODAL:
-        {
-            const open_io_modal = action.open;
-            return Object.assign({}, state, {open_io_modal});
         }
     case ActionTypes.OPEN_GEOCODE_MODAL:
         {

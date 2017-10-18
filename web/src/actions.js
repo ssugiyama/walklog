@@ -128,13 +128,6 @@ export function openWalkEditor(open, mode) {
     };
 }
 
-export function openIOModal(open) {
-    return {
-        type: ActionTypes.OPEN_IO_MODAL,
-        open
-    };
-}
-
 export function openGeocodeModal(open) {
     return {
         type: ActionTypes.OPEN_GEOCODE_MODAL,

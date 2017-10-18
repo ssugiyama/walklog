@@ -14,7 +14,6 @@ export const DELETE_SELECTED_PATH = Symbol('delete_selected_path');
 export const CLEAR_PATHS = Symbol('clear_paths');
 export const SET_EDITING_PATH = Symbol('set_editing_path');
 export const OPEN_WALK_EDITOR = Symbol('open_walk_editor');
-export const OPEN_IO_MODAL = Symbol('open_io_modal');
 export const OPEN_GEOCODE_MODAL = Symbol('open_geocode_modal');
 export const SET_STREET_VIEW = Symbol('set_street_view');
 export const SET_INFO_WINDOW = Symbol('set_info_window');

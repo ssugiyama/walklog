@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setPanoramaCount, setPanoramaIndex, setOverlay, 
-    setEditingPath, deleteSelectedPath, clearPaths, openIOModal, setSearchForm, downloadPath, uploadPath } from './actions';
+    setEditingPath, deleteSelectedPath, clearPaths, setSearchForm, downloadPath, uploadPath } from './actions';
 import IconButton from 'material-ui/IconButton';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
@@ -86,7 +86,6 @@ class BottomBar extends Component {
                     <IconButton tooltip="clear all" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.clearPaths() }><NavigationRefresh /></IconButton>
                     <IconButton tooltip="download" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
                     <IconButton tooltip="upload" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.uploadPath() }><FileUpload /></IconButton>
-                    <IconButton tooltip="export/import..." tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.openIOModal(true)}><ActionSwapVert /></IconButton>
                     <span className="label label-info">{`${this.state.length.toFixed(1)}km`}</span>
                 </ToolbarGroup>            
             ) }
@@ -118,7 +117,6 @@ function mapDispatchToProps(dispatch) {
         clearPaths, 
         downloadPath,
         uploadPath,
-        openIOModal,
         setSearchForm,
     }, dispatch);
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { toggleSidebar, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths,  openIOModal, downloadPath, uploadPath } from './actions';
+import { toggleSidebar, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath } from './actions';
 import AppBar from 'material-ui/AppBar';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
@@ -58,7 +58,6 @@ class NavBar extends Component {
                                 <MenuItem primaryText="clear" onTouchTap={() => this.props.clearPaths() } />,
                                 <MenuItem primaryText="download" onTouchTap={() => this.props.downloadPath()} disabled={! this.props.selected_path} />,
                                 <MenuItem primaryText="upload..." onTouchTap={() => this.props.uploadPath()} />,
-                                <MenuItem primaryText="export/import..." onTouchTap={() => this.props.openIOModal(true)} />,
                             ]}
                         />
                         <MenuItem primaryText="geo" rightIcon={<ArrowDropRight />}
@@ -82,7 +81,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleSidebar, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths, openIOModal, downloadPath, uploadPath }, dispatch);
+    return bindActionCreators({ toggleSidebar, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar);
