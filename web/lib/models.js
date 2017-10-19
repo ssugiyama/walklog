@@ -54,49 +54,50 @@ const Walks = sequelize.define('walks', {
     }
 }, {
     underscored: true,
-    classMethods: {
-        getPoint: function (x, y) {
-            return util.format('SRID=%d;POINT(%d %d)', SRID, x, y);
-        },
-        decodePath: function (path) {
-            const json = { type: 'LineString', coordinates: encoder.decode(path), crs:{type:'name',properties:{name: 'EPSG:' + SRID }} };
-            return wkx.Geometry.parseGeoJSON(json).toEwkt();
-        },
-        getPathExtent: function (path) {
-            const points = encoder.decode(path);
-            return points.reduce(function (pv, cv) {
-                if (pv.xmax === undefined || pv.xmax < cv[0] ) pv.xmax = cv[0];
-                if (pv.xmin === undefined || pv.xmin > cv[0] ) pv.xmin = cv[0];
-                if (pv.ymax === undefined || pv.ymax < cv[1] ) pv.ymax = cv[1];
-                if (pv.ymin === undefined || pv.ymin > cv[1] ) pv.ymin = cv[1];
-                return pv;
-            }, {});
-        }
-    },
-    instanceMethods: {
-        encodedPath: function () {
-            return encoder.encode(this.path.coordinates);
-        },
-        asObject: function (includePath) {
-            return {
-                id:         this.id,
-                date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
-                title:      this.title,
-                comment:        this.comment,
-                length :    this.length,
-                path :      (includePath && this.path) ? this.encodedPath() : null,
-                created_at: this.created_at,
-                updated_at: this.updated_at,
-                distance:   this.distance,
-                user:       this.user,   
-            };
-        }
-    }
 });
+
+Walks.getPoint = function (x, y) {
+    return util.format('SRID=%d;POINT(%d %d)', SRID, x, y);
+};
+
+Walks.decodePath = function (path) {
+    const json = { type: 'LineString', coordinates: encoder.decode(path), crs:{type:'name',properties:{name: 'EPSG:' + SRID }} };
+    return wkx.Geometry.parseGeoJSON(json).toEwkt();
+};
+
+Walks.getPathExtent =  function (path) {
+    const points = encoder.decode(path);
+    return points.reduce(function (pv, cv) {
+        if (pv.xmax === undefined || pv.xmax < cv[0] ) pv.xmax = cv[0];
+        if (pv.xmin === undefined || pv.xmin > cv[0] ) pv.xmin = cv[0];
+        if (pv.ymax === undefined || pv.ymax < cv[1] ) pv.ymax = cv[1];
+        if (pv.ymin === undefined || pv.ymin > cv[1] ) pv.ymin = cv[1];
+        return pv;
+    }, {});
+};
+
+Walks.prototype.encodedPath =  function () {
+    return encoder.encode(this.path.coordinates);
+};
+
+Walks.prototype.asObject =  function (includePath) {
+    return {
+        id:         this.id,
+        date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
+        title:      this.title,
+        comment:        this.comment,
+        length :    this.length,
+        path :      (includePath && this.path) ? this.encodedPath() : null,
+        created_at: this.created_at,
+        updated_at: this.updated_at,
+        distance:   this.distance,
+        user:       this.user,   
+    };
+};
 
 Walks.belongsTo(Users);
 
-sequelize.define('areas', {
+const Areas = sequelize.define('areas', {
     jcode:      {
         type:       Sequelize.INTEGER,
         primaryKey: true
@@ -105,17 +106,17 @@ sequelize.define('areas', {
 }, {
     timestamps:  false,
     underscored: true,
-    instanceMethods: {
-        encodedGeom: function () {
-            return  this.the_geom.coordinates.map(function (polygones) {
-                return encoder.encode(polygones[0]);
-            }).join(' ');
-        },
-        asObject: function () {
-            return {
-                jcode:     this.jcode,
-                the_geom : this.encodedGeom()
-            };
-        }
-    }
 });
+
+Areas.prototype.encodedGeom = function () {
+    return  this.the_geom.coordinates.map(function (polygones) {
+        return encoder.encode(polygones[0]);
+    }).join(' ');
+};
+
+Areas.prototype.asObject = function () {
+    return {
+        jcode:     this.jcode,
+        the_geom : this.encodedGeom()
+    };
+};

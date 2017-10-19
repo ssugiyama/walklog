@@ -1,13 +1,13 @@
 const express = require('express')
   ,   models  = require('./models')
   ,   fs      = require('fs')
+  ,   Sequelize = require('sequelize')
+  ,   sequelize = models.sequelize
   ,   Walk    = models.sequelize.models.walks
   ,   Area    = models.sequelize.models.areas
   ,   Users   = models.sequelize.models.users;
 
-/*
- * GET home page.
- */
+const Op = Sequelize.Op;
 
 const api = express.Router();
 module.exports = api;
@@ -24,40 +24,34 @@ api.get('/version', function(req, res){
 
 api.get('/search', function(req, res){
     const order_hash = {
-        'newest_first'       : 'date desc',
+        'newest_first'       : ['date', 'desc'],
         'oldest_first'       : 'date',
-        'longest_first'      : 'length desc',
+        'longest_first'      : ['length', 'desc'],
         'shortest_first'     : 'length',
-        'easternmost_first'  : 'st_xmax(PATH) desc',
-        'westernmost_first'  : 'st_xmin(PATH)',
-        'southernmost_first' : 'st_ymin(PATH)',
-        'northernmost_first' : 'st_ymax(PATH) desc',
-        'nearest_first'      : 'distance'
+        'easternmost_first'  : [sequelize.fn('st_xmax', sequelize.col('path')),  'desc'],
+        'westernmost_first'  : sequelize.fn('st_xmin', sequelize.col('path')),
+        'southernmost_first' : sequelize.fn('st_ymin', sequelize.col('path')),
+        'northernmost_first' : [sequelize.fn('st_ymax', sequelize.col('path')), 'desc'],
+        'nearest_first'      : sequelize.literal('distance'),
     };
-    let where;
-    const exprs = [], values = [];
+    const where = [];
     const order = order_hash[req.query.order] || 'date desc';
     const attributes = ['id', 'date', 'title', 'comment', 'path', 'length'];
     if (req.query.id) {
-        exprs.push('walks.id = ?');
-        values.push(req.query.id);
+        where.push({id: req.query.id});
     }
     else if (req.query.date) {
-        exprs.push('date = ?');
-        values.push(req.query.date);
+        where.push({date: req.query.date});
     }
     else {
         if (req.query.user) {
-            exprs.push('user_id = ?');
-            values.push(parseInt(req.query.user));
+            where.push({user_id: parseInt(req.query.user)});
         }
         if (req.query.year) {
-            exprs.push('extract(year from DATE) = ?');
-            values.push(parseInt(req.query.year));
+            where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(req.query.year)));
         }
         if (req.query.month) {
-            exprs.push('extract(month from DATE) = ?');
-            values.push(parseInt(req.query.month));
+            where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(req.query.month)));
         }
 
         if (req.query.filter == 'neighborhood') {
@@ -70,8 +64,12 @@ api.get('/search', function(req, res){
             const center    = Walk.getPoint(longitude, latitude);
             const lb        = Walk.getPoint(longitude-dlon, latitude-dlat);
             const rt        = Walk.getPoint(longitude+dlon, latitude+dlat);
-            exprs.push('st_makebox2d(?, ?) && path', 'st_distance(path, ?, TRUE) <= ?');
-            values.push(lb, rt,  center, radius);
+            where.push(sequelize.where(sequelize.fn('st_makebox2d', lb, rt), {
+                [Op.overlap]: sequelize.col('path')
+            }));
+            where.push(sequelize.where(sequelize.fn('st_distance', sequelize.col('path'), center, true), {
+                [Op.lte]: radius
+            }));
         }
         else if (req.query.filter == 'cities') {
             if (!req.query.cities) {
@@ -82,7 +80,7 @@ api.get('/search', function(req, res){
                 return;
             }
             const cities = req.query.cities.split(/,/).map(function (elm) { return `'${elm}'`; }).join(',');
-            exprs.push(`EXISTS (SELECT * FROM areas WHERE jcode IN (${cities}) AND path && the_geom AND ST_Intersects(path, the_geom))`);
+            where.push(sequelize.literal(`EXISTS (SELECT * FROM areas WHERE jcode IN (${cities}) AND path && the_geom AND ST_Intersects(path, the_geom))`));
         }
         else if (req.query.filter == 'crossing') {
             if (!req.query.searchPath) {
@@ -93,8 +91,12 @@ api.get('/search', function(req, res){
                 return;
             }
             const linestring = Walk.decodePath(req.query.searchPath);
-            exprs.push('path && ?', 'ST_Intersects(path, ?)');
-            values.push(linestring, linestring);
+            where.push({ 
+                path: {
+                    [Op.overlap]: linestring
+                }
+            });
+            where.push(sequelize.fn('ST_Intersects', sequelize.col('path'), linestring));
         }
         else if (req.query.filter == 'hausdorff') {
             if (!req.query.searchPath) {
@@ -114,18 +116,21 @@ api.get('/search', function(req, res){
             const rt         = Walk.getPoint(extent.xmax+dlon, extent.ymax+dlat);
 
             attributes.push([`ST_HausdorffDistance(ST_Transform(path, ${models.SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${models.SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance']);
-            exprs.push('ST_Within(path, ST_SetSRID(ST_MakeBox2d(?, ?), ?))',
-                       'ST_HausdorffDistance(ST_Transform(path, ?), ST_Transform(?::Geometry, ?)) < ?');
-            values.push(lb, rt, models.SRID, models.SRID_FOR_SIMILAR_SEARCH, linestring, models.SRID_FOR_SIMILAR_SEARCH, max_distance);
+            where.push(sequelize.fn('ST_Within', sequelize.col('path'), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', lb, rt), models.SRID)));
+            where.push(sequelize.where(
+                        sequelize.fn('ST_HausdorffDistance', 
+                            sequelize.fn('ST_Transform', sequelize.col('path'), models.SRID_FOR_SIMILAR_SEARCH), 
+                            sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), models.SRID_FOR_SIMILAR_SEARCH)), {
+                                [Op.lt]: max_distance
+                            }));
         }
     }
-    where = [exprs.map(function (e) { return '(' + e + ')';}).join(' AND ')].concat(values);
     const limit  = parseInt(req.query.limit) || 20;
     const offset = parseInt(req.query.offset) || 0;
     Walk.findAndCountAll({
         attributes : attributes,
-        order  : order,
-        where  : where,
+        order  : [order],
+        where  : {[Op.and]: where},
         offset : offset,
         limit  : limit,
         include: [{ model: Users }]
@@ -176,7 +181,7 @@ api.get('/cities', function(req, res){
     else{
         latitude  = parseFloat(req.query.latitude);
         longitude = parseFloat(req.query.longitude);
-        where = ['ST_Contains(the_geom, ST_SetSRID(ST_Point(?, ?), ?))', longitude, latitude, models.SRID];
+        where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', longitude, latitude), models.SRID));
     }
     Area.findAll({
         where  : where
