@@ -119,11 +119,11 @@ class PanoramaBox extends Component {
                         label="overlay" toggled={this.props.overlay} onToggle={this.handleOverlayChange.bind(this)} style={styles.panoramaBoxOverlayToggle}/></div>
                     <div style={styles.panoramaBoxBody} ref="body"></div>
                     <div style={styles.panoramaBoxControl}>
-                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
-                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
                         <span className="label label-info"><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
-                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                        <IconButton onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
                     </div>
             </div>
         );

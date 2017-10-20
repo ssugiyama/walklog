@@ -104,9 +104,9 @@ class WalkEditor extends Component {
     }
     render() {
         const actions = [];
-        actions.push (<FlatButton onTouchTap={this.handleSubmit.bind(this)}  label={ this.props.walk_editor_mode || 'create' } primary={true} />);
+        actions.push (<FlatButton onClick={this.handleSubmit.bind(this)}  label={ this.props.walk_editor_mode || 'create' } primary={true} />);
         if (this.props.walk_editor_mode == 'update') {
-            actions.push (<FlatButton label="delete" secondary={true} onTouchTap={this.handleDelete.bind(this)}/>);
+            actions.push (<FlatButton label="delete" secondary={true} onClick={this.handleDelete.bind(this)}/>);
         }
         // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
         return (
@@ -131,7 +131,7 @@ class WalkEditor extends Component {
                     this.props.walk_editor_mode == 'update' ?
                     <div><Toggle label="update path?" onToggle={this.handleChange.bind(this, 'update_path')}  toggled={this.state.update_path} disabled={this.state.path == null} /></div> : null
                 }
-                <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+                <IconButton style={styles.dialogCloseButton} onClick={this.handleClose.bind(this)}><NavigationClose /></IconButton>
             </Dialog>
         );
     }

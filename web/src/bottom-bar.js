@@ -48,13 +48,13 @@ class BottomBar extends Component {
             <Toolbar style={styles.bottomBar} noGutter={true}>
             { this.props.overlay ? (
                 <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
-                    <IconButton tooltip="-10" tooltipPosition="top-center" touch={true} onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
-                    <IconButton tooltip="-1" tooltipPosition="top-center" touch={true} onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                    <IconButton tooltip="-10" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
+                    <IconButton tooltip="-1" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
                     <span className="label label-info"><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
-                    <IconButton tooltip="+1" tooltipPosition="top-center" touch={true} onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                    <IconButton tooltip="+10" tooltipPosition="top-center" touch={true} onTouchTap={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
+                    <IconButton tooltip="+1" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                    <IconButton tooltip="+10" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
                     <ToolbarSeparator />
-                    <IconButton tooltip="back to map" tooltipPosition="top-center" touch={true} onTouchTap={ () => { this.props.setOverlay(false); }}><MapsMap /></IconButton>
+                    <IconButton tooltip="back to map" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setOverlay(false); }}><MapsMap /></IconButton>
                 </ToolbarGroup>
             ) : this.props.filter == 'neighborhood' ? (
                 <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
@@ -69,23 +69,23 @@ class BottomBar extends Component {
                             : (<MenuItem value={this.props.radius} primaryText={Math.round(this.props.radius) + 'm'} />)
                         }
                     </DropDownMenu>
-                    <IconButton tooltip="cancel" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
+                    <IconButton tooltip="cancel" tooltipPosition="top-center" touch={true} onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
                 </ToolbarGroup>            
             ) : this.props.filter == 'cities' ? (
                 <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
                     <ToolbarTitle text='Cities' />
-                    <IconButton tooltip="clear" tooltipPosition="top-center" touch={true} onTouchTap={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
-                    <IconButton tooltip="cancel" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
+                    <IconButton tooltip="clear" tooltipPosition="top-center" touch={true} onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
+                    <IconButton tooltip="cancel" tooltipPosition="top-center" touch={true} onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
                 </ToolbarGroup>            
             )            
             : (
                 <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
                     <ToolbarTitle text='Path' />
-                    <IconButton tooltip="edit" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.setEditingPath() } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
-                    <IconButton tooltip="delete" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}><ActionDelete /></IconButton>
-                    <IconButton tooltip="clear all" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.clearPaths() }><NavigationRefresh /></IconButton>
-                    <IconButton tooltip="download" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
-                    <IconButton tooltip="upload" tooltipPosition="top-center" touch={true} onTouchTap={() => this.props.uploadPath() }><FileUpload /></IconButton>
+                    <IconButton tooltip="edit" tooltipPosition="top-center" touch={true} onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
+                    <IconButton tooltip="delete" tooltipPosition="top-center" touch={true} onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}><ActionDelete /></IconButton>
+                    <IconButton tooltip="clear all" tooltipPosition="top-center" touch={true} onClick={() => this.props.clearPaths() }><NavigationRefresh /></IconButton>
+                    <IconButton tooltip="download" tooltipPosition="top-center" touch={true} onClick={() => this.props.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
+                    <IconButton tooltip="upload" tooltipPosition="top-center" touch={true} onClick={() => this.props.uploadPath() }><FileUpload /></IconButton>
                     <span className="label label-info">{`${this.state.length.toFixed(1)}km`}</span>
                 </ToolbarGroup>            
             ) }

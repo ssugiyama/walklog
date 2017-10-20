@@ -136,7 +136,7 @@ class SearchForm extends Component {
                     <TextField id="search_form_limit" floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: '50%'}} />
                 </div>
                 <div>
-                    <FlatButton label="Reset" secondary={true} onTouchTap={this.reset.bind(this)} style={{width: '100%'}} />
+                    <FlatButton label="Reset" secondary={true} onClick={this.reset.bind(this)} style={{width: '100%'}} />
                 </div>
             </form>
         );

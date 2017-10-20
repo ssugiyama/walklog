@@ -39,7 +39,7 @@ class GeocodeModal extends Component {
     }
     render() {
         const actions = [
-            <FlatButton onTouchTap={this.handleSubmit.bind(this, null)}  label="Move to" primary={true} />
+            <FlatButton onClick={this.handleSubmit.bind(this, null)}  label="Move to" primary={true} />
         ];
         // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
         return (
@@ -51,7 +51,7 @@ class GeocodeModal extends Component {
                 onRequestClose={this.handleClose.bind(this)}
             >
                 <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value); }} floatingLabelText="address" floatingLabelFixed={true}  fullWidth={true} />
-                <IconButton style={styles.dialogCloseButton} onTouchTap={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+                <IconButton style={styles.dialogCloseButton} onClick={this.handleClose.bind(this)}><NavigationClose /></IconButton>
             </Dialog>
         );
     }

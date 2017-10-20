@@ -3,13 +3,13 @@ import * as ActionTypes from './action-types';
 import { Route, browserHistory, match } from 'react-router';
 import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux';
 import thunkMiddleware from 'redux-thunk';
-import createLogger from 'redux-logger';
+import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, setSearchForm, setSelectedPath, setSelectedItem } from './actions';
 import BodyContainer from './body';
 
-const injectTapEventPlugin = require('react-tap-event-plugin');
-injectTapEventPlugin();
+// const injectTapEventPlugin = require('react-tap-event-plugin');
+// injectTapEventPlugin();
 
 const currentYear = (new Date()).getFullYear();
 const years = [];
@@ -259,8 +259,6 @@ const reducers = combineReducers({
     routing: routerReducer
 });
 
-const loggerMiddleware = createLogger();
-
 export function handleRoute(renderProps, isPathSelected, prefix, rows, next) {
     const query = Object.assign({}, renderProps.location.query);
     if (renderProps.params.id) {
@@ -307,7 +305,7 @@ const middlewares = [
 ];
 
 if (process.env.NODE_ENV != 'production') {
-    middlewares.push(loggerMiddleware);
+    middlewares.push(logger);
 }
 
 const createStoreWithMiddleware = applyMiddleware(

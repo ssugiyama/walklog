@@ -77,7 +77,7 @@ class SearchBox extends Component {
                         }
 
                     </strong> :
-            { this.props.rows.length > 0 ? (<FlatButton onTouchTap={ this.handleShowAll.bind(this) } label="show all paths" />) : null }
+            { this.props.rows.length > 0 ? (<FlatButton onClick={ this.handleShowAll.bind(this) } label="show all paths" />) : null }
             { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
               <Toggle
                   label="show hausdorff distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> : null }
@@ -94,7 +94,7 @@ class SearchBox extends Component {
                         }
                     </TableBody>
                 </Table>
-                { this.props.params ? <FlatButton style={{width: '100%'}} onTouchTap={this.handleGetMore.bind(this)} label="more" /> : null }
+                { this.props.params ? <FlatButton style={{width: '100%'}} onClick={this.handleGetMore.bind(this)} label="more" /> : null }
             </div>
         );
     }

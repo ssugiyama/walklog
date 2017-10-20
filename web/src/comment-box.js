@@ -53,10 +53,10 @@ class CommentBox extends Component {
         return (
             <div>
                 <div style={styles.commentBoxControl}>
-                    <IconButton disabled={!this.props.next_id && this.props.selected_index <= 0} onTouchTap={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
-                    <IconButton disabled={!this.props.prev_id && this.props.selected_index >= this.props.count - 1} onTouchTap={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
+                    <IconButton disabled={!this.props.next_id && this.props.selected_index <= 0} onClick={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
+                    <IconButton disabled={!this.props.prev_id && this.props.selected_index >= this.props.count - 1} onClick={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
                     {
-                        this.props.current_user && data.user && this.props.current_user.id == data.user.id ? (<IconButton onTouchTap={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
+                        this.props.current_user && data.user && this.props.current_user.id == data.user.id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                     }
                     <div ref="twitter" style={styles.twitter}></div>
                 </div>

@@ -41,29 +41,29 @@ class NavBar extends Component {
             <AppBar
                 title="walklog"
                 onTitleTouchTap={this.handleShow.bind(this)}
-                onLeftIconButtonTouchTap={this.handleShow.bind(this)}
+                onLeftIconButtonClick={this.handleShow.bind(this)}
                 iconElementRight={
                     <IconMenu
                         iconButtonElement={
                             <IconButton><MoreVertIcon /></IconButton>
                     }>
-                        <MenuItem primaryText={this.props.current_user ? 'logout' : 'login with twitter'}  onTouchTap={this.login_or_logout.bind(this)} />
+                        <MenuItem primaryText={this.props.current_user ? 'logout' : 'login with twitter'}  onClick={this.login_or_logout.bind(this)} />
                         {
-                            this.props.current_user ? ( <MenuItem primaryText="new walk..."  onTouchTap={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>): null
+                            this.props.current_user ? ( <MenuItem primaryText="new walk..."  onClick={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}/>): null
                         }
                         <MenuItem primaryText="path" rightIcon={<ArrowDropRight />}
                             menuItems={[
-                                <MenuItem primaryText="edit" onTouchTap={() => this.props.setEditingPath() } disabled={! this.props.selected_path} />,
-                                <MenuItem primaryText="delete" onTouchTap={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path} />,
-                                <MenuItem primaryText="clear" onTouchTap={() => this.props.clearPaths() } />,
-                                <MenuItem primaryText="download" onTouchTap={() => this.props.downloadPath()} disabled={! this.props.selected_path} />,
-                                <MenuItem primaryText="upload..." onTouchTap={() => this.props.uploadPath()} />,
+                                <MenuItem primaryText="edit" onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path} />,
+                                <MenuItem primaryText="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path} />,
+                                <MenuItem primaryText="clear" onClick={() => this.props.clearPaths() } />,
+                                <MenuItem primaryText="download" onClick={() => this.props.downloadPath()} disabled={! this.props.selected_path} />,
+                                <MenuItem primaryText="upload..." onClick={() => this.props.uploadPath()} />,
                             ]}
                         />
                         <MenuItem primaryText="geo" rightIcon={<ArrowDropRight />}
                             menuItems={[
-                                <MenuItem onTouchTap={ () => this.props.openGeocodeModal(true)} primaryText="geocode..." />,
-                                <MenuItem onTouchTap={this.setCurrentPosition.bind(this)} primaryText="geolocation" />
+                                <MenuItem onClick={ () => this.props.openGeocodeModal(true)} primaryText="geocode..." />,
+                                <MenuItem onClick={this.setCurrentPosition.bind(this)} primaryText="geolocation" />
                             ]}
                         />
                      </IconMenu>
