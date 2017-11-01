@@ -98,7 +98,7 @@ api.get('/search', function(req, res){
             });
             where.push(sequelize.fn('ST_Intersects', sequelize.col('path'), linestring));
         }
-        else if (req.query.filter == 'hausdorff' || req.query.filter == 'frechet') {
+        else if (req.query.filter == 'hausdorff') {
             if (!req.query.searchPath) {
                 res.json({
                     count: 0,
@@ -137,16 +137,16 @@ api.get('/search', function(req, res){
             const sp         = Walk.getStartPoint(req.query.searchPath);
             const ep         = Walk.getEndPoint(req.query.searchPath);
             const dlat       = max_distance*180/Math.PI/models.EARTH_RADIUS;
-            const mlat       = Math.max(Math.abs(fp.y + dlat), Math.abs(fp.y - dlat), Math.abs(lp.y + dlat), Math.abs(lp.y - dlat));
-            const dlon       = dlat/Math.cos(fmlat/180*Math.PI);
-            const slb         = Walk.getPoint(fp.x-dlon, fp.y-dlat);
-            const srt         = Walk.getPoint(fp.x+dlon, fp.y+dlat);
-            const elb         = Walk.getPoint(lp.x-dlon, lp.y-dlat);
-            const ert         = Walk.getPoint(lp.x+dlon, lp.y+dlat);
+            const mlat       = Math.max(Math.abs(sp[1] + dlat), Math.abs(sp[1] - dlat), Math.abs(ep[1] + dlat), Math.abs(ep[1] - dlat));
+            const dlon       = dlat/Math.cos(mlat/180*Math.PI);
+            const slb         = Walk.getPoint(sp[0]-dlon, sp[1]-dlat);
+            const srt         = Walk.getPoint(sp[0]+dlon, sp[1]+dlat);
+            const elb         = Walk.getPoint(ep[0]-dlon, ep[1]-dlat);
+            const ert         = Walk.getPoint(ep[0]+dlon, ep[1]+dlat);
 
             attributes.push([`ST_FrechetDistance(ST_Transform(path, ${models.SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${models.SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance']);
-            where.push(sequelize.fn('ST_Within', sequelize.fn('ST_StartPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', flb, frt), models.SRID)));
-            where.push(sequelize.fn('ST_Within', sequelize.fn('ST_EndPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', llb, lrt), models.SRID)));
+            where.push(sequelize.fn('ST_Within', sequelize.fn('ST_StartPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', slb, srt), models.SRID)));
+            where.push(sequelize.fn('ST_Within', sequelize.fn('ST_EndPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', elb, ert), models.SRID)));
             where.push(sequelize.where(
                         sequelize.fn('ST_FrechetDistance',
                             sequelize.fn('ST_Transform', sequelize.col('path'), models.SRID_FOR_SIMILAR_SEARCH),
