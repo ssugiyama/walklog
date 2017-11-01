@@ -74,7 +74,7 @@ const mainReducer = function(state = initialState, action) {
     switch (action.type) {
     case ActionTypes.SET_SEARCH_FORM:
         {
-            if (action.payload.filter == 'hausdorff') {
+            if (action.payload.filter == 'hausdorff' || action.payload.filter == 'frechet') {
                 action.payload.order = 'nearest_first';
             }
             else if (state.search_form.order == 'nearest_first') {
@@ -273,7 +273,7 @@ export function handleRoute(renderProps, isPathSelected, prefix, rows, next) {
     const show_on_map = query.show || (query.id && 'first');
     delete query['show'];
     const search_form = Object.assign({}, initialState.search_form, query);
-    if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff') && !isPathSelected && search_form.searchPath) {
+    if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff' || search_form.filter == 'frechet') && !isPathSelected && search_form.searchPath) {
         next(setSelectedPath(search_form.searchPath));
     }
     next(setSearchForm(search_form));

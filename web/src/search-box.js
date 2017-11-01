@@ -80,7 +80,7 @@ class SearchBox extends Component {
             { this.props.rows.length > 0 ? (<FlatButton onClick={ this.handleShowAll.bind(this) } label="show all paths" />) : null }
             { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
               <Toggle
-                  label="show hausdorff distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> : null }
+                  label="show line distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> : null }
                 </div>
                 <Table onRowSelection={this.handleSelect.bind(this)} style={{cursor: 'pointer'}}>
                     <TableBody stripedRows  displayRowCheckbox={false}>

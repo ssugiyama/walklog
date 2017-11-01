@@ -76,6 +76,16 @@ Walks.getPathExtent =  function (path) {
     }, {});
 };
 
+Walks.getStartPoint = function(path) {
+    const points = encoder.decode(path);
+    return points[0];
+}
+
+Walks.getEndPoint = function(path) {
+    const points = encoder.decode(path);
+    return points[points.length - 1];
+}
+
 Walks.prototype.encodedPath =  function () {
     return encoder.encode(this.path.coordinates);
 };

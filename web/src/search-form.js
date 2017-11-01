@@ -37,7 +37,7 @@ const order_options  = [
     { label: 'westernmost first', value: 'westernmost_first' },
 ];
 
-const order_options_hausdorff = [
+const order_options_with_nearest = [
     { label: 'nearest first', value: 'nearest_first' },
 ];
 
@@ -57,6 +57,7 @@ class SearchForm extends Component {
             break;
         case 'crossing':
         case 'hausdorff':
+        case 'frechet':
             keys.push('searchPath');
             break;
         }
@@ -68,13 +69,13 @@ class SearchForm extends Component {
         this.props.setTabValue('search');
         if (this.props.open_sidebar) {
             if ( prevProps.filter != this.props.filter 
-                && ['neighborhood', 'cities', 'hausdorff', 'crossing'].some(item => item == this.props.filter)) {
+                && ['neighborhood', 'cities', 'hausdorff', 'crossing', 'frechet'].some(item => item == this.props.filter)) {
                 setTimeout(this.props.toggleSidebar.bind(this), 1000);
             }           
         }
         else {
             if (! (query.filter == 'cities' && ! query.cities) && 
-                ! ((query.filter == 'crossing' || query.filter == 'hausdorff') && ! query.searchPath)) {
+                ! ((query.filter == 'crossing' || query.filter == 'hausdorff' || query.filter == 'frechet') && ! query.searchPath)) {
                 setTimeout(this.props.toggleSidebar.bind(this), 1000);
             }
         }
@@ -102,6 +103,7 @@ class SearchForm extends Component {
                         <MenuItem value="any" primaryText="any" />
                         <MenuItem value="neighborhood" primaryText="Neighborhood" />
                         <MenuItem value="cities" primaryText="Cities" />
+                        <MenuItem value="frechet" primaryText="Fréchet" />
                         <MenuItem value="hausdorff" primaryText="Hausdorff" />
                         <MenuItem value="crossing" primaryText="Crossing" />
                     </SelectField>
@@ -128,7 +130,7 @@ class SearchForm extends Component {
                 <div>
                     <SelectField id="search_form_order" floatingLabelText="order" value={this.props.order} onChange={this.handleSelectChange.bind(this, 'order')} style={{width: '50%', verticalAlign: 'bottom'}}>
                         {
-                            (this.props.filter == 'hausdorff' ? order_options_hausdorff : order_options).map(option =>
+                            (this.props.filter == 'hausdorff' || this.props.filter == 'frechet' ? order_options_with_nearest : order_options).map(option =>
                                 <MenuItem value={option.value} key={option.value} primaryText={option.label} />
                             )
                         }
