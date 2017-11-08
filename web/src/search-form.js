@@ -69,7 +69,8 @@ class SearchForm extends Component {
         this.props.setTabValue('search');
         if (this.props.open_sidebar) {
             if ( prevProps.filter != this.props.filter 
-                && ['neighborhood', 'cities', 'hausdorff', 'crossing', 'frechet'].some(item => item == this.props.filter)) {
+                && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
+                  || ( ['hausdorff', 'crossing', 'frechet'].some(item => item == this.props.filter) && ! query.searchPath) ) {
                 setTimeout(this.props.toggleSidebar.bind(this), 1000);
             }           
         }

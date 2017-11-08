@@ -168,7 +168,8 @@ const mainReducer = function(state = initialState, action) {
             if (tab_value == 'visualization') {
                 tab_value = 'search';
             }
-            return Object.assign({}, state, {selected_path: null, tab_value});
+            const search_form = Object.assign({}, state.search_form, {searchPath: null });
+            return Object.assign({}, state, {selected_path: null, tab_value, search_form});
         }
     case ActionTypes.CLEAR_PATHS:
         {
@@ -180,7 +181,8 @@ const mainReducer = function(state = initialState, action) {
             if (tab_value == 'visualization') {
                 tab_value = 'search';
             }
-            return Object.assign({}, state, {selected_path: null, action_queue, tab_value});
+            const search_form = Object.assign({}, state.search_form, {searchPath: null });
+            return Object.assign({}, state, {selected_path: null, action_queue, tab_valu, search_form});
         }
     case ActionTypes.DOWNLOAD_PATH:
     case ActionTypes.UPLOAD_PATH:
