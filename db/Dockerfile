@@ -1,9 +1,8 @@
-FROM mdillon/postgis
+FROM chezsugi/postgis
 MAINTAINER Shinichi SUGIYAMA <shin.sugi@gmail.com>
 
 WORKDIR /tmp
-RUN apt-get update
-RUN apt-get install -y unzip
+RUN apk add --no-cache unzip
 ADD schema.sql .
 ADD japan_ver*.zip .
 ADD walklog-init.sh /docker-entrypoint-initdb.d/
