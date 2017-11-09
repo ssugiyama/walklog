@@ -20,7 +20,7 @@
     <script src="//www.google.com/jsapi"></script>
     <script src="//maps.google.com/maps/api/js?libraries=geometry,drawing&key=<%= google_api_key %>"></script>
 </head>
-<body style="margin: 0;">
+<body style="margin: 0; background-color: black;">
     <div id="body"><%- html %></div>
     <script>
         window.__PRELOADED_STATE__ = <%- JSON.stringify(preloadedState) %>
