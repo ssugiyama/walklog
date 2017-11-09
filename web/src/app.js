@@ -182,7 +182,7 @@ const mainReducer = function(state = initialState, action) {
                 tab_value = 'search';
             }
             const search_form = Object.assign({}, state.search_form, {searchPath: null });
-            return Object.assign({}, state, {selected_path: null, action_queue, tab_valu, search_form});
+            return Object.assign({}, state, {selected_path: null, action_queue, tab_value, search_form});
         }
     case ActionTypes.DOWNLOAD_PATH:
     case ActionTypes.UPLOAD_PATH:
