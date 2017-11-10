@@ -94,7 +94,7 @@ class SearchBox extends Component {
                         }
                     </TableBody>
                 </Table>
-                { this.props.params ? <FlatButton style={{width: '100%'}} onClick={this.handleGetMore.bind(this)} label="more" /> : null }
+                { this.props.params ? <FlatButton style={{width: '100%', marginBottom: 20}} onClick={this.handleGetMore.bind(this)} label="more" /> : null }
             </div>
         );
     }
