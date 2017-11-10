@@ -49,7 +49,7 @@ class SearchBox extends Component {
     }
     render() {
         return (
-            <div className="sidebar">
+            <div style={{ paddingBottom: 20 }}>
                 <SearchFormContainer />
                 <div>
                     <strong>
