@@ -40,8 +40,8 @@ class NavBar extends Component {
         return (
             <AppBar
                 title="walklog"
-                onTitleTouchTap={this.handleShow.bind(this)}
-                onLeftIconButtonTouchTap={this.handleShow.bind(this)}
+                onTitleClick={this.handleShow.bind(this)}
+                onLeftIconButtonClick={this.handleShow.bind(this)}
                 iconElementRight={
                     <IconMenu
                         iconButtonElement={

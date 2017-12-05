@@ -27,7 +27,7 @@
     "isomorphic-fetch": "^2.2.1",
     "jssha": "^2.2.0",
     "marked": "^0.3.5",
-    "material-ui": "0.19.4",
+    "material-ui": "0.20.0",
     "morgan": "*",
     "passport": "^0.4.0",
     "passport-twitter": "^1.0.4",
