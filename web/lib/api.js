@@ -12,17 +12,7 @@ const Op = Sequelize.Op;
 const api = express.Router();
 module.exports = api;
 
-api.get('/version', function(req, res){
-    fs.readFile('package.json', function (err, data) {
-        const json = JSON.parse(data);
-        res.json({
-            app_version: json.version,
-            app_env: process.env.NODE_ENV,
-        });
-    });
-});
-
-api.get('/search', function(req, res){
+const searchFunc = params => {
     const order_hash = {
         'newest_first'       : ['date', 'desc'],
         'oldest_first'       : 'date',
@@ -35,29 +25,29 @@ api.get('/search', function(req, res){
         'nearest_first'      : sequelize.literal('distance'),
     };
     const where = [];
-    const order = order_hash[req.query.order] || 'date desc';
+    const order = order_hash[params.order || 'newest_first'];
     const attributes = ['id', 'date', 'title', 'comment', 'path', 'length'];
-    if (req.query.id) {
-        where.push({id: req.query.id});
+    if (params.id) {
+        where.push({id: params.id});
     }
-    else if (req.query.date) {
-        where.push({date: req.query.date});
+    else if (params.date) {
+        where.push({date: params.date});
     }
     else {
-        if (req.query.user) {
-            where.push({user_id: parseInt(req.query.user)});
+        if (params.user) {
+            where.push({user_id: parseInt(params.user)});
         }
-        if (req.query.year) {
-            where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(req.query.year)));
+        if (params.year) {
+            where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(params.year)));
         }
-        if (req.query.month) {
-            where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(req.query.month)));
+        if (params.month) {
+            where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(params.month)));
         }
 
-        if (req.query.filter == 'neighborhood') {
-            const latitude  = parseFloat(req.query.latitude);
-            const longitude = parseFloat(req.query.longitude);
-            const radius    = parseFloat(req.query.radius);
+        if (params.filter == 'neighborhood') {
+            const latitude  = parseFloat(params.latitude);
+            const longitude = parseFloat(params.longitude);
+            const radius    = parseFloat(params.radius);
             const dlat      = radius*180/Math.PI/models.EARTH_RADIUS;
             const mlat      = latitude > 0 ? latitude + dlat : latitude - dlat;
             const dlon      = dlat/Math.cos(mlat/180*Math.PI);
@@ -71,26 +61,26 @@ api.get('/search', function(req, res){
                 [Op.lte]: radius
             }));
         }
-        else if (req.query.filter == 'cities') {
-            if (!req.query.cities) {
+        else if (params.filter == 'cities') {
+            if (!params.cities) {
                 res.json({
                     count: 0,
                     rows: []
                 });
                 return;
             }
-            const cities = req.query.cities.split(/,/).map(function (elm) { return `'${elm}'`; }).join(',');
+            const cities = params.cities.split(/,/).map(function (elm) { return `'${elm}'`; }).join(',');
             where.push(sequelize.literal(`EXISTS (SELECT * FROM areas WHERE jcode IN (${cities}) AND path && the_geom AND ST_Intersects(path, the_geom))`));
         }
-        else if (req.query.filter == 'crossing') {
-            if (!req.query.searchPath) {
+        else if (params.filter == 'crossing') {
+            if (!params.searchPath) {
                 res.json({
                     count: 0,
                     rows: []
                 });
                 return;
             }
-            const linestring = Walk.decodePath(req.query.searchPath);
+            const linestring = Walk.decodePath(params.searchPath);
             where.push({ 
                 path: {
                     [Op.overlap]: linestring
@@ -98,17 +88,17 @@ api.get('/search', function(req, res){
             });
             where.push(sequelize.fn('ST_Intersects', sequelize.col('path'), linestring));
         }
-        else if (req.query.filter == 'hausdorff') {
-            if (!req.query.searchPath) {
+        else if (params.filter == 'hausdorff') {
+            if (!params.searchPath) {
                 res.json({
                     count: 0,
                     rows: []
                 });
                 return;
             }
-            const max_distance = req.query.max_distance || 4000;
-            const linestring = Walk.decodePath(req.query.searchPath);
-            const extent     = Walk.getPathExtent(req.query.searchPath);
+            const max_distance = params.max_distance || 4000;
+            const linestring = Walk.decodePath(params.searchPath);
+            const extent     = Walk.getPathExtent(params.searchPath);
             const dlat       = max_distance*180/Math.PI/models.EARTH_RADIUS;
             const mlat       = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin-dlat));
             const dlon       = dlat/Math.cos(mlat/180*Math.PI);
@@ -124,18 +114,18 @@ api.get('/search', function(req, res){
                                 [Op.lt]: max_distance
                             }));
         }
-        else if (req.query.filter == 'frechet') {
-            if (!req.query.searchPath) {
+        else if (params.filter == 'frechet') {
+            if (!params.searchPath) {
                 res.json({
                     count: 0,
                     rows: []
                 });
                 return;
             }
-            const max_distance = req.query.max_distance || 4000;
-            const linestring = Walk.decodePath(req.query.searchPath);
-            const sp         = Walk.getStartPoint(req.query.searchPath);
-            const ep         = Walk.getEndPoint(req.query.searchPath);
+            const max_distance = params.max_distance || 4000;
+            const linestring = Walk.decodePath(params.searchPath);
+            const sp         = Walk.getStartPoint(params.searchPath);
+            const ep         = Walk.getEndPoint(params.searchPath);
             const dlat       = max_distance*180/Math.PI/models.EARTH_RADIUS;
             const mlat       = Math.max(Math.abs(sp[1] + dlat), Math.abs(sp[1] - dlat), Math.abs(ep[1] + dlat), Math.abs(ep[1] - dlat));
             const dlon       = dlat/Math.cos(mlat/180*Math.PI);
@@ -155,50 +145,70 @@ api.get('/search', function(req, res){
                             }));
         }
     }
-    const limit  = parseInt(req.query.limit) || 20;
-    const offset = parseInt(req.query.offset) || 0;
-    Walk.findAndCountAll({
-        attributes : attributes,
-        order  : [order],
-        where  : {[Op.and]: where},
-        offset : offset,
-        limit  : limit,
-        include: [{ model: Users }]
-    }).then(function (result) {
-        let params = null;
-        if (result.count > offset + limit) {
-            const q = Object.keys(req.query).filter(function (e) { return e != 'offset';}).map( function (e) { return e + '=' + req.query[e]; });
-            q.push('offset=' +  (offset + limit));
-            params = q.join('&');
-        }
-        let prev_id, next_id;
-        if (req.query.id) {
-            models.sequelize.query('SELECT id FROM walks where id > ? order by id limit 1',
-                { replacements: [req.query.id], type: models.sequelize.QueryTypes.SELECT }
-            ).then(ids => {
-                if (ids.length > 0) next_id = ids[0].id;
-                return models.sequelize.query('SELECT id FROM walks where id < ? order by id desc limit 1',
-                    { replacements: [req.query.id], type: models.sequelize.QueryTypes.SELECT }
-                );
-            }).then(ids => {
-                if (ids.length > 0) prev_id = ids[0].id;
-                res.json({
-                    count: result.count,
-                    params: params,
-                    rows:  result.rows.map(function (row) { return row.asObject(true); }),
-                    next_id: next_id,
-                    prev_id: prev_id
+    const limit  = parseInt(params.limit) || 20;
+    const offset = parseInt(params.offset) || 0;
+    return new Promise((resolve, reject) => {
+        Walk.findAndCountAll({
+            attributes : attributes,
+            order  : [order],
+            where  : {[Op.and]: where},
+            offset : offset,
+            limit  : limit,
+            include: [{ model: Users }]
+        }).then(function (result) {
+            let qparams = null;
+            if (result.count > offset + limit) {
+                const q = Object.keys(params).filter(e => e != 'offset').map( e => e + '=' + params[e]);
+                q.push('offset=' +  (offset + limit));
+                qparams = q.join('&');
+            }
+            let prev_id, next_id;
+            if (params.id) {
+                models.sequelize.query('SELECT id FROM walks where id > ? order by id limit 1',
+                    { replacements: [params.id], type: models.sequelize.QueryTypes.SELECT }
+                ).then(ids => {
+                    if (ids.length > 0) next_id = ids[0].id;
+                    return models.sequelize.query('SELECT id FROM walks where id < ? order by id desc limit 1',
+                        { replacements: [params.id], type: models.sequelize.QueryTypes.SELECT }
+                    );
+                }).then(ids => {
+                    if (ids.length > 0) prev_id = ids[0].id;
+                    resolve({
+                        count: result.count,
+                        params: qparams,
+                        rows:  result.rows.map(function (row) { return row.asObject(true); }),
+                        next_id: next_id,
+                        prev_id: prev_id
+                    });
                 });
-            });
-        } else {
-            res.json({
-                count: result.count,
-                params: params,
-                rows:  result.rows.map(function (row) { return row.asObject(true); })
-            });
-        }
-    }).catch (function (reason) {
-        res.status(500).json({error: reason});
+            } else {
+                resolve({
+                    count: result.count,
+                    params: qparams,
+                    rows:  result.rows.map(function (row) { return row.asObject(true); })
+                });
+            }
+        }).catch (function (reason) {
+            reject({error: reason});
+        });
+    });
+};
+
+api.get('/version', function(req, res){
+    fs.readFile('package.json', function (err, data) {
+        const json = JSON.parse(data);
+        res.json({
+            app_version: json.version,
+            app_env: process.env.NODE_ENV,
+        });
+    });
+});
+
+api.get('/search', function(req, res){
+    searchFunc(req.query).then(json => {
+        res.json(json);
+    }).catch(error => {
+        res.status(500).json(error);
     });
 });
 
