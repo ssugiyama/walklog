@@ -18,4 +18,5 @@ export default {
     'twitter_consumer_key': '',
     'twitter_consumer_secret': '',
     'twitter_allowed_users': null,
+    'external_links' : [],
 };

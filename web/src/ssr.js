@@ -41,6 +41,7 @@ export default function handleSSR(req, res) {
                     </Provider>
                 );
                 const state = store.getState();
+                state.main.external_links = config.external_links;
                 let title = config.site_name;
                 let description = '';
                 const google_api_key = config.google_api_key;

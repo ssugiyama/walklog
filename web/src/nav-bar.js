@@ -6,6 +6,7 @@ import AppBar from 'material-ui/AppBar';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
+import Divider from 'material-ui/Divider';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
 
@@ -66,6 +67,14 @@ class NavBar extends Component {
                                 <MenuItem onClick={this.setCurrentPosition.bind(this)} primaryText="geolocation" />
                             ]}
                         />
+                        <Divider />
+                        {
+                            this.props.external_links.map(link => 
+                                <a href={link.href} target="_blank" key={link.name}>
+                                    <MenuItem primaryText={link.name} />
+                                </a>
+                            )
+                        }
                      </IconMenu>
                  }
             />
@@ -77,6 +86,7 @@ function mapStateToProps(state) {
     return {
         selected_path: state.main.selected_path,
         current_user: state.main.current_user,
+        external_links: state.main.external_links,
     };
 }
 

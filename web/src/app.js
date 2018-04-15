@@ -68,6 +68,7 @@ const initialState = {
     message: '',
     users: [],
     current_user: null,
+    external_links: [],
 };
 
 const mainReducer = function(state = initialState, action) {
