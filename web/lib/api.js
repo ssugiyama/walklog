@@ -26,7 +26,7 @@ const searchFunc = params => {
     };
     const where = [];
     const order = order_hash[params.order || 'newest_first'];
-    const attributes = ['id', 'date', 'title', 'comment', 'path', 'length'];
+    const attributes = ['id', 'date', 'title', 'comment', 'path', 'length', 'user_id'];
     if (params.id) {
         where.push({id: params.id});
     }
@@ -154,7 +154,6 @@ const searchFunc = params => {
             where  : {[Op.and]: where},
             offset : offset,
             limit  : limit,
-            include: [{ model: Users }]
         }).then(function (result) {
             let qparams = null;
             if (result.count > offset + limit) {
@@ -178,14 +177,14 @@ const searchFunc = params => {
                         params: qparams,
                         rows:  result.rows.map(function (row) { return row.asObject(true); }),
                         next_id: next_id,
-                        prev_id: prev_id
+                        prev_id: prev_id,
                     });
                 });
             } else {
                 resolve({
                     count: result.count,
                     params: qparams,
-                    rows:  result.rows.map(function (row) { return row.asObject(true); })
+                    rows:  result.rows.map(function (row) { return row.asObject(true); }),
                 });
             }
         }).catch (function (reason) {

@@ -95,13 +95,13 @@ Walks.prototype.asObject =  function (includePath) {
         id:         this.id,
         date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
         title:      this.title,
-        comment:        this.comment,
+        comment:    this.comment,
         length :    this.length,
         path :      (includePath && this.path) ? this.encodedPath() : null,
         created_at: this.created_at,
         updated_at: this.updated_at,
         distance:   this.distance,
-        user:       this.user,   
+        user_id:    this.user_id,   
     };
 };
 
