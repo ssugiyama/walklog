@@ -39,6 +39,7 @@ and edit web/src/config.js.
 - `'twitter_allowed_users` : specify array of screennames if restrict the users who can login
 
 ## with docker
+    % mkdir data public
     % docker-compose up -d
     % docker-compose run --rm web /var/www/setup.sh
 
