@@ -3,10 +3,10 @@
 walklog is a management tool of walking paths.
 
 ## prerequisite
-    % git clone --recursive https://github.com/ssugiyama/walklog.git
+    % git clone https://github.com/ssugiyama/walklog.git
     % cd walklog
 
-visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into current directory.
+visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into db directory.
 
     % cp web/src/config.js.sample web/src/config.js
 
@@ -32,6 +32,7 @@ and edit web/src/config.js.
         'twitter_consumer_key': '',
         'twitter_consumer_secret': '',
         'twitter_allowed_users': null,
+        'external_links': [],
     };
 
 - `google_api_key` : needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
@@ -52,7 +53,7 @@ and edit web/src/config.js.
 - node.js
 
 ###1. create database and install postgis functions.
-
+    % cd db
     % createdb walklog -E utf8
     % psql walklog -f $(POSTGIS_DIR)/postgis.sql
     % psql walklog -f $(POSTGIS_DIR)/spatial_ref_sys.sql
@@ -64,7 +65,7 @@ and edit web/src/config.js.
     % psql walklog -f areas.sql
 
 ###3. setup and start api server
-    % cd web
+    % cd ../web
     % npm install && npm run build-cli && npm run build-svr
     % cp -a assets/* public
     % PORT=3000 WALKLOG_URL=postgres://user:password@host:5432/walklog npm start

@@ -2,7 +2,7 @@ version: '2'
 services:
   db:
     restart: always
-    build: .
+    build: db 
     volumes:
       - ./data:/var/lib/postgresql/data
   web:
