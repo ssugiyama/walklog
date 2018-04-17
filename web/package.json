@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-cli": "NODE_ENV=production webpack -p",
+    "build-cli": "parcel build -o public/bundle.js src/main.js",
     "build-svr": "babel src -d ./dist --presets env,react",
     "start": "node index.js",
-    "watch": "webpack --watch"
+    "watch": "parcel watch -o public/bundle.js src/main.js"
   },
   "keywords": [],
   "author": "Shinichi SUGIYAMA",
@@ -27,23 +27,23 @@
     "isomorphic-fetch": "^2.2.1",
     "jssha": "^2.2.0",
     "marked": "^0.3.5",
-    "material-ui": "0.20.0",
+    "material-ui": "^0.20.0",
     "morgan": "*",
+    "parcel-bundler": "^1.7.1",
     "passport": "^0.4.0",
     "passport-twitter": "^1.0.4",
     "pg": "^6.4.2",
     "pg-hstore": "*",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "react-redux": "^5.0.6",
-    "react-router": "^3.0.0",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
+    "react-redux": "^5.0.7",
+    "react-router": "^3.2.1",
     "react-router-redux": "^4.0.8",
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "sequelize": "^4.15.0",
-    "sitemap": "^1.8.2",
-    "webpack": "^3.8.1"
+    "sitemap": "^1.8.2"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
