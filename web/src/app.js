@@ -1,7 +1,8 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
-import { Route, browserHistory, match } from 'react-router';
+import { createBrowserHistory, createMemoryHistory } from 'history';
 import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux';
+import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
@@ -262,20 +263,22 @@ const reducers = combineReducers({
     routing: routerReducer
 });
 
-export function handleRoute(renderProps, isPathSelected, prefix, rows, next) {
-    const query = Object.assign({}, renderProps.location.query);
-    if (renderProps.params.id) {
-        if (!query.force_fetch) {
-            const index = rows.findIndex(row => row.id == renderProps.params.id);
+export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
+    const qry = Object.assign({}, query);
+    const last_branch = branch[branch.length - 1];
+    const match = last_branch.match;
+    if (match.params.id) {
+        if (!qry.force_fetch) {
+            const index = rows.findIndex(row => row.id == match.params.id);
             if (index >= 0) {
                 return next(setSelectedItem(rows[index], index));
             }
         }
-        query.id = renderProps.params.id;
+        qry.id = match.params.id;
     }
-    const show_on_map = query.show || (query.id && 'first');
-    delete query['show'];
-    const search_form = Object.assign({}, initialState.search_form, query);
+    const show_on_map = qry.show || (qry.id && 'first');
+    delete qry['show'];
+    const search_form = Object.assign({}, initialState.search_form, qry);
     if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff' || search_form.filter == 'frechet') && !isPathSelected && search_form.searchPath) {
         next(setSelectedPath(search_form.searchPath));
     }
@@ -289,20 +292,20 @@ const dataFetchMiddleware = store => next => {
         // Fetch data on update location
         if (action.type === LOCATION_CHANGE) {
             if (!isFirstLocation) {
-                match({ routes, location: action.payload.pathname + action.payload.search }, (err, redirect, renderProps) => {
-                    if (err || redirect || !renderProps) return;
-                    const state = store.getState();
-                    handleRoute(renderProps, state.main.selected_path, '/', state.main.result.rows, next);
-                });
+                const branch = matchRoutes(routes, action.payload.pathname);
+                console.log(branch);
+                const state = store.getState();
+                handleRoute(branch, action.payload.search, state.main.selected_path, '/', state.main.result.rows, next);
             }
             isFirstLocation = false;
         }
         return next(action);
     };
 };
+export const history = typeof document !== 'undefined' ? createBrowserHistory() : createMemoryHistory();
 
 const middlewares = [
-    routerMiddleware(browserHistory),
+    routerMiddleware(history),
     dataFetchMiddleware,
     thunkMiddleware,
 ];
@@ -324,7 +327,15 @@ export function configureStore(state) {
     }
 }
 
-export const routes = <Route path="/" component={BodyContainer}>
-    <Route path="/:id" />
-</Route>
-;
+export const routes = [
+    {
+        component: BodyContainer,
+        routes: [
+            {
+                path: '/:id',
+            }
+        ]
+    }
+
+];
+
