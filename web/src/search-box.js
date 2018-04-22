@@ -7,6 +7,7 @@ import { getMoreItems, addPaths, setSelectedItem, toggleSidebar } from './action
 import Table, {TableBody, TableHead, TableRow, TableCell} from 'material-ui/Table';
 import Button from 'material-ui/Button';
 import Switch from 'material-ui/Switch';
+import { FormControlLabel } from 'material-ui/Form';
 
 const td_common_style = {
     paddingLeft: 2,
@@ -77,8 +78,11 @@ class SearchBox extends Component {
                     </strong> :
             { this.props.rows.length > 0 && (<Button onClick={ this.handleShowAll.bind(this) }>show all paths</Button>) }
             { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined &&
-              <Switch
-                  label="show line distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> }
+                <FormControlLabel
+                    control={<Switch
+                        checked={this.state.show_distance} onChange={this.handleShowDistance.bind(this)} />}
+                    label="show line distance" /> 
+            }
                 </div>
                 <Table style={{cursor: 'pointer'}}>
                     <TableBody>
