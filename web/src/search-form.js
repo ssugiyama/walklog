@@ -43,13 +43,6 @@ const order_options_with_nearest = [
 ];
 
 const styles = {
-    menuList: {
-        display: 'flex',
-        flexDirection: 'column',
-        paddingLeft: 10,
-        paddingRight: 10,
-        alignItems: 'left',
-    },
 };
 
 class SearchForm extends Component {
@@ -109,15 +102,7 @@ class SearchForm extends Component {
                 <input type="hidden" name="cities" value=""  />
                 <input type="hidden" name="searchPath" value=""  />
                 <div>
-                    <TextField select label="filter" value={this.props.filter} onChange={this.handleChange('filter')} style={{width: '50%'}}
-                        SelectProps={{
-                            MenuProps: {
-                                MenuListProps: {
-                                    className: classes.menuList,
-                                }
-                            }
-                        }}
-                    >
+                    <TextField select label="filter" value={this.props.filter} onChange={this.handleChange('filter')} style={{width: '50%'}}>
                         <MenuItem value="any">Any</MenuItem>
                         <MenuItem value="neighborhood">Neighborhood</MenuItem>
                         <MenuItem value="cities">Cities</MenuItem>
@@ -127,13 +112,6 @@ class SearchForm extends Component {
                     </TextField>
                     <TextField select label="user" value={this.props.user} onChange={this.handleChange('user')} 
                         style={{width: '50%'}}
-                        SelectProps={{
-                            MenuProps: {
-                                MenuListProps: {
-                                    className: classes.menuList,
-                                }
-                            }
-                        }}    
                     >
                         <MenuItem value="">-</MenuItem>
                         {this.props.users.map(u => <MenuItem value={u.id} key={u.id}>{u.username}</MenuItem>)}
@@ -142,25 +120,11 @@ class SearchForm extends Component {
                 <div>
                     <TextField select label="month" value={parseInt(this.props.month) || ''} onChange={this.handleChange('month')} 
                         style={{width: '50%'}}
-                        SelectProps={{
-                            MenuProps: {
-                                MenuListProps: {
-                                    className: classes.menuList,
-                                }
-                            }
-                        }}    
                     >
                         {month_options.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
                     </TextField>
                     <TextField select label="year" value={parseInt(this.props.year) || ''} onChange={this.handleChange('year')} 
-                        style={{width: '50%'}}
-                        SelectProps={{
-                            MenuProps: {
-                                MenuListProps: {
-                                    className: classes.menuList,
-                                }
-                            }
-                        }}    
+                        style={{width: '50%'}} 
                     >
                         <MenuItem value="">-</MenuItem>
                         {this.props.years.map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
@@ -168,14 +132,7 @@ class SearchForm extends Component {
                 </div>
                 <div>
                     <TextField select label="order" value={this.props.order} onChange={this.handleChange('order')} 
-                        style={{width: '50%', verticalAlign: 'bottom'}}
-                        SelectProps={{
-                            MenuProps: {
-                                MenuListProps: {
-                                    className: classes.menuList,
-                                }
-                            }
-                        }}    
+                        style={{width: '50%', verticalAlign: 'bottom'}} 
                     >
                         {
                             (this.props.filter == 'hausdorff' || this.props.filter == 'frechet' ? order_options_with_nearest : order_options).map(option =>

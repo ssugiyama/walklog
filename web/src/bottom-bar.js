@@ -34,13 +34,6 @@ const styles = {
     bottomBarGroup: {
         margin: 'auto',
     },
-    menuList: {
-        display: 'flex',
-        flexDirection: 'column',
-        paddingLeft: 10,
-        paddingRight: 10,
-        alignItems: 'left',
-    },
 };
 
 class BottomBar extends Component {
@@ -91,14 +84,7 @@ class BottomBar extends Component {
             ) : this.props.filter == 'neighborhood' ? (
                 <div style={styles.bottomBarGroup}>
                     <Typography variant="caption" color="inherit">Radius</Typography>
-                    <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}
-
-                        MenuProps={{
-                            MenuListProps: {
-                                className: classes.menuList,
-                            }
-                        }}
-                    >
+                    <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
                         <MenuItem value={1000}>1km</MenuItem>
                         <MenuItem value={500}>500m</MenuItem>
                         <MenuItem value={250}>250m</MenuItem>

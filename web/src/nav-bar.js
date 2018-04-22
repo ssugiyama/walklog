@@ -19,13 +19,6 @@ const styles = {
     title: {
         flex: 1,
     },
-    menuList: {
-        display: 'flex',
-        flexDirection: 'column',
-        paddingLeft: 10,
-        paddingRight: 10,
-        alignItems: 'left',
-    },
 };
 
 class NavBar extends Component {
@@ -79,9 +72,6 @@ class NavBar extends Component {
                         anchorEl={this.state.topAnchorEl}
                         open={Boolean(this.state.topAnchorEl)}
                         onClose={this.handleMenuClose('topAnchorEl')}
-                        MenuListProps={{
-                            className: classes.menuList,
-                        }}
                     >
                         <MenuItem key="login or logout" onClick={this.login_or_logout.bind(this)}>{this.props.current_user ? 'logout' : 'login with twitter'}</MenuItem>
                         {
@@ -104,9 +94,6 @@ class NavBar extends Component {
                         anchorEl={this.state.pathAnchorEl}
                         open={Boolean(this.state.pathAnchorEl)}
                         onClose={this.handleMenuClose('pathAnchorEl')}
-                        MenuListProps={{
-                            className: classes.menuList,
-                        }}
                     >
                         <MenuItem key="edit" onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path}>edit</MenuItem>,
                         <MenuItem key="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}>delete</MenuItem>,
@@ -118,9 +105,6 @@ class NavBar extends Component {
                         anchorEl={this.state.geoAAnchorEl}
                         open={Boolean(this.state.geoAnchorEl)}
                         onClose={this.handleMenuClose('geoAnchorEl')}
-                        MenuListProps={{
-                            className: classes.menuList,
-                        }}
                     >
                         <MenuItem key="geocode" onClick={ () => {this.closeAllMenus(); this.props.openGeocodeModal(true); }}>geocode...</MenuItem>,
                         <MenuItem key="geolocation" onClick={this.setCurrentPosition.bind(this)}>geolocation</MenuItem>
