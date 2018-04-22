@@ -18,8 +18,8 @@ class GeocodeModal extends Component {
         super(props);
         this.state = {address: ''};
     }
-    handleSubmit(address = this.state.address) {
-        this.geocoder.geocode( { 'address': address}, (results, status) =>  {
+    handleSubmit() {
+        this.geocoder.geocode( { 'address': this.state.address}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
                 this.props.setCenter(results[0].geometry.location);
                 this.handleClose();
@@ -47,11 +47,11 @@ class GeocodeModal extends Component {
             >
                 <DialogTitle>Geocode</DialogTitle>
                 <DialogContent>
-                    <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value); }} label="address"  fullWidth={true} />
+                    <TextField value={this.state.address} onChange={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(); }} label="address"  fullWidth={true} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleClose.bind(this)}>Cancel</Button>
-                    <Button onClick={this.handleSubmit.bind(this, null)} color="primary">Move to</Button>
+                    <Button onClick={this.handleSubmit.bind(this)} color="primary">Move to</Button>
                 </DialogActions>
             </Dialog>
         );
