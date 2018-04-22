@@ -33,7 +33,7 @@ const order_options  = [
     { label: 'longest first', value: 'longest_first' },
     { label: 'shortest first', value: 'shortest_first' },
     { label: 'northernmost first', value: 'northernmost_first' },
-    { label: 'southernmostest first', value: 'southernmost_first' },
+    { label: 'southernmost first', value: 'southernmost_first' },
     { label: 'easternmost first', value: 'easternmost_first' },
     { label: 'westernmost first', value: 'westernmost_first' },
 ];
