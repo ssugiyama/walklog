@@ -26,11 +26,6 @@ class WalkEditor extends Component {
         this.props.openWalkEditor(false);
     }
     handleSubmit() {
-        function formatDate(d) {
-            return d.getFullYear()+
-              ( '0' + ( d.getMonth()+1 ) ).slice(-2)+
-              ( '0' + d.getDate() ).slice(-2);
-        }
         const keys = ['date', 'title', 'comment'];
 
         if (! this.state.id || this.state.update_path) {
@@ -39,8 +34,7 @@ class WalkEditor extends Component {
         if (this.state.id) {
             keys.push('id');
         }
-        const state = Object.assign({}, this.state, {date: formatDate(this.state.date)});
-        const params = keys.map(key => `${key}=${encodeURIComponent(state[key])}`).join('&');
+        const params = keys.map(key => `${key}=${encodeURIComponent(this.state[key])}`).join('&');
         fetch('/api/save', {
             method: 'POST',
             credentials: 'include',
