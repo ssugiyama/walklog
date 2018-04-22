@@ -5,6 +5,9 @@ import {configureStore, routes, handleRoute}  from './app';
 import {setCurrentUser, setUsers, setMessage, openSnackbar} from './actions';
 import { StaticRouter } from 'react-router-dom';
 import { renderRoutes, matchRoutes } from 'react-router-config';
+import { SheetsRegistry } from 'react-jss/lib/jss';
+import { MuiThemeProvider, createMuiTheme, createGenerateClassName } from 'material-ui/styles';
+import JssProvider from 'react-jss/lib/JssProvider';
 
 import config from './config';
 import models from '../lib/models';
@@ -30,13 +33,21 @@ export default function handleSSR(req, res) {
         .then(() => Users.findAll().then(users => store.dispatch(setUsers(users))))
         .then(() => {
             let context = {};
+            const sheetsRegistry = new SheetsRegistry();
+            const theme = createMuiTheme();
+            const generateClassName = createGenerateClassName();
             const html = renderToString(
                 <Provider store={store}>
                     <StaticRouter location={req.url} context={context}>
-                        {renderRoutes(routes)}
+                        <JssProvider registry={sheetsRegistry} generateClassName={generateClassName}>
+                            <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
+                                {renderRoutes(routes)}
+                            </MuiThemeProvider>
+                        </JssProvider>
                     </StaticRouter>
                 </Provider>
             );
+            const css = sheetsRegistry.toString();
             const state = store.getState();
             state.main.external_links = config.external_links;
             let title = config.site_name;
@@ -51,6 +62,7 @@ export default function handleSSR(req, res) {
             }
             const bind = Object.assign({
                 html,
+                css,
                 title,
                 description,
                 google_api_key,

@@ -6,13 +6,14 @@
   "scripts": {
     "build-cli": "parcel build -d public -o bundle src/main.js",
     "build-svr": "babel src -d ./dist --presets env,react",
-    "start": "node index.js",
+    "start": "NODE_ENV=development node index.js",
     "watch": "parcel watch -d public -o bundle src/main.js"
   },
   "keywords": [],
   "author": "Shinichi SUGIYAMA",
   "license": "ISC",
   "dependencies": {
+    "@material-ui/icons": "^1.0.0-beta.42",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^6.4.1",
@@ -28,7 +29,7 @@
     "isomorphic-fetch": "^2.2.1",
     "jssha": "^2.2.0",
     "marked": "^0.3.5",
-    "material-ui": "^0.20.0",
+    "material-ui": "^1.0.0-beta.42",
     "morgan": "*",
     "parcel-bundler": "^1.7.1",
     "passport": "^0.4.0",

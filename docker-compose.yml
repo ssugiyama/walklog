@@ -10,6 +10,7 @@ services:
     build: web
     volumes:
       - ./public:/var/www/public
+      - ./web/src:/var/www/src
     ports:
       - 3000:3000
     links:

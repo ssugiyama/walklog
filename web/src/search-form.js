@@ -3,12 +3,13 @@ import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
 import { setSearchForm, resetSearchForm, search, toggleSidebar, setTabValue} from './actions';
-import FlatButton from 'material-ui/FlatButton';
-import SearchIcon from 'material-ui/svg-icons/action/search';
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
+import Button from 'material-ui/Button';
+import SearchIcon from '@material-ui/icons/Search';
+import Select from 'material-ui/Select';
+import { MenuItem } from 'material-ui/Menu';
 import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
+import { withStyles } from 'material-ui/styles';
 
 const month_options = [
     { label: '-', value: '' },
@@ -40,6 +41,16 @@ const order_options  = [
 const order_options_with_nearest = [
     { label: 'nearest first', value: 'nearest_first' },
 ];
+
+const styles = {
+    menuList: {
+        display: 'flex',
+        flexDirection: 'column',
+        paddingLeft: 10,
+        paddingRight: 10,
+        alignItems: 'left',
+    },
+};
 
 class SearchForm extends Component {
     constructor(props) {
@@ -81,65 +92,101 @@ class SearchForm extends Component {
             }
         }
     }
-    handleSelectChange(name, e, index, value) {
-        this.props.setSearchForm({[name]: value});
-    }
-    handleTextChange(name, e) {
-        this.props.setSearchForm({[name]: e.target.value});
+    handleChange(name) {
+        return event => this.props.setSearchForm({[name]: event.target.value});
     }
     reset() {
         this.props.resetSearchForm();
         this.setState({force_search: true});
     }
     render() {
+        const classes = this.props.classes;
         return (
-            <form className="form-horizontal" role="form">
+            <form role="form">
                 <input type="hidden" name="latitude" value="" />
                 <input type="hidden" name="longitude" value="" />
                 <input type="hidden" name="radius" value="" />
                 <input type="hidden" name="cities" value=""  />
                 <input type="hidden" name="searchPath" value=""  />
                 <div>
-                    <SelectField id="search_form_filter" floatingLabelText="filter" value={this.props.filter} onChange={this.handleSelectChange.bind(this, 'filter')} style={{width: '50%'}}>
-                        <MenuItem value="any" primaryText="any" />
-                        <MenuItem value="neighborhood" primaryText="Neighborhood" />
-                        <MenuItem value="cities" primaryText="Cities" />
-                        <MenuItem value="frechet" primaryText="Fréchet" />
-                        <MenuItem value="hausdorff" primaryText="Hausdorff" />
-                        <MenuItem value="crossing" primaryText="Crossing" />
-                    </SelectField>
-                    <SelectField id="search_form_user" floatingLabelText="user" floatingLabelFixed={true} value={this.props.user} onChange={this.handleSelectChange.bind(this, 'user')} style={{width: '50%'}}>
-                        <MenuItem value="" primaryText="-" />
-                        {this.props.users.map(function (u) {
-                             return <MenuItem value={u.id} key={u.id} primaryText={u.username} />;
-                         })}
-                    </SelectField>
+                    <TextField select label="filter" value={this.props.filter} onChange={this.handleChange('filter')} style={{width: '50%'}}
+                        SelectProps={{
+                            MenuProps: {
+                                MenuListProps: {
+                                    className: classes.menuList,
+                                }
+                            }
+                        }}
+                    >
+                        <MenuItem value="any">Any</MenuItem>
+                        <MenuItem value="neighborhood">Neighborhood</MenuItem>
+                        <MenuItem value="cities">Cities</MenuItem>
+                        <MenuItem value="frechet">Fréchet</MenuItem>
+                        <MenuItem value="hausdorff">Hausdorff</MenuItem>
+                        <MenuItem value="crossing">Crossing</MenuItem>
+                    </TextField>
+                    <TextField select label="user" value={this.props.user} onChange={this.handleChange('user')} 
+                        style={{width: '50%'}}
+                        SelectProps={{
+                            MenuProps: {
+                                MenuListProps: {
+                                    className: classes.menuList,
+                                }
+                            }
+                        }}    
+                    >
+                        <MenuItem value="">-</MenuItem>
+                        {this.props.users.map(u => <MenuItem value={u.id} key={u.id}>{u.username}</MenuItem>)}
+                    </TextField>
                 </div>
                 <div>
-                    <SelectField id="search_form_month" floatingLabelText="month" floatingLabelFixed={true} value={parseInt(this.props.month) || ''} onChange={this.handleSelectChange.bind(this, 'month')} style={{width: '50%'}}>
-                        {month_options.map(function (option) {
-                             return <MenuItem value={option.value} key={option.value} primaryText={option.label} />;
-                         })}
-                    </SelectField>
-                    <SelectField id="search_form_year" floatingLabelText="year" floatingLabelFixed={true} value={parseInt(this.props.year) || ''} onChange={this.handleSelectChange.bind(this, 'year')} style={{width: '50%'}}>
-                        <MenuItem value="" primaryText="-" />
-                        {this.props.years.map(function (y) {
-                             return <MenuItem value={y} key={y} primaryText={y} />;
-                         })}
-                    </SelectField>
+                    <TextField select label="month" value={parseInt(this.props.month) || ''} onChange={this.handleChange('month')} 
+                        style={{width: '50%'}}
+                        SelectProps={{
+                            MenuProps: {
+                                MenuListProps: {
+                                    className: classes.menuList,
+                                }
+                            }
+                        }}    
+                    >
+                        {month_options.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
+                    </TextField>
+                    <TextField select label="year" value={parseInt(this.props.year) || ''} onChange={this.handleChange('year')} 
+                        style={{width: '50%'}}
+                        SelectProps={{
+                            MenuProps: {
+                                MenuListProps: {
+                                    className: classes.menuList,
+                                }
+                            }
+                        }}    
+                    >
+                        <MenuItem value="">-</MenuItem>
+                        {this.props.years.map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+                    </TextField>
                 </div>
                 <div>
-                    <SelectField id="search_form_order" floatingLabelText="order" value={this.props.order} onChange={this.handleSelectChange.bind(this, 'order')} style={{width: '50%', verticalAlign: 'bottom'}}>
+                    <TextField select label="order" value={this.props.order} onChange={this.handleChange('order')} 
+                        style={{width: '50%', verticalAlign: 'bottom'}}
+                        SelectProps={{
+                            MenuProps: {
+                                MenuListProps: {
+                                    className: classes.menuList,
+                                }
+                            }
+                        }}    
+                    >
                         {
                             (this.props.filter == 'hausdorff' || this.props.filter == 'frechet' ? order_options_with_nearest : order_options).map(option =>
-                                <MenuItem value={option.value} key={option.value} primaryText={option.label} />
+                                <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>
                             )
                         }
-                    </SelectField>
-                    <TextField id="search_form_limit" floatingLabelText="limit" floatingLabelFixed={true} value={this.props.limit} onChange={this.handleTextChange.bind(this, 'limit')} style={{width: '50%'}} />
+                    </TextField>
+                    <TextField id="search_form_limit" label="limit" value={this.props.limit} onChange={this.handleChange('limit')} style={{width: '50%'}} />
                 </div>
                 <div>
-                    <FlatButton label="Reset" secondary={true} onClick={this.reset.bind(this)} style={{width: '100%'}} />
+                    <Button onClick={this.reset.bind(this)} style={{width: '100%'}}>Reset</Button>
                 </div>
             </form>
         );
@@ -159,4 +206,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({setSearchForm, resetSearchForm, search, toggleSidebar, setTabValue}, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SearchForm);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchForm));

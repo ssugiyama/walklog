@@ -3,14 +3,19 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { setSelectedItem, openWalkEditor } from './actions';
-import FlatButton from 'material-ui/FlatButton';
-import Dialog from 'material-ui/Dialog';
-import DatePicker from 'material-ui/DatePicker';
+import Button from 'material-ui/Button';
+import Dialog, {
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from 'material-ui/Dialog';
+import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
+import Switch from 'material-ui/Switch';
 import IconButton from 'material-ui/IconButton';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
-import styles from './styles';
+import NavigationClose from '@material-ui/icons/Close';
+import moment from 'moment';
 
 class WalkEditor extends Component {
     constructor(props) {
@@ -85,11 +90,11 @@ class WalkEditor extends Component {
 
             if (nextProps.walk_editor_mode == 'update') {
                 item = nextProps.selected_item;
-                date = new Date(item.date);
+                date = item.date;
             }
             else {
                 item = {id: '', date: '', title: '', comment: ''};
-                date = new Date();
+                date = moment().format('YYYY-MM-DD');
             }
             if (path == null && nextProps.walk_editor_mode == 'create') {
                 alert('draw or select a path on map');
@@ -103,35 +108,34 @@ class WalkEditor extends Component {
         }
     }
     render() {
-        const actions = [];
-        actions.push (<FlatButton onClick={this.handleSubmit.bind(this)}  label={ this.props.walk_editor_mode || 'create' } primary={true} />);
-        if (this.props.walk_editor_mode == 'update') {
-            actions.push (<FlatButton label="delete" secondary={true} onClick={this.handleDelete.bind(this)}/>);
-        }
-        // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
         return (
             <Dialog
-                title={ this.props.walk_editor_mode == 'update' ? 'Update Walk' : 'New Walk' }
-                actions={actions}
-                modal={false}
+                fullScreen
                 open={this.props.open_walk_editor}
-                onRequestClose={this.handleClose.bind(this)}
+                onClose={this.handleClose.bind(this)}
             >
-                <div>
-                    <DatePicker value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" floatingLabelText='date' floatingLabelFixed={true} fullWidth={true} autoOk={true} />
-                </div>
-                <div>
-                    <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} floatingLabelText="title" floatingLabelFixed={true}  fullWidth={true} />
-                </div>
-                <div>
-                    <TextField multiLine={true} rows={4} rowsMax={4}
-                               defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} floatingLabelText="comment" floatingLabelFixed={true} fullWidth={true} />
-                </div>
-                {
-                    this.props.walk_editor_mode == 'update' ?
-                    <div><Toggle label="update path?" onToggle={this.handleChange.bind(this, 'update_path')}  toggled={this.state.update_path} disabled={this.state.path == null} /></div> : null
-                }
-                <IconButton style={styles.dialogCloseButton} onClick={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+                <DialogTitle>{ this.props.walk_editor_mode == 'update' ? 'Update Walk' : 'New Walk' }</DialogTitle>
+                <DialogContent>
+                    <FormGroup row>
+                        <TextField type="date" value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" label='date' fullWidth={true} autoOk={true} />
+                        <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} label="title" fullWidth={true} />
+                        <TextField multiline rows={4} rowsMax={20}
+                                defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} label="comment" fullWidth={true} />
+                        {
+                            this.props.walk_editor_mode == 'update' &&
+                            <FormControlLabel
+                                control={<Switch onChange={this.handleChange.bind(this, 'update_path')}  checked={this.state.update_path} disabled={this.state.path == null} />}
+                                label="update path?" />
+                        }
+                    </FormGroup>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleClose.bind(this)}>cancel</Button>
+                    <Button onClick={this.handleSubmit.bind(this)} color="primary">{ this.props.walk_editor_mode || 'create' }</Button>
+                    {this.props.walk_editor_mode == 'update' && 
+                        <Button onClick={this.handleDelete.bind(this)} color="secondary">delete</Button>}
+                </DialogActions>
+                
             </Dialog>
         );
     }

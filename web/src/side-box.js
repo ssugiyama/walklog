@@ -5,40 +5,53 @@ import { connect } from 'react-redux';
 import { setTabValue } from './actions';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
-import {Tabs, Tab} from 'material-ui/Tabs';
+import Tabs, { Tab } from 'material-ui/Tabs';
 import SearchBox from './search-box';
 import CommentBox from './comment-box';
 import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
-import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+import Table, { TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
-import SearchIcon from 'material-ui/svg-icons/action/search';
-import DescriptionIcon from 'material-ui/svg-icons/action/description';
-import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
-import styles from './styles';
+import NavigationClose from '@material-ui/icons/Close';
+import SearchIcon from '@material-ui/icons/Search';
+import DescriptionIcon from '@material-ui/icons/Description';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { withStyles } from 'material-ui/styles';
+
+const drawerWidth = 300;
+const appBarHeight = 64;
+const styles = {
+    tab: {
+        minWidth: drawerWidth/3,
+    },
+    drawerPaper: {  
+        marginTop: appBarHeight,
+        width: drawerWidth,
+    },
+};
 
 class SideBox extends Component {
     constructor(props) {
         super(props);
     }
-    handleTabChange(tab_value) {
-        if (typeof(tab_value) !== 'string') return;
+    handleTabChange(event, tab_value) {
+        // if (typeof(tab_value) !== 'string') return;
         this.props.setTabValue(tab_value);
     }
     render() {
         return (
-            <Drawer open={this.props.open_sidebar} width={300} containerStyle={styles.sideBox}>
-                <Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}   style={styles.tabs}>
-                    <Tab icon={<SearchIcon />} value="search" >
-                        <SearchBox />
-                    </Tab>
-                    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item}><CommentBox /></Tab>
-                    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.highlighted_path}>
-                        <ElevationBox />
-                        <PanoramaBox />
-                    </Tab>
+            <Drawer open={this.props.open_sidebar} variant="persistent" 
+                classes={{ paper: this.props.classes.drawerPaper }}>
+                <Tabs value={this.props.tab_value} onChange={this.handleTabChange.bind(this)}> 
+                    indicatorColor="primary" textColor="primary" fullWidth>
+                    <Tab icon={<SearchIcon />} value="search" className={this.props.classes.tab}/>
+                    <Tab icon={<DescriptionIcon />} value="comment" disabled={!this.props.selected_item} className={this.props.classes.tab} />
+                    <Tab icon={<VisibilityIcon />} value="visualization"  disabled={!this.props.highlighted_path} className={this.props.classes.tab} />
                 </Tabs>
+                { this.props.tab_value == "search" && <SearchBox /> }
+                { this.props.tab_value == "comment" && <CommentBox /> }
+                { this.props.tab_value == "visualization" && <div><ElevationBox /><PanoramaBox /></div>}
+                <div style={{paddingBottom: appBarHeight}}></div>
             </Drawer>
         );
     }
@@ -52,4 +65,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ setTabValue }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SideBox);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SideBox));

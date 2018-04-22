@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
+import CssBaseline from 'material-ui/CssBaseline';
 import NavBarContainer from './nav-bar';
 import MapContainer from './map';
 import BottomBarContainer from './bottom-bar';
 import WalkEditorContainer from './walk-editor';
 import GeocodeModalContainer from './geocode-modal';
 import { connect } from 'react-redux';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import SideBoxContainer from './side-box';
 import { bindActionCreators } from 'redux';
 import { openSnackbar } from './actions';
@@ -17,22 +17,21 @@ class Body extends Component {
     }
     render() {
         return (
-            <MuiThemeProvider>
-                <div>
-                    <NavBarContainer />
-                    <SideBoxContainer />
-                    <MapContainer />
-                    <BottomBarContainer />
-                    <WalkEditorContainer />
-                    <GeocodeModalContainer />
-                    <Snackbar
-                        open={this.props.open_snackbar}
-                        message={this.props.message}
-                        autoHideDuration={4000}
-                        onRequestClose={this.handleRequestClose.bind(this)}
-                    />
-                </div>
-            </MuiThemeProvider>
+            <div>
+                <CssBaseline />
+                <NavBarContainer />
+                <SideBoxContainer />
+                <MapContainer />
+                <BottomBarContainer />
+                <WalkEditorContainer />
+                <GeocodeModalContainer />
+                <Snackbar
+                    open={this.props.open_snackbar}
+                    message={this.props.message}
+                    autoHideDuration={4000}
+                    onClose={this.handleRequestClose.bind(this)}
+                />
+            </div>
         );
     }
 }

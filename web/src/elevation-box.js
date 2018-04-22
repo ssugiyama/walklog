@@ -2,9 +2,16 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
+import Typography from 'material-ui/Typography';
 
 const Chart = typeof window !== 'undefined' ? require('chart.js').Chart : {};
-import styles from './styles';
+
+const styles = {
+    elevationBox: {
+        width: '100%',
+        height: 250,
+    },
+};
 
 class ElevationBox extends Component {
     constructor(props) {
@@ -89,7 +96,7 @@ class ElevationBox extends Component {
         if (this.props.highlighted_path)
             return (
                 <div>
-                    <h3>elevation</h3>
+                    <Typography variant="subheading">elevation</Typography>
                     <canvas style={styles.elevationBox} ref="root"></canvas>
                 </div>
             );

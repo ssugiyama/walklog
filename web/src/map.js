@@ -3,12 +3,23 @@ import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
 import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar } from './actions';
 import { connect } from 'react-redux';
-import styles from './styles';
 import SideBoxContainer from './side-box';
 import * as ActionTypes from './action-types';
 
 const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
 
+const appBarHeight = 64;
+const bottomBarHeight = 64;
+
+const styles = {
+    map: {
+        position: 'absolute',
+        top: appBarHeight,
+        left: 0,
+        right: 0,
+        bottom: bottomBarHeight,
+    },
+};
 class Map extends Component {
     componentDidMount() {
         const defaultPos = new google.maps.LatLng(this.props.latitude, this.props.longitude);

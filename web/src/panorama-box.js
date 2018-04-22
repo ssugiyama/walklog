@@ -3,13 +3,35 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setStreetView, toggleSidebar, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
 import IconButton from 'material-ui/IconButton';
-import Toggle from 'material-ui/Toggle';
-import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
-import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
-import AvFastForward from 'material-ui/svg-icons/av/fast-forward';
-import AvFastRewind from 'material-ui/svg-icons/av/fast-rewind';
-import styles from './styles';
+import { FormControlLabel } from 'material-ui/Form';
+import Typography from 'material-ui/Typography';
+import Switch from 'material-ui/Switch';
+import NavigationArrowForward from '@material-ui/icons/ArrowForward';
+import NavigationArrowBack from '@material-ui/icons/ArrowBack';
+import AvFastForward from '@material-ui/icons/FastForward';
+import AvFastRewind from '@material-ui/icons/FastRewind';
 
+// import { withStyles } from 'material-ui/styles';
+
+const styles = {
+    panoramaBoxBody: {
+        width: '100%',
+        height: 214
+    },
+    panoramaBoxControl: {
+        width: '100%',
+        textAlign: 'center',
+        height: 36
+    },
+    panoramaBoxTitle: {
+        float: 'left'
+    },
+    panoramaBoxOverlayToggle: {
+        width: 120,
+        float: 'right',
+        marginTop: 40,
+    },
+};
 
 class PanoramaBox extends Component {
     constructor(props) {
@@ -112,19 +134,21 @@ class PanoramaBox extends Component {
     }
     render() {
         return (
-            <div>
-                <div>
-                    <h3 style={styles.panoramaBoxTitle}>street view </h3>
-                    <Toggle
-                        label="overlay" toggled={this.props.overlay} onToggle={this.handleOverlayChange.bind(this)} style={styles.panoramaBoxOverlayToggle}/></div>
-                    <div style={styles.panoramaBoxBody} ref="body"></div>
-                    <div style={styles.panoramaBoxControl}>
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                        <span className="label label-info"><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
-                    </div>
+            <div>                
+                <Typography variant="subheading">street view </Typography>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={this.props.overlay} onChange={this.handleOverlayChange.bind(this)} />}
+                    label="overlay" />
+                <div style={styles.panoramaBoxBody} ref="body"></div>
+                <div style={styles.panoramaBoxControl}>
+                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
+                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                    <span><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
+                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
+                </div>
             </div>
         );
     }

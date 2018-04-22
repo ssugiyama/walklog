@@ -3,23 +3,45 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setPanoramaCount, setPanoramaIndex, setOverlay, 
     setEditingPath, deleteSelectedPath, clearPaths, setSearchForm, downloadPath, uploadPath } from './actions';
+import Tooltip from 'material-ui/Tooltip';
 import IconButton from 'material-ui/IconButton';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit';
-import ActionDelete from 'material-ui/svg-icons/action/delete';
-import NavigationRefresh from 'material-ui/svg-icons/navigation/refresh';
-import NavigationCancel from 'material-ui/svg-icons/navigation/cancel';
-import ActionSwapVert from 'material-ui/svg-icons/action/swap-vert';
-import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
-import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
-import AvFastForward from 'material-ui/svg-icons/av/fast-forward';
-import AvFastRewind from 'material-ui/svg-icons/av/fast-rewind';
-import FileDownload from 'material-ui/svg-icons/file/file-download';
-import FileUpload from 'material-ui/svg-icons/file/file-upload';
-import MapsMap from 'material-ui/svg-icons/maps/map';
-import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
-import styles from './styles';
+import Select from 'material-ui/Select';
+import {MenuItem} from 'material-ui/Menu';
+import EditorModeEdit from '@material-ui/icons/ModeEdit';
+import ActionDelete from '@material-ui/icons/Delete';
+import NavigationRefresh from '@material-ui/icons/Refresh';
+import NavigationCancel from '@material-ui/icons/Cancel';
+import ActionSwapVert from '@material-ui/icons/SwapVert';
+import NavigationArrowForward from '@material-ui/icons/ArrowForward';
+import NavigationArrowBack from '@material-ui/icons/ArrowBack';
+import AvFastForward from '@material-ui/icons/FastForward';
+import AvFastRewind from '@material-ui/icons/FastRewind';
+import FileDownload from '@material-ui/icons/FileDownload';
+import FileUpload from '@material-ui/icons/FileUpload';
+import MapsMap from '@material-ui/icons/Map';
+import Toolbar from 'material-ui/Toolbar';
+import Typography from 'material-ui/Typography';
+import { withStyles } from 'material-ui/styles';
+
+const styles = {
+    root: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#c0c0c0',
+    },
+    bottomBarGroup: {
+        margin: 'auto',
+    },
+    menuList: {
+        display: 'flex',
+        flexDirection: 'column',
+        paddingLeft: 10,
+        paddingRight: 10,
+        alignItems: 'left',
+    },
+};
 
 class BottomBar extends Component {
     constructor(props) {
@@ -40,54 +62,87 @@ class BottomBar extends Component {
     resetCities() {
         this.props.setSearchForm({cities: ''});
     }
-    handleSelectRadius(event, index, r) {
-        this.props.setSearchForm({radius: r});
+    handleSelectRadius(event) {
+        this.props.setSearchForm({radius: event.target.value});
     }
     render() {
+        const classes = this.props.classes;
         return (
-            <Toolbar style={styles.bottomBar} noGutter={true}>
+            <Toolbar style={styles.root}>
             { this.props.overlay ? (
-                <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
-                    <IconButton tooltip="-10" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
-                    <IconButton tooltip="-1" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                    <span className="label label-info"><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
-                    <IconButton tooltip="+1" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                    <IconButton tooltip="+10" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
-                    <ToolbarSeparator />
-                    <IconButton tooltip="back to map" tooltipPosition="top-center" touch={true} onClick={ () => { this.props.setOverlay(false); }}><MapsMap /></IconButton>
-                </ToolbarGroup>
+                <div style={styles.bottomBarGroup}>
+                    <Tooltip title="-10" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="-1" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                    </Tooltip>
+                    <span><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
+                    <Tooltip title="+1" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="+10" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="back to map" position="top-center">
+                        <IconButton onClick={ () => { this.props.setOverlay(false); }}><MapsMap /></IconButton>
+                    </Tooltip>
+                </div>
             ) : this.props.filter == 'neighborhood' ? (
-                <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
-                    <ToolbarTitle text='Radius' />
-                    <DropDownMenu value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
-                        <MenuItem value={1000} primaryText="1km" />
-                        <MenuItem value={500} primaryText="500m" />
-                        <MenuItem value={250} primaryText="250m" />
-                        <MenuItem value={100} primaryText="100m" />
+                <div style={styles.bottomBarGroup}>
+                    <Typography variant="caption" color="inherit">Radius</Typography>
+                    <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}
+
+                        MenuProps={{
+                            MenuListProps: {
+                                className: classes.menuList,
+                            }
+                        }}
+                    >
+                        <MenuItem value={1000}>1km</MenuItem>
+                        <MenuItem value={500}>500m</MenuItem>
+                        <MenuItem value={250}>250m</MenuItem>
+                        <MenuItem value={100}>100m</MenuItem>
                         {
                             [1000, 500, 250, 100].some(r => r == this.props.radius) ? null
-                            : (<MenuItem value={this.props.radius} primaryText={Math.round(this.props.radius) + 'm'} />)
+                            : (<MenuItem value={this.props.radius}>{Math.round(this.props.radius) + 'm'}</MenuItem>)
                         }
-                    </DropDownMenu>
-                    <IconButton tooltip="cancel" tooltipPosition="top-center" touch={true} onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
-                </ToolbarGroup>            
+                    </Select>
+                    <Tooltip title="cancel" position="top-center">
+                        <IconButton onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
+                    </Tooltip>
+                </div>            
             ) : this.props.filter == 'cities' ? (
-                <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
-                    <ToolbarTitle text='Cities' />
-                    <IconButton tooltip="clear" tooltipPosition="top-center" touch={true} onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
-                    <IconButton tooltip="cancel" tooltipPosition="top-center" touch={true} onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
-                </ToolbarGroup>            
+                <div style={styles.bottomBarGroup}>
+                    <Typography variant="caption" color="inherit">Cities</Typography>
+                    <Tooltip title="clear" position="top-center">
+                        <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="cancel" position="top-center">
+                        <IconButton onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
+                    </Tooltip>
+                </div>            
             )            
             : (
-                <ToolbarGroup style={styles.bottomBarGroup} firstChild={true} lastChild={true}>
-                    <ToolbarTitle text='Path' />
-                    <IconButton tooltip="edit" tooltipPosition="top-center" touch={true} onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
-                    <IconButton tooltip="delete" tooltipPosition="top-center" touch={true} onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}><ActionDelete /></IconButton>
-                    <IconButton tooltip="clear all" tooltipPosition="top-center" touch={true} onClick={() => this.props.clearPaths() }><NavigationRefresh /></IconButton>
-                    <IconButton tooltip="download" tooltipPosition="top-center" touch={true} onClick={() => this.props.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
-                    <IconButton tooltip="upload" tooltipPosition="top-center" touch={true} onClick={() => this.props.uploadPath() }><FileUpload /></IconButton>
-                    <span className="label label-info">{`${this.state.length.toFixed(1)}km`}</span>
-                </ToolbarGroup>            
+                <div style={styles.bottomBarGroup}>
+                    <Typography variant="caption" color="inherit">Path</Typography>
+                    <Tooltip title="edit" position="top-center">
+                        <IconButton onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="delete" position="top-center">
+                        <IconButton onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}><ActionDelete /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="clear all" position="top-center">
+                        <IconButton onClick={() => this.props.clearPaths() }><NavigationRefresh /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="download" position="top-center">
+                        <IconButton onClick={() => this.props.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="upload" position="top-center">
+                        <IconButton onClick={() => this.props.uploadPath() }><FileUpload /></IconButton>
+                    </Tooltip>
+                    <span>{`${this.state.length.toFixed(1)}km`}</span>
+                </div>            
             ) }
             </Toolbar>
         );
@@ -121,4 +176,4 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(BottomBar);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(BottomBar));

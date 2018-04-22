@@ -5,10 +5,41 @@ import { push } from 'react-router-redux';
 import { setTabValue, setSelectedItem, getMoreItems, openWalkEditor } from './actions';
 import marked from 'marked';
 import IconButton from 'material-ui/IconButton';
-import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward';
-import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
-import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit';
-import styles from './styles';
+import NavigationArrowForward from '@material-ui/icons/ArrowForward';
+import NavigationArrowBack from '@material-ui/icons/ArrowBack';
+import EditorModeEdit from '@material-ui/icons/ModeEdit';
+import Typography from 'material-ui/Typography';
+
+const styles = {
+    commentBoxBody: {
+        padding: '10px 20px',
+        textAlign: 'justify'
+    },
+    commentBoxTitle: {
+        fontSize: '90%'
+    },
+    commentBoxAuthor: {
+        fontSize: '85%',
+        textAlign: 'right',
+    },
+    commentBoxAuthorPhoto: {
+        width: '16px',
+    },        
+    commentBoxText: {
+        textIndent: '1.2em',
+        fontSize: '85%',
+        lineHeight: '1.65',
+        letterSpacing: '.1em',
+    },
+    commentBoxControl: {
+        width: '100%',
+        textAlign: 'center'
+    },    
+    twitter: {
+        display: 'inline-block',
+        marginLeft: 20
+    },
+};
 
 class CommentBox extends Component {
     handleEdit() {
@@ -65,7 +96,7 @@ class CommentBox extends Component {
                     <div ref="twitter" style={styles.twitter}></div>
                 </div>
                 <div style={styles.commentBoxBody}>
-                    <h4 style={styles.commentBoxTitle}>{title}</h4>
+                    <Typography variant="subheading">{title}</Typography>
                     {
                         data_user ? (<div style={styles.commentBoxAuthor}><img style={styles.commentBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></div>) : null
                     }

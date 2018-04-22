@@ -4,9 +4,9 @@ import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { getMoreItems, addPaths, setSelectedItem, toggleSidebar } from './actions';
-import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
-import FlatButton from 'material-ui/FlatButton';
-import Toggle from 'material-ui/Toggle';
+import Table, {TableBody, TableHead, TableRow, TableCell} from 'material-ui/Table';
+import Button from 'material-ui/Button';
+import Switch from 'material-ui/Switch';
 
 const td_common_style = {
     paddingLeft: 2,
@@ -33,9 +33,7 @@ class SearchBox extends Component {
     handleGetMore() {
         this.props.getMoreItems(this.props.params);
     }
-    handleSelect(selectedRows) {
-        if (selectedRows.length == 0) return;
-        const index = selectedRows[0];
+    handleSelect(index) {
         const item = this.props.rows[index];
         this.props.push( '/' + item.id );
     }
@@ -77,24 +75,24 @@ class SearchBox extends Component {
                         }
 
                     </strong> :
-            { this.props.rows.length > 0 ? (<FlatButton onClick={ this.handleShowAll.bind(this) } label="show all paths" />) : null }
-            { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
-              <Toggle
-                  label="show line distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> : null }
+            { this.props.rows.length > 0 && (<Button onClick={ this.handleShowAll.bind(this) }>show all paths</Button>) }
+            { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined &&
+              <Switch
+                  label="show line distance" toggled={this.state.show_distance} onToggle={this.handleShowDistance.bind(this)} /> }
                 </div>
-                <Table onRowSelection={this.handleSelect.bind(this)} style={{cursor: 'pointer'}}>
-                    <TableBody stripedRows  displayRowCheckbox={false}>
+                <Table style={{cursor: 'pointer'}}>
+                    <TableBody>
                         { this.props.rows.map( (item, index) =>
-                            <TableRow key={index}>
-                                <TableRowColumn style={td_styles[0]}>{index+1}</TableRowColumn>
-                                <TableRowColumn style={td_styles[1]}>{item.date}</TableRowColumn>
-                                <TableRowColumn style={td_styles[2]}>{item.title}</TableRowColumn>
-                                <TableRowColumn style={td_styles[3]}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableRowColumn>
+                            <TableRow key={index} onClick={this.handleSelect.bind(this, index)}>
+                                <TableCell style={td_styles[0]}>{index+1}</TableCell>
+                                <TableCell style={td_styles[1]}>{item.date}</TableCell>
+                                <TableCell style={td_styles[2]}>{item.title}</TableCell>
+                                <TableCell style={td_styles[3]}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
                             </TableRow>)
                         }
                     </TableBody>
                 </Table>
-                { this.props.params ? <FlatButton style={{width: '100%'}} onClick={this.handleGetMore.bind(this)} label="more" /> : null }
+                { this.props.params && <Button style={{width: '100%'}} onClick={this.handleGetMore.bind(this)}>more</Button>  }
             </div>
         );
     }

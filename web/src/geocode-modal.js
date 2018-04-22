@@ -2,14 +2,16 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { openGeocodeModal, setCenter } from './actions';
-import FlatButton from 'material-ui/FlatButton';
-import Dialog from 'material-ui/Dialog';
-import DatePicker from 'material-ui/DatePicker';
+import Button from 'material-ui/Button';
+import Dialog, {
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
 import IconButton from 'material-ui/IconButton';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
-import styles from './styles';
+import NavigationClose from '@material-ui/icons/Close';
 
 class GeocodeModal extends Component {
     constructor(props) {
@@ -38,20 +40,19 @@ class GeocodeModal extends Component {
         }
     }
     render() {
-        const actions = [
-            <FlatButton onClick={this.handleSubmit.bind(this, null)}  label="Move to" primary={true} />
-        ];
-        // due to https://github.com/callemall/material-ui/issues/3394 we use onBlur.
         return (
             <Dialog
-                title="Geocode"
-                actions={actions}
-                modal={false}
                 open={this.props.open_geocode_modal}
-                onRequestClose={this.handleClose.bind(this)}
+                onClose={this.handleClose.bind(this)}
             >
-                <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value); }} floatingLabelText="address" floatingLabelFixed={true}  fullWidth={true} />
-                <IconButton style={styles.dialogCloseButton} onClick={this.handleClose.bind(this)}><NavigationClose /></IconButton>
+                <DialogTitle>Geocode</DialogTitle>
+                <DialogContent>
+                    <TextField defaultValue={this.state.address} onBlur={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(e.target.value); }} label="address"  fullWidth={true} />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleClose.bind(this)}>Cancel</Button>
+                    <Button onClick={this.handleSubmit.bind(this, null)} color="primary">Move to</Button>
+                </DialogActions>
             </Dialog>
         );
     }
