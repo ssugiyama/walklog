@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
-import { setSearchForm, resetSearchForm, search, toggleSidebar, setTabValue} from './actions';
+import { setSearchForm, resetSearchForm, search, toggleSidebar, setLastQuery } from './actions';
 import Button from 'material-ui/Button';
 import SearchIcon from '@material-ui/icons/Search';
 import Select from 'material-ui/Select';
@@ -10,6 +10,7 @@ import { MenuItem } from 'material-ui/Menu';
 import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
 import { withStyles } from 'material-ui/styles';
+import { push } from 'react-router-redux';
 
 const month_options = [
     { label: '-', value: '' },
@@ -69,8 +70,10 @@ class SearchForm extends Component {
         this.setState({force_search: false});
         const query = {};
         keys.forEach(key => { query[key] = this.props[key]; });
-        this.props.search(query, false);
-        this.props.setTabValue('search');
+        this.props.push({
+            query
+        });  
+        this.props.setLastQuery(query);
         if (this.props.open_sidebar) {
             if ( prevProps.filter != this.props.filter 
                 && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
@@ -160,7 +163,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, resetSearchForm, search, toggleSidebar, setTabValue}, dispatch);
+    return bindActionCreators({setSearchForm, resetSearchForm, search, push, toggleSidebar, setLastQuery}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchForm));
