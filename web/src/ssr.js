@@ -3,11 +3,11 @@ import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import {configureStore, routes, handleRoute}  from './app';
 import {setCurrentUser, setUsers, setMessage, openSnackbar} from './actions';
-import { StaticRouter } from 'react-router-dom';
-import { renderRoutes, matchRoutes } from 'react-router-config';
+import { matchRoutes } from 'react-router-config';
 import { SheetsRegistry } from 'react-jss/lib/jss';
 import { MuiThemeProvider, createMuiTheme, createGenerateClassName } from 'material-ui/styles';
 import JssProvider from 'react-jss/lib/JssProvider';
+import BodyContainer from './body';
 
 import config from './config';
 import models from '../lib/models';
@@ -20,7 +20,6 @@ export default function handleSSR(req, res) {
     };
     const prefix = `http://localhost:${req.app.get('port')}/`;
     const branch = matchRoutes(routes, req.url);
-    console.log(branch)
     const store = configureStore();
     handleRoute(branch, req.query, false, prefix, [], store.dispatch)
         .then(() =>{
@@ -38,13 +37,11 @@ export default function handleSSR(req, res) {
             const generateClassName = createGenerateClassName();
             const html = renderToString(
                 <Provider store={store}>
-                    <StaticRouter location={req.url} context={context}>
-                        <JssProvider registry={sheetsRegistry} generateClassName={generateClassName}>
-                            <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
-                                {renderRoutes(routes)}
-                            </MuiThemeProvider>
-                        </JssProvider>
-                    </StaticRouter>
+                    <JssProvider registry={sheetsRegistry} generateClassName={generateClassName}>
+                        <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
+                            <BodyContainer />
+                        </MuiThemeProvider>
+                    </JssProvider>
                 </Provider>
             );
             const css = sheetsRegistry.toString();

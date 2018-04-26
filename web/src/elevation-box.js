@@ -95,10 +95,7 @@ class ElevationBox extends Component {
     render() {
         if (this.props.highlighted_path)
             return (
-                <div>
-                    <Typography variant="subheading">elevation</Typography>
-                    <canvas style={styles.elevationBox} ref="root"></canvas>
-                </div>
+                <canvas style={styles.elevationBox} ref="root"></canvas>
             );
         else
             return null;

@@ -7,6 +7,7 @@ import { ConnectedRouter } from 'react-router-redux';
 import { renderRoutes } from 'react-router-config';
 import { configureStore, routes, history } from './app';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import BodyContainer from './body';
 
 const store = configureStore( window.__PRELOADED_STATE__);
 
@@ -20,7 +21,7 @@ class Main extends React.Component {
     }
   
     render() {
-        return renderRoutes(routes);
+        return <BodyContainer />;
     }
 }
   
@@ -29,11 +30,9 @@ const theme = createMuiTheme();
 
 ReactDOM.render(
     <Provider store={store}>
-        <ConnectedRouter history={history}>
-            <MuiThemeProvider theme={theme}>
-                <Main />
-            </MuiThemeProvider>
-        </ConnectedRouter>
+        <MuiThemeProvider theme={theme}>
+            <Main />
+        </MuiThemeProvider>
     </Provider>,
     document.querySelector('#body')
 );

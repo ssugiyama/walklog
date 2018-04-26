@@ -6,7 +6,7 @@
   "scripts": {
     "build-cli": "parcel build -d public -o bundle src/main.js",
     "build-svr": "babel src -d ./dist --presets env,react",
-    "start": "NODE_ENV=development node index.js",
+    "start": "node index.js",
     "watch": "parcel watch -d public -o bundle src/main.js"
   },
   "keywords": [],

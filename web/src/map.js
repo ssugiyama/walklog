@@ -8,13 +8,12 @@ import * as ActionTypes from './action-types';
 
 const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
 
-const appBarHeight = 64;
 const bottomBarHeight = 64;
 
 const styles = {
     map: {
         position: 'absolute',
-        top: appBarHeight,
+        top: 0,
         left: 0,
         right: 0,
         bottom: bottomBarHeight,

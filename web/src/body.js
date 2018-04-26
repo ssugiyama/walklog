@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import CssBaseline from 'material-ui/CssBaseline';
-import NavBarContainer from './nav-bar';
 import MapContainer from './map';
 import BottomBarContainer from './bottom-bar';
 import WalkEditorContainer from './walk-editor';
@@ -8,21 +7,38 @@ import GeocodeModalContainer from './geocode-modal';
 import { connect } from 'react-redux';
 import SideBoxContainer from './side-box';
 import { bindActionCreators } from 'redux';
-import { openSnackbar } from './actions';
+import { openSnackbar, toggleSidebar } from './actions';
 import Snackbar from 'material-ui/Snackbar';
+import Button from 'material-ui/Button';
+import MenuIcon from '@material-ui/icons/Menu';
+import { withStyles } from 'material-ui/styles';
+
+const styles = {
+    drawerButton: {
+        display: 'absolute',
+        top: 5,
+        left: 20,
+    },
+};
 
 class Body extends Component {
     handleRequestClose() {
         this.props.openSnackbar(false);
     }
+    handleShow() {
+        this.props.toggleSidebar();
+    }
     render() {
+        const {classes} = this.props;
         return (
             <div>
                 <CssBaseline />
-                <NavBarContainer />
                 <SideBoxContainer />
                 <MapContainer />
                 <BottomBarContainer />
+                <Button variant="fab" color="primary" onClick={this.handleShow.bind(this)} className={classes.drawerButton}>
+                    <MenuIcon />
+                </Button>
                 <WalkEditorContainer />
                 <GeocodeModalContainer />
                 <Snackbar
@@ -41,7 +57,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({openSnackbar}, dispatch);
+    return bindActionCreators({openSnackbar, toggleSidebar}, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Body);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Body));

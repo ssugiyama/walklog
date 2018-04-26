@@ -7,7 +7,9 @@ import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, setSearchForm, setSelectedPath, setSelectedItem } from './actions';
-import BodyContainer from './body';
+import SearchBox from './search-box';
+import CommentBox from './comment-box';
+import { renderRoutes } from 'react-router-config';
 
 // const injectTapEventPlugin = require('react-tap-event-plugin');
 // injectTapEventPlugin();
@@ -54,7 +56,6 @@ const initialState = {
     open_walk_editor: false,
     open_snackbar: false,
     open_geocode_modal: false,
-    tab_value: 'search',
     street_view: null,
     info_window: {
         open: false,
@@ -70,6 +71,7 @@ const initialState = {
     users: [],
     current_user: null,
     external_links: [],
+    last_query: null,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -83,11 +85,6 @@ const mainReducer = function(state = initialState, action) {
                 action.payload.order = 'newest_first';
             }
             const search_form = Object.assign({}, state.search_form, action.payload);
-            return Object.assign({}, state, {search_form});
-        }
-    case ActionTypes.RESET_SEARCH_FORM:
-        {
-            const search_form = Object.assign({}, initialState.search_form);
             return Object.assign({}, state, {search_form});
         }
     case ActionTypes.SEARCH_START:
@@ -113,14 +110,7 @@ const mainReducer = function(state = initialState, action) {
             const selected_item = action.item;
             const selected_index = action.index;
             const highlighted_path = selected_item ? selected_item.path : state.selected_path;
-            let tab_value;
-            if (!selected_item) {
-                tab_value = 'search';
-            }
-            else {
-                tab_value = 'comment';
-            }
-            return Object.assign({}, state, {selected_index, selected_item, tab_value, highlighted_path});
+            return Object.assign({}, state, {selected_index, selected_item, highlighted_path});
         }
     case ActionTypes.SET_SELECTED_PATH:
         {
@@ -128,12 +118,8 @@ const mainReducer = function(state = initialState, action) {
             if (typeof window !== 'undefined' && window.localStorage) {
                 window.localStorage.selected_path = selected_path;
             }
-            let tab_value = state.tab_value;
-            if (!selected_path && tab_value == 'visualization') {
-                tab_value = 'search';
-            }
             const search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-            return Object.assign({}, state, {selected_path, search_form, tab_value, editing_path: false});
+            return Object.assign({}, state, {selected_path, search_form, editing_path: false});
         }
     case ActionTypes.TOGGLE_SIDEBAR:
         {
@@ -151,11 +137,6 @@ const mainReducer = function(state = initialState, action) {
             const open_geocode_modal = action.open;
             return Object.assign({}, state, {open_geocode_modal});
         }
-    case ActionTypes.SET_TAB_VALUE:
-        {
-            const tab_value = action.value;
-            return Object.assign({}, state, {tab_value});
-        }
     case ActionTypes.ADD_PATHS:
         {
             const action_queue = state.action_queue.concat(action);
@@ -163,28 +144,17 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.DELETE_SELECTED_PATH:
         {
-            let tab_value = state.tab_value;
-            if (typeof window !== 'undefined' && window.localStorage) {
-                delete window.localStorage.selected_path;
-            }
-            if (tab_value == 'visualization') {
-                tab_value = 'search';
-            }
             const search_form = Object.assign({}, state.search_form, {searchPath: null });
-            return Object.assign({}, state, {selected_path: null, tab_value, search_form});
+            return Object.assign({}, state, {selected_path: null, search_form});
         }
     case ActionTypes.CLEAR_PATHS:
         {
-            let tab_value = state.tab_value;
             if (typeof window !== 'undefined' && window.localStorage) {
                 delete window.localStorage.selected_path;
             }
             const action_queue = state.action_queue.concat(action);
-            if (tab_value == 'visualization') {
-                tab_value = 'search';
-            }
             const search_form = Object.assign({}, state.search_form, {searchPath: null });
-            return Object.assign({}, state, {selected_path: null, action_queue, tab_value, search_form});
+            return Object.assign({}, state, {selected_path: null, action_queue, search_form});
         }
     case ActionTypes.DOWNLOAD_PATH:
     case ActionTypes.UPLOAD_PATH:
@@ -252,7 +222,12 @@ const mainReducer = function(state = initialState, action) {
         {
             const open_snackbar = action.open;
             return Object.assign({}, state, {open_snackbar});
-        }    
+        }
+    case ActionTypes.SET_LAST_QUERY:
+        {   
+            const last_query = action.last_query;
+            return Object.assign({}, state, {last_query});
+        } 
     default:
         return state;
     }
@@ -264,7 +239,7 @@ const reducers = combineReducers({
 });
 
 export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
-    const qry = Object.assign({}, query);
+    const qry = Object.assign({}, query)
     const last_branch = branch[branch.length - 1];
     const match = last_branch.match;
     if (match.params.id) {
@@ -293,9 +268,8 @@ const dataFetchMiddleware = store => next => {
         if (action.type === LOCATION_CHANGE) {
             if (!isFirstLocation) {
                 const branch = matchRoutes(routes, action.payload.pathname);
-                console.log(branch);
                 const state = store.getState();
-                handleRoute(branch, action.payload.search, state.main.selected_path, '/', state.main.result.rows, next);
+                handleRoute(branch, action.payload.query, state.main.selected_path, '/', state.main.result.rows, next);
             }
             isFirstLocation = false;
         }
@@ -327,12 +301,24 @@ export function configureStore(state) {
     }
 }
 
+const SideRoot = ({ route }) => (
+    <div style={{ overflowY: 'auto' }}>
+        {renderRoutes(route.routes)}
+    </div>
+);
+
 export const routes = [
     {
-        component: BodyContainer,
+        component: SideRoot,
         routes: [
             {
                 path: '/:id',
+                component: CommentBox,
+            },
+            {
+                path: '/',
+                component: SearchBox,
+                exact: true,
             }
         ]
     }

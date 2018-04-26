@@ -13,9 +13,6 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from 'material-ui/styles';
 
 const styles = {
-    root: {
-        flexGrow: 1,
-    },
     title: {
         flex: 1,
     },
@@ -63,7 +60,7 @@ class NavBar extends Component {
     render() {
         const classes = this.props.classes;
         return (
-            <AppBar postion="static" className={classes.root}>
+            <AppBar position="static">
                 <Toolbar>
                     <IconButton onClick={this.handleShow.bind(this)} color="inherit"><MenuIcon /></IconButton>
                     <Typography variant="title" color="inherit" className={classes.title}>Walklog</Typography>

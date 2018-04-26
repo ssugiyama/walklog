@@ -8,6 +8,7 @@ import Table, {TableBody, TableHead, TableRow, TableCell} from 'material-ui/Tabl
 import Button from 'material-ui/Button';
 import Switch from 'material-ui/Switch';
 import { FormControlLabel } from 'material-ui/Form';
+import { Typography } from 'material-ui';
 
 const td_common_style = {
     paddingLeft: 2,
@@ -51,7 +52,7 @@ class SearchBox extends Component {
             <div style={{ paddingBottom: 20 }}>
                 <SearchFormContainer />
                 <div>
-                    <strong>
+                    <Typography variant="body2" style={{ display: 'inline-block' }}>
                         {
                             ( () => {
                                 if (this.props.error) {
@@ -74,14 +75,13 @@ class SearchBox extends Component {
                                 }
                             })()
                         }
-
-                    </strong> :
+                    </Typography> :
             { this.props.rows.length > 0 && (<Button onClick={ this.handleShowAll.bind(this) }>show all paths</Button>) }
             { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined &&
                 <FormControlLabel
                     control={<Switch
                         checked={this.state.show_distance} onChange={this.handleShowDistance.bind(this)} />}
-                    label="show line distance" /> 
+                    label="show line distance"></FormControlLabel> 
             }
                 </div>
                 <Table style={{cursor: 'pointer'}}>

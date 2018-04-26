@@ -10,12 +10,6 @@ export function setSearchForm(payload) {
     };
 }
 
-export function resetSearchForm() {
-    return {
-        type: ActionTypes.RESET_SEARCH_FORM,
-    };
-}
-
 function searchStart() {
     return {
         type: ActionTypes.SEARCH_START,
@@ -85,13 +79,6 @@ export function setSelectedPath(path) {
 export function toggleSidebar() {
     return {
         type: ActionTypes.TOGGLE_SIDEBAR,
-    };
-}
-
-export function setTabValue(value) {
-    return {
-        type: ActionTypes.SET_TAB_VALUE,
-        value
     };
 }
 
@@ -220,5 +207,12 @@ export function downloadPath() {
 export function uploadPath() {
     return {
         type: ActionTypes.UPLOAD_PATH,
+    };
+}
+
+export function setLastQuery(last_query) {
+    return {
+        type: ActionTypes.SET_LAST_QUERY,
+        last_query,
     };
 }

@@ -19,6 +19,8 @@ const styles = {
         height: 214
     },
     panoramaBoxControl: {
+        display: 'flex',
+        flextDirection: 'row',
         width: '100%',
         textAlign: 'center',
         height: 36
@@ -134,18 +136,20 @@ class PanoramaBox extends Component {
     }
     render() {
         return (
-            <div>                
-                <Typography variant="subheading">street view </Typography>
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={this.props.overlay} onChange={this.handleOverlayChange.bind(this)} />}
-                    label="overlay" />
+            <div>
+                <div>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={this.props.overlay} onChange={this.handleOverlayChange.bind(this)} />}
+                        label="overlay">
+                    </FormControlLabel>
+                </div>
                 <div style={styles.panoramaBoxBody} ref="body"></div>
                 <div style={styles.panoramaBoxControl}>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                    <span><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
+                    <Typography variant="body1" style={{ flexGrow: 1 }}><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></Typography>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
                 </div>
