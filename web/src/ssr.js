@@ -8,6 +8,7 @@ import { SheetsRegistry } from 'react-jss/lib/jss';
 import { MuiThemeProvider, createMuiTheme, createGenerateClassName } from 'material-ui/styles';
 import JssProvider from 'react-jss/lib/JssProvider';
 import BodyContainer from './body';
+import { StaticRouter } from 'react-router-dom';
 
 import config from './config';
 import models from '../lib/models';
@@ -39,7 +40,9 @@ export default function handleSSR(req, res) {
                 <Provider store={store}>
                     <JssProvider registry={sheetsRegistry} generateClassName={generateClassName}>
                         <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
-                            <BodyContainer />
+                            <StaticRouter location={req.url} context={context}>
+                                <BodyContainer />
+                            </StaticRouter>
                         </MuiThemeProvider>
                     </JssProvider>
                 </Provider>

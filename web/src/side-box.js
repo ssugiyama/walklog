@@ -14,10 +14,9 @@ import SearchIcon from '@material-ui/icons/Search';
 import DescriptionIcon from '@material-ui/icons/Description';
 import NavBarContainer from './nav-bar';
 import { withStyles } from 'material-ui/styles';
-import { StaticRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
-import { routes, history } from './app';
-import { ConnectedRouter } from 'react-router-redux';
+import { routes } from './app';
 
 const drawerWidth = 300;
 
@@ -39,15 +38,7 @@ class SideBox extends Component {
             <Drawer open={this.props.open_sidebar} variant="persistent" 
                 classes={{ paper: this.props.classes.drawerPaper }}>
                 <NavBarContainer />
-                { typeof(document) !== 'undefined' ?
-                    <ConnectedRouter history={history}>
-                        { renderRoutes(routes) }
-                    </ConnectedRouter>
-                :
-                    <StaticRouter location={history.location.url} context={context}>
-                        { renderRoutes(routes) }
-                    </StaticRouter>
-                }
+                { renderRoutes(routes) }
             </Drawer>
         );
     }
@@ -65,4 +56,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SideBox));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SideBox)));

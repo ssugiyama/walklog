@@ -21,7 +21,7 @@ class Main extends React.Component {
     }
   
     render() {
-        return <BodyContainer />;
+        return <ConnectedRouter history={history}><BodyContainer /></ConnectedRouter>;
     }
 }
   

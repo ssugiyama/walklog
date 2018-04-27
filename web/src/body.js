@@ -12,6 +12,7 @@ import Snackbar from 'material-ui/Snackbar';
 import Button from 'material-ui/Button';
 import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from 'material-ui/styles';
+import { withRouter } from 'react-router-dom';
 
 const styles = {
     drawerButton: {
@@ -60,4 +61,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({openSnackbar, toggleSidebar}, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Body));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Body)));
