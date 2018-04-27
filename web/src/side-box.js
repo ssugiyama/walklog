@@ -33,7 +33,6 @@ class SideBox extends Component {
         super(props);
     }
     render() {
-        const context = {};
         return (
             <Drawer open={this.props.open_sidebar} variant="persistent" 
                 classes={{ paper: this.props.classes.drawerPaper }}>
@@ -49,7 +48,7 @@ function mapStateToProps(state) {
         open_sidebar: state.main.open_sidebar, 
         highlighted_path: state.main.highlighted_path, 
         selected_item: state.main.selected_item, 
-        location: state.routing.location });
+    });
 }
 
 function mapDispatchToProps(dispatch) {
