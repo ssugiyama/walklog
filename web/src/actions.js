@@ -23,26 +23,31 @@ function searchResult(data, append) {
     };
 }
 
-export function search(props, show, prefix = '/') {
+export function search(props, prefix = '/') {
     return dispatch => {
         dispatch(searchStart());
-        const keys = ['id', 'user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
+        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
-        if (! props['id']) {
-            dispatch(setLastQuery(params));
-        }
+        
+        dispatch(setLastQuery(params));
         return fetch(prefix + 'api/search?' + params)
             .then(response => response.json())
             .then(data => {
                 dispatch(searchResult(data, false));
-                if (!data.error && show == 'first' && data.rows.length > 0) {
-                    dispatch(setSelectedItem(data.rows[0], 0));
-                }
-                else if (!data.error && show == 'all') {
-                    dispatch(addPaths(data.rows.map(row => row.path)));
-                }
             })
             .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
+    };
+}
+
+export function getItem(id, prefix = '/') {
+    return dispatch => {
+        return fetch(prefix + 'api/get/' + id)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error && data.rows.length > 0) {
+                    dispatch(setSelectedItem(data.rows[0], 0));
+                }
+            });
     };
 }
 

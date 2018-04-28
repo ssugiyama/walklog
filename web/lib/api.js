@@ -212,6 +212,14 @@ api.get('/search', function(req, res){
     });
 });
 
+api.get('/get/:id', function(req, res){
+    searchFunc({id: req.params.id}).then(json => {
+        res.json(json);
+    }).catch(error => {
+        res.status(500).json(error);
+    });
+});
+
 api.get('/cities', function(req, res){
     const jcodes    = req.query.jcodes;
     let where, latitude, longitude;

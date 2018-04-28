@@ -6,7 +6,7 @@ import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { search, setSearchForm, setSelectedPath, setSelectedItem } from './actions';
+import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem } from './actions';
 import SearchBox from './search-box';
 import CommentBox from './comment-box';
 import { renderRoutes } from 'react-router-config';
@@ -249,16 +249,14 @@ export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
                 return next(setSelectedItem(rows[index], index));
             }
         }
-        qry.id = match.params.id;
+        return next(getItem(match.params.id, prefix));
     }
-    const show_on_map = qry.show || (qry.id && 'first');
-    delete qry['show'];
     const search_form = Object.assign({}, initialState.search_form, qry);
     if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff' || search_form.filter == 'frechet') && !isPathSelected && search_form.searchPath) {
         next(setSelectedPath(search_form.searchPath));
     }
     next(setSearchForm(search_form));
-    return next(search(search_form, show_on_map, prefix));
+    return next(search(search_form, prefix));
 }
 
 let isFirstLocation = true;
