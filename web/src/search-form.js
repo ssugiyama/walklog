@@ -93,8 +93,8 @@ class SearchForm extends Component {
         return event => this.props.setSearchForm({[name]: event.target.value});
     }
     reset() {
-        this.props.resetSearchForm();
         this.setState({force_search: true});
+        this.props.push({pathname: '/'});
     }
     render() {
         const classes = this.props.classes;
