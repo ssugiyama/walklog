@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
-import { setSearchForm, resetSearchForm, search, toggleSidebar, setLastQuery } from './actions';
+import { setSearchForm, resetSearchForm, search, toggleSidebar } from './actions';
 import Button from 'material-ui/Button';
 import SearchIcon from '@material-ui/icons/Search';
 import Select from 'material-ui/Select';
@@ -70,10 +70,11 @@ class SearchForm extends Component {
         this.setState({force_search: false});
         const query = {};
         keys.forEach(key => { query[key] = this.props[key]; });
+        const usp = new URLSearchParams(query);
         this.props.push({
-            query
-        });  
-        this.props.setLastQuery(query);
+            pathname: '/',
+            search: usp.toString(),
+        });
         if (this.props.open_sidebar) {
             if ( prevProps.filter != this.props.filter 
                 && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
@@ -163,7 +164,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, resetSearchForm, search, push, toggleSidebar, setLastQuery}, dispatch);
+    return bindActionCreators({setSearchForm, resetSearchForm, search, push, toggleSidebar}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchForm));

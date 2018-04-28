@@ -239,7 +239,7 @@ const reducers = combineReducers({
 });
 
 export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
-    const qry = Object.assign({}, query)
+    const qry = Object.assign({}, query);
     const last_branch = branch[branch.length - 1];
     const match = last_branch.match;
     if (match.params.id) {
@@ -269,7 +269,12 @@ const dataFetchMiddleware = store => next => {
             if (!isFirstLocation) {
                 const branch = matchRoutes(routes, action.payload.pathname);
                 const state = store.getState();
-                handleRoute(branch, action.payload.query, state.main.selected_path, '/', state.main.result.rows, next);
+                const usp = new URLSearchParams(action.payload.search);
+                const query = {};
+                for(let p of usp) {
+                    query[p[0]] = p[1];
+                }
+                handleRoute(branch, query, state.main.selected_path, '/', state.main.result.rows, next);
             }
             isFirstLocation = false;
         }

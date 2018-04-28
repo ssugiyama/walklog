@@ -20,7 +20,7 @@ export default function handleSSR(req, res) {
         userAgent: req.headers['user-agent']
     };
     const prefix = `http://localhost:${req.app.get('port')}/`;
-    const branch = matchRoutes(routes, req.url);
+    const branch = matchRoutes(routes, req.path);
     const store = configureStore();
     handleRoute(branch, req.query, false, prefix, [], store.dispatch)
         .then(() =>{
