@@ -6,7 +6,7 @@ import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem } from './actions';
+import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem, setLastQuery } from './actions';
 import SearchBox from './search-box';
 import CommentBox from './comment-box';
 import { renderRoutes } from 'react-router-config';
@@ -25,7 +25,7 @@ const initialState = {
     search_form: {
         id: '',
         date: '',
-        filter: 'any',
+        filter: '',
         month: '',
         year: '',
         order: 'newest_first',
@@ -251,6 +251,7 @@ export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
         }
         return next(getItem(match.params.id, prefix));
     }
+    next(setLastQuery(qry));
     const search_form = Object.assign({}, initialState.search_form, qry);
     if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff' || search_form.filter == 'frechet') && !isPathSelected && search_form.searchPath) {
         next(setSelectedPath(search_form.searchPath));

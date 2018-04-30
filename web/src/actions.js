@@ -28,8 +28,6 @@ export function search(props, prefix = '/') {
         dispatch(searchStart());
         const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
-        
-        dispatch(setLastQuery(params));
         return fetch(prefix + 'api/search?' + params)
             .then(response => response.json())
             .then(data => {
