@@ -95,7 +95,7 @@ class BottomBar extends Component {
                         }
                     </Select>
                     <Tooltip title="cancel" position="top-center">
-                        <IconButton onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
+                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
                     </Tooltip>
                 </div>            
             ) : this.props.filter == 'cities' ? (
@@ -105,7 +105,7 @@ class BottomBar extends Component {
                         <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
                     </Tooltip>
                     <Tooltip title="cancel" position="top-center">
-                        <IconButton onClick={() => this.props.setSearchForm({filter: 'any'}) }><NavigationCancel /></IconButton>
+                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
                     </Tooltip>
                 </div>            
             )            

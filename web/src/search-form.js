@@ -107,7 +107,7 @@ class SearchForm extends Component {
                 <input type="hidden" name="searchPath" value=""  />
                 <div>
                     <TextField select label="filter" value={this.props.filter} onChange={this.handleChange('filter')} style={{width: '50%'}}>
-                        <MenuItem value="any">Any</MenuItem>
+                        <MenuItem value="">-</MenuItem>
                         <MenuItem value="neighborhood">Neighborhood</MenuItem>
                         <MenuItem value="cities">Cities</MenuItem>
                         <MenuItem value="frechet">Fréchet</MenuItem>

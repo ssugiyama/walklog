@@ -89,8 +89,8 @@ class CommentBox extends Component {
         }
     }
     goToSearch() {
-        const searchParams = this.props.last_query;
-        this.props.push({ pathname: '/', search: searchParams ? '?' + searchParams : null });
+        const searchParams = this.props.last_query ? '?' + new URLSearchParams(this.props.last_query).toString() : null;
+        this.props.push({ pathname: '/', search: searchParams });
     }
     render() {
         const data = this.props.selected_item;
