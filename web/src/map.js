@@ -186,6 +186,9 @@ class Map extends Component {
         if (this.props.highlighted_path && this.props.highlighted_path != this.path_manager.getEncodedHighlight()) {
             this.path_manager.showPath(this.props.highlighted_path, false, true);
         }
+        else if( ! this.props.highlighted_path ) {
+            this.path_manager.set('highlight', null);
+        }
         this.processActionQueue();
         if (this.props.editing_path) {
             this.path_manager.set('editable', true);

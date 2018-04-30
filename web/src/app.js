@@ -109,7 +109,7 @@ const mainReducer = function(state = initialState, action) {
         {
             const selected_item = action.item;
             const selected_index = action.index;
-            const highlighted_path = selected_item ? selected_item.path : state.selected_path;
+            const highlighted_path = selected_item ? selected_item.path : null;
             return Object.assign({}, state, {selected_index, selected_item, highlighted_path});
         }
     case ActionTypes.SET_SELECTED_PATH:
@@ -251,6 +251,7 @@ export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
         }
         return next(getItem(match.params.id, prefix));
     }
+    next(setSelectedItem(null, -1));
     next(setLastQuery(qry));
     const search_form = Object.assign({}, initialState.search_form, qry);
     if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff' || search_form.filter == 'frechet') && !isPathSelected && search_form.searchPath) {
