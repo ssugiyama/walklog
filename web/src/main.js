@@ -28,7 +28,7 @@ class Main extends React.Component {
 // Create a theme instance.
 const theme = createMuiTheme();
 
-ReactDOM.render(
+ReactDOM.hydrate(
     <Provider store={store}>
         <MuiThemeProvider theme={theme}>
             <Main />
