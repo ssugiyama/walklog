@@ -81,9 +81,7 @@ class NavBar extends Component {
                         <Divider />
                         {
                             this.props.external_links.map(link => 
-                                <a href={link.href} target="_blank" key={link.name}>
-                                    <MenuItem>{link.name}</MenuItem>
-                                </a>
+                                <MenuItem component="a" href={link.href} target="_blank" key={link.name} >{link.name}</MenuItem>
                             )
                         }
                     </Menu>
