@@ -19,6 +19,8 @@ import PanoramaBox from './panorama-box';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
+import TweetIcon from './tweet-icon';
+import config from './config';
 
 const styles = {
     ExpansionPanelDetails: {
@@ -54,26 +56,31 @@ const styles = {
 };
 
 class CommentBox extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { };
+    }
     handleEdit() {
         this.props.openWalkEditor(true, 'update');
     }
-    prepareTwitter() {
-        const data = this.props.selected_item;
+    prepareTwitter(props) {
+        const data = props.selected_item;
         if (! data) return;
-        const href = location.protocol + '//' + location.host + '/' + data.id;
-        const body = data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)';
-        this.refs.twitter.innerHTML = `<a href="https://twitter.com/share" ref="twitter_button" class="twitter-share-button" data-lang="en"  data-size="small" data-hashtags="walklog" data-text='${body}' data-url="${href}" >Tweet</a>`;
-        if (window.twttr.widgets) window.twttr.widgets.load();
+        const href = config.base_url + '/' + data.id;
+        const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
+        this.setState({
+            tweet_url: `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`,
+        });
+    }
+    componentWillMount() {
+        this.prepareTwitter(this.props);
+    }
+    componentWillReceiveProps(nextProps) {
+        this.prepareTwitter(nextProps);
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.selected_item != this.props.selected_item) return true;
         return false;
-    }
-    componentDidMount() {
-        this.prepareTwitter();
-    }
-    componentDidUpdate() {
-        this.prepareTwitter();
     }
     traverseItem(delta) {
         const index = this.props.selected_index + delta;
@@ -111,7 +118,7 @@ class CommentBox extends Component {
                         {
                             data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                         }
-                        { data && <div ref="twitter" style={styles.twitter}></div>}
+                        <IconButton><a href={this.state.tweet_url}><TweetIcon /></a></IconButton>
                         <h4 style={styles.commentBoxTitle}>{ title || 'not found'}</h4>
                         {
                             data_user ? (<div style={styles.commentBoxAuthor}><img style={styles.commentBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></div>) : null

@@ -49,6 +49,7 @@ const Wrapper = props => (
         <script dangerouslySetInnerHTML={definePreloadedState(props.preloadedState)}>
         </script>
         <script src="./bundle.js"></script>
+        <script type="text/javascript" async src="https://platform.twitter.com/widgets.js"></script>
         <style id="jss-server-side">{props.css}</style>
     </body>
 </html>);
