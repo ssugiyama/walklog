@@ -8,7 +8,7 @@ import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem, setLastQuery } from './actions';
 import SearchBox from './search-box';
-import CommentBox from './comment-box';
+import ItemBox from './item-box';
 import { renderRoutes } from 'react-router-config';
 
 // const injectTapEventPlugin = require('react-tap-event-plugin');
@@ -318,7 +318,7 @@ export const routes = [
         routes: [
             {
                 path: '/:id',
-                component: CommentBox,
+                component: ItemBox,
             },
             {
                 path: '/',

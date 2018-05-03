@@ -5,8 +5,6 @@ import { connect } from 'react-redux';
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
 import Tabs, { Tab } from 'material-ui/Tabs';
-import SearchBox from './search-box';
-import CommentBox from './comment-box';
 import Table, { TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
 import NavigationClose from '@material-ui/icons/Close';
