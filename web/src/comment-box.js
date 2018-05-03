@@ -118,7 +118,7 @@ class CommentBox extends Component {
                         {
                             data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                         }
-                        <IconButton><a href={this.state.tweet_url}><TweetIcon /></a></IconButton>
+                        <IconButton component="a" href={this.state.tweet_url}><TweetIcon /></IconButton>
                         <h4 style={styles.commentBoxTitle}>{ title || 'not found'}</h4>
                         {
                             data_user ? (<div style={styles.commentBoxAuthor}><img style={styles.commentBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></div>) : null
