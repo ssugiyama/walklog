@@ -42,6 +42,7 @@ export function getItem(id, prefix = '/') {
         return fetch(prefix + 'api/get/' + id)
             .then(response => response.json())
             .then(data => {
+                dispatch(searchResult(data, false));
                 if (!data.error && data.rows.length > 0) {
                     dispatch(setSelectedItem(data.rows[0], 0));
                 }
