@@ -67,10 +67,10 @@ class SearchForm extends Component {
             keys.push('searchPath');
             break;
         }
+        const query = {};
+        keys.forEach(key => { query[key] = this.props[key]; });
         if (! this.state.force_search) {
             if (keys.every(key => prevProps[key] == this.props[key])) return;
-            const query = {};
-            keys.forEach(key => { query[key] = this.props[key]; });
             const usp = new URLSearchParams(query);
             this.props.push({
                 pathname: '/',
