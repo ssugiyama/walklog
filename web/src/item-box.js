@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
 import { setSelectedItem, getMoreItems, openWalkEditor } from './actions';
 import marked from 'marked';
@@ -95,10 +96,6 @@ class ItemBox extends Component {
             this.props.push('/' + this.props.rows[index].id);
         }
     }
-    goToSearch() {
-        const searchParams = this.props.last_query ? '?' + new URLSearchParams(this.props.last_query).toString() : null;
-        this.props.push({ pathname: '/', search: searchParams });
-    }
     render() {
         const data = this.props.selected_item;
         let title, createMarkup, data_user;
@@ -109,12 +106,18 @@ class ItemBox extends Component {
                 if (u.id == data.user_id) data_user = u;
             }
         }
+        const upUrl = this.props.last_query ? '/?' + this.props.last_query : '/';
+        const index = this.props.selected_index;
+        const nextId = this.props.next_id || (index > 0 ? this.props.rows[index-1].id : null);
+        const nextUrl = nextId && '/' + nextId;
+        const prevId = this.props.prev_id || (index < this.props.rows.length-1 ? this.props.rows[index+1].id : null);
+        const prevUrl = prevId ? '/' + prevId : this.props.params ? '/?' + this.props.params: null;
         const { classes } = this.props;
         return  <div>
                     <div style={styles.itemBoxControl}>
-                        <IconButton disabled={!this.props.next_id && this.props.selected_index <= 0} onClick={this.traverseItem.bind(this, -1)}><NavigationArrowBack /></IconButton>
-                        <IconButton onClick={this.goToSearch.bind(this)}><ArrowUpward /></IconButton>
-                        <IconButton disabled={!this.props.prev_id && this.props.selected_index >= this.props.count - 1} onClick={this.traverseItem.bind(this, 1)}><NavigationArrowForward /></IconButton>
+                        <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
+                        <IconButton component={Link} to={upUrl}><ArrowUpward /></IconButton>
+                        <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
                         {
                             data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                         }

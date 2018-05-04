@@ -24,14 +24,20 @@ function searchResult(data, append) {
 }
 
 export function search(props, prefix = '/') {
+    const offset = Number(props['offset']);
     return dispatch => {
-        dispatch(searchStart());
-        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
+        if (offset == 0) {
+            dispatch(searchStart());
+        }
+        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
         return fetch(prefix + 'api/search?' + params)
             .then(response => response.json())
             .then(data => {
-                dispatch(searchResult(data, false));
+                dispatch(searchResult(data, offset > 0));
+                if (offset > 0) {
+                    dispatch(push('/' + data.rows[0].id));
+                }
             })
             .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
     };
