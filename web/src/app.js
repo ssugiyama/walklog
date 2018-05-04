@@ -251,6 +251,8 @@ export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
         return next(getItem(match.params.id, prefix));
     }
     next(setSelectedItem(null, -1));
+    const select = query['select'];
+    delete query['select'];
     const last_query = Object.assign({}, query);
     delete last_query['offset'];
     const lqs = Object.keys(last_query).map(key => key + '=' + encodeURIComponent(last_query[key])).join('&');
@@ -260,7 +262,7 @@ export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
         next(setSelectedPath(search_form.searchPath));
     }
     next(setSearchForm(search_form));
-    return next(search(search_form, prefix));
+    return next(search(search_form, prefix, select));
 }
 
 let isFirstLocation = true;

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
 import { getMoreItems, addPaths, setSelectedItem, toggleSidebar } from './actions';
 import Table, {TableBody, TableHead, TableRow, TableCell} from 'material-ui/Table';
@@ -96,7 +97,7 @@ class SearchBox extends Component {
                         }
                     </TableBody>
                 </Table>
-                { this.props.params && <Button style={{width: '100%'}} onClick={this.handleGetMore.bind(this)}>more</Button>  }
+                { this.props.params && <Button style={{width: '100%'}} component={Link} to={'/?' + this.props.params}>more</Button>  }
             </div>
         );
     }

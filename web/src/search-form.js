@@ -10,6 +10,7 @@ import { MenuItem } from 'material-ui/Menu';
 import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
 import { withStyles } from 'material-ui/styles';
+import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
 
 const month_options = [
@@ -66,15 +67,17 @@ class SearchForm extends Component {
             keys.push('searchPath');
             break;
         }
-        if (!this.state.force_search && keys.every(key => prevProps[key] == this.props[key])) return;
+        if (! this.state.force_search) {
+            if (keys.every(key => prevProps[key] == this.props[key])) return;
+            const query = {};
+            keys.forEach(key => { query[key] = this.props[key]; });
+            const usp = new URLSearchParams(query);
+            this.props.push({
+                pathname: '/',
+                search: usp.toString(),
+            });
+        }
         this.setState({force_search: false});
-        const query = {};
-        keys.forEach(key => { query[key] = this.props[key]; });
-        const usp = new URLSearchParams(query);
-        this.props.push({
-            pathname: '/',
-            search: usp.toString(),
-        });
         if (this.props.open_sidebar) {
             if ( prevProps.filter != this.props.filter 
                 && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
@@ -91,10 +94,6 @@ class SearchForm extends Component {
     }
     handleChange(name) {
         return event => this.props.setSearchForm({[name]: event.target.value});
-    }
-    reset() {
-        this.setState({force_search: true});
-        this.props.push({pathname: '/'});
     }
     render() {
         const classes = this.props.classes;
@@ -147,7 +146,7 @@ class SearchForm extends Component {
                     <TextField id="search_form_limit" label="limit" value={this.props.limit} onChange={this.handleChange('limit')} style={{width: '50%'}} />
                 </div>
                 <div>
-                    <Button onClick={this.reset.bind(this)} style={{width: '100%'}}>Reset</Button>
+                    <Button onClick={() => this.setState({force_search: true})} style={{width: '100%'}} component={Link} to="/" >Reset</Button>
                 </div>
             </form>
         );

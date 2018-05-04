@@ -83,19 +83,6 @@ class ItemBox extends Component {
         if (nextProps.selected_item != this.props.selected_item) return true;
         return false;
     }
-    traverseItem(delta) {
-        const index = this.props.selected_index + delta;
-        if (this.props.next_id && delta < 0) {
-            this.props.push('/' + this.props.next_id);
-        } else if (this.props.prev_id && delta > 0) {
-            this.props.push('/' + this.props.prev_id);
-        } else if (index >= this.props.rows.length) {
-            this.props.getMoreItems(this.props.params, 'first');
-        }
-        else {
-            this.props.push('/' + this.props.rows[index].id);
-        }
-    }
     render() {
         const data = this.props.selected_item;
         let title, createMarkup, data_user;
@@ -111,7 +98,7 @@ class ItemBox extends Component {
         const nextId = this.props.next_id || (index > 0 ? this.props.rows[index-1].id : null);
         const nextUrl = nextId && '/' + nextId;
         const prevId = this.props.prev_id || (index < this.props.rows.length-1 ? this.props.rows[index+1].id : null);
-        const prevUrl = prevId ? '/' + prevId : this.props.params ? '/?' + this.props.params: null;
+        const prevUrl = prevId ? '/' + prevId : this.props.params ? '/?select=1&' + this.props.params: null;
         const { classes } = this.props;
         return  <div>
                     <div style={styles.itemBoxControl}>

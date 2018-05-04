@@ -23,7 +23,7 @@ function searchResult(data, append) {
     };
 }
 
-export function search(props, prefix = '/') {
+export function search(props, prefix = '/', select) {
     const offset = Number(props['offset']);
     return dispatch => {
         if (offset == 0) {
@@ -35,7 +35,7 @@ export function search(props, prefix = '/') {
             .then(response => response.json())
             .then(data => {
                 dispatch(searchResult(data, offset > 0));
-                if (offset > 0) {
+                if (select) {
                     dispatch(push('/' + data.rows[0].id));
                 }
             })
