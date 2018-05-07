@@ -48,7 +48,7 @@ export function getItem(id, prefix = '/') {
         return fetch(prefix + 'api/get/' + id)
             .then(response => response.json())
             .then(data => {
-                dispatch(searchResult(data, false));
+                dispatch(setAdjacentItemIds(data.next_id, data.prev_id));
                 if (!data.error && data.rows.length > 0) {
                     dispatch(setSelectedItem(data.rows[0], 0));
                 }
@@ -227,5 +227,12 @@ export function setLastQuery(last_query) {
     return {
         type: ActionTypes.SET_LAST_QUERY,
         last_query,
+    };
+}
+
+export function setAdjacentItemIds(next_id, prev_id) {
+    return {
+        type: ActionTypes.SET_ADJACENT_ITEM_IDS,
+        next_id, prev_id
     };
 }

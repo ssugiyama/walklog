@@ -61,7 +61,9 @@ export default function handleSSR(req, res) {
     const prefix = `http://localhost:${req.app.get('port')}/`;
     const branch = matchRoutes(routes, req.path);
     const store = configureStore();
-    handleRoute(branch, req.query, false, prefix, [], store.dispatch)
+    const last_branch = branch[branch.length - 1];
+    const match = last_branch.match;
+    handleRoute(match.params.id, req.query, false, prefix, [], store.dispatch)
         .then(() =>{
             if (req.session.messages && req.session.messages.length > 0) {
                 const msg = req.session.messages.pop() || '';

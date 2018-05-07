@@ -43,9 +43,9 @@ const initialState = {
         show_distance: false,
         error: null,
         searching: false,
-        next_id: null,
-        prev_id: null,
     },
+    next_id: null,
+    prev_id: null,
     years: years,
     selected_item: null,
     selected_path: null,
@@ -227,7 +227,12 @@ const mainReducer = function(state = initialState, action) {
         {   
             const last_query = action.last_query;
             return Object.assign({}, state, {last_query});
-        } 
+        }
+    case ActionTypes.SET_ADJACENT_ITEM_IDS:
+        {
+            const {next_id, prev_id} = action;
+            return Object.assign({}, state, {next_id, prev_id});
+        }
     default:
         return state;
     }
@@ -238,17 +243,15 @@ const reducers = combineReducers({
     routing: routerReducer
 });
 
-export function handleRoute(branch, query, isPathSelected, prefix, rows, next) {
-    const last_branch = branch[branch.length - 1];
-    const match = last_branch.match;
-    if (match.params.id) {
+export function handleRoute(item_id, query, isPathSelected, prefix, rows, next) {
+    if (item_id) {
         if (!query.force_fetch) {
-            const index = rows.findIndex(row => row.id == match.params.id);
+            const index = rows.findIndex(row => row.id == item_id);
             if (index >= 0) {
                 return next(setSelectedItem(rows[index], index));
             }
         }
-        return next(getItem(match.params.id, prefix));
+        return next(getItem(item_id, prefix));
     }
     next(setSelectedItem(null, -1));
     const select = query['select'];
@@ -272,13 +275,18 @@ const dataFetchMiddleware = store => next => {
         if (action.type === LOCATION_CHANGE) {
             if (!isFirstLocation) {
                 const branch = matchRoutes(routes, action.payload.pathname);
+                const last_branch = branch[branch.length - 1];
+                const match = last_branch.match;
                 const state = store.getState();
                 const usp = new URLSearchParams(action.payload.search);
                 const query = {};
                 for(let p of usp) {
                     query[p[0]] = p[1];
                 }
-                handleRoute(branch, query, state.main.selected_path, '/', state.main.result.rows, next);
+                const qsearch = action.payload.search &&  action.payload.search.slice(1);
+                if (match.params.id || qsearch != state.main.last_query) {
+                    handleRoute(match.params.id, query, state.main.selected_path, '/', state.main.result.rows, next);
+                }
             }
             isFirstLocation = false;
         }

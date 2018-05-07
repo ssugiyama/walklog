@@ -157,8 +157,8 @@ function mapStateToProps(state) {
         users: state.main.users,
         count: state.main.result.count,
         params: state.main.result.params,
-        next_id: state.main.result.next_id,
-        prev_id: state.main.result.prev_id,
+        next_id: state.main.next_id,
+        prev_id: state.main.prev_id,
         current_user: state.main.current_user,
         last_query: state.main.last_query,
     };
