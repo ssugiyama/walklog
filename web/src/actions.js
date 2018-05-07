@@ -1,7 +1,7 @@
 // actions
 import * as ActionTypes from './action-types';
 require('isomorphic-fetch');
-import { push } from 'react-router-redux';
+import { push, replace } from 'react-router-redux';
 
 export function setSearchForm(payload) {
     return {
@@ -29,14 +29,18 @@ export function search(props, prefix = '/', select) {
         if (offset == 0) {
             dispatch(searchStart());
         }
-        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset'];
+        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
-        return fetch(prefix + 'api/search?' + params)
+        const params_with_offset = offset > 0 ? params + '&offset=' + offset : params;
+        return fetch(prefix + 'api/search?' + params_with_offset)
             .then(response => response.json())
             .then(data => {
                 dispatch(searchResult(data, offset > 0));
                 if (select) {
                     dispatch(push('/' + data.rows[0].id));
+                }
+                else if (offset > 0) {
+                    dispatch(replace({pathname: '/', search: params}));
                 }
             })
             .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
@@ -53,24 +57,6 @@ export function getItem(id, prefix = '/') {
                     dispatch(setSelectedItem(data.rows[0], 0));
                 }
             });
-    };
-}
-
-export function getMoreItems(params, show) {
-    return dispatch => {
-        fetch('/api/search?' + params)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    dispatch(searchResult(null, data.error.message, false));
-                    return;
-                }
-                dispatch(searchResult(data, true));
-                if (show == 'first' && data.rows.length > 0) {
-                    dispatch(push('/' + data.rows[0].id));
-                }
-            })
-            .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
     };
 }
 
