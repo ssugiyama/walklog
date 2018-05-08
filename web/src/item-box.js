@@ -83,6 +83,9 @@ class ItemBox extends Component {
         if (nextProps.selected_item != this.props.selected_item) return true;
         return false;
     }
+    componentDidMount() {
+        this.refs.box_root.parentNode.scrollTop = 0;
+    }
     render() {
         const data = this.props.selected_item;
         let title, createMarkup, data_user;
@@ -100,7 +103,7 @@ class ItemBox extends Component {
         const prevId = this.props.prev_id || (index < this.props.rows.length-1 ? this.props.rows[index+1].id : null);
         const prevUrl = prevId ? '/' + prevId : this.props.params ? '/?select=1&' + this.props.params: null;
         const { classes } = this.props;
-        return  <div>
+        return  <div ref="box_root">
                     <div style={styles.itemBoxControl}>
                         <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
                         <IconButton component={Link} to={upUrl}><ArrowUpward /></IconButton>
