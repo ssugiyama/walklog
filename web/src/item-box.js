@@ -101,7 +101,7 @@ class ItemBox extends Component {
         const nextId = this.props.next_id || (index > 0 ? this.props.rows[index-1].id : null);
         const nextUrl = nextId && '/' + nextId;
         const prevId = this.props.prev_id || (index < this.props.rows.length-1 ? this.props.rows[index+1].id : null);
-        const prevUrl = prevId ? '/' + prevId : this.props.params ? '/?select=1&' + this.props.params: null;
+        const prevUrl = prevId ? '/' + prevId : this.props.offset > 0 ? '/?select=1&offset=' + this.props.offset + this.props.last_query: null;
         const { classes } = this.props;
         return  <div ref="box_root">
                     <div style={styles.itemBoxControl}>
@@ -159,7 +159,7 @@ function mapStateToProps(state) {
         rows: state.main.result.rows,
         users: state.main.users,
         count: state.main.result.count,
-        params: state.main.result.params,
+        offset: state.main.result.offset,
         next_id: state.main.next_id,
         prev_id: state.main.prev_id,
         current_user: state.main.current_user,

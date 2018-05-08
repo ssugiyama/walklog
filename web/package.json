@@ -29,7 +29,7 @@
     "isomorphic-fetch": "^2.2.1",
     "jssha": "^2.2.0",
     "marked": "^0.3.5",
-    "material-ui": "^1.0.0-beta.42",
+    "material-ui": "^1.0.0-beta.45",
     "morgan": "*",
     "parcel-bundler": "^1.7.1",
     "passport": "^0.4.0",

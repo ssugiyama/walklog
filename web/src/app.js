@@ -1,7 +1,7 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
 import { createBrowserHistory, createMemoryHistory } from 'history';
-import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux';
+import { routerReducer, LOCATION_CHANGE, routerMiddleware, replace } from 'react-router-redux';
 import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
@@ -39,7 +39,7 @@ const initialState = {
     result: {
         rows: [],
         count: 0,
-        params: '',
+        offset: 0,
         show_distance: false,
         error: null,
         searching: false,
@@ -96,11 +96,9 @@ const mainReducer = function(state = initialState, action) {
         {
             const result = { 
                 count: action.data.count,
-                params: action.data.params,
+                offset: action.data.offset,
                 error: action.data.error,
                 searching: false,
-                next_id: action.data.next_id,
-                prev_id: action.data.prev_id,
             };
             result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
             return Object.assign({}, state, {result});
@@ -265,7 +263,7 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, next) 
         next(setSelectedPath(search_form.searchPath));
     }
     next(setSearchForm(search_form));
-    return next(search(search_form, prefix, select));
+    return next(search(search_form, prefix, select, lqs));
 }
 
 let isFirstLocation = true;

@@ -49,6 +49,7 @@ class SearchBox extends Component {
         this.setState({show_distance: toggled});
     }
     render() {
+        const moreUrl = `/?offset=${this.props.offset}` + (this.props.last_query && `&${this.props.last_query}`);
         return (
             <div style={{ paddingBottom: 20 }}>
                 <SearchFormContainer />
@@ -97,14 +98,14 @@ class SearchBox extends Component {
                         }
                     </TableBody>
                 </Table>
-                { this.props.params && <Button style={{width: '100%'}} component={Link} to={'/?' + this.props.params}>more</Button>  }
+                { this.props.offset > 0 && <Button style={{width: '100%'}} component={Link} to={moreUrl}>more</Button>  }
             </div>
         );
     }
 }
 
 function mapStateToProps(state) {
-    return Object.assign({}, state.main.result);
+    return Object.assign({}, state.main.result, {last_query: state.main.last_query} );
 }
 
 function mapDispatchToProps(dispatch) {

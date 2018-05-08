@@ -23,16 +23,15 @@ function searchResult(data, append) {
     };
 }
 
-export function search(props, prefix = '/', select) {
+export function search(props, prefix = '/', select, last_query) {
     const offset = Number(props['offset']);
     return dispatch => {
-        if (offset == 0) {
+        if (!select && !offset) {
             dispatch(searchStart());
         }
-        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order'];
+        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
-        const params_with_offset = offset > 0 ? params + '&offset=' + offset : params;
-        return fetch(prefix + 'api/search?' + params_with_offset)
+        return fetch(prefix + 'api/search?' + params)
             .then(response => response.json())
             .then(data => {
                 dispatch(searchResult(data, offset > 0));
@@ -40,7 +39,7 @@ export function search(props, prefix = '/', select) {
                     dispatch(push('/' + data.rows[0].id));
                 }
                 else if (offset > 0) {
-                    dispatch(replace({pathname: '/', search: params}));
+                    dispatch(replace({pathname: '/', search: last_query}));
                 }
             })
             .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });

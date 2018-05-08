@@ -156,12 +156,6 @@ const searchFunc = params => {
             offset : offset,
             limit  : limit,
         }).then(function (result) {
-            let qparams = null;
-            if (result.count > offset + limit) {
-                const q = Object.keys(params).filter(e => e != 'offset').map( e => e + '=' + params[e]);
-                q.push('offset=' +  (offset + limit));
-                qparams = q.join('&');
-            }
             let prev_id, next_id;
             if (params.id) {
                 models.sequelize.query('SELECT id FROM walks where id > ? order by id limit 1',
@@ -175,7 +169,6 @@ const searchFunc = params => {
                     if (ids.length > 0) prev_id = ids[0].id;
                     resolve({
                         count: result.count,
-                        params: qparams,
                         rows:  result.rows.map(function (row) { return row.asObject(true); }),
                         next_id: next_id,
                         prev_id: prev_id,
@@ -184,7 +177,7 @@ const searchFunc = params => {
             } else {
                 resolve({
                     count: result.count,
-                    params: qparams,
+                    offset: result.count > offset + limit ? offset + limit : 0,
                     rows:  result.rows.map(function (row) { return row.asObject(true); }),
                 });
             }
