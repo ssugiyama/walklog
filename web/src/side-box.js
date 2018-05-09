@@ -33,7 +33,7 @@ class SideBox extends Component {
         super(props);
     }
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.location.search != '?force_reload=1' && this.props.location.search == '?force_reload=1') return;
+        if (prevProps.location.search != '?force_fetch=1' && this.props.location.search == '?force_fetch=1') return;
         const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
         switch (this.props.filter) {
         case 'neighborhood':

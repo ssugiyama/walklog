@@ -50,7 +50,7 @@ class WalkEditor extends Component {
         }).then(
             response => response.json()
         ).then(json => {
-            this.props.push({pathname: '/' + json[0].id, query: {force_fetch: 1} });
+            this.props.push({pathname: '/' + json[0].id, search: 'force_fetch=1' });
             this.handleClose();
         })
           .catch(ex => alert(ex));
