@@ -15,6 +15,8 @@ import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { routes } from './app';
+import { toggleSidebar } from './actions';
+import { push } from 'react-router-redux';
 
 const drawerWidth = 300;
 
@@ -30,6 +32,44 @@ class SideBox extends Component {
     constructor(props) {
         super(props);
     }
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.location.search != '?force_reload=1' && this.props.location.search == '?force_reload=1') return;
+        const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
+        switch (this.props.filter) {
+        case 'neighborhood':
+            keys.push('radius', 'longitude', 'latitude');
+            break;
+        case 'cities':
+            keys.push('cities');
+            break;
+        case 'crossing':
+        case 'hausdorff':
+        case 'frechet':
+            keys.push('searchPath');
+            break;
+        }
+        const query = {};
+        keys.forEach(key => { query[key] = this.props[key]; });
+        if (keys.every(key => prevProps[key] == this.props[key])) return;
+        const usp = new URLSearchParams(query);
+        this.props.push({
+            pathname: '/',
+            search: usp.toString(),
+        });
+        if (this.props.open_sidebar) {
+            if ( prevProps.filter != this.props.filter 
+                && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
+                  || ( ['hausdorff', 'crossing', 'frechet'].some(item => item == this.props.filter) && ! query.searchPath) ) {
+                setTimeout(this.props.toggleSidebar.bind(this), 1000);
+            }           
+        }
+        else {
+            if (! (query.filter == 'cities' && ! query.cities) && 
+                ! ((query.filter == 'crossing' || query.filter == 'hausdorff' || query.filter == 'frechet') && ! query.searchPath)) {
+                setTimeout(this.props.toggleSidebar.bind(this), 1000);
+            }
+        }
+    }
     render() {
         return (
             <Drawer open={this.props.open_sidebar} variant="persistent" 
@@ -42,15 +82,16 @@ class SideBox extends Component {
 }
 
 function mapStateToProps(state) {
-    return Object.assign({}, { 
-        open_sidebar: state.main.open_sidebar, 
-        highlighted_path: state.main.highlighted_path, 
-        selected_item: state.main.selected_item, 
+    return Object.assign({}, state.main.search_form, { 
+            open_sidebar: state.main.open_sidebar, 
+            highlighted_path: state.main.highlighted_path, 
+            selected_item: state.main.selected_item, 
+            location: state.routing.location,
     });
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ }, dispatch);
+    return bindActionCreators({  push, toggleSidebar }, dispatch);
 }
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SideBox)));

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
-import { setSearchForm, resetSearchForm, search, toggleSidebar } from './actions';
+import { setSearchForm, search } from './actions';
 import Button from 'material-ui/Button';
 import SearchIcon from '@material-ui/icons/Search';
 import Select from 'material-ui/Select';
@@ -11,7 +11,6 @@ import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
 import { withStyles } from 'material-ui/styles';
 import { Link } from 'react-router-dom';
-import { push } from 'react-router-redux';
 
 const month_options = [
     { label: '-', value: '' },
@@ -50,47 +49,6 @@ const styles = {
 class SearchForm extends Component {
     constructor(props) {
         super(props);
-        this.state = {force_search: false};
-    }
-    componentDidUpdate(prevProps, prevState) {
-        const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
-        switch (this.props.filter) {
-        case 'neighborhood':
-            keys.push('radius', 'longitude', 'latitude');
-            break;
-        case 'cities':
-            keys.push('cities');
-            break;
-        case 'crossing':
-        case 'hausdorff':
-        case 'frechet':
-            keys.push('searchPath');
-            break;
-        }
-        const query = {};
-        keys.forEach(key => { query[key] = this.props[key]; });
-        if (! this.state.force_search) {
-            if (keys.every(key => prevProps[key] == this.props[key])) return;
-            const usp = new URLSearchParams(query);
-            this.props.push({
-                pathname: '/',
-                search: usp.toString(),
-            });
-        }
-        this.setState({force_search: false});
-        if (this.props.open_sidebar) {
-            if ( prevProps.filter != this.props.filter 
-                && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
-                  || ( ['hausdorff', 'crossing', 'frechet'].some(item => item == this.props.filter) && ! query.searchPath) ) {
-                setTimeout(this.props.toggleSidebar.bind(this), 1000);
-            }           
-        }
-        else {
-            if (! (query.filter == 'cities' && ! query.cities) && 
-                ! ((query.filter == 'crossing' || query.filter == 'hausdorff' || query.filter == 'frechet') && ! query.searchPath)) {
-                setTimeout(this.props.toggleSidebar.bind(this), 1000);
-            }
-        }
     }
     handleChange(name) {
         return event => this.props.setSearchForm({[name]: event.target.value});
@@ -146,13 +104,12 @@ class SearchForm extends Component {
                     <TextField id="search_form_limit" label="limit" value={this.props.limit} onChange={this.handleChange('limit')} style={{width: '50%'}} />
                 </div>
                 <div>
-                    <Button onClick={() => this.setState({force_search: true})} style={{width: '100%'}} component={Link} to="/" >Reset</Button>
+                    <Button style={{width: '100%'}} component={Link} to="/?force_reload=1" >Reset</Button>
                 </div>
             </form>
         );
     }
 }
-
 
 function mapStateToProps(state) {
     return Object.assign({}, state.main.search_form, { 
@@ -163,7 +120,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, resetSearchForm, search, push, toggleSidebar}, dispatch);
+    return bindActionCreators({setSearchForm, search }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchForm));
