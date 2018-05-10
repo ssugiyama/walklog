@@ -30,7 +30,7 @@ const styles = theme => ({
         },
         '&:nth-of-type(2)': {
             width: 80,
-            whiteSpace: 'no-wrap',
+            whiteSpace: 'nowrap',
         },
         '&:nth-of-type(4)': {
             width: 40,
