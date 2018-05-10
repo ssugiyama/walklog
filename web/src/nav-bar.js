@@ -63,7 +63,7 @@ class NavBar extends Component {
             <AppBar position="static">
                 <Toolbar>
                     <IconButton onClick={this.handleShow.bind(this)} color="inherit"><MenuIcon /></IconButton>
-                    <Typography variant="title" color="inherit" className={classes.title}>Walklog</Typography>
+                    <Typography variant="headline" color="inherit" className={classes.title}>Walklog</Typography>
                     <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MoreVertIcon /></IconButton>
                     <Menu 
                         anchorEl={this.state.topAnchorEl}

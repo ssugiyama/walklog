@@ -29,11 +29,7 @@ const styles = {
         flexDirection: 'column',
     },
     itemBoxTitle: {
-        fontSize: '90%'
-    },
-    itemBoxAuthor: {
-        fontSize: '85%',
-        textAlign: 'right',
+        fontSize: '100%'
     },
     itemBoxAuthorPhoto: {
         width: '16px',
@@ -49,10 +45,6 @@ const styles = {
         width: '100%',
         textAlign: 'center',
         padding: '8px 12px 12px'
-    },    
-    twitter: {
-        display: 'inline-block',
-        marginLeft: 20
     },
 };
 
@@ -106,7 +98,7 @@ class ItemBox extends Component {
         const prevUrl = prevId ? '/' + prevId : this.props.offset > 0 ? '/?select=1&offset=' + this.props.offset + this.props.last_query: null;
         const { classes } = this.props;
         return  <div ref="box_root">
-                    <div style={styles.itemBoxControl}>
+                    <div className={classes.itemBoxControl}>
                         <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
                         <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
                         <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
@@ -114,18 +106,18 @@ class ItemBox extends Component {
                             data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                         }
                         <IconButton component="a" href={this.state.tweet_url}><TweetIcon /></IconButton>
-                        <h4 style={styles.itemBoxTitle}>{ title || 'not found'}</h4>
+                        <Typography variant="title" className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
                         {
-                            data_user ? (<div style={styles.itemBoxAuthor}><img style={styles.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></div>) : null
+                            data_user ? (<Typography variant="body1" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
                         }
                     </div>
                     { data && 
                         <ExpansionPanel defaultExpanded={true}>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography variant="subheading">Comment</Typography>
+                            <Typography color="secondary" variant="subheading">Comment</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
-                                <div style={styles.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
+                                <div className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
                                 </div>
                             </ExpansionPanelDetails>
                         </ExpansionPanel> 
@@ -133,7 +125,7 @@ class ItemBox extends Component {
                     { data && 
                         <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography variant="subheading">Elevation</Typography>
+                            <Typography color="secondary" variant="subheading">Elevation</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <ElevationBox />
@@ -143,7 +135,7 @@ class ItemBox extends Component {
                     { data && 
                         <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography variant="subheading">StreetView</Typography>
+                            <Typography color="secondary" variant="subheading">StreetView</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <PanoramaBox />
