@@ -25,19 +25,16 @@ const styles = theme => ({
         paddingLeft: 2,
         paddingRight: 2,
         '&:nth-of-type(1)': {
-            width: 32,
-            textAlign: 'right',
-        },
-        '&:nth-of-type(2)': {
             width: 80,
             whiteSpace: 'nowrap',
         },
-        '&:nth-of-type(4)': {
+        '&:nth-of-type(3)': {
             width: 40,
             textAlign: 'right',
         },
     }
-}); 
+});
+
 class SearchBox extends Component {
     constructor(props) {
         super(props);
@@ -105,7 +102,6 @@ class SearchBox extends Component {
                     <TableBody>
                         { this.props.rows.map( (item, index) =>
                             <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
-                                <TableCell className={classes.cell}>{index+1}</TableCell>
                                 <TableCell className={classes.cell}>{item.date}</TableCell>
                                 <TableCell className={classes.cell}>{item.title}</TableCell>
                                 <TableCell className={classes.cell}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
