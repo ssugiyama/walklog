@@ -23,18 +23,18 @@ import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
 
-const styles = {
+const styles = theme => ({
     root: {
         position: 'absolute',
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: '#c0c0c0',
+        backgroundColor: theme.palette.background.default,
     },
     bottomBarGroup: {
         margin: 'auto',
     },
-};
+});
 
 class BottomBar extends Component {
     constructor(props) {
@@ -61,9 +61,9 @@ class BottomBar extends Component {
     render() {
         const classes = this.props.classes;
         return (
-            <Toolbar style={styles.root}>
+            <Toolbar className={classes.root}>
             { this.props.overlay ? (
-                <div style={styles.bottomBarGroup}>
+                <div className={classes.bottomBarGroup}>
                     <Tooltip title="-10" position="top-center">
                         <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
                     </Tooltip>
@@ -82,7 +82,7 @@ class BottomBar extends Component {
                     </Tooltip>
                 </div>
             ) : this.props.filter == 'neighborhood' ? (
-                <div style={styles.bottomBarGroup}>
+                <div className={classes.bottomBarGroup}>
                     <Typography variant="caption" color="inherit">Radius</Typography>
                     <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
                         <MenuItem value={1000}>1km</MenuItem>
@@ -99,7 +99,7 @@ class BottomBar extends Component {
                     </Tooltip>
                 </div>            
             ) : this.props.filter == 'cities' ? (
-                <div style={styles.bottomBarGroup}>
+                <div className={classes.bottomBarGroup}>
                     <Typography variant="caption" color="inherit">Cities</Typography>
                     <Tooltip title="clear" position="top-center">
                         <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
@@ -110,7 +110,7 @@ class BottomBar extends Component {
                 </div>            
             )            
             : (
-                <div style={styles.bottomBarGroup}>
+                <div className={classes.bottomBarGroup}>
                     <Typography variant="caption" color="inherit">Path</Typography>
                     <Tooltip title="edit" position="top-center">
                         <IconButton onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>

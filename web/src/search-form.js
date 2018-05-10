@@ -104,7 +104,7 @@ class SearchForm extends Component {
                     <TextField id="search_form_limit" label="limit" value={this.props.limit} onChange={this.handleChange('limit')} style={{width: '50%'}} />
                 </div>
                 <div>
-                    <Button style={{width: '100%'}} component={Link} to="/?force_fetch=1" >Reset</Button>
+                    <Button style={{width: '100%'}} color="secondary" component={Link} to="/?force_fetch=1" >Reset</Button>
                 </div>
             </form>
         );

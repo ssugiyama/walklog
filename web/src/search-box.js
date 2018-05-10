@@ -10,20 +10,34 @@ import Button from 'material-ui/Button';
 import Switch from 'material-ui/Switch';
 import { FormControlLabel } from 'material-ui/Form';
 import { Typography } from 'material-ui';
+import { withStyles } from 'material-ui/styles';
 
-const td_common_style = {
-    paddingLeft: 2,
-    paddingRight: 2,
-    overflow: 'hidden',
-};
-
-const td_styles = [
-    Object.assign({}, td_common_style, { width: 32, textAlign: 'right' }),
-    Object.assign({}, td_common_style, { width: 80 }),
-    td_common_style,
-    Object.assign({}, td_common_style, { width: 40, textAlign: 'right'})
-];
-
+const styles = theme => ({
+    root: {
+        cursor: 'pointer',
+    },
+    row: {
+        '&:nth-of-type(odd)': {
+            backgroundColor: theme.palette.background.default,
+        },
+    },
+    cell: {
+        paddingLeft: 2,
+        paddingRight: 2,
+        '&:nth-of-type(1)': {
+            width: 32,
+            textAlign: 'right',
+        },
+        '&:nth-of-type(2)': {
+            width: 80,
+            whiteSpace: 'no-wrap',
+        },
+        '&:nth-of-type(4)': {
+            width: 40,
+            textAlign: 'right',
+        },
+    }
+}); 
 class SearchBox extends Component {
     constructor(props) {
         super(props);
@@ -49,9 +63,10 @@ class SearchBox extends Component {
         this.setState({show_distance: toggled});
     }
     render() {
+        const { classes } = this.props;
         const moreUrl = `/?offset=${this.props.offset}` + (this.props.last_query && `&${this.props.last_query}`);
         return (
-            <div style={{ paddingBottom: 20 }}>
+            <div>
                 <SearchFormContainer />
                 <div>
                     <Typography variant="body2" style={{ display: 'inline-block' }}>
@@ -86,14 +101,14 @@ class SearchBox extends Component {
                     label="show line distance"></FormControlLabel> 
             }
                 </div>
-                <Table style={{cursor: 'pointer'}}>
+                <Table className={classes.root}>
                     <TableBody>
                         { this.props.rows.map( (item, index) =>
-                            <TableRow key={index} onClick={this.handleSelect.bind(this, index)}>
-                                <TableCell style={td_styles[0]}>{index+1}</TableCell>
-                                <TableCell style={td_styles[1]}>{item.date}</TableCell>
-                                <TableCell style={td_styles[2]}>{item.title}</TableCell>
-                                <TableCell style={td_styles[3]}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
+                            <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
+                                <TableCell className={classes.cell}>{index+1}</TableCell>
+                                <TableCell className={classes.cell}>{item.date}</TableCell>
+                                <TableCell className={classes.cell}>{item.title}</TableCell>
+                                <TableCell className={classes.cell}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
                             </TableRow>)
                         }
                     </TableBody>
@@ -112,4 +127,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ getMoreItems, setSelectedItem, addPaths, toggleSidebar, push }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SearchBox);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchBox));

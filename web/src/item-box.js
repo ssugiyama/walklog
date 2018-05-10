@@ -106,7 +106,7 @@ class ItemBox extends Component {
         return  <div ref="box_root">
                     <div style={styles.itemBoxControl}>
                         <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
-                        <IconButton component={Link} to={upUrl}><ArrowUpward /></IconButton>
+                        <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
                         <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
                         {
                             data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
