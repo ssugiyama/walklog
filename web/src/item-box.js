@@ -96,7 +96,9 @@ class ItemBox extends Component {
                 if (u.id == data.user_id) data_user = u;
             }
         }
-        const upUrl = this.props.last_query ? '/?' + this.props.last_query : '/';
+        const upUrl = this.props.location && this.props.location.search == '?force_fetch=1'
+            ? '/' + this.props.location.search
+            : this.props.last_query ? '/?' + this.props.last_query : '/';
         const index = this.props.selected_index;
         const nextId = this.props.next_id || (index > 0 ? this.props.rows[index-1].id : null);
         const nextUrl = nextId && '/' + nextId;
@@ -164,6 +166,7 @@ function mapStateToProps(state) {
         prev_id: state.main.prev_id,
         current_user: state.main.current_user,
         last_query: state.main.last_query,
+        location: state.routing.location,
     };
 }
 
