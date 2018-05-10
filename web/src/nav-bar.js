@@ -52,7 +52,7 @@ class NavBar extends Component {
     login_or_logout() {
         this.closeAllMenus();
         const url = this.props.current_user ? '/auth/logout' : '/auth/twitter';
-        window.location.href = url;
+        window.location.href = url + '?redirect=' + window.location.href;
     }
     closeAllMenus() {
         this.setState({ topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null });

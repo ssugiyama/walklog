@@ -37,18 +37,23 @@ passport.deserializeUser(function(obj, done) {
 
 exports.passport = passport;
 
-auth.get('/twitter',
-    passport.authenticate('twitter'));
+auth.get('/twitter', (req, res, next) => {
+    req.session.redirect = req.query.redirect;
+    passport.authenticate('twitter')(req, res, next);
+});
 
-auth.get('/twitter/callback', 
+auth.get('/twitter/callback', (req, res, next) => { 
+    const redirect = req.session.redirect;
+    delete req.session.redirect;
     passport.authenticate('twitter', { 
-        successRedirect: '/',
-        failureRedirect: '/',
+        successRedirect: redirect || '/',
+        failureRedirect: redirect || '/',
         failureMessage: true,
         successMessage: true,
-    }));
+    })(req, res, next);
+});
 
 auth.get('/logout', function(req, res){
     req.logout();
-    res.redirect('/');
+    res.redirect(req.query.redirect || '/');
 });
