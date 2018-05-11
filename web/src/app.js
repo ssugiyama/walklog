@@ -254,7 +254,7 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, next) 
     next(setSelectedItem(null, -1));
     const select = query['select'];
     delete query['select'];
-    delete query['force_reload'];
+    delete query['force_fetch'];
     const last_query = Object.assign({}, query);
     delete last_query['offset'];
     const lqs = Object.keys(last_query).map(key => key + '=' + encodeURIComponent(last_query[key])).join('&');
