@@ -241,7 +241,7 @@ const reducers = combineReducers({
     routing: routerReducer
 });
 
-export function handleRoute(item_id, query, isPathSelected, prefix, rows, next) {
+export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryChanged, next) {
     if (item_id) {
         if (!query.force_fetch) {
             const index = rows.findIndex(row => row.id == item_id);
@@ -252,6 +252,7 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, next) 
         return next(getItem(item_id, prefix));
     }
     next(setSelectedItem(null, -1));
+    if (! queryChanged) return;
     const select = query['select'];
     delete query['select'];
     delete query['force_fetch'];
@@ -283,9 +284,8 @@ const dataFetchMiddleware = store => next => {
                     query[p[0]] = p[1];
                 }
                 const qsearch = action.payload.search &&  action.payload.search.slice(1);
-                if (match.params.id || qsearch != state.main.last_query) {
-                    handleRoute(match.params.id, query, state.main.selected_path, '/', state.main.result.rows, next);
-                }
+                const queryChanged = qsearch != state.main.last_query;
+                handleRoute(match.params.id, query, state.main.selected_path, '/', state.main.result.rows, queryChanged, next);
             }
             isFirstLocation = false;
         }
