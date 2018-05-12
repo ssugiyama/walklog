@@ -22,8 +22,7 @@ import { push } from 'react-router-redux';
 import constants from './constants';
 
 const styles = theme => ({
-    drawerPaper: {  
-        width: constants.sideBoxWidth,
+    drawerPaper: {
         overflowX: 'hidden',
         overflowY: 'hidden',
         [theme.breakpoints.up('sm')]: {
