@@ -12,21 +12,29 @@ import SearchIcon from '@material-ui/icons/Search';
 import DescriptionIcon from '@material-ui/icons/Description';
 import NavBarContainer from './nav-bar';
 import { withStyles } from 'material-ui/styles';
+import withWidth from 'material-ui/utils/withWidth';
+import compose from 'recompose/compose';
 import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { routes } from './app';
 import { toggleSidebar } from './actions';
 import { push } from 'react-router-redux';
+import constants from './constants';
 
-const drawerWidth = 300;
-
-const styles = {
+const styles = theme => ({
     drawerPaper: {  
-        width: drawerWidth,
+        width: constants.sideBoxWidth,
         overflowX: 'hidden',
         overflowY: 'hidden',
+        [theme.breakpoints.up('sm')]: {
+            width: constants.sideBoxWidth,
+        },
+        [theme.breakpoints.down('xs')]: {
+            width: '100%',
+            height: constants.sideBoxHeight,
+        },
     },
-};
+});
 
 class SideBox extends Component {
     constructor(props) {
@@ -73,7 +81,7 @@ class SideBox extends Component {
     render() {
         return (
             <Drawer open={this.props.open_sidebar} variant="persistent" 
-                classes={{ paper: this.props.classes.drawerPaper }}>
+                classes={{ paper: this.props.classes.drawerPaper }} anchor={ this.props.width == 'xs' ? 'top' : 'left' }>
                 <NavBarContainer />
                 { renderRoutes(routes) }
             </Drawer>
@@ -94,4 +102,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({  push, toggleSidebar }, dispatch);
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SideBox)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(compose(withStyles(styles), withWidth())(SideBox)));

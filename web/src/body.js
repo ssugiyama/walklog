@@ -13,14 +13,57 @@ import Button from 'material-ui/Button';
 import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
+import withWidth from 'material-ui/utils/withWidth';
+import compose from 'recompose/compose';
+import classNames from 'classnames';
+import constants from './constants';
 
-const styles = {
+const styles = theme => ({
+    main: {
+        display: 'flex',
+        height: '100%',
+        [theme.breakpoints.up('sm')]: {
+            flexDirection: 'row',
+        },
+        [theme.breakpoints.up('xs')]: {
+            flexDirection: 'column',
+        },
+    },
+    mapBox: {
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        flexGrow: 1,
+        height: '100%',
+        marginLeft: 0,
+        marginTop: 0,
+        transition: theme.transitions.create('margin', {
+            // easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+    mapBoxRight: {
+        marginTop: 0,
+        marginLeft: constants.sideBoxWidth,
+        transition: theme.transitions.create('margin', {
+            // easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    mapBoxBottom: {
+        marginLeft: 0,
+        marginTop: constants.sideBoxHeight,
+        transition: theme.transitions.create('margin', {
+            // easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
     drawerButton: {
-        display: 'absolute',
+        position: 'absolute',
         top: 5,
         left: 20,
     },
-};
+});
 
 class Body extends Component {
     handleRequestClose() {
@@ -30,13 +73,20 @@ class Body extends Component {
         this.props.toggleSidebar();
     }
     render() {
-        const {classes} = this.props;
+        const {classes, width, open_sidebar} = this.props;
         return (
             <div>
                 <CssBaseline />
-                <SideBoxContainer />
-                <MapContainer />
-                <BottomBarContainer />
+                <main className={classes.main}>
+                    <SideBoxContainer />
+                    <div className={classNames(classes.mapBox, {
+                        [classes.mapBoxRight]: open_sidebar && width != 'xs',
+                        [classes.mapBoxBottom]: open_sidebar && width == 'xs',
+                    })}>
+                        <MapContainer />
+                        { (! open_sidebar || width != 'xs') &&  <BottomBarContainer /> }
+                    </div>
+                </main>
                 <Button variant="fab" color="primary" onClick={this.handleShow.bind(this)} className={classes.drawerButton}>
                     <MenuIcon />
                 </Button>
@@ -54,11 +104,11 @@ class Body extends Component {
 }
 
 function mapStateToProps(state) {
-    return { message: state.main.message, open_snackbar: state.main.open_snackbar };
+    return { message: state.main.message, open_snackbar: state.main.open_snackbar, open_sidebar: state.main.open_sidebar, };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({openSnackbar, toggleSidebar}, dispatch);
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Body)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(compose(withStyles(styles), withWidth())(Body)));

@@ -25,10 +25,7 @@ import { withStyles } from 'material-ui/styles';
 
 const styles = theme => ({
     root: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
+        width: '100%',
         backgroundColor: theme.palette.background.default,
     },
     bottomBarGroup: {

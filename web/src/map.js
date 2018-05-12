@@ -3,22 +3,18 @@ import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
 import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar } from './actions';
 import { connect } from 'react-redux';
-import SideBoxContainer from './side-box';
 import * as ActionTypes from './action-types';
+import { withStyles } from 'material-ui/styles';
 
 const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
 
-const bottomBarHeight = 64;
-
-const styles = {
+const styles = theme => ({
     map: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: bottomBarHeight,
+        flexGrow: 1,
     },
-};
+
+});
+
 class Map extends Component {
     componentDidMount() {
         const defaultPos = new google.maps.LatLng(this.props.latitude, this.props.longitude);
@@ -283,12 +279,13 @@ class Map extends Component {
         reader.readAsText(file);
     }
     render() {
+        const { classes } = this.props;
         return (
-            <div>
-                <div ref="map" style={styles.map}></div>
+            <React.Fragment>
+                <div ref="map" className={classes.map}></div>
                 <a ref="download" style={{display: 'none'}} download='walklog.json'></a>
                 <input ref="upload" type="file" style={{display: 'none'}} />
-            </div>
+            </React.Fragment>
         );
     }
     gsiMapOption() {
@@ -337,4 +334,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar}, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Map);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Map));
