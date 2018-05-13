@@ -1,4 +1,4 @@
 export default {
-    sideBoxWidth: 300,
+    sideBoxWidth: 340,
     sideBoxHeight: 360,
 };

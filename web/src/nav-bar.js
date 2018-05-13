@@ -13,6 +13,9 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from 'material-ui/styles';
 
 const styles = {
+    root: {
+        paddingTop: 'env(safe-area-inset-top)',
+    },
     title: {
         flex: 1,
     },
@@ -60,7 +63,7 @@ class NavBar extends Component {
     render() {
         const classes = this.props.classes;
         return (
-            <AppBar position="static">
+            <AppBar position="static" className={classes.root}>
                 <Toolbar>
                     <IconButton onClick={this.handleShow.bind(this)} color="inherit"><MenuIcon /></IconButton>
                     <Typography variant="headline" color="inherit" className={classes.title}>Walklog</Typography>

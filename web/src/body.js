@@ -38,7 +38,7 @@ const styles = theme => ({
         marginLeft: 0,
         marginTop: 0,
         transition: theme.transitions.create('margin', {
-            // easing: theme.transitions.easing.sharp,
+            easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
     },
@@ -46,7 +46,7 @@ const styles = theme => ({
         marginTop: 0,
         marginLeft: constants.sideBoxWidth,
         transition: theme.transitions.create('margin', {
-            // easing: theme.transitions.easing.easeOut,
+            easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen,
         }),
     },
@@ -54,12 +54,13 @@ const styles = theme => ({
         marginLeft: 0,
         marginTop: constants.sideBoxHeight,
         transition: theme.transitions.create('margin', {
-            // easing: theme.transitions.easing.easeOut,
+            easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen,
         }),
     },
     drawerButton: {
         position: 'absolute',
+        marginTop: 30, //'env(safe-area-inset-top)',
         top: 5,
         left: 20,
     },

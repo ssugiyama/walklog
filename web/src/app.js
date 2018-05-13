@@ -320,7 +320,8 @@ export function configureStore(state) {
 const SideRoot = ({ route }) => (
     <div style={{
         overflowY: 'auto',
-        margin: 1,
+        padding: 2,
+        paddingLeft: 'env(safe-area-inset-left)',
         border: 'inset 1px #c0c0c0' }}>
         {renderRoutes(route.routes)}
     </div>
