@@ -60,7 +60,7 @@ const styles = theme => ({
     },
     drawerButton: {
         position: 'absolute',
-        marginTop: 30, //'env(safe-area-inset-top)',
+        marginTop: 'env(safe-area-inset-top)',
         top: 5,
         left: 20,
     },
