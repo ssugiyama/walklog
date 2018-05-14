@@ -1,18 +1,25 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleView } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from 'material-ui/styles';
+import compose from 'recompose/compose';
+import classNames from 'classnames';
 
 const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
 
 const styles = theme => ({
-    map: {
-        flexGrow: 1,
+    mapCompact: {
+        margin: 16,
+        height: 360,
     },
-
+    mapExpand: {
+        flexGrow: 1,
+        marginLeft: 0,
+        marginRight: 0,
+    }
 });
 
 class Map extends Component {
@@ -49,7 +56,7 @@ class Map extends Component {
                     .catch(ex => alert(ex));
             }
             else {
-                this.props.toggleSidebar();
+                this.props.toggleView();
             }
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
@@ -279,10 +286,13 @@ class Map extends Component {
         reader.readAsText(file);
     }
     render() {
-        const { classes } = this.props;
+        const { classes, view } = this.props;
         return (
             <React.Fragment>
-                <div ref="map" className={classes.map}></div>
+                <div ref="map" className={classNames({
+                    [classes.mapCompact]: view == 'content',
+                    [classes.mapExpand]: view == 'map',
+                })}></div>
                 <a ref="download" style={{display: 'none'}} download='walklog.json'></a>
                 <input ref="upload" type="file" style={{display: 'none'}} />
             </React.Fragment>
@@ -313,25 +323,16 @@ class Map extends Component {
 }
 
 function mapStateToProps(state) {
+    const { filter, latitude, longitude, radius, cities } = state.main.search_form;
+    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, view } = state.main;
     return {
-        filter: state.main.search_form.filter,
-        latitude: state.main.search_form.latitude,
-        longitude: state.main.search_form.longitude,
-        radius: state.main.search_form.radius,
-        cities: state.main.search_form.cities,
-        selected_path: state.main.selected_path,
-        highlighted_path: state.main.highlighted_path,
-        editing_path: state.main.editing_path,
-        action_queue: state.main.action_queue,
-        panorama: state.main.panorama,
-        info_window: state.main.info_window,
-        center: state.main.center,
-        open_sidebar: state.main.open_sidebar,
+        filter, latitude, longitude, radius, cities,
+        selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, view,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleSidebar}, dispatch);
+    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleView}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Map));

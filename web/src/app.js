@@ -1,7 +1,7 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
 import { createBrowserHistory, createMemoryHistory } from 'history';
-import { routerReducer, LOCATION_CHANGE, routerMiddleware, replace } from 'react-router-redux';
+import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux';
 import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
@@ -10,7 +10,7 @@ import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem, setLa
 import SearchBox from './search-box';
 import ItemBox from './item-box';
 import { renderRoutes } from 'react-router-config';
-
+import { createMuiTheme } from 'material-ui/styles';
 // const injectTapEventPlugin = require('react-tap-event-plugin');
 // injectTapEventPlugin();
 
@@ -52,7 +52,7 @@ const initialState = {
     selected_index: -1,
     highlighted_path: null,
     editing_path: false,
-    open_sidebar: true,
+    view: 'content',
     open_walk_editor: false,
     open_snackbar: false,
     open_geocode_modal: false,
@@ -119,10 +119,10 @@ const mainReducer = function(state = initialState, action) {
             const search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
             return Object.assign({}, state, {selected_path, search_form, editing_path: false});
         }
-    case ActionTypes.TOGGLE_SIDEBAR:
+    case ActionTypes.TOGGLE_VIEW:
         {
-            const open_sidebar = !state.open_sidebar;
-            return Object.assign({}, state, {open_sidebar});
+            const view = (state.view == 'content' ? 'map' : 'content');
+            return Object.assign({}, state, {view});
         }
     case ActionTypes.OPEN_WALK_EDITOR:
         {
@@ -345,3 +345,4 @@ export const routes = [
 
 ];
 
+export const theme = createMuiTheme();

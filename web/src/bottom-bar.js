@@ -133,15 +133,10 @@ class BottomBar extends Component {
 }
 
 function mapStateToProps(state) {
+    const { filter, radius } = state.main.search_form;
+    const { selected_path, panorama, panorama_index, panorama_count, overlay } = state.main;
     return {
-        filter: state.main.search_form.filter,
-        radius: state.main.search_form.radius,
-        selected_path: state.main.selected_path,
-        panorama: state.main.panorama,
-        open_sidebar: state.main.open_sidebar,
-        panorama_index: state.main.panorama_index,
-        panorama_count: state.main.panorama_count,
-        overlay: state.main.overlay,        
+        filter, radius, selected_path, panorama, panorama_index, panorama_count, overlay,
     };
 }
 

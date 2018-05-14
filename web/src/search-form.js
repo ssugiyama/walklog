@@ -112,10 +112,9 @@ class SearchForm extends Component {
 }
 
 function mapStateToProps(state) {
+    const { years, view, users } = state.main;
     return Object.assign({}, state.main.search_form, { 
-        years: state.main.years, 
-        open_sidebar: state.main.open_sidebar ,
-        users: state.main.users,
+        years, view, users,
     });
 }
 

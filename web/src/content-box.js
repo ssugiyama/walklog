@@ -2,40 +2,28 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
-import Drawer from 'material-ui/Drawer';
-import AppBar from 'material-ui/AppBar';
-import Tabs, { Tab } from 'material-ui/Tabs';
 import Table, { TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
 import NavigationClose from '@material-ui/icons/Close';
 import SearchIcon from '@material-ui/icons/Search';
 import DescriptionIcon from '@material-ui/icons/Description';
-import NavBarContainer from './nav-bar';
 import { withStyles } from 'material-ui/styles';
-import withWidth from 'material-ui/utils/withWidth';
-import compose from 'recompose/compose';
 import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { routes } from './app';
-import { toggleSidebar } from './actions';
+import { toggleView } from './actions';
 import { push } from 'react-router-redux';
-import constants from './constants';
 
 const styles = theme => ({
-    drawerPaper: {
-        overflowX: 'hidden',
-        overflowY: 'hidden',
-        [theme.breakpoints.up('sm')]: {
-            width: constants.sideBoxWidth,
-        },
-        [theme.breakpoints.down('xs')]: {
-            width: '100%',
-            height: constants.sideBoxHeight,
-        },
+    root: {
+        width: '100%',
+    },
+    hidden: {
+        display: 'none',
     },
 });
 
-class SideBox extends Component {
+class ContentBox extends Component {
     constructor(props) {
         super(props);
     }
@@ -63,42 +51,40 @@ class SideBox extends Component {
             pathname: '/',
             search: usp.toString(),
         });
-        if (this.props.open_sidebar) {
+        if (this.props.view == 'content') {
             if ( prevProps.filter != this.props.filter 
                 && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
                   || ( ['hausdorff', 'crossing', 'frechet'].some(item => item == this.props.filter) && ! query.searchPath) ) {
-                setTimeout(this.props.toggleSidebar.bind(this), 1000);
+                setTimeout(this.props.toggleView.bind(this), 1000);
             }           
         }
         else {
             if (! (query.filter == 'cities' && ! query.cities) && 
                 ! ((query.filter == 'crossing' || query.filter == 'hausdorff' || query.filter == 'frechet') && ! query.searchPath)) {
-                setTimeout(this.props.toggleSidebar.bind(this), 1000);
+                setTimeout(this.props.toggleView.bind(this), 1000);
             }
         }
     }
     render() {
+        const { classes, view } = this.props;
         return (
-            <Drawer open={this.props.open_sidebar} variant="persistent" 
-                classes={{ paper: this.props.classes.drawerPaper }} anchor={ this.props.width == 'xs' ? 'top' : 'left' }>
-                <NavBarContainer />
+            <div className={view == 'content' ? classes.root: classes.hidden}>
                 { renderRoutes(routes) }
-            </Drawer>
+            </div>
         );
     }
 }
 
 function mapStateToProps(state) {
+    const { view, highlighted_path, selected_item } = state.main;
+    const { location } =  state.routing;
     return Object.assign({}, state.main.search_form, { 
-            open_sidebar: state.main.open_sidebar, 
-            highlighted_path: state.main.highlighted_path, 
-            selected_item: state.main.selected_item, 
-            location: state.routing.location,
+        view, highlighted_path, selected_item, location,
     });
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({  push, toggleSidebar }, dispatch);
+    return bindActionCreators({  push, toggleView }, dispatch);
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(compose(withStyles(styles), withWidth())(SideBox)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(ContentBox)));

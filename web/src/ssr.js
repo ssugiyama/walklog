@@ -1,11 +1,11 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import {configureStore, routes, handleRoute}  from './app';
+import {configureStore, routes, handleRoute, theme}  from './app';
 import {setCurrentUser, setUsers, setMessage, openSnackbar} from './actions';
 import { matchRoutes } from 'react-router-config';
 import { SheetsRegistry } from 'react-jss/lib/jss';
-import { MuiThemeProvider, createMuiTheme, createGenerateClassName } from 'material-ui/styles';
+import { MuiThemeProvider, createGenerateClassName } from 'material-ui/styles';
 import JssProvider from 'react-jss/lib/JssProvider';
 import BodyContainer from './body';
 import { StaticRouter } from 'react-router-dom';
@@ -75,7 +75,6 @@ export default function handleSSR(req, res) {
         .then(() => {
             let context = {};
             const sheetsRegistry = new SheetsRegistry();
-            const theme = createMuiTheme();
             const generateClassName = createGenerateClassName();
             const markup = renderToString(
                 <Provider store={store}>

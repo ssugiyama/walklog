@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { toggleSidebar, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath } from './actions';
+import { toggleView, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath } from './actions';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
@@ -44,7 +44,7 @@ class NavBar extends Component {
         this.props.openWalkEditor(true, 'create');
     }
     handleShow() {
-        this.props.toggleSidebar();
+        this.props.toggleView();
     }
     handleMenuOpen(anchorEl) {
         return event => this.setState({ [anchorEl]: event.currentTarget });
@@ -122,7 +122,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleSidebar, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath }, dispatch);
+    return bindActionCreators({ toggleView, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(NavBar));

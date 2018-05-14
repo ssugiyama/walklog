@@ -74,9 +74,9 @@ export function setSelectedPath(path) {
     };
 }
 
-export function toggleSidebar() {
+export function toggleView() {
     return {
-        type: ActionTypes.TOGGLE_SIDEBAR,
+        type: ActionTypes.TOGGLE_VIEW,
     };
 }
 

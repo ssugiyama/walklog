@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setStreetView, toggleSidebar, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
+import { setStreetView, toggleView, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
 import IconButton from 'material-ui/IconButton';
 import { FormControlLabel } from 'material-ui/Form';
 import Typography from 'material-ui/Typography';
@@ -112,10 +112,12 @@ class PanoramaBox extends Component {
     componentDidUpdate(prevProps) {
         this.showPanorama();
         if (this.props.overlay) {
-            this.props.setStreetView(null);
-            if (this.props.open_sidebar) this.props.toggleSidebar();
+            if (this.props.view == 'content') this.props.toggleView();
+            this.props.setStreetView(null)
+            //setTimeout(() => this.props.setStreetView(null), 2000);
         }
         else {
+            if (this.props.view == 'map') this.props.toggleView();
             this.props.setStreetView(this.panorama);
         }
     }
@@ -159,18 +161,14 @@ class PanoramaBox extends Component {
 }
 
 function mapStateToProps(state) {
+    const { view, highlighted_path, panorama, panorama_index, panorama_count, overlay } = state.main;
     return {
-        highlighted_path: state.main.highlighted_path,
-        panorama: state.main.panorama,
-        open_sidebar: state.main.open_sidebar,
-        panorama_index: state.main.panorama_index,
-        panorama_count: state.main.panorama_count,
-        overlay: state.main.overlay,
+        view, highlighted_path, panorama, panorama_index, panorama_count, overlay,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setStreetView, toggleSidebar, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
+    return bindActionCreators({ setStreetView, toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PanoramaBox);

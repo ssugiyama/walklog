@@ -3,13 +3,13 @@ import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'react-router-redux';
 import { renderRoutes } from 'react-router-config';
-import { configureStore, routes, history } from './app';
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import { configureStore, routes, history, theme } from './app';
+import { MuiThemeProvider } from 'material-ui/styles';
 import BodyContainer from './body';
 
 const store = configureStore( window.__PRELOADED_STATE__);
 
-class Main extends React.Component {
+class ClientRoot extends React.Component {
     // Remove the server-side injected CSS.
     componentDidMount() {
         const jssStyles = document.getElementById('jss-server-side');
@@ -22,14 +22,11 @@ class Main extends React.Component {
         return <ConnectedRouter history={history}><BodyContainer /></ConnectedRouter>;
     }
 }
-  
-// Create a theme instance.
-const theme = createMuiTheme();
 
 ReactDOM.hydrate(
     <Provider store={store}>
         <MuiThemeProvider theme={theme}>
-            <Main />
+            <ClientRoot />
         </MuiThemeProvider>
     </Provider>,
     document.querySelector('#body')

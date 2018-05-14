@@ -1,68 +1,28 @@
 import React, { Component } from 'react';
 import CssBaseline from 'material-ui/CssBaseline';
+import NavBarContainer from './nav-bar';
 import MapContainer from './map';
 import BottomBarContainer from './bottom-bar';
 import WalkEditorContainer from './walk-editor';
 import GeocodeModalContainer from './geocode-modal';
 import { connect } from 'react-redux';
-import SideBoxContainer from './side-box';
+import ContentBoxContainer from './content-box';
 import { bindActionCreators } from 'redux';
-import { openSnackbar, toggleSidebar } from './actions';
+import { openSnackbar, toggleView } from './actions';
 import Snackbar from 'material-ui/Snackbar';
 import Button from 'material-ui/Button';
 import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from 'material-ui/styles';
 import { withRouter } from 'react-router-dom';
-import withWidth from 'material-ui/utils/withWidth';
-import compose from 'recompose/compose';
 import classNames from 'classnames';
-import constants from './constants';
 
 const styles = theme => ({
-    main: {
-        display: 'flex',
+    root: {
         height: '100%',
-        [theme.breakpoints.up('sm')]: {
-            flexDirection: 'row',
-        },
-        [theme.breakpoints.up('xs')]: {
-            flexDirection: 'column',
-        },
     },
-    mapBox: {
+    rootMap: {
         display: 'flex',
         flexDirection: 'column',
-        position: 'relative',
-        flexGrow: 1,
-        height: '100%',
-        marginLeft: 0,
-        marginTop: 0,
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-    },
-    mapBoxRight: {
-        marginTop: 0,
-        marginLeft: constants.sideBoxWidth,
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    mapBoxBottom: {
-        marginLeft: 0,
-        marginTop: constants.sideBoxHeight,
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
-    drawerButton: {
-        position: 'absolute',
-        marginTop: 'env(safe-area-inset-top)',
-        top: 5,
-        left: 20,
     },
 });
 
@@ -71,26 +31,22 @@ class Body extends Component {
         this.props.openSnackbar(false);
     }
     handleShow() {
-        this.props.toggleSidebar();
+        this.props.toggleView();
     }
     render() {
-        const {classes, width, open_sidebar} = this.props;
+        const {classes, width, view} = this.props;
         return (
-            <div>
+            <div className={classNames(
+                classes.root,
+                {
+                    [classes.rootMap]: view == 'map',
+                }
+            )}>
                 <CssBaseline />
-                <main className={classes.main}>
-                    <SideBoxContainer />
-                    <div className={classNames(classes.mapBox, {
-                        [classes.mapBoxRight]: open_sidebar && width != 'xs',
-                        [classes.mapBoxBottom]: open_sidebar && width == 'xs',
-                    })}>
-                        <MapContainer />
-                        { (! open_sidebar || width != 'xs') &&  <BottomBarContainer /> }
-                    </div>
-                </main>
-                <Button variant="fab" color="primary" onClick={this.handleShow.bind(this)} className={classes.drawerButton}>
-                    <MenuIcon />
-                </Button>
+                <NavBarContainer />
+                <MapContainer />
+                <ContentBoxContainer />
+                { view == 'map' && <BottomBarContainer /> }
                 <WalkEditorContainer />
                 <GeocodeModalContainer />
                 <Snackbar
@@ -105,11 +61,12 @@ class Body extends Component {
 }
 
 function mapStateToProps(state) {
-    return { message: state.main.message, open_snackbar: state.main.open_snackbar, open_sidebar: state.main.open_sidebar, };
+    const { message, open_snackbar, view } = state.main;
+    return { message, open_snackbar, view, };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({openSnackbar, toggleSidebar}, dispatch);
+    return bindActionCreators({openSnackbar, toggleView}, dispatch);
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(compose(withStyles(styles), withWidth())(Body)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Body)));

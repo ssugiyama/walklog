@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-cli": "parcel build -d public -o bundle src/main.js",
+    "build-cli": "parcel build -d public -o bundle src/client-root.js",
     "build-svr": "babel src -d ./dist --presets env,react",
     "start": "node index.js",
-    "watch": "parcel watch -d public -o bundle src/main.js"
+    "watch": "parcel watch -d public -o bundle src/client-root.js"
   },
   "keywords": [],
   "author": "Shinichi SUGIYAMA",
