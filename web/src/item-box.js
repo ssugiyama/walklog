@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
 import { setSelectedItem, getMoreItems, openWalkEditor } from './actions';
 import marked from 'marked';
+import Paper from 'material-ui/Paper';
 import IconButton from 'material-ui/IconButton';
 import NavigationArrowForward from '@material-ui/icons/ArrowForward';
 import NavigationArrowBack from '@material-ui/icons/ArrowBack';
@@ -98,7 +99,7 @@ class ItemBox extends Component {
         const prevUrl = prevId ? '/' + prevId : this.props.offset > 0 ? '/?select=1&offset=' + this.props.offset + this.props.last_query: null;
         const { classes } = this.props;
         return  <div ref="box_root">
-                    <div className={classes.itemBoxControl}>
+                    <Paper className={classes.itemBoxControl}>
                         <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
                         <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
                         <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
@@ -110,7 +111,7 @@ class ItemBox extends Component {
                         {
                             data_user ? (<Typography variant="body1" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
                         }
-                    </div>
+                    </Paper>
                     { data && 
                         <ExpansionPanel defaultExpanded={true}>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>

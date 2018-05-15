@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
 import { getMoreItems, addPaths, setSelectedItem, toggleSidebar } from './actions';
+import Paper from 'material-ui/Paper';
 import Table, {TableBody, TableHead, TableRow, TableCell} from 'material-ui/Table';
 import Button from 'material-ui/Button';
 import Switch from 'material-ui/Switch';
@@ -14,6 +15,9 @@ import { withStyles } from 'material-ui/styles';
 
 const styles = theme => ({
     root: {
+        padding: 16,
+    },
+    table: {
         cursor: 'pointer',
     },
     row: {
@@ -63,7 +67,7 @@ class SearchBox extends Component {
         const { classes } = this.props;
         const moreUrl = `/?offset=${this.props.offset}` + (this.props.last_query && `&${this.props.last_query}`);
         return (
-            <div>
+            <Paper className={classes.root}>
                 <SearchFormContainer />
                 <div>
                     <Typography variant="body2" style={{ display: 'inline-block' }}>
@@ -98,7 +102,7 @@ class SearchBox extends Component {
                     label="show line distance"></FormControlLabel> 
             }
                 </div>
-                <Table className={classes.root}>
+                <Table className={classes.table}>
                     <TableBody>
                         { this.props.rows.map( (item, index) =>
                             <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
@@ -109,8 +113,8 @@ class SearchBox extends Component {
                         }
                     </TableBody>
                 </Table>
-                { this.props.offset > 0 && <Button style={{width: '100%'}} component={Link} to={moreUrl}>more</Button>  }
-            </div>
+                { this.props.offset > 0 && <Button style={{width: '100%'}} color="primary" component={Link} to={moreUrl}>more</Button>  }
+            </Paper>
         );
     }
 }

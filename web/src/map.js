@@ -12,13 +12,16 @@ const PathManager = typeof window !== 'undefined' ? require('./path-manager').de
 
 const styles = theme => ({
     mapCompact: {
-        margin: 16,
+        margin: '8px 16px',
         height: 360,
+        marginLeft: 'env(safe-area-inset-left)',
+        marginRight: 'env(safe-area-inset-right)',
     },
     mapExpand: {
         flexGrow: 1,
-        marginLeft: 0,
-        marginRight: 0,
+        margin: 0,
+        marginLeft: 'env(safe-area-inset-left)',
+        marginRight: 'env(safe-area-inset-right)',
     }
 });
 
