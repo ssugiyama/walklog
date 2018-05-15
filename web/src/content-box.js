@@ -45,6 +45,10 @@ class ContentBox extends Component {
         const query = {};
         keys.forEach(key => { query[key] = this.props[key]; });
         if (keys.every(key => prevProps[key] == this.props[key])) return;
+        if (prevProps.filter != this.props.filter && this.props.filter == 'neighborhood' && this.props.center) {
+            query.latitude = this.props.center.lat();
+            query.longitude = this.props.center.lng();
+        }
         const usp = new URLSearchParams(query);
         this.props.push({
             pathname: '/',
@@ -75,10 +79,10 @@ class ContentBox extends Component {
 }
 
 function mapStateToProps(state) {
-    const { view, highlighted_path, selected_item } = state.main;
+    const { view, highlighted_path, selected_item, center } = state.main;
     const { location } =  state.routing;
     return Object.assign({}, state.main.search_form, { 
-        view, highlighted_path, selected_item, location,
+        view, highlighted_path, selected_item, center, location,
     });
 }
 
