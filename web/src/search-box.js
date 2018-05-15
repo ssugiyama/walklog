@@ -5,13 +5,16 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
 import { getMoreItems, addPaths, setSelectedItem, toggleSidebar } from './actions';
-import Paper from 'material-ui/Paper';
-import Table, {TableBody, TableHead, TableRow, TableCell} from 'material-ui/Table';
-import Button from 'material-ui/Button';
-import Switch from 'material-ui/Switch';
-import { FormControlLabel } from 'material-ui/Form';
-import { Typography } from 'material-ui';
-import { withStyles } from 'material-ui/styles';
+import Paper from '@material-ui/core/Paper';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
+import Button from '@material-ui/core/Button';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
     root: {

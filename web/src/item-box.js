@@ -5,22 +5,21 @@ import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
 import { setSelectedItem, getMoreItems, openWalkEditor } from './actions';
 import marked from 'marked';
-import Paper from 'material-ui/Paper';
-import IconButton from 'material-ui/IconButton';
+import Paper from '@material-ui/core/Paper';
+import IconButton from '@material-ui/core/IconButton';
 import NavigationArrowForward from '@material-ui/icons/ArrowForward';
 import NavigationArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
 import EditorModeEdit from '@material-ui/icons/ModeEdit';
-import Typography from 'material-ui/Typography';
-import ExpansionPanel, {
-    ExpansionPanelSummary,
-    ExpansionPanelDetails,
-} from 'material-ui/ExpansionPanel';
+import Typography from '@material-ui/core/Typography';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { withStyles } from 'material-ui/styles';
-import Button from 'material-ui/Button';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import TweetIcon from './tweet-icon';
 import config from './config';
 

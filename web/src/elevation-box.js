@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
-import Typography from 'material-ui/Typography';
+import Typography from '@material-ui/core/Typography';
 
 const Chart = typeof window !== 'undefined' ? require('chart.js').Chart : {};
 

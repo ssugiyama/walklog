@@ -10,7 +10,7 @@ import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem, setLa
 import SearchBox from './search-box';
 import ItemBox from './item-box';
 import { renderRoutes } from 'react-router-config';
-import { createMuiTheme } from 'material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 // const injectTapEventPlugin = require('react-tap-event-plugin');
 // injectTapEventPlugin();
 

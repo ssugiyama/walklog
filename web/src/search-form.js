@@ -3,13 +3,13 @@ import { bindActionCreators } from 'redux';
 import 'whatwg-fetch';
 import { connect } from 'react-redux';
 import { setSearchForm, search } from './actions';
-import Button from 'material-ui/Button';
+import Button from '@material-ui/core/Button';
 import SearchIcon from '@material-ui/icons/Search';
-import Select from 'material-ui/Select';
-import { MenuItem } from 'material-ui/Menu';
-import TextField from 'material-ui/TextField';
-import IconButton from 'material-ui/IconButton';
-import { withStyles } from 'material-ui/styles';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 
 const month_options = [

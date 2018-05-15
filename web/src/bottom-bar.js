@@ -3,10 +3,10 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setPanoramaCount, setPanoramaIndex, setOverlay, 
     setEditingPath, deleteSelectedPath, clearPaths, setSearchForm, downloadPath, uploadPath } from './actions';
-import Tooltip from 'material-ui/Tooltip';
-import IconButton from 'material-ui/IconButton';
-import Select from 'material-ui/Select';
-import {MenuItem} from 'material-ui/Menu';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import EditorModeEdit from '@material-ui/icons/ModeEdit';
 import ActionDelete from '@material-ui/icons/Delete';
 import NavigationRefresh from '@material-ui/icons/Refresh';
@@ -19,9 +19,9 @@ import AvFastRewind from '@material-ui/icons/FastRewind';
 import FileDownload from '@material-ui/icons/FileDownload';
 import FileUpload from '@material-ui/icons/FileUpload';
 import MapsMap from '@material-ui/icons/Map';
-import Toolbar from 'material-ui/Toolbar';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
     root: {

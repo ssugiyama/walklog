@@ -4,8 +4,7 @@ import { bindActionCreators } from 'redux';
 import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleView } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
-import { withStyles } from 'material-ui/styles';
-import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 
 const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};

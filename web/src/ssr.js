@@ -5,7 +5,7 @@ import {configureStore, routes, handleRoute, theme}  from './app';
 import {setCurrentUser, setUsers, setMessage, openSnackbar} from './actions';
 import { matchRoutes } from 'react-router-config';
 import { SheetsRegistry } from 'react-jss/lib/jss';
-import { MuiThemeProvider, createGenerateClassName } from 'material-ui/styles';
+import { MuiThemeProvider, createGenerateClassName } from '@material-ui/core/styles';
 import JssProvider from 'react-jss/lib/JssProvider';
 import BodyContainer from './body';
 import { StaticRouter } from 'react-router-dom';

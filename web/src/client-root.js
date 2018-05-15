@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'react-router-redux';
 import { renderRoutes } from 'react-router-config';
 import { configureStore, routes, history, theme } from './app';
-import { MuiThemeProvider } from 'material-ui/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import BodyContainer from './body';
 
 const store = configureStore( window.__PRELOADED_STATE__);
