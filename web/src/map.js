@@ -44,7 +44,9 @@ class Map extends Component {
                 style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             }
         };
-
+        this.refs.map.addEventListener('touchmove', event => {
+            event.preventDefault();
+        });
         this.map = new google.maps.Map(this.refs.map, options);
         google.maps.event.addListener(this.map, 'click', event => {
             if (this.props.filter == 'neighborhood'){
