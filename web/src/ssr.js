@@ -111,6 +111,7 @@ export default function handleSSR(req, res) {
                 twitter_site,
                 preloadedState: state
             };
+            res.set('Content-Type', 'text/html');
             ReactDOMServer.renderToStaticNodeStream(
                 <Wrapper {...props}>
                 </Wrapper>

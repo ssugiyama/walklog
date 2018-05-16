@@ -19,8 +19,6 @@ const auth       = require('./lib/auth');
 const config     = require('./dist/config').default;
 // all environments
 app.set('port', process.env.PORT || 3000);
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 app.use(morgan());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
