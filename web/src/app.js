@@ -100,8 +100,10 @@ const mainReducer = function(state = initialState, action) {
                 error: action.data.error,
                 searching: false,
             };
+            const next_id = null;
+            const prev_id = null;
             result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
-            return Object.assign({}, state, {result});
+            return Object.assign({}, state, {result, next_id, prev_id});
         }
     case ActionTypes.SET_SELECTED_ITEM:
         {
