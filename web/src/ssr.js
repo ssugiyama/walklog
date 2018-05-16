@@ -21,7 +21,7 @@ const definePreloadedState = state => { return {__html: 'window.__PRELOADED_STAT
 const Wrapper = props => (
     <html>
     <head>
-        <meta charSet="utf-8" />
+        <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="twitter:card" content="summary" />
