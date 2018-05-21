@@ -43,7 +43,7 @@ class ContentBox extends Component {
             break;
         }
         const query = {};
-        keys.forEach(key => { query[key] = this.props[key]; });
+        keys.forEach(key => { query[key] = this.props[key] || ''; });
         if (keys.every(key => prevProps[key] == this.props[key])) return;
         if (prevProps.filter != this.props.filter && this.props.filter == 'neighborhood' && this.props.center) {
             query.latitude = this.props.center.lat();
