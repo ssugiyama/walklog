@@ -9,7 +9,10 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import ArrowRightIcon from '@material-ui/icons/ArrowForward';
 import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -63,6 +66,25 @@ class NavBar extends Component {
     }
     render() {
         const classes = this.props.classes;
+        const EndMenuItem = props => {
+            const onClick = props.onClick;
+            const cpProps = Object.assign({}, props);
+            delete cpProps.onClick;
+            return <MenuItem onClick={() => {
+                this.closeAllMenus();
+                if (onClick) onClick();
+                return true;
+            }} {...cpProps}>{props.children}</MenuItem> ;
+        };
+        const ParentMenuItem = props => {
+            const subMenuAnchor = props.subMenuAnchor;
+            return <MenuItem key="path" onClick={this.handleMenuOpen(subMenuAnchor)}>
+                <ListItemText>{props.children}</ListItemText>
+                <ListItemIcon>
+                    <ArrowRightIcon />
+                </ListItemIcon>
+            </MenuItem>;
+        } ;
         return (
             <AppBar position="static" className={classes.root}>
                 <Toolbar>
@@ -74,18 +96,16 @@ class NavBar extends Component {
                         open={Boolean(this.state.topAnchorEl)}
                         onClose={this.handleMenuClose('topAnchorEl')}
                     >
-                        <MenuItem key="login or logout" onClick={this.login_or_logout.bind(this)}>{this.props.current_user ? 'logout' : 'login with twitter'}</MenuItem>
+                        <EndMenuItem key="login or logout" onClick={this.login_or_logout.bind(this)}>{this.props.current_user ? 'logout' : 'login with twitter'}</EndMenuItem>
                         {
-                            this.props.current_user && ( <MenuItem key="new walk" onClick={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}>new walk...</MenuItem>)
+                            this.props.current_user && ( <EndMenuItem key="new walk" onClick={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}>new walk...</EndMenuItem>)
                         }
-                        <MenuItem key="path" onClick={this.handleMenuOpen('pathAnchorEl')}>path ▶</MenuItem> 
-                            
-                        <MenuItem onClick={this.handleMenuOpen('geoAnchorEl')}>geo ▶</MenuItem>
-                            
+                        <ParentMenuItem key="path" subMenuAnchor="pathAnchorEl">path</ParentMenuItem>
+                        <ParentMenuItem key="geo" subMenuAnchor="geoAnchorEl">geo</ParentMenuItem>
                         <Divider />
                         {
                             this.props.external_links.map(link => 
-                                <MenuItem component="a" href={link.href} target="_blank" key={link.name} >{link.name}</MenuItem>
+                                <EndMenuItem component="a" href={link.href} target="_blank" key={link.name} >{link.name}</EndMenuItem>
                             )
                         }
                     </Menu>
@@ -94,19 +114,19 @@ class NavBar extends Component {
                         open={Boolean(this.state.pathAnchorEl)}
                         onClose={this.handleMenuClose('pathAnchorEl')}
                     >
-                        <MenuItem key="edit" onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path}>edit</MenuItem>,
-                        <MenuItem key="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}>delete</MenuItem>,
-                        <MenuItem key="clear" onClick={() => this.props.clearPaths() }>clear</MenuItem>,
-                        <MenuItem key="download" onClick={() => this.props.downloadPath()} disabled={! this.props.selected_path}>download</MenuItem>,
-                        <MenuItem key="upload" onClick={() => {this.closeAllMenus(); this.props.uploadPath();}}>upload...</MenuItem>
+                        <EndMenuItem key="edit" onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path}>edit</EndMenuItem>,
+                        <EndMenuItem key="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}>delete</EndMenuItem>,
+                        <EndMenuItem key="clear" onClick={() => this.props.clearPaths() }>clear</EndMenuItem>,
+                        <EndMenuItem key="download" onClick={() => this.props.downloadPath() } disabled={! this.props.selected_path}>download</EndMenuItem>,
+                        <EndMenuItem key="upload" onClick={() => this.props.uploadPath() }>upload...</EndMenuItem>
                     </Menu>
                     <Menu
                         anchorEl={this.state.geoAAnchorEl}
                         open={Boolean(this.state.geoAnchorEl)}
                         onClose={this.handleMenuClose('geoAnchorEl')}
                     >
-                        <MenuItem key="geocode" onClick={ () => {this.closeAllMenus(); this.props.openGeocodeModal(true); }}>geocode...</MenuItem>,
-                        <MenuItem key="geolocation" onClick={this.setCurrentPosition.bind(this)}>geolocation</MenuItem>
+                        <EndMenuItem key="geocode" onClick={ () => this.props.openGeocodeModal(true)}>geocode...</EndMenuItem>,
+                        <EndMenuItem key="geolocation" onClick={this.setCurrentPosition.bind(this)}>geolocation</EndMenuItem>
                     </Menu>
                 </Toolbar>
             </AppBar>
