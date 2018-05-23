@@ -77,6 +77,7 @@ class PanoramaBox extends Component {
             if (this.props.panorama) {
                 this.props.panorama.setVisible(false);
             }
+            this.props.setStreetView(null);
             return;
         }
         const path = google.maps.geometry.encoding.decodePath(highlighted_path);
@@ -113,7 +114,7 @@ class PanoramaBox extends Component {
         this.showPanorama();
         if (this.props.overlay) {
             if (this.props.view == 'content') this.props.toggleView();
-            this.props.setStreetView(null)
+            this.props.setStreetView(null);
             //setTimeout(() => this.props.setStreetView(null), 2000);
         }
         else {
@@ -129,12 +130,15 @@ class PanoramaBox extends Component {
             enableCloseButton: false,
         });
         this.props.setStreetView(this.panorama);
-        if (this.props.highlighted_path) this.initPanorama(this.props.highlighted_path);
+        this.initPanorama(this.props.highlighted_path);
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.highlighted_path != this.props.highlighted_path) {
             this.initPanorama(nextProps.highlighted_path);
         }
+    }
+    componentWillUnmount() {
+        this.props.setStreetView(null);
     }
     render() {
         return (
