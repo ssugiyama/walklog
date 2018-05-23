@@ -4,7 +4,7 @@ import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { push } from 'react-router-redux';
-import { getMoreItems, addPaths, setSelectedItem, toggleSidebar } from './actions';
+import { getMoreItems, addPaths, setSelectedItem, toggleView } from './actions';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -49,7 +49,7 @@ class SearchBox extends Component {
     }
     handleShowAll() {
         this.props.addPaths(this.props.rows.map(row => row.path));
-        this.props.toggleSidebar();
+        this.props.toggleView();
     }
     handleGetMore() {
         this.props.getMoreItems(this.props.params);
@@ -127,7 +127,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ getMoreItems, setSelectedItem, addPaths, toggleSidebar, push }, dispatch);
+    return bindActionCreators({ getMoreItems, setSelectedItem, addPaths, toggleView, push }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchBox));
