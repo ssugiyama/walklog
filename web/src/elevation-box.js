@@ -42,8 +42,8 @@ class ElevationBox extends Component {
                     datasets:[ {
                         data,
                         borderWidth: 1,
-                        borderColor: '#c000c0',
-                        backgroundColor: 'rgba(192, 0, 192, 0.1)',
+                        borderColor: '#ff0000',
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
                         pointStyle: 'dot',
                         radius: 1
                     }]

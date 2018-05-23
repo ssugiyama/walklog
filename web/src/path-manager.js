@@ -6,9 +6,10 @@ export default class PathManager extends google.maps.MVCObject {
         const options = opt_options || {};
         this.setValues(options);
         this.polylines = new Object();
-        this.generalStyle = {strokeColor : '#0000ff', strokeOpacity: 0.5, zIndex: 10};
-        this.selectedStyle = {strokeColor : '#ff0000', strokeOpacity : 0.7, zIndex: 10};
-        this.highlightedStyle = {strokeColor : '#c000c0', strokeOpacity : 0.7, zIndex: 10};
+        this.generalStyle = {strokeColor: '#0000ff', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 10};
+        this.selectedStyle = {strokeOpacity: 0.8, strokeWeight: 4, zIndex: 9};
+        this.highlightedStyle = {strokeColor: '#ff0000', strokeOpacity: 0.8, zIndex: 8};
+        const drawingStyle = Object.assign({}, this.generalStyle, this.selectedStyle);
         this.drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.POLYLINE,
             drawingControl: true,
@@ -16,7 +17,7 @@ export default class PathManager extends google.maps.MVCObject {
                 position: google.maps.ControlPosition.TOP_CENTER,
                 drawingModes: [google.maps.drawing.OverlayType.POLYLINE]
             },
-            polylineOptions: this.selectedStyle
+            polylineOptions: drawingStyle
         });
         this.drawingManager.setDrawingMode(null);
         this.drawingManager.setMap(this.map);
@@ -133,14 +134,22 @@ export default class PathManager extends google.maps.MVCObject {
     selection_changed(){
         const prevSelection = this.get('prevSelection');
         if (prevSelection){
-            prevSelection.setOptions(this.prevSelection == this.highlight ? this.highlightedStyle : this.generalStyle);
+            let style = Object.assign({}, this.generalStyle);
+            if ( this.prevSelection == this.highlight ) {
+                style = Object.assign(style, this.highlightedStyle);
+            }
+            prevSelection.setOptions(style);
             prevSelection.setEditable(false);
         }
         const selection = this.get('selection');
         this.set('prevSelection', selection);
 
         if (selection) {
-            selection.setOptions(this.selectedStyle);
+            let style = Object.assign({}, this.generalStyle, this.selectedStyle);
+            if ( selection == this.highlight ) {
+                style = Object.assign(style, this.highlightedStyle);
+            }
+            selection.setOptions(style);
         }
         this.updateLength();
         this.unbind('editable');
@@ -172,13 +181,21 @@ export default class PathManager extends google.maps.MVCObject {
     highlight_changed(){
         const prevHighlight = this.get('prevHighlight');
         if (prevHighlight){
-            prevHighlight.setOptions(this.prevHighlight == this.selection ? this.selectedStyle : this.generalStyle);
+            let style = Object.assign({}, this.generalStyle);
+            if ( this.prevHighlight == this.selection ) {
+                style = Object.assign(style, this.selectedStyle);
+            }
+            prevHighlight.setOptions(style);
         }
         const highlight = this.get('highlight');
         this.set('prevHighlight', highlight);
 
         if (highlight) {
-            highlight.setOptions(this.highlightedStyle);
+            let style = Object.assign({}, this.generalStyle, this.highlightedStyle);
+            if ( this.selection == this.highlight ) {
+                style = Object.assign(style, this.selectedStyle);
+            }
+            highlight.setOptions(style);
         }
     }
 
