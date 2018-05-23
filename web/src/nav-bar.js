@@ -12,7 +12,7 @@ import Typography from '@material-ui/core/Typography';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import ArrowRightIcon from '@material-ui/icons/ArrowForward';
+import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
 import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -81,7 +81,7 @@ class NavBar extends Component {
             return <MenuItem key="path" onClick={this.handleMenuOpen(subMenuAnchor)}>
                 <ListItemText>{props.children}</ListItemText>
                 <ListItemIcon>
-                    <ArrowRightIcon />
+                    <ArrowDownIcon />
                 </ListItemIcon>
             </MenuItem>;
         } ;
