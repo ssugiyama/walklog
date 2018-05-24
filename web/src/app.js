@@ -144,6 +144,9 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.DELETE_SELECTED_PATH:
         {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                delete window.localStorage.selected_path;
+            }
             const search_form = Object.assign({}, state.search_form, {searchPath: null });
             return Object.assign({}, state, {selected_path: null, search_form});
         }
