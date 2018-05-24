@@ -111,7 +111,7 @@ class WalkEditor extends Component {
                 <DialogTitle>{ this.props.walk_editor_mode == 'update' ? 'Update Walk' : 'New Walk' }</DialogTitle>
                 <DialogContent>
                     <FormGroup row>
-                        <TextField type="date" value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" label='date' fullWidth={true} autoOk={true} />
+                        <TextField type="date" value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" label='date' fullWidth={true} />
                         <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} label="title" fullWidth={true} />
                         <TextField multiline rows={4} rowsMax={20}
                                 defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} label="comment" fullWidth={true} />
