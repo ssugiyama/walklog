@@ -13,6 +13,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -22,6 +23,9 @@ const styles = {
     },
     title: {
         flex: 1,
+    },
+    userPhoto: {
+        width: 24,
     },
 };
 
@@ -44,7 +48,6 @@ class NavBar extends Component {
         }
     }
     handleNewWalk() {
-        this.closeAllMenus();
         this.props.openWalkEditor(true, 'create');
     }
     handleShow() {
@@ -56,16 +59,17 @@ class NavBar extends Component {
     handleMenuClose(anchorEl) {
         return event => this.setState({ [anchorEl]: null });
     }
-    login_or_logout() {
-        this.closeAllMenus();
-        const url = this.props.current_user ? '/auth/logout' : '/auth/twitter';
-        window.location.href = url + '?redirect=' + window.location.href;
+    handleLogin() {
+        window.location.href = '/auth/twitter?redirect=' + window.location.href;
+    }
+    handleLogout() {
+        window.location.href = '/auth/logout?redirect=' + window.location.href;
     }
     closeAllMenus() {
-        this.setState({ topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null });
+        this.setState({ topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null, accountAnchorEl: null });
     }
     render() {
-        const classes = this.props.classes;
+        const { classes, current_user, selected_path } = this.props;
         const EndMenuItem = props => {
             const onClick = props.onClick;
             const cpProps = Object.assign({}, props);
@@ -90,16 +94,15 @@ class NavBar extends Component {
                 <Toolbar>
                     <IconButton onClick={this.handleShow.bind(this)} color="inherit"><MenuIcon /></IconButton>
                     <Typography variant="headline" color="inherit" className={classes.title}>Walklog</Typography>
+                    <IconButton onClick={this.handleMenuOpen('accountAnchorEl')} color="inherit">
+                        { current_user ? <img className={classes.userPhoto} src={current_user.photo} /> : <AccountCircleIcon /> }
+                    </IconButton>
                     <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MoreVertIcon /></IconButton>
-                    <Menu 
+                    <Menu
                         anchorEl={this.state.topAnchorEl}
                         open={Boolean(this.state.topAnchorEl)}
                         onClose={this.handleMenuClose('topAnchorEl')}
                     >
-                        <EndMenuItem key="login or logout" onClick={this.login_or_logout.bind(this)}>{this.props.current_user ? 'logout' : 'login with twitter'}</EndMenuItem>
-                        {
-                            this.props.current_user && ( <EndMenuItem key="new walk" onClick={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}>new walk...</EndMenuItem>)
-                        }
                         <ParentMenuItem key="path" subMenuAnchor="pathAnchorEl">path</ParentMenuItem>
                         <ParentMenuItem key="geo" subMenuAnchor="geoAnchorEl">geo</ParentMenuItem>
                         <Divider />
@@ -110,18 +113,32 @@ class NavBar extends Component {
                         }
                     </Menu>
                     <Menu
+                        anchorEl={this.state.accountAnchorEl}
+                        open={Boolean(this.state.accountAnchorEl)}
+                        onClose={this.handleMenuClose('accountAnchorEl')}
+                    >
+                        {
+                            current_user ? [
+                                (<MenuItem key="label" disabled={true}>Logged in as {current_user.username}</MenuItem>),
+                                (<Divider />),
+                                (<EndMenuItem key="new walk" onClick={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}>new walk...</EndMenuItem>),
+                                (<EndMenuItem key="logout" onClick={this.handleLogout.bind(this)}>logout</EndMenuItem>)
+                            ] : [<EndMenuItem key="login" onClick={this.handleLogin.bind(this)}>login with twitter</EndMenuItem>]
+                        }                        
+                    </Menu>
+                    <Menu
                         anchorEl={this.state.pathAnchorEl}
                         open={Boolean(this.state.pathAnchorEl)}
                         onClose={this.handleMenuClose('pathAnchorEl')}
                     >
-                        <EndMenuItem key="edit" onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path}>edit</EndMenuItem>,
-                        <EndMenuItem key="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}>delete</EndMenuItem>,
+                        <EndMenuItem key="edit" onClick={() => this.props.setEditingPath() } disabled={! selected_path}>edit</EndMenuItem>,
+                        <EndMenuItem key="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! selected_path}>delete</EndMenuItem>,
                         <EndMenuItem key="clear" onClick={() => this.props.clearPaths() }>clear</EndMenuItem>,
-                        <EndMenuItem key="download" onClick={() => this.props.downloadPath() } disabled={! this.props.selected_path}>download</EndMenuItem>,
+                        <EndMenuItem key="download" onClick={() => this.props.downloadPath() } disabled={! selected_path}>download</EndMenuItem>,
                         <EndMenuItem key="upload" onClick={() => this.props.uploadPath() }>upload...</EndMenuItem>
                     </Menu>
                     <Menu
-                        anchorEl={this.state.geoAAnchorEl}
+                        anchorEl={this.state.geoAnchorEl}
                         open={Boolean(this.state.geoAnchorEl)}
                         onClose={this.handleMenuClose('geoAnchorEl')}
                     >
