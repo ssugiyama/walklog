@@ -26,6 +26,7 @@ const styles = {
     },
     userPhoto: {
         width: 24,
+        borderRadius: '50%',
     },
 };
 
