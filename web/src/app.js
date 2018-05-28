@@ -251,7 +251,9 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
         if (!query.force_fetch) {
             const index = rows.findIndex(row => row.id == item_id);
             if (index >= 0) {
-                next(setAdjacentItemIds(null, null));
+                const next_id = index > 0 ? rows[index-1].id : null;
+                const prev_id = index < rows.length-1 ? rows[index+1].id : null;
+                next(setAdjacentItemIds(next_id, prev_id));
                 return next(setSelectedItem(rows[index], index));
             }
         }

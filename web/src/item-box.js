@@ -91,11 +91,9 @@ class ItemBox extends Component {
         const upUrl = this.props.location && this.props.location.search == '?force_fetch=1'
             ? '/' + this.props.location.search
             : this.props.last_query ? '/?' + this.props.last_query : '/';
-        const index = this.props.selected_index;
-        const nextId = this.props.next_id || (index > 0 ? this.props.rows[index-1].id : null);
-        const nextUrl = nextId && '/' + nextId;
-        const prevId = this.props.prev_id || (index < this.props.rows.length-1 ? this.props.rows[index+1].id : null);
-        const prevUrl = prevId ? '/' + prevId : this.props.offset > 0 ? '/?select=1&offset=' + this.props.offset + this.props.last_query: null;
+        const { next_id, prev_id } = this.props;
+        const nextUrl = next_id && '/' + next_id;
+        const prevUrl = prev_id ? '/' + prev_id : this.props.offset > 0 ? '/?select=1&offset=' + this.props.offset + this.props.last_query: null;
         const { classes } = this.props;
         return  <div ref="box_root">
                     <Paper className={classes.itemBoxControl}>
