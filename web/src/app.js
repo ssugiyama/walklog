@@ -6,7 +6,7 @@ import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem, setLastQuery } from './actions';
+import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem,  setAdjacentItemIds, setLastQuery } from './actions';
 import SearchBox from './search-box';
 import ItemBox from './item-box';
 import { renderRoutes } from 'react-router-config';
@@ -251,6 +251,7 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
         if (!query.force_fetch) {
             const index = rows.findIndex(row => row.id == item_id);
             if (index >= 0) {
+                next(setAdjacentItemIds(null, null));
                 return next(setSelectedItem(rows[index], index));
             }
         }
