@@ -241,7 +241,7 @@ const mainReducer = function(state = initialState, action) {
     }
 };
 
-const reducers = combineReducers({
+export const reducers = combineReducers({
     main: mainReducer,
     routing: routerReducer
 });
