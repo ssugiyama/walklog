@@ -31,6 +31,7 @@ class GeocodeModal extends Component {
         this.props.openGeocodeModal(false);
     }
     componentDidMount() {
+        if (typeof google === 'undefined') return;
         this.geocoder = new google.maps.Geocoder();
     }
     componentWillReceiveProps(nextProps) {

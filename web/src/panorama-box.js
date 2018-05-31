@@ -123,6 +123,7 @@ class PanoramaBox extends Component {
         }
     }
     componentDidMount() {
+        if (typeof google === 'undefined') return;
         this.streetViewService = new google.maps.StreetViewService();
         this.panorama = new google.maps.StreetViewPanorama(this.refs.body, {
             addressControl: true,

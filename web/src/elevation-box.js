@@ -82,6 +82,7 @@ class ElevationBox extends Component {
         }
     }
     componentDidMount() {
+        if (typeof google === 'undefined') return;
         this.elevator = new google.maps.ElevationService();
         this.requestElevation(this.props.highlighted_path);
     }

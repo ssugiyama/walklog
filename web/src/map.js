@@ -7,7 +7,7 @@ import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 
-const PathManager = typeof window !== 'undefined' ? require('./path-manager').default : {};
+const PathManager = typeof google !== 'undefined' ? require('./path-manager').default : {};
 
 const styles = theme => ({
     mapCompact: {
@@ -26,6 +26,7 @@ const styles = theme => ({
 
 class Map extends Component {
     componentDidMount() {
+        if (typeof google === 'undefined') return;
         const defaultPos = new google.maps.LatLng(this.props.latitude, this.props.longitude);
         const options = {
             zoom: 13,
