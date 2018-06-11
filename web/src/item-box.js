@@ -80,6 +80,7 @@ class ItemBox extends Component {
     }
     render() {
         const data = this.props.selected_item;
+        const {location, last_query, next_id, prev_id, offset} = this.props;
         let title, createMarkup, data_user;
         if (data) {
             title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
@@ -88,12 +89,15 @@ class ItemBox extends Component {
                 if (u.id == data.user_id) data_user = u;
             }
         }
-        const upUrl = this.props.location && this.props.location.search == '?force_fetch=1'
-            ? '/' + this.props.location.search
-            : this.props.last_query ? '/?' + this.props.last_query : '/';
-        const { next_id, prev_id } = this.props;
+        const upUrl = location && location.search == '?force_fetch=1'
+            ? '/' + location.search
+            : last_query ? '/?' + last_query : '/';
         const nextUrl = next_id && '/' + next_id;
-        const prevUrl = prev_id ? '/' + prev_id : this.props.offset > 0 ? '/?select=1&offset=' + this.props.offset + this.props.last_query: null;
+        const prevUrl = prev_id ? 
+            '/' + prev_id : 
+            offset > 0 ? 
+                '/?select=1&offset=' + offset + 
+                    (last_query ? '&' + last_query : '') : null;
         const { classes } = this.props;
         return  <div ref="box_root">
                     <Paper className={classes.itemBoxControl}>
