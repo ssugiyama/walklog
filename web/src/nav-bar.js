@@ -106,7 +106,7 @@ class NavBar extends Component {
                     >
                         <ParentMenuItem key="path" subMenuAnchor="pathAnchorEl">path</ParentMenuItem>
                         <ParentMenuItem key="geo" subMenuAnchor="geoAnchorEl">geo</ParentMenuItem>
-                        <Divider />
+                        <Divider key="divider" />
                         {
                             this.props.external_links.map(link => 
                                 <EndMenuItem component="a" href={link.href} target="_blank" key={link.name} >{link.name}</EndMenuItem>
