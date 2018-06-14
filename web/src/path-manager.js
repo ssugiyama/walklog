@@ -108,7 +108,7 @@ export default class PathManager extends google.maps.MVCObject {
                     if (ymax < elem.lat()) ymax = elem.lat();
                 }
             }
-            const center = new google.maps.LatLng((ymin+ymax)/2, (xmin+xmax)/2);
+            const center = { lat: (ymin+ymax)/2, lng: (xmin+xmax)/2 };
             this.map.panTo(center);
         }
     }

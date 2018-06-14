@@ -46,8 +46,8 @@ class ContentBox extends Component {
         keys.forEach(key => { query[key] = this.props[key] || ''; });
         if (keys.every(key => prevProps[key] == this.props[key])) return;
         if (prevProps.filter != this.props.filter && this.props.filter == 'neighborhood' && this.props.center) {
-            query.latitude = this.props.center.lat();
-            query.longitude = this.props.center.lng();
+            query.latitude = this.props.center.lat;
+            query.longitude = this.props.center.lng;
         }
         const usp = new URLSearchParams(query);
         this.props.push({

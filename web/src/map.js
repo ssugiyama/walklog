@@ -27,10 +27,12 @@ const styles = theme => ({
 class Map extends Component {
     componentDidMount() {
         if (typeof google === 'undefined') return;
-        const defaultPos = new google.maps.LatLng(this.props.latitude, this.props.longitude);
+        if (window.localStorage.center) {
+            this.props.setCenter(JSON.parse(window.localStorage.center));
+        }
         const options = {
             zoom: 13,
-            center: defaultPos,
+            center: this.props.center,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             disableDoubleClickZoom: true,
             scaleControl: true,
@@ -51,7 +53,7 @@ class Map extends Component {
         this.map = new google.maps.Map(this.refs.map, options);
         google.maps.event.addListener(this.map, 'click', event => {
             if (this.props.filter == 'neighborhood'){
-                this.distanceWidget.setCenter(event.latLng);
+                this.distanceWidget.setCenter(event.latLng.toJSON());
             }
             else if (this.props.filter == 'cities') {
                 const params = `latitude=${event.latLng.lat()}&longitude=${event.latLng.lng()}`;
@@ -65,7 +67,7 @@ class Map extends Component {
             }
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
-            this.props.setCenter(this.map.getCenter());
+            this.props.setCenter(this.map.getCenter().toJSON());
         });
         this.path_manager = new PathManager({map: this.map});
         const path_changed = () => {
@@ -81,7 +83,7 @@ class Map extends Component {
             strokeWeight: 2,
             editable: true,
             color: '#000',
-            center: defaultPos,
+            center: this.props.center,
             radius: parseFloat(this.props.radius),
         });
         google.maps.event.addListener(this.distanceWidget, 'center_changed', () => {
@@ -152,7 +154,7 @@ class Map extends Component {
                 this.infoWindow.close();
             }
         }
-        if (nextProps.center && ! nextProps.center.equals(this.props.center)) {
+        if (nextProps.center && this.props.center && ! ( nextProps.center.lat == this.props.center.lat && nextProps.center.lng == this.props.center.lng ) ) {
             this.map.setCenter(nextProps.center);
         }
     }
@@ -204,7 +206,7 @@ class Map extends Component {
         if (this.props.filter == 'neighborhood') {
             this.distanceWidget.setMap(this.map);
             this.distanceWidget.set('radius', parseFloat(this.props.radius));
-            const center = new google.maps.LatLng(this.props.latitude, this.props.longitude);
+            const center = { lat: this.props.latitude, lng: this.props.longitude };
             this.distanceWidget.setCenter(center);
         }
         else {
@@ -282,9 +284,7 @@ class Map extends Component {
         reader.addEventListener('loadend', e => {
             const obj = JSON.parse(e.target.result);
             const coordinates = obj.coordinates;
-            const pts = coordinates.map(function (item) {
-                return new google.maps.LatLng(item[1], item[0]);
-            });
+            const pts = coordinates.map(item => ({ lat: item[1], lng: item[0] }));
             const path = google.maps.geometry.encoding.encodePath(new google.maps.MVCArray(pts));
             this.props.setSelectedPath(path);
         });

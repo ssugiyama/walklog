@@ -30,8 +30,8 @@ const initialState = {
         year: '',
         order: 'newest_first',
         limit: '20',
-        latitude: 35.690,
-        longitude: 139.70,
+        latitude: NaN,
+        longitude: NaN,
         radius: 500,
         cities: '',
         user: '',
@@ -62,7 +62,7 @@ const initialState = {
         message: null,
         position: null
     },
-    center: null,
+    center: { lat: 35.690, lng: 139.7 },
     panorama: null,
     panorama_index: 0,
     panorama_count: 0,
@@ -182,6 +182,9 @@ const mainReducer = function(state = initialState, action) {
     case ActionTypes.SET_CENTER:
         {
             const center = action.center;
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.center = JSON.stringify(center);
+            }
             return Object.assign({}, state, {center});
         }
     case ActionTypes.REMOVE_FROM_ACTION_QUEUE:
@@ -268,7 +271,11 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
     delete last_query['offset'];
     const lqs = Object.keys(last_query).map(key => key + '=' + encodeURIComponent(last_query[key])).join('&');
     next(setLastQuery(lqs));
+    const numberForms = ['radius', 'latitude', 'longitude'];
     const search_form = Object.assign({}, initialState.search_form, query);
+    for (let p of numberForms) {
+        search_form[p] = Number(search_form[p]);
+    }
     if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff' || search_form.filter == 'frechet') && !isPathSelected && search_form.searchPath) {
         next(setSelectedPath(search_form.searchPath));
     }

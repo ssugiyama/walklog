@@ -45,7 +45,7 @@ class PanoramaBox extends Component {
         this.props.setOverlay(toggled);
     }
     interpolatePoints(pt1, pt2, r) {
-        return new google.maps.LatLng(r*pt2.lat() + (1-r)*pt1.lat(), r*pt2.lng() + (1-r)*pt1.lng());
+        return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
     }
     getPanoramaPointsAndHeadings(highlighted_path) {
         if (!highlighted_path) return null;
