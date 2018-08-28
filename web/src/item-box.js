@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import NavigationArrowForward from '@material-ui/icons/ArrowForward';
 import NavigationArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
-import EditorModeEdit from '@material-ui/icons/ModeEdit';
+import EditorModeEdit from '@material-ui/icons/Edit';
 import Typography from '@material-ui/core/Typography';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
