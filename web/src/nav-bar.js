@@ -11,7 +11,7 @@ import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -93,12 +93,12 @@ class NavBar extends Component {
         return (
             <AppBar position="static" className={classes.root}>
                 <Toolbar>
-                    <IconButton onClick={this.handleShow.bind(this)} color="inherit"><MenuIcon /></IconButton>
+                    <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MenuIcon /></IconButton>
                     <Typography variant="headline" color="inherit" className={classes.title}>Walklog</Typography>
                     <IconButton onClick={this.handleMenuOpen('accountAnchorEl')} color="inherit">
                         { current_user ? <img className={classes.userPhoto} src={current_user.photo} /> : <AccountCircleIcon /> }
                     </IconButton>
-                    <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MoreVertIcon /></IconButton>
+                    <IconButton onClick={this.handleShow.bind(this)} color="inherit"><VisibilityIcon /></IconButton>
                     <Menu
                         anchorEl={this.state.topAnchorEl}
                         open={Boolean(this.state.topAnchorEl)}
