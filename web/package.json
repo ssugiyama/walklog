@@ -47,7 +47,8 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "sequelize": "^4.15.0",
-    "sitemap": "^1.8.2"
+    "sitemap": "^1.8.2",
+    "whatwg-fetch": "2.0.4"
   },
   "devDependencies": {
     "babel-jest": "^23.0.1",
