@@ -108,15 +108,15 @@ class ItemBox extends Component {
                             data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                         }
                         <IconButton component="a" href={this.state.tweet_url}><TweetIcon /></IconButton>
-                        <Typography variant="title" className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
+                        <Typography variant="h6" className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
                         {
-                            data_user ? (<Typography variant="body1" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
+                            data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
                         }
                     </Paper>
                     { data && 
                         <ExpansionPanel defaultExpanded={true}>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography color="secondary" variant="subheading">Comment</Typography>
+                            <Typography color="secondary" variant="subtitle1">Comment</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <div className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
@@ -127,7 +127,7 @@ class ItemBox extends Component {
                     { data && 
                         <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography color="secondary" variant="subheading">Elevation</Typography>
+                            <Typography color="secondary" variant="subtitle1">Elevation</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <ElevationBox />
@@ -137,7 +137,7 @@ class ItemBox extends Component {
                     { data && 
                         <ExpansionPanel>
                             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography color="secondary" variant="subheading">StreetView</Typography>
+                            <Typography color="secondary" variant="subtitle1">StreetView</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <PanoramaBox />

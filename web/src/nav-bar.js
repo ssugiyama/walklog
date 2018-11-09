@@ -100,7 +100,7 @@ class NavBar extends Component {
             <AppBar position="static" className={classes.root}>
                 <Toolbar onClick={ this.handleShow.bind(this) }>
                     <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MenuIcon /></IconButton>
-                    <Typography variant="headline" color="inherit" className={classes.title}>Walklog</Typography>
+                    <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
                     <IconButton onClick={this.handleMenuOpen('accountAnchorEl')} color="inherit">
                         { current_user ? <img className={classes.userPhoto} src={current_user.photo} /> : <AccountCircleIcon /> }
                     </IconButton>

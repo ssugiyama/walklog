@@ -73,7 +73,7 @@ class SearchBox extends Component {
             <Paper className={classes.root}>
                 <SearchFormContainer />
                 <div>
-                    <Typography variant="body2" style={{ display: 'inline-block' }}>
+                    <Typography variant="body1" style={{ display: 'inline-block' }}>
                         {
                             ( () => {
                                 if (this.props.error) {

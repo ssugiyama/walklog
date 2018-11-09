@@ -156,7 +156,7 @@ class PanoramaBox extends Component {
                 <div style={styles.panoramaBoxControl}>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                    <Typography variant="body1" style={{ flexGrow: 1 }}><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></Typography>
+                    <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></Typography>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
                 </div>

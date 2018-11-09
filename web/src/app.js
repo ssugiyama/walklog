@@ -363,4 +363,8 @@ export const routes = [
 
 ];
 
-export const theme = createMuiTheme();
+export const theme = createMuiTheme({
+    typography: {
+        useNextVariants: true,
+    }
+});
