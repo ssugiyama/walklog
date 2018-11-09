@@ -16,7 +16,8 @@ const db_url = process.env.WALKLOG_URL || 'postgres://postgres@db/postgres';
 const sequelize = new Sequelize(db_url, {
     dialect: 'postgres',
     omitNull: true,
-    native: false
+    native: false,
+    operatorsAliases: false,
 });
 
 exports.sequelize = sequelize;

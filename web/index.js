@@ -19,7 +19,7 @@ const auth       = require('./lib/auth');
 const config     = require('./dist/config').default;
 // all environments
 app.set('port', process.env.PORT || 3000);
-app.use(morgan());
+app.use(morgan('tiny'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -32,6 +32,8 @@ if ('development' == app.get('env')) {
 
 const sess = {
     secret: config.session_secret,
+    resave: false,
+    saveUninitialized: true,
     cookie: {
         maxAge: config.session_max_age,
         secure: 'auto'
