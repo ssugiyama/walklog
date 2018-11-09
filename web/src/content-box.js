@@ -11,7 +11,7 @@ import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { routes } from './app';
 import { toggleView } from './actions';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 
 const styles = theme => ({
     root: {
@@ -80,7 +80,7 @@ class ContentBox extends Component {
 
 function mapStateToProps(state) {
     const { view, highlighted_path, selected_item, center } = state.main;
-    const { location } =  state.routing;
+    const { location } =  state.router;
     return Object.assign({}, state.main.search_form, { 
         view, highlighted_path, selected_item, center, location,
     });

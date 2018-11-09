@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 import { setSelectedItem, getMoreItems, openWalkEditor } from './actions';
 import marked from 'marked';
 import Paper from '@material-ui/core/Paper';
@@ -160,7 +160,7 @@ function mapStateToProps(state) {
         prev_id: state.main.prev_id,
         current_user: state.main.current_user,
         last_query: state.main.last_query,
-        location: state.routing.location,
+        location: state.router.location,
     };
 }
 

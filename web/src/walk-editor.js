@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 import { setSelectedItem, openWalkEditor } from './actions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';

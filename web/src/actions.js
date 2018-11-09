@@ -1,7 +1,7 @@
 // actions
 import * as ActionTypes from './action-types';
 require('isomorphic-fetch');
-import { push, replace } from 'react-router-redux';
+import { push, replace } from 'connected-react-router';
 
 export function setSearchForm(payload) {
     return {

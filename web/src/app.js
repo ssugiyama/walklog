@@ -1,7 +1,7 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
 import { createBrowserHistory, createMemoryHistory } from 'history';
-import { routerReducer, LOCATION_CHANGE, routerMiddleware } from 'react-router-redux';
+import { connectRouter, LOCATION_CHANGE, routerMiddleware } from 'connected-react-router';
 import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
@@ -244,9 +244,11 @@ const mainReducer = function(state = initialState, action) {
     }
 };
 
+export const history = typeof document !== 'undefined' ? createBrowserHistory() : createMemoryHistory();
+
 export const reducers = combineReducers({
     main: mainReducer,
-    routing: routerReducer
+    router: connectRouter(history)
 });
 
 export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryChanged, next) {
@@ -289,16 +291,16 @@ const dataFetchMiddleware = store => next => {
         // Fetch data on update location
         if (action.type === LOCATION_CHANGE) {
             if (!isFirstLocation) {
-                const branch = matchRoutes(routes, action.payload.pathname);
+                const branch = matchRoutes(routes, action.payload.location.pathname);
                 const last_branch = branch[branch.length - 1];
                 const match = last_branch.match;
                 const state = store.getState();
-                const usp = new URLSearchParams(action.payload.search);
+                const usp = new URLSearchParams(action.payload.location.search);
                 const query = {};
                 for(let p of usp) {
                     query[p[0]] = p[1];
                 }
-                const qsearch = action.payload.search &&  action.payload.search.slice(1);
+                const qsearch = action.payload.location.search &&  action.payload.location.search.slice(1);
                 const queryChanged = qsearch != state.main.last_query;
                 handleRoute(match.params.id, query, state.main.selected_path, '/', state.main.result.rows, queryChanged, next);
             }
@@ -307,7 +309,6 @@ const dataFetchMiddleware = store => next => {
         return next(action);
     };
 };
-export const history = typeof document !== 'undefined' ? createBrowserHistory() : createMemoryHistory();
 
 const middlewares = [
     routerMiddleware(history),
