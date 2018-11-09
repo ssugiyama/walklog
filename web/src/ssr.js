@@ -22,6 +22,7 @@ const Wrapper = props => (
     <html>
     <head>
         <meta charset="utf-8" />
+        <meta name="description" content={props.description} />
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="twitter:card" content="summary" />
@@ -112,6 +113,7 @@ export default function handleSSR(req, res) {
                 preloadedState: state
             };
             res.set('Content-Type', 'text/html');
+            res.write('<!DOCTYPE html>');
             ReactDOMServer.renderToStaticNodeStream(
                 <Wrapper {...props}>
                 </Wrapper>
