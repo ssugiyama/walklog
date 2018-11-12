@@ -80,7 +80,10 @@ class ItemBox extends Component {
     }
     render() {
         const data = this.props.selected_item;
-        const {location, last_query, next_id, prev_id, offset} = this.props;
+        const {location, last_query, next_id, prev_id, offset, staticContext} = this.props;
+        if (staticContext && !data) {
+            staticContext.status = 404;
+        }
         let title, createMarkup, data_user;
         if (data) {
             title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;

@@ -112,6 +112,9 @@ export default function handleSSR(req, res) {
                 twitter_site,
                 preloadedState: state
             };
+            if(context.status === 404) {
+                res.status(404);
+            }
             res.set('Content-Type', 'text/html');
             res.write('<!DOCTYPE html>');
             ReactDOMServer.renderToStaticNodeStream(
