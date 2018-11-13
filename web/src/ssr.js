@@ -97,7 +97,7 @@ export default function handleSSR(req, res) {
             if (state.main.selected_item) {
                 const data = state.main.selected_item;
                 title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
-                description = data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...';
+                description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
                 canonical = '/' + data.id;
             }
             const props = {
