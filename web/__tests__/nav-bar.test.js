@@ -13,7 +13,7 @@ Enzyme.configure({ adapter: new Adapter() });
 function setup(props) {
     const state = createStore(reducers).getState();
     Object.assign(state.main, props);
-    Object.assign(state.routing, {});
+    Object.assign(state.router, {});
     const store = configureStore()(state);
     return mount(
         <Provider store={store}>
@@ -30,7 +30,7 @@ describe('<NavBarContainer />', () => {
     it('not logged in', () => {
         wrapper = setup({
         });
-        expect(wrapper.find('IconButton').at(1).find('AccountCircle').exists()).toBeTruthy();
+        expect(wrapper.find('IconButton').at(1).find('AccountCircleIcon').exists()).toBeTruthy();
     });
     it('logged in', () => {
         wrapper = setup({

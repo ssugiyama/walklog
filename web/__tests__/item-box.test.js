@@ -13,7 +13,7 @@ Enzyme.configure({ adapter: new Adapter() });
 function setup(path, props, routing) {
     const state = createStore(reducers).getState();
     Object.assign(state.main, props);
-    Object.assign(state.routing, routing);
+    Object.assign(state.router, routing);
     const store = configureStore()(state);
     return mount(
         <Provider store={store}>
@@ -52,12 +52,12 @@ describe('<ItemBoxContainer />', () => {
         expect(wrapper.find('IconButton').at(0).props().to).toBe('/18');
         expect(wrapper.find('IconButton').at(1).props().to).toBe('/');
         expect(wrapper.find('IconButton').at(2).props().to).toBe('/16');
-        expect(wrapper.find('Typography[variant="title"]').text()).toBe('2018-05-30 : start - end (14.6 km)');
-        expect(wrapper.find('Typography[variant="body1"] img').prop('src')).toBe('http://exmaple.com/photo');
-        expect(wrapper.find('Typography[variant="body1"] img + span').text()).toBe('Alice');
+        expect(wrapper.find('Typography[variant="h6"]').text()).toBe('2018-05-30 : start - end (14.6 km)');
+        expect(wrapper.find('Typography[variant="body2"] img').prop('src')).toBe('http://exmaple.com/photo');
+        expect(wrapper.find('Typography[variant="body2"] img + span').text()).toBe('Alice');
         expect(wrapper.find('ExpansionPanelDetails div').at(1).props().dangerouslySetInnerHTML.__html)
             .toEqual(expect.stringContaining('<p>paragraph</p>'));
-        expect(wrapper.find('ModeEdit').length).toBe(0);
+        expect(wrapper.find('EditIcon').length).toBe(0);
     });
     it('show edit button', () => {
         const mainProps = {
@@ -80,8 +80,8 @@ describe('<ItemBoxContainer />', () => {
         };
         wrapper = setup('/17', mainProps, {
         });
-
-        expect(wrapper.find('ModeEdit').length).toBe(1);
+        // console.log(wrapper.debug());
+        expect(wrapper.find('EditIcon').length).toBe(1);
     });
     it('selected item is null', () => {
         const mainProps = {
@@ -92,7 +92,7 @@ describe('<ItemBoxContainer />', () => {
         };
         wrapper = setup('/17', mainProps, {});
 
-        expect(wrapper.find('Typography[variant="title"]').text()).toBe('not found');
+        expect(wrapper.find('Typography[variant="h6"]').text()).toBe('not found');
     });
     it('next url is more url', () => {
         const mainProps = {
