@@ -217,7 +217,7 @@ api.get('/cities', function(req, res){
     const jcodes    = req.query.jcodes;
     let where, latitude, longitude;
     if (jcodes) {
-        where = { jcode : { $in : jcodes.split(/,/) } };
+        where = { jcode : { [Op.in] : jcodes.split(/,/) } };
     }
     else{
         latitude  = parseFloat(req.query.latitude);
