@@ -52,6 +52,7 @@ class ItemBox extends Component {
     constructor(props) {
         super(props);
         this.state = { };
+        this.root_ref = React.createRef();
     }
     handleEdit() {
         this.props.openWalkEditor(true, 'update');
@@ -74,7 +75,7 @@ class ItemBox extends Component {
     }
     componentDidMount() {
         this.prepareTwitter(this.props);
-        this.refs.box_root.parentNode.scrollTop = 0;
+        this.root_ref.current.parentNode.scrollTop = 0;
     }
     render() {
         const data = this.props.selected_item;
@@ -100,7 +101,7 @@ class ItemBox extends Component {
                 '/?select=1&offset=' + offset + 
                     (last_query ? '&' + last_query : '') : null;
         const { classes } = this.props;
-        return  <div ref="box_root">
+        return  <div ref={this.root_ref}>
                     <Paper className={classes.itemBoxControl}>
                         <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
                         <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>

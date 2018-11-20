@@ -25,6 +25,12 @@ const styles = theme => ({
 });
 
 class Map extends Component {
+    constructor(props) {
+        super(props);
+        this.map_ref = React.createRef();
+        this.download_ref = React.createRef();
+        this.upload_ref = React.createRef();
+    }
     componentDidMount() {
         if (typeof google === 'undefined') return;
         if (window.localStorage.center) {
@@ -47,10 +53,10 @@ class Map extends Component {
                 style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             }
         };
-        this.refs.map.addEventListener('touchmove', event => {
+        this.map_ref.current.addEventListener('touchmove', event => {
             event.preventDefault();
         });
-        this.map = new google.maps.Map(this.refs.map, options);
+        this.map = new google.maps.Map(this.map_ref.current, options);
         google.maps.event.addListener(this.map, 'click', event => {
             if (this.props.filter == 'neighborhood'){
                 this.distanceWidget.setCenter(event.latLng.toJSON());
@@ -115,7 +121,7 @@ class Map extends Component {
             this.props.setSelectedPath(window.localStorage.selected_path);
         }
         window.addEventListener('resize', this.handleResize.bind(this));
-        this.refs.upload.addEventListener('change', e => {
+        this.upload_ref.current.addEventListener('change', e => {
             this.processUpload(e);
         });
         this.componentDidUpdate();
@@ -238,13 +244,13 @@ class Map extends Component {
         else if (action.type == ActionTypes.DOWNLOAD_PATH) {
             const content = this.path_manager.selectionAsGeoJSON();
             const blob = new Blob([ content ], { 'type' : 'application/json' });
-            const elem = ReactDOM.findDOMNode(this.refs.download);
+            const elem = ReactDOM.findDOMNode(this.download_ref.current);
             elem.href = window.URL.createObjectURL(blob);
             setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
             this.props.removeFromActionQueue();
         }
         else if (action.type == ActionTypes.UPLOAD_PATH) {
-            const elem = ReactDOM.findDOMNode(this.refs.upload);
+            const elem = ReactDOM.findDOMNode(this.upload_ref.current);
             setTimeout(() => elem.click(), 0);
             this.props.removeFromActionQueue();
         }
@@ -293,12 +299,12 @@ class Map extends Component {
         const { classes, view } = this.props;
         return (
             <React.Fragment>
-                <div ref="map" className={classNames({
+                <div ref={this.map_ref} className={classNames({
                     [classes.mapCompact]: view == 'content',
                     [classes.mapExpand]: view == 'map',
                 })}></div>
-                <a ref="download" style={{display: 'none'}} download='walklog.json'></a>
-                <input ref="upload" type="file" style={{display: 'none'}} />
+                <a ref={this.download_ref} style={{display: 'none'}} download='walklog.json'></a>
+                <input ref={this.upload_ref} type="file" style={{display: 'none'}} />
             </React.Fragment>
         );
     }

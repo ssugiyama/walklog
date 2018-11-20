@@ -38,8 +38,8 @@ const styles = {
 class PanoramaBox extends Component {
     constructor(props) {
         super(props);
-
         this.panoramaInterval = 50;
+        this.body_ref = React.createRef();
     }
     handleOverlayChange(e, toggled) {
         this.props.setOverlay(toggled);
@@ -128,7 +128,7 @@ class PanoramaBox extends Component {
     componentDidMount() {
         if (typeof google === 'undefined') return;
         this.streetViewService = new google.maps.StreetViewService();
-        this.panorama = new google.maps.StreetViewPanorama(this.refs.body, {
+        this.panorama = new google.maps.StreetViewPanorama(this.body_ref.current, {
             addressControl: true,
             navigationControl: true,
             enableCloseButton: false,
@@ -150,7 +150,7 @@ class PanoramaBox extends Component {
                         label="overlay">
                     </FormControlLabel>
                 </div>
-                <div style={styles.panoramaBoxBody} ref="body"></div>
+                <div style={styles.panoramaBoxBody} ref={this.body_ref}></div>
                 <div style={styles.panoramaBoxControl}>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>

@@ -17,6 +17,7 @@ class ElevationBox extends Component {
     constructor(props) {
         super(props);
         this.chart = null;
+        this.root_ref = React.createRef();
     }
     requestElevation(highlighted_path) {
         if (!highlighted_path) return;
@@ -35,7 +36,7 @@ class ElevationBox extends Component {
             this.elevationResults = results;
             const data = results.map(result => result.elevation);
             const labels = results.map(result => '');
-            this.chart = new Chart(this.refs.root.getContext('2d'), {
+            this.chart = new Chart(this.root_ref.current.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels,
@@ -96,7 +97,7 @@ class ElevationBox extends Component {
     render() {
         if (this.props.highlighted_path)
             return (
-                <canvas style={styles.elevationBox} ref="root"></canvas>
+                <canvas style={styles.elevationBox} ref={this.root_ref}></canvas>
             );
         else
             return null;
