@@ -134,59 +134,30 @@ class Map extends Component {
             google.maps.event.trigger(this.map, 'resize');
         }, 500);
     }
-    componentWillReceiveProps(nextProps) {
-        this.paths_changed = (nextProps.paths != this.props.paths);
-        if (nextProps.panorama != this.map.getStreetView()) {
-            this.map.setStreetView(nextProps.panorama);
-            if (nextProps.panorama === null) {
+    componentDidUpdate(prevProps, prevState) {
+        if (! prevProps) {
+            prevProps = {};
+        }
+        this.paths_changed = (prevProps.paths != this.props.paths);
+        if (prevProps.panorama != this.map.getStreetView()) {
+            this.map.setStreetView(this.props.panorama);
+            if (this.props.panorama === null) {
                 this.props.setStreetView(this.map.getStreetView());
             }
         }
-    }
-    componentWillUpdate(nextProps, nextState) {
-        if (nextProps.info_window != this.props.info_window) {
-            if (nextProps.info_window.open) {
+        if (prevProps.info_window != this.props.info_window) {
+            if (this.props.info_window.open) {
                 this.infoWindow.open(this.map);
-                this.infoWindow.setPosition(nextProps.info_window.position);
-                this.infoWindow.setContent(nextProps.info_window.message);
+                this.infoWindow.setPosition(this.props.info_window.position);
+                this.infoWindow.setContent(this.props.info_window.message);
             }
             else {
                 this.infoWindow.close();
             }
         }
-        if (nextProps.center && this.props.center && ! ( nextProps.center.lat == this.props.center.lat && nextProps.center.lng == this.props.center.lng ) ) {
-            this.map.setCenter(nextProps.center);
+        if (prevProps.center && this.props.center && ! ( prevProps.center.lat == this.props.center.lat && prevProps.center.lng == this.props.center.lng ) ) {
+            this.map.setCenter(this.props.center);
         }
-    }
-    processActionQueue() {
-        const len = this.props.action_queue.length;
-        if (len == 0) return;
-        const action = this.props.action_queue[len-1];
-        if (action.type == ActionTypes.ADD_PATHS) {
-            for (let path of action.paths) {
-                this.path_manager.showPath(path, false, false);
-            }
-            this.props.removeFromActionQueue();
-        }
-        else if (action.type == ActionTypes.CLEAR_PATHS) {
-            this.path_manager.deleteAll();
-            this.props.removeFromActionQueue();
-        }
-        else if (action.type == ActionTypes.DOWNLOAD_PATH) {
-            const content = this.path_manager.selectionAsGeoJSON();
-            const blob = new Blob([ content ], { 'type' : 'application/json' });
-            const elem = ReactDOM.findDOMNode(this.refs.download);
-            elem.href = window.URL.createObjectURL(blob);
-            setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
-            this.props.removeFromActionQueue();
-        }
-        else if (action.type == ActionTypes.UPLOAD_PATH) {
-            const elem = ReactDOM.findDOMNode(this.refs.upload);
-            setTimeout(() => elem.click(), 0);
-            this.props.removeFromActionQueue();
-        }
-    }
-    componentDidUpdate() {
         if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
             this.path_manager.showPath(this.props.selected_path, true);
         }
@@ -248,6 +219,34 @@ class Map extends Component {
                     geom.setMap(null);
                 }
             }
+        }
+    }
+    processActionQueue() {
+        const len = this.props.action_queue.length;
+        if (len == 0) return;
+        const action = this.props.action_queue[len-1];
+        if (action.type == ActionTypes.ADD_PATHS) {
+            for (let path of action.paths) {
+                this.path_manager.showPath(path, false, false);
+            }
+            this.props.removeFromActionQueue();
+        }
+        else if (action.type == ActionTypes.CLEAR_PATHS) {
+            this.path_manager.deleteAll();
+            this.props.removeFromActionQueue();
+        }
+        else if (action.type == ActionTypes.DOWNLOAD_PATH) {
+            const content = this.path_manager.selectionAsGeoJSON();
+            const blob = new Blob([ content ], { 'type' : 'application/json' });
+            const elem = ReactDOM.findDOMNode(this.refs.download);
+            elem.href = window.URL.createObjectURL(blob);
+            setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
+            this.props.removeFromActionQueue();
+        }
+        else if (action.type == ActionTypes.UPLOAD_PATH) {
+            const elem = ReactDOM.findDOMNode(this.refs.upload);
+            setTimeout(() => elem.click(), 0);
+            this.props.removeFromActionQueue();
         }
     }
     toPolygon(id, str) {

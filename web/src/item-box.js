@@ -65,17 +65,15 @@ class ItemBox extends Component {
             tweet_url: `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`,
         });
     }
-    componentWillMount() {
+    componentDidUpdate(prevProps, prevState) {
         this.prepareTwitter(this.props);
-    }
-    componentWillReceiveProps(nextProps) {
-        this.prepareTwitter(nextProps);
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.selected_item != this.props.selected_item) return true;
         return false;
     }
     componentDidMount() {
+        this.prepareTwitter(this.props);
         this.refs.box_root.parentNode.scrollTop = 0;
     }
     render() {

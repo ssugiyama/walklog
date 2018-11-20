@@ -111,6 +111,9 @@ class PanoramaBox extends Component {
         return false;
     }
     componentDidUpdate(prevProps) {
+        if (this.props.highlighted_path != prevProps.highlighted_path) {
+            this.initPanorama(this.props.highlighted_path);
+        }
         this.showPanorama();
         if (this.props.overlay) {
             if (this.props.view == 'content') this.props.toggleView();
@@ -132,11 +135,6 @@ class PanoramaBox extends Component {
         });
         this.props.setStreetView(this.panorama);
         this.initPanorama(this.props.highlighted_path);
-    }
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.highlighted_path != this.props.highlighted_path) {
-            this.initPanorama(nextProps.highlighted_path);
-        }
     }
     componentWillUnmount() {
         this.props.setStreetView(null);

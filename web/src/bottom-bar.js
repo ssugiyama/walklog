@@ -38,7 +38,7 @@ class BottomBar extends Component {
         super(props);
         this.state = {length: 0};
     }
-    computeLength(selected_path) {
+    static computeLength(selected_path) {
         if (selected_path) {
             return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selected_path))/1000;
         }
@@ -46,11 +46,8 @@ class BottomBar extends Component {
             return 0;
         }
     }
-    componentWillReceiveProps(nextProps) {
-        this.setState({ length:  this.computeLength(nextProps.selected_path)});
-    }
-    componentDidMount() {
-        this.setState({ length:  this.computeLength(this.props.selected_path)});
+    static getDerivedStateFromProps(nextProps, prevState) {
+        return { length:  BottomBar.computeLength(nextProps.selected_path)};
     }
     resetCities() {
         this.props.setSearchForm({cities: ''});

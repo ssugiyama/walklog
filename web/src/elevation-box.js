@@ -86,12 +86,12 @@ class ElevationBox extends Component {
         this.elevator = new google.maps.ElevationService();
         this.requestElevation(this.props.highlighted_path);
     }
-    componentWillReceiveProps(nextProps) {
+    componentDidUpdate(prevProps, prevState) {
         if (this.chart) {
             this.chart.destroy();
             this.chart = null;
         }
-        this.requestElevation(nextProps.highlighted_path);
+        this.requestElevation(this.props.highlighted_path);
     }
     render() {
         if (this.props.highlighted_path)

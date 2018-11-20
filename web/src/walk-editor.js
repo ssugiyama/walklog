@@ -76,8 +76,8 @@ class WalkEditor extends Component {
     handleChange(name, e, value) {
         this.setState({[name]: value !== undefined ? value : e.target.value});
     }
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.open_walk_editor && !this.props.open_walk_editor) {
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.open_walk_editor) {
 
             const path = nextProps.selected_path;
             let item, update_path, date;
@@ -92,13 +92,16 @@ class WalkEditor extends Component {
             }
             if (path == null && nextProps.walk_editor_mode == 'create') {
                 alert('draw or select a path on map');
-                return;
+                return null;
             }
             else if (path == null) {
                 update_path = false;
             }
             const state = Object.assign({}, item, {path, update_path, date});
-            this.setState(state);
+            return state;
+        }
+        else {
+            return null;
         }
     }
     render() {

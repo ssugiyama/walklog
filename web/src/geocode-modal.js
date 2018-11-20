@@ -34,9 +34,12 @@ class GeocodeModal extends Component {
         if (typeof google === 'undefined') return;
         this.geocoder = new google.maps.Geocoder();
     }
-    componentWillReceiveProps(nextProps) {
+    static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.open_geocode_modal&& !this.props.open_geocode_modal) {
-            this.setState({address: ''});
+            return {address: ''};
+        }
+        else {
+            return null;
         }
     }
     render() {
