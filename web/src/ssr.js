@@ -19,7 +19,7 @@ const Users = models.sequelize.models.users;
 const definePreloadedState = state => { return {__html: 'window.__PRELOADED_STATE__ = ' + JSON.stringify(state) } };
 
 const Wrapper = props => (
-    <html>
+    <html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="description" content={props.description} />
@@ -91,14 +91,14 @@ export default function handleSSR(req, res) {
             const state = store.getState();
             state.main.external_links = config.external_links;
             let title = config.site_name;
-            let description = '';
+            let description = config.site_description;
             const { site_name, base_url, twitter_site, google_api_key }  = config;
-            let canonical = '/';
+            let canonical = base_url + '/';
             if (state.main.selected_item) {
                 const data = state.main.selected_item;
                 title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
                 description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
-                canonical = '/' + data.id;
+                canonical = base_url + '/' + data.id;
             }
             const props = {
                 markup,

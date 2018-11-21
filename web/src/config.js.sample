@@ -1,5 +1,6 @@
 export default {
     'site_name': 'walklog',
+    'site_description': 'webapp for walk logging',
     'base_url': 'http://localhost:3000',
     'twitter_site': '@chez_sugi',
     'google_api_key': '',
