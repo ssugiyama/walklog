@@ -14,10 +14,6 @@
   "author": "Shinichi SUGIYAMA",
   "license": "ISC",
   "dependencies": {
-    "@babel/cli": "^7.1.5",
-    "@babel/core": "^7.1.6",
-    "@babel/preset-env": "^7.1.6",
-    "@babel/preset-react": "^7.0.0",
     "@material-ui/core": "^3.0.0",
     "@material-ui/icons": "^3.0.0",
     "body-parser": "*",
@@ -32,7 +28,6 @@
     "jssha": "^2.2.0",
     "marked": "^0.3.5",
     "morgan": "*",
-    "parcel-bundler": "^1.7.1",
     "passport": "^0.4.0",
     "passport-twitter": "^1.0.4",
     "pg": "^6.4.2",
@@ -51,13 +46,19 @@
     "whatwg-fetch": "2.0.4"
   },
   "devDependencies": {
-    "babel-core": "^7.0.0-bridge",
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-react": "^7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "eslint": "^3.19.0",
     "eslint-plugin-react": "^7.0.1",
     "jest": "^23.0.1",
-    "redux-mock-store": "^1.5.1"
+    "parcel-bundler": "^1.7.1",
+    "redux-mock-store": "^1.5.1",
+    "regenerator-runtime": "^0.13.1"
   }
 }
