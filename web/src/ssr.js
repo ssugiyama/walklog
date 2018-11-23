@@ -42,6 +42,7 @@ const Wrapper = props => (
         <meta name="theme-color" content="#ffffff" />
         <link rel="canonical" href={props.canonical} />
         <title>{props.title}</title>
+        <script src="/register-sw.js"></script>
         <script src="//www.google.com/jsapi"></script>
         <script src={ '//maps.google.com/maps/api/js?libraries=geometry,drawing&key=' +  props.google_api_key }></script>
     </head>

@@ -58,7 +58,33 @@
     "eslint-plugin-react": "^7.0.1",
     "jest": "^23.0.1",
     "parcel-bundler": "^1.7.1",
+    "parcel-plugin-sw-cache": "^0.2.6",
     "redux-mock-store": "^1.5.1",
     "regenerator-runtime": "^0.13.1"
+  },
+  "cache": {
+    "runtimeCaching": [
+      {
+        "urlPattern": [
+          "/$"
+        ],
+        "handler": "networkFirst"
+      },
+      {
+        "urlPattern": [
+          "/.+"
+        ],
+        "handler": "networkFirst",
+        "options": {
+          "cacheName": "workbox-temporary",
+          "expiration": {
+            "maxAgeSeconds": 86400,
+            "maxEntries": 10
+          }
+        }
+      }
+    ],
+    "templatedUrls": {},
+    "navigateFallback": "undefined"
   }
 }
