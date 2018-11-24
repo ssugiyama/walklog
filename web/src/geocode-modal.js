@@ -15,7 +15,7 @@ import NavigationClose from '@material-ui/icons/Close';
 class GeocodeModal extends Component {
     constructor(props) {
         super(props);
-        this.state = {address: ''};
+        this.state = {address: '', initialized: false};
     }
     handleSubmit() {
         this.geocoder.geocode( { 'address': this.state.address}, (results, status) =>  {
@@ -29,14 +29,17 @@ class GeocodeModal extends Component {
     }
     handleClose() {
         this.props.openGeocodeModal(false);
+        this.setState({
+            initialized: false
+        });
     }
     componentDidMount() {
         if (typeof google === 'undefined') return;
         this.geocoder = new google.maps.Geocoder();
     }
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.open_geocode_modal&& !this.props.open_geocode_modal) {
-            return {address: ''};
+        if (nextProps.open_geocode_modal&& !prevState.initialized) {
+            return {address: '', initialized: true};
         }
         else {
             return null;

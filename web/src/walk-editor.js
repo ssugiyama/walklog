@@ -20,10 +20,11 @@ import moment from 'moment';
 class WalkEditor extends Component {
     constructor(props) {
         super(props);
-        this.state = {id: '', date: null, title: '', comment: ''};
+        this.state = {id: '', date: null, title: '', comment: '', initialized: false};
     }
     handleClose() {
         this.props.openWalkEditor(false);
+        this.setState({initialized: false});
     }
     handleSubmit() {
         const keys = ['date', 'title', 'comment'];
@@ -73,15 +74,15 @@ class WalkEditor extends Component {
             }).catch(ex => alert(ex));
         }
     }
-    handleChange(name, e, value) {
-        this.setState({[name]: value !== undefined ? value : e.target.value});
+    handleChange(name, e) {
+        this.setState({[name]: e.target.value});
     }
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.open_walk_editor) {
+        if (nextProps.open_walk_editor && ! prevState.initialized) {
 
             const path = nextProps.selected_path;
             let item, update_path, date;
-
+            const initialized = true;
             if (nextProps.walk_editor_mode == 'update') {
                 item = nextProps.selected_item;
                 date = item.date;
@@ -97,7 +98,7 @@ class WalkEditor extends Component {
             else if (path == null) {
                 update_path = false;
             }
-            const state = Object.assign({}, item, {path, update_path, date});
+            const state = Object.assign({}, item, {path, update_path, date, initialized});
             return state;
         }
         else {
@@ -115,9 +116,9 @@ class WalkEditor extends Component {
                 <DialogContent>
                     <FormGroup row>
                         <TextField type="date" value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" label='date' fullWidth={true} />
-                        <TextField defaultValue={this.state.title} onBlur={this.handleChange.bind(this, 'title')} label="title" fullWidth={true} />
+                        <TextField defaultValue={this.state.title} onChange={this.handleChange.bind(this, 'title')} label="title" fullWidth={true} />
                         <TextField multiline rows={4} rowsMax={20}
-                                defaultValue={this.state.comment} onBlur={this.handleChange.bind(this, 'comment')} label="comment" fullWidth={true} />
+                                defaultValue={this.state.comment} onChange={this.handleChange.bind(this, 'comment')} label="comment" fullWidth={true} />
                         {
                             this.props.walk_editor_mode == 'update' &&
                             <FormControlLabel
