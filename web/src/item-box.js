@@ -57,24 +57,20 @@ class ItemBox extends Component {
     handleEdit() {
         this.props.openWalkEditor(true, 'update');
     }
-    prepareTwitter(props) {
-        const data = props.selected_item;
+    static getDerivedStateFromProps(nextProps, prevState) {
+        const data = nextProps.selected_item;
         if (! data) return;
         const href = config.base_url + '/' + data.id;
         const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
-        this.setState({
+        return {
             tweet_url: `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`,
-        });
-    }
-    componentDidUpdate(prevProps, prevState) {
-        this.prepareTwitter(this.props);
+        };
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.selected_item != this.props.selected_item) return true;
         return false;
     }
     componentDidMount() {
-        this.prepareTwitter(this.props);
         this.root_ref.current.parentNode.scrollTop = 0;
     }
     render() {
