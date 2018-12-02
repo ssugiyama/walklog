@@ -7,8 +7,7 @@ import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 
-const PathManager = typeof google !== 'undefined' ? require('./path-manager').default : {};
-
+import config from './config';
 const styles = theme => ({
     mapCompact: {
         margin: '8px 16px',
@@ -24,6 +23,14 @@ const styles = theme => ({
     }
 });
 
+function loadJS(src) {
+    const ref = window.document.getElementsByTagName('script')[0];
+    const script = window.document.createElement('script');
+    script.src = src;
+    script.async = true;
+    ref.parentNode.insertBefore(script, ref);
+}
+
 class Map extends Component {
     constructor(props) {
         super(props);
@@ -31,8 +38,7 @@ class Map extends Component {
         this.download_ref = React.createRef();
         this.upload_ref = React.createRef();
     }
-    componentDidMount() {
-        if (typeof google === 'undefined') return;
+    initMap() {
         if (window.localStorage.center) {
             this.props.setCenter(JSON.parse(window.localStorage.center));
         }
@@ -75,6 +81,7 @@ class Map extends Component {
         google.maps.event.addListener(this.map, 'center_changed', () => {
             this.props.setCenter(this.map.getCenter().toJSON());
         });
+        const PathManager = require('./path-manager').default;
         this.path_manager = new PathManager({map: this.map});
         const path_changed = () => {
             const next_path = this.path_manager.getEncodedSelection();
@@ -126,6 +133,10 @@ class Map extends Component {
         });
         this.componentDidUpdate();
     }
+    componentDidMount() {
+        window.initMap = this.initMap.bind(this);
+        loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.google_api_key);
+    }
     citiesChanges() {
         const a = new Set(this.props.cities.split(/,/));
         const b = new Set(Object.keys(this.cities || {}));
@@ -141,6 +152,7 @@ class Map extends Component {
         }, 500);
     }
     componentDidUpdate(prevProps, prevState) {
+        if (! this.map ) return; // componentDidUpdate can be called prior to initMap
         if (! prevProps) {
             prevProps = {};
         }

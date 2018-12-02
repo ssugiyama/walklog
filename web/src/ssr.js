@@ -42,16 +42,14 @@ const Wrapper = props => (
         <meta name="theme-color" content="#ffffff" />
         <link rel="canonical" href={props.canonical} />
         <title>{props.title}</title>
-        <script src="/register-sw.js"></script>
-        <script src="//www.google.com/jsapi"></script>
-        <script src={ '//maps.google.com/maps/api/js?libraries=geometry,drawing&key=' +  props.google_api_key }></script>
     </head>
     <body style={{ margin: 0 }}>
         <div id="body" dangerouslySetInnerHTML={{ __html: props.markup }}></div>
         <script dangerouslySetInnerHTML={definePreloadedState(props.preloadedState)}>
         </script>
         <script src="./bundle.js"></script>
-        <script type="text/javascript" async src="https://platform.twitter.com/widgets.js"></script>
+        <script type="text/javascript" async defer src="https://platform.twitter.com/widgets.js"></script>
+        <script src="/register-sw.js"></script>
         <style id="jss-server-side">{props.css}</style>
     </body>
 </html>);
