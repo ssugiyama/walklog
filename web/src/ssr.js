@@ -19,7 +19,7 @@ const Users = models.sequelize.models.users;
 const definePreloadedState = state => { return {__html: 'window.__PRELOADED_STATE__ = ' + JSON.stringify(state) } };
 
 const Wrapper = props => (
-    <html lang="en">
+    <html lang="en" style={{ height: '100%' }}>
     <head>
         <meta charset="utf-8" />
         <meta name="description" content={props.description} />
@@ -43,8 +43,8 @@ const Wrapper = props => (
         <link rel="canonical" href={props.canonical} />
         <title>{props.title}</title>
     </head>
-    <body style={{ margin: 0 }}>
-        <div id="body" dangerouslySetInnerHTML={{ __html: props.markup }}></div>
+    <body style={{ margin: 0, height: '100%' }}>
+        <div id="body" dangerouslySetInnerHTML={{ __html: props.markup }} style={{ height: '100%' }}></div>
         <script dangerouslySetInnerHTML={definePreloadedState(props.preloadedState)}>
         </script>
         <script src="./bundle.js"></script>
