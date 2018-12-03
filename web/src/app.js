@@ -63,6 +63,7 @@ const initialState = {
         position: null
     },
     center: { lat: 35.690, lng: 139.7 },
+    zoom: 13,
     panorama: null,
     panorama_index: 0,
     panorama_count: 0,
@@ -186,6 +187,14 @@ const mainReducer = function(state = initialState, action) {
                 window.localStorage.center = JSON.stringify(center);
             }
             return Object.assign({}, state, {center});
+        }
+    case ActionTypes.SET_ZOOM:
+        {
+            const zoom = action.zoom;
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.zoom = zoom;
+            }
+            return Object.assign({}, state, {zoom});
         }
     case ActionTypes.REMOVE_FROM_ACTION_QUEUE:
         {

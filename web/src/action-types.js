@@ -16,6 +16,7 @@ export const OPEN_GEOCODE_MODAL = Symbol('open_geocode_modal');
 export const SET_STREET_VIEW = Symbol('set_street_view');
 export const SET_INFO_WINDOW = Symbol('set_info_window');
 export const SET_CENTER = Symbol('set_center');
+export const SET_ZOOM = Symbol('set_zoom');
 export const REMOVE_FROM_ACTION_QUEUE = Symbol('remove_from_action_queue');
 export const SET_PANORAMA_COUNT = Symbol('set_panorama_count');
 export const SET_PANORAMA_INDEX = Symbol('set_panorama_index');

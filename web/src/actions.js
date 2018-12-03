@@ -141,6 +141,13 @@ export function setCenter(center) {
     };
 }
 
+export function setZoom(zoom) {
+    return {
+        type: ActionTypes.SET_ZOOM,
+        zoom,
+    };
+}
+
 export function removeFromActionQueue() {
     return {
         type: ActionTypes.REMOVE_FROM_ACTION_QUEUE,

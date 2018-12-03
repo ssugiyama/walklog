@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleView } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, setStreetView, removeFromActionQueue, toggleView } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -42,8 +42,11 @@ class Map extends Component {
         if (window.localStorage.center) {
             this.props.setCenter(JSON.parse(window.localStorage.center));
         }
+        if (window.localStorage.zoom) {
+            this.props.setZoom(parseInt(window.localStorage.zoom));
+        }
         const options = {
-            zoom: 13,
+            zoom: this.props.zoom,
             center: this.props.center,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             disableDoubleClickZoom: true,
@@ -80,6 +83,9 @@ class Map extends Component {
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
             this.props.setCenter(this.map.getCenter().toJSON());
+        });
+        google.maps.event.addListener(this.map, 'zoom_changed', () => {
+            this.props.setZoom(this.map.getZoom());
         });
         const PathManager = require('./path-manager').default;
         this.path_manager = new PathManager({map: this.map});
@@ -346,15 +352,15 @@ class Map extends Component {
 
 function mapStateToProps(state) {
     const { filter, latitude, longitude, radius, cities } = state.main.search_form;
-    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, view } = state.main;
+    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view } = state.main;
     return {
         filter, latitude, longitude, radius, cities,
-        selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, view,
+        selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view,
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setStreetView, removeFromActionQueue, toggleView}, dispatch);
+    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setZoom, setStreetView, removeFromActionQueue, toggleView}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Map));
