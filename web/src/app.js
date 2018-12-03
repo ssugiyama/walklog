@@ -1,7 +1,7 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
 import { createBrowserHistory, createMemoryHistory } from 'history';
-import { connectRouter, LOCATION_CHANGE, routerMiddleware } from 'connected-react-router';
+import { connectRouter, LOCATION_CHANGE, routerMiddleware, replace, push } from 'connected-react-router';
 import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
@@ -299,21 +299,29 @@ const dataFetchMiddleware = store => next => {
     return action => {
         // Fetch data on update location
         if (action.type === LOCATION_CHANGE) {
+            const usp = new URLSearchParams(action.payload.location.search);
+            const query = {};
+            for(let p of usp) {
+                query[p[0]] = p[1];
+            }
             if (!isFirstLocation) {
                 const branch = matchRoutes(routes, action.payload.location.pathname);
                 const last_branch = branch[branch.length - 1];
                 const match = last_branch.match;
                 const state = store.getState();
-                const usp = new URLSearchParams(action.payload.location.search);
-                const query = {};
-                for(let p of usp) {
-                    query[p[0]] = p[1];
-                }
                 const qsearch = action.payload.location.search &&  action.payload.location.search.slice(1);
                 const queryChanged = qsearch != state.main.last_query;
                 handleRoute(match.params.id, query, state.main.selected_path, '/', state.main.result.rows, queryChanged, next);
             }
             isFirstLocation = false;
+            if (window && window.localStorage) {
+                if ( query.restore_url) {
+                    // need to be async for proper layout
+                    setTimeout(() => store.dispatch(push(localStorage.last_url || '/')), 0);
+                    return;
+                }
+                localStorage.last_url = action.payload.location.pathname + action.payload.location.search;
+            }
         }
         return next(action);
     };
