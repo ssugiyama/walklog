@@ -316,8 +316,7 @@ const dataFetchMiddleware = store => next => {
             isFirstLocation = false;
             if (window && window.localStorage) {
                 if ( query.restore_url) {
-                    // need to be async for proper layout
-                    setTimeout(() => store.dispatch(push(localStorage.last_url || '/')), 0);
+                    location.href = (localStorage.last_url || '/');
                     return;
                 }
                 localStorage.last_url = action.payload.location.pathname + action.payload.location.search;
