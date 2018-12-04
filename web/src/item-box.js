@@ -59,7 +59,7 @@ class ItemBox extends Component {
     }
     static getDerivedStateFromProps(nextProps, prevState) {
         const data = nextProps.selected_item;
-        if (! data) return;
+        if (! data) return null;
         const href = config.base_url + '/' + data.id;
         const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
         return {

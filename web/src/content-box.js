@@ -26,48 +26,6 @@ class ContentBox extends Component {
     constructor(props) {
         super(props);
     }
-    componentDidUpdate(prevProps, prevState) {
-        if (prevProps.location.search != '?force_fetch=1' && this.props.location.search == '?force_fetch=1') return;
-        const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
-        switch (this.props.filter) {
-        case 'neighborhood':
-            keys.push('radius', 'longitude', 'latitude');
-            break;
-        case 'cities':
-            keys.push('cities');
-            break;
-        case 'crossing':
-        case 'hausdorff':
-        case 'frechet':
-            keys.push('searchPath');
-            break;
-        }
-        const query = {};
-        keys.forEach(key => { query[key] = this.props[key] || ''; });
-        if (keys.every(key => prevProps[key] == this.props[key])) return;
-        if (prevProps.filter != this.props.filter && this.props.filter == 'neighborhood' && this.props.center) {
-            query.latitude = this.props.center.lat;
-            query.longitude = this.props.center.lng;
-        }
-        const usp = new URLSearchParams(query);
-        this.props.push({
-            pathname: '/',
-            search: usp.toString(),
-        });
-        if (this.props.view == 'content') {
-            if ( prevProps.filter != this.props.filter 
-                && ( ['neighborhood', 'cities'].some(item => item == this.props.filter))
-                  || ( ['hausdorff', 'crossing', 'frechet'].some(item => item == this.props.filter) && ! query.searchPath) ) {
-                setTimeout(this.props.toggleView.bind(this), 1000);
-            }           
-        }
-        else {
-            if (! (query.filter == 'cities' && ! query.cities) && 
-                ! ((query.filter == 'crossing' || query.filter == 'hausdorff' || query.filter == 'frechet') && ! query.searchPath)) {
-                setTimeout(this.props.toggleView.bind(this), 1000);
-            }
-        }
-    }
     render() {
         const { classes, view } = this.props;
         return (

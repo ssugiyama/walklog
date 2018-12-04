@@ -1,16 +1,17 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
 import { createBrowserHistory, createMemoryHistory } from 'history';
-import { connectRouter, LOCATION_CHANGE, routerMiddleware, replace, push } from 'connected-react-router';
+import { connectRouter, LOCATION_CHANGE, routerMiddleware, push } from 'connected-react-router';
 import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem,  setAdjacentItemIds, setLastQuery } from './actions';
+import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem,  setAdjacentItemIds, setLastQuery, toggleView } from './actions';
 import SearchBox from './search-box';
 import ItemBox from './item-box';
 import { renderRoutes } from 'react-router-config';
 import { createMuiTheme } from '@material-ui/core/styles';
+
 // const injectTapEventPlugin = require('react-tap-event-plugin');
 // injectTapEventPlugin();
 
@@ -294,6 +295,57 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
     return next(search(search_form, prefix, select, lqs));
 }
 
+const formWatchMiddleware = store => next => action => {
+    if (action.type == ActionTypes.SET_SEARCH_FORM) {
+        const state = store.getState();
+        const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
+        const current_filter = action.payload.filter || state.main.search_form.filter;
+        switch (current_filter) {
+        case 'neighborhood':
+            keys.push('radius', 'longitude', 'latitude');
+            break;
+        case 'cities':
+            keys.push('cities');
+            break;
+        case 'crossing':
+        case 'hausdorff':
+        case 'frechet':
+            keys.push('searchPath');
+            break;
+        }
+        if (!keys.every(key => !action.payload[key] || action.payload[key] == state.main.search_form[key])) {
+            const q = Object.assign({}, state.main.search_form, action.payload);
+            const query = {};
+            keys.forEach(key => { query[key] = q[key] || ''; });
+            if (action.payload.filter && current_filter == 'neighborhood' && state.main.center) {
+                query.latitude = state.main.center.lat;
+                query.longitude = state.main.center.lng;
+            }
+            const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
+            store.dispatch(push({
+                pathname: '/',
+                search: usp,
+            }));
+            if (typeof window !== 'undefined') { // client side only
+                if (state.main.view == 'content') {
+                    if ( action.payload.filter
+                        && ( ['neighborhood', 'cities'].includes(current_filter))
+                        || ( ['hausdorff', 'crossing', 'frechet'].includes(current_filter) && ! query.searchPath) ) {
+                        next(toggleView());
+                    }
+                }
+                else {
+                    if ( !action.payload.filter && ! (current_filter == 'cities' && ! query.cities) && 
+                        ! (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && ! query.searchPath)) {
+                        next(toggleView());
+                    }
+                }
+            }
+        }
+    }
+    return next(action);
+};
+
 let isFirstLocation = true;
 const dataFetchMiddleware = store => next => {
     return action => {
@@ -327,6 +379,7 @@ const dataFetchMiddleware = store => next => {
 };
 
 const middlewares = [
+    formWatchMiddleware,
     routerMiddleware(history),
     dataFetchMiddleware,
     thunkMiddleware,
