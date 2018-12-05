@@ -108,6 +108,7 @@ class PanoramaBox extends Component {
         if (nextProps.panorama_index != this.props.panorama_index) return true;
         if (nextProps.panorama_count != this.props.panorama_count) return true;
         if (nextProps.overlay != this.props.overlay) return true;
+        if (nextProps.google_maps_api_loaded != this.props.google_maps_api_loaded) return true;
         return false;
     }
     componentDidUpdate(prevProps) {

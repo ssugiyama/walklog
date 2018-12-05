@@ -75,7 +75,7 @@ class ElevationBox extends Component {
         }
     }
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.highlighted_path !== this.props.highlighted_path) {
+        if (nextProps.highlighted_path !== this.props.highlighted_path || nextProps.google_maps_api_loaded !== this.props.google_maps_api_loaded) {
             return true;
         }
         else {
