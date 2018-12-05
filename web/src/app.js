@@ -74,6 +74,7 @@ const initialState = {
     current_user: null,
     external_links: [],
     last_query: null,
+    google_maps_api_loaded: false,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -248,6 +249,11 @@ const mainReducer = function(state = initialState, action) {
         {
             const {next_id, prev_id} = action;
             return Object.assign({}, state, {next_id, prev_id});
+        }
+    case ActionTypes.SET_GOOGLE_MAPS_API_LOADED:
+        {
+            const google_maps_api_loaded = true;
+            return Object.assign({}, state, {google_maps_api_loaded});
         }
     default:
         return state;

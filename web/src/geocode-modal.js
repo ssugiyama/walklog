@@ -33,9 +33,10 @@ class GeocodeModal extends Component {
             initialized: false
         });
     }
-    componentDidMount() {
-        if (typeof google === 'undefined') return;
-        this.geocoder = new google.maps.Geocoder();
+    componentDidUpdate(prevProps, prevSate) {
+        if ( this.props.google_maps_api_loaded && !this.geocoder) {
+            this.geocoder = new google.maps.Geocoder();
+        }
     }
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.open_geocode_modal&& !prevState.initialized) {
@@ -65,7 +66,11 @@ class GeocodeModal extends Component {
 }
 
 function mapStateToProps(state) {
-    return { open_geocode_modal: state.main.open_geocode_modal };
+    const {open_geocode_modal, google_maps_api_loaded} = state.main;
+    return { 
+        open_geocode_modal, 
+        google_maps_api_loaded, 
+    };
 }
 
 function mapDispatchToProps(dispatch) {

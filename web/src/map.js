@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, setStreetView, removeFromActionQueue, toggleView } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, setStreetView, removeFromActionQueue, toggleView, setGoogleMapsAPILoaded } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -39,6 +39,7 @@ class Map extends Component {
         this.upload_ref = React.createRef();
     }
     initMap() {
+        this.props.setGoogleMapsAPILoaded();
         if (window.localStorage.center) {
             this.props.setCenter(JSON.parse(window.localStorage.center));
         }
@@ -360,7 +361,11 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, setSelectedPath, setCenter, setZoom, setStreetView, removeFromActionQueue, toggleView}, dispatch);
+    return bindActionCreators({
+        setSearchForm, setSelectedPath, setCenter, 
+        setZoom, setStreetView, removeFromActionQueue, 
+        toggleView, setGoogleMapsAPILoaded,
+    }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Map));

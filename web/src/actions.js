@@ -228,3 +228,9 @@ export function setAdjacentItemIds(next_id, prev_id) {
         next_id, prev_id
     };
 }
+
+export function setGoogleMapsAPILoaded() {
+    return {
+        type: ActionTypes.SET_GOOGLE_MAPS_API_LOADED,
+    };
+}
