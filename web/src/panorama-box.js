@@ -121,7 +121,7 @@ class PanoramaBox extends Component {
                 enableCloseButton: false,
             });
         }
-        if (this.props.highlighted_path != prevProps.highlighted_path) {
+        if ( !this.panoramaPointsAndHeadings || this.props.highlighted_path != prevProps.highlighted_path) {
             this.initPanorama(this.props.highlighted_path);
         }
         this.showPanorama();
