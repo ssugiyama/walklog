@@ -82,7 +82,7 @@ class ElevationBox extends Component {
             return false;
         }
     }
-    componentDidUpdate(prevProps, prevState) {
+    updateChart() {
         if ( !this.props.google_maps_api_loaded ) return;
         if (! this.elevator ) {
             this.elevator = new google.maps.ElevationService();
@@ -92,6 +92,12 @@ class ElevationBox extends Component {
             this.chart = null;
         }
         this.requestElevation(this.props.highlighted_path);
+    }
+    componentDidMount() {
+        this.updateChart();
+    }
+    componentDidUpdate(prevProps) {
+        this.updateChart();
     }
     render() {
         if (this.props.highlighted_path)

@@ -72,7 +72,7 @@ class PanoramaBox extends Component {
         return pph;
 
     }
-    initPanorama(highlighted_path) {
+    updatePath(highlighted_path) {
         if (! highlighted_path) {
             if (this.props.panorama) {
                 this.props.panorama.setVisible(false);
@@ -111,7 +111,7 @@ class PanoramaBox extends Component {
         if (nextProps.google_maps_api_loaded != this.props.google_maps_api_loaded) return true;
         return false;
     }
-    componentDidUpdate(prevProps) {
+    updatePanorama(pathUpdated) {
         if ( !this.props.google_maps_api_loaded ) return;
         if ( !this.panorama ) {
             this.streetViewService = new google.maps.StreetViewService();
@@ -121,8 +121,8 @@ class PanoramaBox extends Component {
                 enableCloseButton: false,
             });
         }
-        if ( !this.panoramaPointsAndHeadings || this.props.highlighted_path != prevProps.highlighted_path) {
-            this.initPanorama(this.props.highlighted_path);
+        if ( pathUpdated ) {
+            this.updatePath(this.props.highlighted_path);
         }
         this.showPanorama();
         if (this.props.overlay) {
@@ -134,6 +134,13 @@ class PanoramaBox extends Component {
             if (this.props.view == 'map') this.props.toggleView();
             this.props.setStreetView(this.panorama);
         }
+    }
+    componentDidMount() {
+        this.updatePanorama(true);
+    }
+    componentDidUpdate(prevProps) {
+        const pathUpdated = !prevProps.google_maps_api_loaded || prevProps.highlighted_path != this.props.highlighted_path;
+        this.updatePanorama(pathUpdated);
     }
     componentWillUnmount() {
         this.props.setStreetView(null);
