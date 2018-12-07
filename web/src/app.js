@@ -57,6 +57,7 @@ const initialState = {
     open_walk_editor: false,
     open_snackbar: false,
     open_geocode_modal: false,
+    map: null,
     street_view: null,
     info_window: {
         open: false,
@@ -65,7 +66,6 @@ const initialState = {
     },
     center: { lat: 35.690, lng: 139.7 },
     zoom: 13,
-    panorama: null,
     panorama_index: 0,
     panorama_count: 0,
     overlay: false,
@@ -74,7 +74,6 @@ const initialState = {
     current_user: null,
     external_links: [],
     last_query: null,
-    google_maps_api_loaded: false,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -172,11 +171,6 @@ const mainReducer = function(state = initialState, action) {
         {
             return Object.assign({}, state, {editing_path: true});
         }
-    case ActionTypes.SET_STREET_VIEW:
-        {
-            const panorama = action.panorama;
-            return Object.assign({}, state, {panorama});
-        }
     case ActionTypes.SET_INFO_WINDOW:
         {
             const info_window = action.payload;
@@ -218,7 +212,14 @@ const mainReducer = function(state = initialState, action) {
     case ActionTypes.SET_OVERLAY:
         {
             const overlay = action.overlay;
-            return Object.assign({}, state, {overlay});
+            const newProps = {overlay};
+            if (overlay && state.view == 'content') {
+                newProps.view = 'map';
+            }
+            else if (!overlay && state.view == 'map') {
+                newProps.view = 'content';
+            }
+            return Object.assign({}, state, newProps);
         }
     case ActionTypes.SET_CURRENT_USER:
         {
@@ -250,11 +251,11 @@ const mainReducer = function(state = initialState, action) {
             const {next_id, prev_id} = action;
             return Object.assign({}, state, {next_id, prev_id});
         }
-    case ActionTypes.SET_GOOGLE_MAPS_API_LOADED:
-        {
-            const google_maps_api_loaded = true;
-            return Object.assign({}, state, {google_maps_api_loaded});
-        }
+    case ActionTypes.SET_MAP:
+    {
+        const map = action.map;
+        return Object.assign({}, state, {map});
+    }
     default:
         return state;
     }

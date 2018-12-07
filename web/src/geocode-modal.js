@@ -34,7 +34,7 @@ class GeocodeModal extends Component {
         });
     }
     componentDidUpdate(prevProps, prevSate) {
-        if ( this.props.google_maps_api_loaded && !this.geocoder) {
+        if ( this.props.map && !this.geocoder) {
             this.geocoder = new google.maps.Geocoder();
         }
     }
@@ -66,10 +66,10 @@ class GeocodeModal extends Component {
 }
 
 function mapStateToProps(state) {
-    const {open_geocode_modal, google_maps_api_loaded} = state.main;
+    const {open_geocode_modal, map} = state.main;
     return { 
         open_geocode_modal, 
-        google_maps_api_loaded, 
+        map, 
     };
 }
 

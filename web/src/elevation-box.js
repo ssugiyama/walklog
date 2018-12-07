@@ -75,7 +75,7 @@ class ElevationBox extends Component {
         }
     }
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.highlighted_path !== this.props.highlighted_path || nextProps.google_maps_api_loaded !== this.props.google_maps_api_loaded) {
+        if (nextProps.highlighted_path !== this.props.highlighted_path || nextProps.map !== this.props.map) {
             return true;
         }
         else {
@@ -83,7 +83,7 @@ class ElevationBox extends Component {
         }
     }
     updateChart() {
-        if ( !this.props.google_maps_api_loaded ) return;
+        if ( !this.props.map ) return;
         if (! this.elevator ) {
             this.elevator = new google.maps.ElevationService();
         }
@@ -110,9 +110,9 @@ class ElevationBox extends Component {
 }
 
 function mapStateToProps(state) {
-    const { highlighted_path, google_maps_api_loaded } = state.main;
+    const { highlighted_path, map } = state.main;
     return {
-        highlighted_path, google_maps_api_loaded
+        highlighted_path, map
     };
 }
 

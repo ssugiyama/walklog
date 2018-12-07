@@ -229,8 +229,9 @@ export function setAdjacentItemIds(next_id, prev_id) {
     };
 }
 
-export function setGoogleMapsAPILoaded() {
+export function setMap(map) {
     return {
-        type: ActionTypes.SET_GOOGLE_MAPS_API_LOADED,
+        type: ActionTypes.SET_MAP,
+        map
     };
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setStreetView, toggleView, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
+import { toggleView, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
 import IconButton from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from '@material-ui/core/Typography';
@@ -74,10 +74,11 @@ class PanoramaBox extends Component {
     }
     updatePath(highlighted_path) {
         if (! highlighted_path) {
-            if (this.props.panorama) {
-                this.props.panorama.setVisible(false);
+            const panorama = this.props.overlay ? this.props.map.getStreetView() : this.panorama;
+            if (panorama) {
+                panorama.setVisible(false);
             }
-            this.props.setStreetView(null);
+            this.setStreetView(null);
             return;
         }
         const path = google.maps.geometry.encoding.decodePath(highlighted_path);
@@ -91,28 +92,29 @@ class PanoramaBox extends Component {
         const item = this.panoramaPointsAndHeadings[index];
         const pt = item[0];
         const heading = item[1];
+        const panorama = this.props.overlay ? this.props.map.getStreetView() : this.panorama;
         this.streetViewService.getPanoramaByLocation(pt, 50, (data, status) => {
             if (status == google.maps.StreetViewStatus.OK) {
-                this.props.panorama.setPano(data.location.pano);
-                this.props.panorama.setPov({heading: heading, zoom: 1, pitch: 0});
-                this.props.panorama.setVisible(true);
+                panorama.setPano(data.location.pano);
+                panorama.setPov({heading: heading, zoom: 1, pitch: 0});
+                panorama.setVisible(true);
             }
             else {
-                this.props.panorama.setVisible(false);
+                panorama.setVisible(false);
             }
         });
-        google.maps.event.trigger(this.props.panorama, 'resize');
+        google.maps.event.trigger(panorama, 'resize');
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.highlighted_path != this.props.highlighted_path) return true;
         if (nextProps.panorama_index != this.props.panorama_index) return true;
         if (nextProps.panorama_count != this.props.panorama_count) return true;
         if (nextProps.overlay != this.props.overlay) return true;
-        if (nextProps.google_maps_api_loaded != this.props.google_maps_api_loaded) return true;
+        if (nextProps.map != this.props.map) return true;
         return false;
     }
     updatePanorama(pathUpdated) {
-        if ( !this.props.google_maps_api_loaded ) return;
+        if ( !this.props.map ) return;
         if ( !this.panorama ) {
             this.streetViewService = new google.maps.StreetViewService();
             this.panorama = new google.maps.StreetViewPanorama(this.body_ref.current, {
@@ -124,26 +126,25 @@ class PanoramaBox extends Component {
         if ( pathUpdated ) {
             this.updatePath(this.props.highlighted_path);
         }
+        if (this.props.overlay){
+            this.setStreetView(null);
+        } else {
+            this.setStreetView(this.panorama);
+        }
         this.showPanorama();
-        if (this.props.overlay) {
-            if (this.props.view == 'content') this.props.toggleView();
-            this.props.setStreetView(null);
-            //setTimeout(() => this.props.setStreetView(null), 2000);
-        }
-        else {
-            if (this.props.view == 'map') this.props.toggleView();
-            this.props.setStreetView(this.panorama);
-        }
     }
     componentDidMount() {
         this.updatePanorama(true);
     }
     componentDidUpdate(prevProps) {
-        const pathUpdated = !prevProps.google_maps_api_loaded || prevProps.highlighted_path != this.props.highlighted_path;
+        const pathUpdated = !prevProps.map || prevProps.highlighted_path != this.props.highlighted_path;
         this.updatePanorama(pathUpdated);
     }
     componentWillUnmount() {
-        this.props.setStreetView(null);
+        this.setStreetView(null);
+    }
+    setStreetView(panorama) {
+        this.props.map.setStreetView(panorama);
     }
     render() {
         return (
@@ -170,14 +171,14 @@ class PanoramaBox extends Component {
 }
 
 function mapStateToProps(state) {
-    const { view, highlighted_path, panorama, panorama_index, panorama_count, overlay, google_maps_api_loaded } = state.main;
+    const { view, highlighted_path, panorama_index, panorama_count, overlay, map } = state.main;
     return {
-        view, highlighted_path, panorama, panorama_index, panorama_count, overlay, google_maps_api_loaded
+        view, highlighted_path,  panorama_index, panorama_count, overlay, map
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setStreetView, toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
+    return bindActionCreators({ toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PanoramaBox);

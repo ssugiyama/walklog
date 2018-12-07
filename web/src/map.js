@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, setStreetView, removeFromActionQueue, toggleView, setGoogleMapsAPILoaded } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -39,7 +39,6 @@ class Map extends Component {
         this.upload_ref = React.createRef();
     }
     initMap() {
-        this.props.setGoogleMapsAPILoaded();
         if (window.localStorage.center) {
             this.props.setCenter(JSON.parse(window.localStorage.center));
         }
@@ -138,6 +137,7 @@ class Map extends Component {
         this.upload_ref.current.addEventListener('change', e => {
             this.processUpload(e);
         });
+        this.props.setMap(this.map);
         this.componentDidUpdate();
     }
     componentDidMount() {
@@ -164,12 +164,6 @@ class Map extends Component {
             prevProps = {};
         }
         this.paths_changed = (prevProps.paths != this.props.paths);
-        if (prevProps.panorama != this.map.getStreetView()) {
-            this.map.setStreetView(this.props.panorama);
-            if (this.props.panorama === null) {
-                this.props.setStreetView(this.map.getStreetView());
-            }
-        }
         if (prevProps.info_window != this.props.info_window) {
             if (this.props.info_window.open) {
                 this.infoWindow.open(this.map);
@@ -353,18 +347,18 @@ class Map extends Component {
 
 function mapStateToProps(state) {
     const { filter, latitude, longitude, radius, cities } = state.main.search_form;
-    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view } = state.main;
+    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view, overlay } = state.main;
     return {
         filter, latitude, longitude, radius, cities,
-        selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view,
+        selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view, overlay,
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         setSearchForm, setSelectedPath, setCenter, 
-        setZoom, setStreetView, removeFromActionQueue, 
-        toggleView, setGoogleMapsAPILoaded,
+        setZoom, removeFromActionQueue, 
+        toggleView, setMap,
     }, dispatch);
 }
 
