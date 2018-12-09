@@ -320,7 +320,7 @@ const formWatchMiddleware = store => next => action => {
             keys.push('searchPath');
             break;
         }
-        if (!keys.every(key => !action.payload[key] || action.payload[key] == state.main.search_form[key])) {
+        if (!keys.every(key => action.payload[key] === undefined || action.payload[key] === state.main.search_form[key])) {
             const q = Object.assign({}, state.main.search_form, action.payload);
             const query = {};
             keys.forEach(key => { query[key] = q[key] || ''; });
