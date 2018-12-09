@@ -306,7 +306,7 @@ const formWatchMiddleware = store => next => action => {
     if (action.type == ActionTypes.SET_SEARCH_FORM) {
         const state = store.getState();
         const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
-        const current_filter = action.payload.filter || state.main.search_form.filter;
+        const current_filter = action.payload.filter !== undefined ? action.payload.filter : state.main.search_form.filter;
         switch (current_filter) {
         case 'neighborhood':
             keys.push('radius', 'longitude', 'latitude');
