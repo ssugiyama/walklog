@@ -139,7 +139,7 @@ class NavBar extends Component {
                     open={Boolean(this.state.pathAnchorEl)}
                     onClose={this.handleMenuClose('pathAnchorEl')}
                 >
-                    <EndMenuItem key="edit" onClick={() => this.props.setEditingPath() } disabled={! selected_path}>edit</EndMenuItem>,
+                    <EndMenuItem key="edit" onClick={() => this.props.setEditingPath(true) } disabled={! selected_path}>edit</EndMenuItem>,
                     <EndMenuItem key="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! selected_path}>delete</EndMenuItem>,
                     <EndMenuItem key="clear" onClick={() => this.props.clearPaths() }>clear</EndMenuItem>,
                     <EndMenuItem key="download" onClick={() => this.props.downloadPath() } disabled={! selected_path}>download</EndMenuItem>,

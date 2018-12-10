@@ -163,7 +163,8 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SET_EDITING_PATH:
         {
-            return Object.assign({}, state, {editing_path: true});
+            const editing_path = action.editing_path;
+            return Object.assign({}, state, {editing_path});
         }
     case ActionTypes.SET_INFO_WINDOW:
         {

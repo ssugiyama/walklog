@@ -110,7 +110,7 @@ class BottomBar extends Component {
                 <div className={classes.bottomBarGroup}>
                     <Typography variant="caption" color="inherit">Path</Typography>
                     <Tooltip title="edit" position="top-center">
-                        <IconButton onClick={() => this.props.setEditingPath() } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
+                        <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
                     </Tooltip>
                     <Tooltip title="delete" position="top-center">
                         <IconButton onClick={() => this.props.deleteSelectedPath() }  disabled={! this.props.selected_path}><ActionDelete /></IconButton>

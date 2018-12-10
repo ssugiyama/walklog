@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap, setEditingPath } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -97,7 +97,11 @@ class Map extends Component {
         };
         google.maps.event.addListener(this.path_manager, 'length_changed', path_changed);
         google.maps.event.addListener(this.path_manager, 'selection_changed', path_changed);
-
+        google.maps.event.addListener(this.path_manager, 'editable_changed',  () => {
+            if (!this.path_manager.editable) {
+                this.props.setEditingPath(false);
+            }
+        });
         this.distanceWidget = new google.maps.Circle({
             strokeWeight: 2,
             editable: true,
@@ -358,7 +362,7 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         setSearchForm, setSelectedPath, setCenter, 
         setZoom, removeFromActionQueue, 
-        toggleView, setMap,
+        toggleView, setMap, setEditingPath
     }, dispatch);
 }
 

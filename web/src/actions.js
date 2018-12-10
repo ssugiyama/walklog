@@ -99,9 +99,10 @@ export function clearPaths() {
     };
 }
 
-export function setEditingPath() {
+export function setEditingPath(editing_path) {
     return {
-        type: ActionTypes.SET_EDITING_PATH
+        type: ActionTypes.SET_EDITING_PATH,
+        editing_path,
     };
 }
 
