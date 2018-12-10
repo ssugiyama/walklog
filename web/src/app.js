@@ -80,12 +80,6 @@ const mainReducer = function(state = initialState, action) {
     switch (action.type) {
     case ActionTypes.SET_SEARCH_FORM:
         {
-            if (action.payload.filter == 'hausdorff' || action.payload.filter == 'frechet') {
-                action.payload.order = 'nearest_first';
-            }
-            else if (state.search_form.order == 'nearest_first') {
-                action.payload.order = 'newest_first';
-            }
             const search_form = Object.assign({}, state.search_form, action.payload);
             return Object.assign({}, state, {search_form});
         }
@@ -327,6 +321,10 @@ const formWatchMiddleware = store => next => action => {
             if (action.payload.filter && current_filter == 'neighborhood' && state.main.center) {
                 query.latitude = state.main.center.lat;
                 query.longitude = state.main.center.lng;
+            } else if (action.payload.filter === 'frechet' ||  action.payload.filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
+                query.order = 'nearest_first';
+            } else if (action.payload.filter !== 'frechet' &&  action.payload.filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
+                query.order = 'newest_first';
             }
             const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
             store.dispatch(push({
