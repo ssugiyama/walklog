@@ -11,6 +11,8 @@ import SearchBox from './search-box';
 import ItemBox from './item-box';
 import { renderRoutes } from 'react-router-config';
 import { createMuiTheme } from '@material-ui/core/styles';
+import * as colors from '@material-ui/core/colors';
+import config from './config';
 
 // const injectTapEventPlugin = require('react-tap-event-plugin');
 // injectTapEventPlugin();
@@ -436,10 +438,14 @@ export const routes = [
             }
         ]
     }
-
 ];
 
 export const theme = createMuiTheme({
+    palette: {
+        primary: colors[config.theme_primary || 'indigo'],
+        secondary: colors[config.theme_secondary || 'pink'],
+        type: config.theme_type || 'light',
+    },
     typography: {
         useNextVariants: true,
     }

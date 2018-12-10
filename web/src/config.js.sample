@@ -10,4 +10,7 @@ export default {
     'twitter_consumer_secret': '',
     'twitter_allowed_users': null,
     'external_links' : [],
+    'theme_primary' : 'indigo',
+    'theme_secondary' : 'pink',
+    'theme_type' : 'light',
 };

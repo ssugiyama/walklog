@@ -117,8 +117,8 @@ class ItemBox extends Component {
                             <Typography color="secondary" variant="subtitle1">Comment</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
-                                <div className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
-                                </div>
+                                <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
+                                </Typography>
                             </ExpansionPanelDetails>
                         </ExpansionPanel> 
                     }
