@@ -4,8 +4,9 @@ import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'connected-react-router';
 import { renderRoutes } from 'react-router-config';
 import { configureStore, routes, history, theme } from './app';
-import { MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider, createGenerateClassName } from '@material-ui/core/styles';
 import BodyContainer from './body';
+import JssProvider from 'react-jss/lib/JssProvider';
 
 const store = configureStore( window.__PRELOADED_STATE__);
 
@@ -17,17 +18,19 @@ class ClientRoot extends React.Component {
             jssStyles.parentNode.removeChild(jssStyles);
         }
     }
-  
     render() {
         return <ConnectedRouter history={history}><BodyContainer /></ConnectedRouter>;
     }
 }
 
+const generateClassName = createGenerateClassName();
 ReactDOM.hydrate(
     <Provider store={store}>
-        <MuiThemeProvider theme={theme}>
-            <ClientRoot />
-        </MuiThemeProvider>
+        <JssProvider generateClassName={generateClassName}>
+            <MuiThemeProvider theme={theme}>
+                <ClientRoot />
+            </MuiThemeProvider>
+        </JssProvider>
     </Provider>,
     document.querySelector('#body')
 );
