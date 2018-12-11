@@ -80,7 +80,7 @@ class BottomBar extends Component {
                 </div>
             ) : this.props.filter == 'neighborhood' ? (
                 <div className={classes.bottomBarGroup}>
-                    <Typography variant="caption" color="inherit">Radius</Typography>
+                    <Typography variant="caption">Radius</Typography>
                     <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
                         <MenuItem value={1000}>1km</MenuItem>
                         <MenuItem value={500}>500m</MenuItem>
@@ -97,18 +97,18 @@ class BottomBar extends Component {
                 </div>            
             ) : this.props.filter == 'cities' ? (
                 <div className={classes.bottomBarGroup}>
-                    <Typography variant="caption" color="inherit">Cities</Typography>
+                    <Typography variant="caption">Cities</Typography>
                     <Tooltip title="clear" position="top-center">
                         <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
                     </Tooltip>
                     <Tooltip title="cancel" position="top-center">
                         <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
                     </Tooltip>
-                </div>            
+                </div>
             )            
             : (
                 <div className={classes.bottomBarGroup}>
-                    <Typography variant="caption" color="inherit">Path</Typography>
+                    <Typography variant="caption">Path</Typography>
                     <Tooltip title="edit" position="top-center">
                         <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
                     </Tooltip>
@@ -124,7 +124,7 @@ class BottomBar extends Component {
                     <Tooltip title="upload" position="top-center">
                         <IconButton onClick={() => this.props.uploadPath() }><FileUpload /></IconButton>
                     </Tooltip>
-                    <span>{`${this.state.length.toFixed(1)}km`}</span>
+                    <Typography variant="body1" style={{ display: 'inline' }}>{`${this.state.length.toFixed(1)}km`}</Typography>
                 </div>            
             ) }
             </Toolbar>
