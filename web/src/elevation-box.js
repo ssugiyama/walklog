@@ -62,8 +62,7 @@ class ElevationBox extends Component {
                     },
                     scales: {
                         yAxes: [{
-                            color: theme.palette.divider,
-                            scaleLabel: {
+                            ticks: {
                                 fontColor: theme.palette.text.primary,
                             },
                             gridLines: {
@@ -72,7 +71,7 @@ class ElevationBox extends Component {
                         }],
                         xAxes: [{
                             gridLines: {
-                                color: theme.palette.divider,
+                                display: false,
                             }
                         }]
                     }
