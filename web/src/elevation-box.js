@@ -3,6 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import Typography from '@material-ui/core/Typography';
+import {  theme } from './app';
 
 const Chart = typeof window !== 'undefined' ? require('chart.js').Chart : {};
 
@@ -58,7 +59,24 @@ class ElevationBox extends Component {
                         intersect: false,
                         mode: 'index',
                         onHover: this.handleHover.bind(this)
+                    },
+                    scales: {
+                        yAxes: [{
+                            color: theme.palette.divider,
+                            scaleLabel: {
+                                fontColor: theme.palette.text,
+                            },
+                            gridLines: {
+                                color: theme.palette.divider,
+                            }
+                        }],
+                        xAxes: [{
+                            gridLines: {
+                                color: theme.palette.divider,
+                            }
+                        }]
                     }
+                
                 }
             });
         }
