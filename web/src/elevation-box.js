@@ -64,7 +64,7 @@ class ElevationBox extends Component {
                         yAxes: [{
                             color: theme.palette.divider,
                             scaleLabel: {
-                                fontColor: theme.palette.text,
+                                fontColor: theme.palette.text.primary,
                             },
                             gridLines: {
                                 color: theme.palette.divider,
