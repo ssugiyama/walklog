@@ -39,7 +39,10 @@ const styles = {
         fontSize: '85%',
         lineHeight: '1.65',
         letterSpacing: '.1em',
-        textAlign: 'justify'
+        textAlign: 'justify',
+        '& a': {
+            color: 'inherit'
+        }
     },
     itemBoxControl: {
         width: '100%',
