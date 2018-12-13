@@ -23,7 +23,11 @@ import Button from '@material-ui/core/Button';
 import TweetIcon from './tweet-icon';
 import config from './config';
 
-const styles = {
+const styles = theme => ({
+    ExpansionPanelSummary: {
+        color: theme.palette.text.primary,
+        backgroundColor: theme.palette.primary.main,
+    },
     ExpansionPanelDetails: {
         padding: '8px 12px 12px',
         flexDirection: 'column',
@@ -49,7 +53,7 @@ const styles = {
         textAlign: 'center',
         padding: '8px 12px 12px'
     },
-};
+});
 
 class ItemBox extends Component {
     constructor(props) {
@@ -109,15 +113,15 @@ class ItemBox extends Component {
                             data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
                         }
                         <IconButton component="a" href={this.state.tweet_url}><TweetIcon /></IconButton>
-                        <Typography variant="h6" className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
+                        <Typography variant="h6" color={title ? 'default' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
                         {
                             data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
                         }
                     </Paper>
                     { data && 
                         <ExpansionPanel defaultExpanded={true}>
-                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography color="secondary" variant="subtitle1">Comment</Typography>
+                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} className={classes.ExpansionPanelSummary}>
+                            <Typography variant="subtitle1">Comment</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
@@ -127,8 +131,8 @@ class ItemBox extends Component {
                     }
                     { data && 
                         <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography color="secondary" variant="subtitle1">Elevation</Typography>
+                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} className={classes.ExpansionPanelSummary}>
+                            <Typography variant="subtitle1">Elevation</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <ElevationBox />
@@ -137,8 +141,8 @@ class ItemBox extends Component {
                     }
                     { data && 
                         <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography color="secondary" variant="subtitle1">StreetView</Typography>
+                            <ExpansionPanelSummary  expandIcon={<ExpandMoreIcon />} className={classes.ExpansionPanelSummary}>
+                            <Typography variant="subtitle1">StreetView</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
                                 <PanoramaBox />

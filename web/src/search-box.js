@@ -73,7 +73,7 @@ class SearchBox extends Component {
             <Paper className={classes.root}>
                 <SearchFormContainer />
                 <div>
-                    <Typography variant="body1" style={{ display: 'inline-block' }}>
+                    <Typography variant="body1" color={this.props.error ? 'error' : 'default'} style={{ display: 'inline-block' }}>
                         {
                             ( () => {
                                 if (this.props.error) {
@@ -97,7 +97,7 @@ class SearchBox extends Component {
                             })()
                         }
                     </Typography> :
-            { this.props.rows.length > 0 && (<Button onClick={ this.handleShowAll.bind(this) }>show all paths</Button>) }
+            { this.props.rows.length > 0 && (<Button onClick={ this.handleShowAll.bind(this) } color="secondary">show all paths</Button>) }
             { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined &&
                 <FormControlLabel
                     control={<Switch
@@ -116,7 +116,7 @@ class SearchBox extends Component {
                         }
                     </TableBody>
                 </Table>
-                { this.props.offset > 0 && <Button style={{width: '100%'}} color="primary" component={Link} to={moreUrl}>more</Button>  }
+                { this.props.offset > 0 && <Button style={{width: '100%'}} color="secondary" component={Link} to={moreUrl}>more</Button>  }
             </Paper>
         );
     }
