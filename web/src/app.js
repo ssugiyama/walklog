@@ -116,8 +116,7 @@ const mainReducer = function(state = initialState, action) {
             if (typeof window !== 'undefined' && window.localStorage) {
                 window.localStorage.selected_path = selected_path;
             }
-            const search_form = Object.assign({}, state.search_form, {searchPath: selected_path });
-            return Object.assign({}, state, {selected_path, search_form, editing_path: false});
+            return Object.assign({}, state, {selected_path, editing_path: false});
         }
     case ActionTypes.TOGGLE_VIEW:
         {
@@ -300,57 +299,64 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
 }
 
 const formWatchMiddleware = store => next => action => {
+    let payload;
     if (action.type == ActionTypes.SET_SEARCH_FORM) {
-        const state = store.getState();
-        const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
-        const current_filter = action.payload.filter !== undefined ? action.payload.filter : state.main.search_form.filter;
-        switch (current_filter) {
-        case 'neighborhood':
-            keys.push('radius', 'longitude', 'latitude');
-            break;
-        case 'cities':
-            keys.push('cities');
-            break;
-        case 'crossing':
-        case 'hausdorff':
-        case 'frechet':
-            keys.push('searchPath');
-            break;
+        payload = action.payload;
+    } else if (action.type == ActionTypes.SET_SELECTED_PATH) {
+        payload = { searchPath: action.path };
+    } else {
+        return next(action);
+    }
+    const state = store.getState();
+    const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
+    const current_filter = payload.filter !== undefined ? payload.filter : state.main.search_form.filter;
+    switch (current_filter) {
+    case 'neighborhood':
+        keys.push('radius', 'longitude', 'latitude');
+        break;
+    case 'cities':
+        keys.push('cities');
+        break;
+    case 'crossing':
+    case 'hausdorff':
+    case 'frechet':
+        keys.push('searchPath');
+        break;
+    }
+    if (!keys.every(key => payload[key] === undefined || payload[key] === state.main.search_form[key])) {
+        const q = Object.assign({}, state.main.search_form, payload);
+        const query = {};
+        keys.forEach(key => { query[key] = q[key] || ''; });
+        if (payload.filter && current_filter == 'neighborhood' && state.main.center) {
+            query.latitude = state.main.center.lat;
+            query.longitude = state.main.center.lng;
+        } else if (payload.filter === 'frechet' ||  payload.filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
+            query.order = 'nearest_first';
+        } else if (payload.filter !== 'frechet' &&  payload.filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
+            query.order = 'newest_first';
         }
-        if (!keys.every(key => action.payload[key] === undefined || action.payload[key] === state.main.search_form[key])) {
-            const q = Object.assign({}, state.main.search_form, action.payload);
-            const query = {};
-            keys.forEach(key => { query[key] = q[key] || ''; });
-            if (action.payload.filter && current_filter == 'neighborhood' && state.main.center) {
-                query.latitude = state.main.center.lat;
-                query.longitude = state.main.center.lng;
-            } else if (action.payload.filter === 'frechet' ||  action.payload.filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
-                query.order = 'nearest_first';
-            } else if (action.payload.filter !== 'frechet' &&  action.payload.filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
-                query.order = 'newest_first';
-            }
-            const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
-            store.dispatch(push({
-                pathname: '/',
-                search: usp,
-            }));
-            if (typeof window !== 'undefined') { // client side only
-                if (state.main.view == 'content') {
-                    if ( action.payload.filter
-                        && ( ['neighborhood', 'cities'].includes(current_filter))
-                        || ( ['hausdorff', 'crossing', 'frechet'].includes(current_filter) && ! query.searchPath) ) {
-                        next(toggleView());
-                    }
+        const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
+        store.dispatch(push({
+            pathname: '/',
+            search: usp,
+        }));
+        if (typeof window !== 'undefined') { // client side only
+            if (state.main.view == 'content') {
+                if ( payload.filter
+                    && ( ['neighborhood', 'cities'].includes(current_filter))
+                    || ( ['hausdorff', 'crossing', 'frechet'].includes(current_filter) && ! query.searchPath) ) {
+                    next(toggleView());
                 }
-                else {
-                    if ( !action.payload.filter && ! (current_filter == 'cities' && ! query.cities) && 
-                        ! (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && ! query.searchPath)) {
-                        next(toggleView());
-                    }
+            }
+            else {
+                if ( !payload.filter && ! (current_filter == 'cities' && ! query.cities) && 
+                    ! (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && ! query.searchPath)) {
+                    next(toggleView());
                 }
             }
         }
     }
+    
     return next(action);
 };
 
