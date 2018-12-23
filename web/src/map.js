@@ -11,7 +11,7 @@ import config from './config';
 const styles = theme => ({
     mapCompact: {
         margin: '8px 16px',
-        height: '35vh',
+        height: '40vh',
         marginLeft: 'env(safe-area-inset-left)',
         marginRight: 'env(safe-area-inset-right)',
     },
