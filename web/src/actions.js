@@ -142,6 +142,13 @@ export function setCenter(center) {
     };
 }
 
+export function setGeoMarker(payload, updateCenter) {
+    return {
+        type: ActionTypes.SET_GEO_MARKER,
+        payload, updateCenter
+    };
+}
+
 export function setZoom(zoom) {
     return {
         type: ActionTypes.SET_ZOOM,

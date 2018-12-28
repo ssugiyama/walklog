@@ -134,6 +134,7 @@ class Map extends Component {
         });
         this.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
         this.infoWindow = new google.maps.InfoWindow();
+        this.geo_marker = new google.maps.Marker();
         if (window.localStorage.selected_path) {
             this.props.setSelectedPath(window.localStorage.selected_path);
         }
@@ -180,6 +181,12 @@ class Map extends Component {
         }
         if (prevProps.center && this.props.center && ! ( prevProps.center.lat == this.props.center.lat && prevProps.center.lng == this.props.center.lng ) ) {
             this.map.setCenter(this.props.center);
+        }
+        if (! ( prevProps.geo_marker.lat == this.props.geo_marker.lat && prevProps.geo_marker.lng == this.props.geo_marker.lng ) ) {
+            this.geo_marker.setPosition({lat: this.props.geo_marker.lat, lng: this.props.geo_marker.lng});
+        }
+        if ( prevProps.geo_marker.show != this.props.geo_marker.show ) {
+            this.geo_marker.setMap(this.props.geo_marker.show ? this.map : null);
         }
         if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
             this.path_manager.showPath(this.props.selected_path, true);
@@ -351,10 +358,11 @@ class Map extends Component {
 
 function mapStateToProps(state) {
     const { filter, latitude, longitude, radius, cities } = state.main.search_form;
-    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view, overlay } = state.main;
+    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, geo_marker, zoom, view, overlay } = state.main;
     return {
         filter, latitude, longitude, radius, cities,
-        selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, zoom, view, overlay,
+        selected_path, highlighted_path, editing_path, action_queue, panorama,
+        info_window, center, geo_marker, zoom, view, overlay,
     };
 }
 

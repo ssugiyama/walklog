@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { toggleView, openWalkEditor, openGeocodeModal, setCenter, setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath } from './actions';
+import { toggleView, openWalkEditor, openGeocodeModal, setGeoMarker, setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath } from './actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -15,6 +15,8 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
+import Checkbox from '@material-ui/core/Checkbox';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = {
@@ -30,16 +32,19 @@ const styles = {
     },
 };
 
+const AUTO_GEOLOCATION_INTERVAL = 30000;
+
 class NavBar extends Component {
     constructor(props) {
         super(props);
-        this.state = { topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null };
+        this.autoGeolocationIntervalID = null;
+        this.state = { topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null, autoGeolocation: false };
     }
-    setCurrentPosition() {
+    setCurrentPosition(updateCenter) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition( pos => {
-                const center = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                this.props.setCenter(center);
+                const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
+                this.props.setGeoMarker(geo_marker, updateCenter);
             }, () => {
                 alert('Unable to retrieve your location');
             });
@@ -72,6 +77,24 @@ class NavBar extends Component {
     handleLogout() {
         window.location.href = '/auth/logout?redirect=' + window.location.href;
     }
+    ignoreClick() {
+        return event => {
+            event.stopPropagation();
+            return false;
+        };
+    } 
+    handleAutoGeolocationChange() {
+        return (event, value) => {
+            this.setState({ autoGeolocation: value});
+            if (value && !this.autoGeolocationIntervalID) {
+                this.setCurrentPosition(true);
+                this.autoGeolocationIntervalID = setInterval(() => { this.setCurrentPosition(false);}, AUTO_GEOLOCATION_INTERVAL);
+            } else if (!value && this.autoGeolocationIntervalID) {
+                clearInterval(this.autoGeolocationIntervalID);
+                this.autoGeolocationIntervalID = null;
+            }
+        };
+    }
     closeAllMenus() {
         this.setState({ topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null, accountAnchorEl: null });
     }
@@ -101,6 +124,14 @@ class NavBar extends Component {
                 <Toolbar onClick={ this.handleShow.bind(this) }>
                     <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MenuIcon /></IconButton>
                     <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
+                    <Checkbox
+                        icon={<MyLocationIcon />}
+                        checkedIcon={<MyLocationIcon />}
+                        checked={this.state.autoGeolocation}
+                        onChange={this.handleAutoGeolocationChange()}
+                        onClick={this.ignoreClick()}
+                        value="autoGeolocation"
+                    />
                     <IconButton onClick={this.handleMenuOpen('accountAnchorEl')} color="inherit">
                         { current_user ? <img className={classes.userPhoto} src={current_user.photo} /> : <AccountCircleIcon /> }
                     </IconButton>
@@ -151,7 +182,7 @@ class NavBar extends Component {
                     onClose={this.handleMenuClose('geoAnchorEl')}
                 >
                     <EndMenuItem key="geocode" onClick={ () => this.props.openGeocodeModal(true)}>geocode...</EndMenuItem>,
-                    <EndMenuItem key="geolocation" onClick={this.setCurrentPosition.bind(this)}>geolocation</EndMenuItem>
+                    <EndMenuItem key="geolocation" onClick={this.setCurrentPosition.bind(this, true)}>geolocation</EndMenuItem>
                 </Menu>
             </AppBar>
         );
@@ -167,7 +198,8 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleView, openWalkEditor, openGeocodeModal, setCenter,  setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath }, dispatch);
+    return bindActionCreators({ toggleView, openWalkEditor, openGeocodeModal, setGeoMarker, 
+        setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(NavBar));

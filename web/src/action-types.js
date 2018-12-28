@@ -29,3 +29,4 @@ export const UPLOAD_PATH = Symbol('upload_path');
 export const SET_LAST_QUERY = Symbol('set_last_query');
 export const SET_ADJACENT_ITEM_IDS = Symbol('set_adjacent_item_ids');
 export const SET_MAP = Symbol('set_map');
+export const SET_GEO_MARKER = Symbol('set_geo_marker');

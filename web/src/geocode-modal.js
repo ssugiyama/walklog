@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { openGeocodeModal, setCenter } from './actions';
+import { openGeocodeModal, setGeoMarker } from './actions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -20,7 +20,11 @@ class GeocodeModal extends Component {
     handleSubmit() {
         this.geocoder.geocode( { 'address': this.state.address}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
-                this.props.setCenter(results[0].geometry.location);
+                this.props.setGeoMarker({ 
+                    lat: results[0].geometry.location.lat,
+                    lng: results[0].geometry.location.lng,
+                    show: true
+                }, true);
                 this.handleClose();
             } else {
                 alert('Geocode was not successful for the following reason: ' + status);
@@ -74,7 +78,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ openGeocodeModal, setCenter }, dispatch);
+    return bindActionCreators({ openGeocodeModal, setGeoMarker }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(GeocodeModal);

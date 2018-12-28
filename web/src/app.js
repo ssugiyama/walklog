@@ -67,6 +67,12 @@ const initialState = {
         position: null
     },
     center: { lat: 35.690, lng: 139.7 },
+    geo_marker: {
+        lat: NaN,
+        lng: NaN,
+        show: false,
+        active: false,
+    },
     zoom: 13,
     panorama_index: 0,
     panorama_count: 0,
@@ -179,6 +185,15 @@ const mainReducer = function(state = initialState, action) {
                 window.localStorage.center = JSON.stringify(center);
             }
             return Object.assign({}, state, {center});
+        }
+    case ActionTypes.SET_GEO_MARKER:
+        {
+            const geo_marker = action.payload;
+            const obj = { geo_marker };
+            if (action.updateCenter) {
+                obj.center = { lat: geo_marker.lat, lng: geo_marker.lng};
+            }
+            return Object.assign({}, state, obj);
         }
     case ActionTypes.SET_ZOOM:
         {
