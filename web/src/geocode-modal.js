@@ -56,9 +56,13 @@ class GeocodeModal extends Component {
                 open={this.props.open_geocode_modal}
                 onClose={this.handleClose.bind(this)}
             >
-                <DialogTitle>Geocode</DialogTitle>
+                <DialogTitle>search location</DialogTitle>
                 <DialogContent>
-                    <TextField value={this.state.address} onChange={e => this.setState({address: e.target.value})} onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(); }} label="address"  fullWidth={true} />
+                    <TextField value={this.state.address}
+                        onChange={e => this.setState({address: e.target.value})}
+                        onKeyPress={e => { if (e.charCode == 13) this.handleSubmit(); }}
+                        autoFocus
+                        label="address"  fullWidth={true} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleClose.bind(this)}>Cancel</Button>

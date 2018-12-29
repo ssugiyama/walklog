@@ -1,7 +1,19 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { toggleView, openWalkEditor, openGeocodeModal, setGeoMarker, setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath } from './actions';
+import {
+    toggleView,
+    openWalkEditor,
+    openGeocodeModal,
+    setGeoMarker,
+    setEditingPath,
+    deleteSelectedPath,
+    clearPaths,
+    downloadPath,
+    uploadPath,
+    setMessage,
+    openSnackbar,
+} from './actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -38,7 +50,7 @@ class NavBar extends Component {
     constructor(props) {
         super(props);
         this.autoGeolocationIntervalID = null;
-        this.state = { topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null, autoGeolocation: false };
+        this.state = { topAnchorEl: null, pathAnchorEl: null, autoGeolocation: false };
     }
     setCurrentPosition(updateCenter) {
         if (navigator.geolocation) {
@@ -88,15 +100,21 @@ class NavBar extends Component {
             this.setState({ autoGeolocation: value});
             if (value && !this.autoGeolocationIntervalID) {
                 this.setCurrentPosition(true);
-                this.autoGeolocationIntervalID = setInterval(() => { this.setCurrentPosition(false);}, AUTO_GEOLOCATION_INTERVAL);
+                this.autoGeolocationIntervalID = setInterval(() => {
+                    this.setCurrentPosition(false);
+                }, AUTO_GEOLOCATION_INTERVAL);
+                this.props.setMessage('Start following your location');
+                this.props.openSnackbar(true);
             } else if (!value && this.autoGeolocationIntervalID) {
                 clearInterval(this.autoGeolocationIntervalID);
                 this.autoGeolocationIntervalID = null;
+                this.props.setMessage('Stop following your location');
+                this.props.openSnackbar(true);
             }
         };
     }
     closeAllMenus() {
-        this.setState({ topAnchorEl: null, pathAnchorEl: null, geoAnchorEl: null, accountAnchorEl: null });
+        this.setState({ topAnchorEl: null, pathAnchorEl: null, accountAnchorEl: null });
     }
     render() {
         const { classes, current_user, selected_path } = this.props;
@@ -143,7 +161,7 @@ class NavBar extends Component {
                 >
                     <EndMenuItem key="view" onClick={ this.handleShow.bind(this) }>toggle view</EndMenuItem>
                     <ParentMenuItem key="path" subMenuAnchor="pathAnchorEl">path</ParentMenuItem>
-                    <ParentMenuItem key="geo" subMenuAnchor="geoAnchorEl">geo</ParentMenuItem>
+                    <EndMenuItem key="geocode" onClick={ () => this.props.openGeocodeModal(true)}>search location...</EndMenuItem>
                     <Divider key="divider" />
                     {
                         this.props.external_links.map(link => 
@@ -159,7 +177,7 @@ class NavBar extends Component {
                     {
                         current_user ? [
                             (<MenuItem key="label" disabled={true}>Logged in as {current_user.username}</MenuItem>),
-                            (<Divider />),
+                            (<Divider key="divider" />),
                             (<EndMenuItem key="new walk" onClick={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}>new walk...</EndMenuItem>),
                             (<EndMenuItem key="logout" onClick={this.handleLogout.bind(this)}>logout</EndMenuItem>)
                         ] : [<EndMenuItem key="login" onClick={this.handleLogin.bind(this)}>login with twitter</EndMenuItem>]
@@ -176,14 +194,6 @@ class NavBar extends Component {
                     <EndMenuItem key="download" onClick={() => this.props.downloadPath() } disabled={! selected_path}>download</EndMenuItem>,
                     <EndMenuItem key="upload" onClick={() => this.props.uploadPath() }>upload...</EndMenuItem>
                 </Menu>
-                <Menu
-                    anchorEl={this.state.geoAnchorEl}
-                    open={Boolean(this.state.geoAnchorEl)}
-                    onClose={this.handleMenuClose('geoAnchorEl')}
-                >
-                    <EndMenuItem key="geocode" onClick={ () => this.props.openGeocodeModal(true)}>geocode...</EndMenuItem>,
-                    <EndMenuItem key="geolocation" onClick={this.setCurrentPosition.bind(this, true)}>geolocation</EndMenuItem>
-                </Menu>
             </AppBar>
         );
     }
@@ -199,7 +209,9 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({ toggleView, openWalkEditor, openGeocodeModal, setGeoMarker, 
-        setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath }, dispatch);
+        setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath,
+        setMessage, openSnackbar,
+    }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(NavBar));
