@@ -21,8 +21,8 @@ class GeocodeModal extends Component {
         this.geocoder.geocode( { 'address': this.state.address}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
                 this.props.setGeoMarker({ 
-                    lat: results[0].geometry.location.lat,
-                    lng: results[0].geometry.location.lng,
+                    lat: results[0].geometry.location.lat(),
+                    lng: results[0].geometry.location.lng(),
                     show: true
                 }, true);
                 this.handleClose();
