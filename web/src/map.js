@@ -198,7 +198,7 @@ class Map extends Component {
         if (prevProps.geo_marker && this.props.geo_marker && ! ( prevProps.geo_marker.lat == this.props.geo_marker.lat && prevProps.geo_marker.lng == this.props.geo_marker.lng ) ) {
             this.geo_marker.setPosition({lat: this.props.geo_marker.lat, lng: this.props.geo_marker.lng});
         }
-        if ( prevProps.geo_marker.show != this.props.geo_marker.show ) {
+        if (prevProps.geo_marker && this.props.geo_marker && prevProps.geo_marker.show != this.props.geo_marker.show ) {
             this.geo_marker.setMap(this.props.geo_marker.show ? this.map : null);
         }
         if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
