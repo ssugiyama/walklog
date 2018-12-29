@@ -23,6 +23,21 @@ const styles = theme => ({
     }
 });
 
+const mapStyles = {
+    polygon: {
+        zIndex: 20,
+    },
+    marker: {
+        zIndex: 10,
+    },
+    circle: {
+        strokeWeight: 2,
+        editable: true,
+        color: '#000',
+        zIndex: 20,
+    },
+};
+
 function loadJS(src) {
     const ref = window.document.getElementsByTagName('script')[0];
     const script = window.document.createElement('script');
@@ -102,13 +117,11 @@ class Map extends Component {
                 this.props.setEditingPath(false);
             }
         });
-        this.distanceWidget = new google.maps.Circle({
-            strokeWeight: 2,
-            editable: true,
-            color: '#000',
+        const circleOpts = Object.assign({}, mapStyles.circle, {
             center: this.props.center,
-            radius: parseFloat(this.props.radius),
+            radius: parseFloat(this.props.radius)
         });
+        this.distanceWidget = new google.maps.Circle(circleOpts);
         google.maps.event.addListener(this.distanceWidget, 'center_changed', () => {
             this.props.setSearchForm({
                 latitude: this.distanceWidget.getCenter().lat(),
@@ -134,7 +147,7 @@ class Map extends Component {
         });
         this.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
         this.infoWindow = new google.maps.InfoWindow();
-        this.geo_marker = new google.maps.Marker();
+        this.geo_marker = new google.maps.Marker(mapStyles.marker);
         if (window.localStorage.selected_path) {
             this.props.setSelectedPath(window.localStorage.selected_path);
         }
@@ -182,7 +195,7 @@ class Map extends Component {
         if (prevProps.center && this.props.center && ! ( prevProps.center.lat == this.props.center.lat && prevProps.center.lng == this.props.center.lng ) ) {
             this.map.setCenter(this.props.center);
         }
-        if (! ( prevProps.geo_marker.lat == this.props.geo_marker.lat && prevProps.geo_marker.lng == this.props.geo_marker.lng ) ) {
+        if (prevProps.geo_marker && this.props.geo_marker && ! ( prevProps.geo_marker.lat == this.props.geo_marker.lat && prevProps.geo_marker.lng == this.props.geo_marker.lng ) ) {
             this.geo_marker.setPosition({lat: this.props.geo_marker.lat, lng: this.props.geo_marker.lng});
         }
         if ( prevProps.geo_marker.show != this.props.geo_marker.show ) {
@@ -283,7 +296,7 @@ class Map extends Component {
         const paths = str.split(' ').map(element => google.maps.geometry.encoding.decodePath(element));
         const pg =  new google.maps.Polygon({});
         pg.setPaths(paths);
-        pg.setOptions(this.areaStyle);
+        pg.setOptions(mapStyles.polygon);
         this.cities[id] = pg;
         google.maps.event.addListener(pg, 'click',  event => {
             this.removeCity(id, pg);
