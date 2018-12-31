@@ -20,6 +20,7 @@ import PanoramaBox from './panorama-box';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import NoSsr from '@material-ui/core/NoSsr';
 import TweetIcon from './tweet-icon';
 import config from './config';
 
@@ -135,7 +136,9 @@ class ItemBox extends Component {
                             <Typography variant="subtitle1">Elevation</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
-                                <ElevationBox />
+                                <NoSsr>
+                                    <ElevationBox />
+                                </NoSsr>
                             </ExpansionPanelDetails>
                         </ExpansionPanel>
                     }

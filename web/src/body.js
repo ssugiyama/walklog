@@ -14,6 +14,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
+import NoSsr from '@material-ui/core/NoSsr';
 
 const styles = theme => ({
     root: {
@@ -44,7 +45,9 @@ class Body extends Component {
             )}>
                 <CssBaseline />
                 <NavBarContainer />
-                <MapContainer />
+                <NoSsr>
+                    <MapContainer />
+                </NoSsr>
                 <ContentBoxContainer />
                 { view == 'map' && <BottomBarContainer /> }
                 <WalkEditorContainer />

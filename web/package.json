@@ -17,6 +17,7 @@
     "@material-ui/core": "^3.0.0",
     "@material-ui/icons": "^3.0.0",
     "body-parser": "*",
+    "chart": "^0.1.2",
     "chart.js": "^2.6.0",
     "connected-react-router": "^5.0.1",
     "ejs": "^2.5.2",
