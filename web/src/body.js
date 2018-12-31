@@ -3,8 +3,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import NavBarContainer from './nav-bar';
 import MapContainer from './map';
 import BottomBarContainer from './bottom-bar';
-import WalkEditorContainer from './walk-editor';
-import GeocodeModalContainer from './geocode-modal';
+import WalkEditorContainer from './walk-editor';;
 import { connect } from 'react-redux';
 import ContentBoxContainer from './content-box';
 import { bindActionCreators } from 'redux';
@@ -49,7 +48,6 @@ class Body extends Component {
                 <ContentBoxContainer />
                 { view == 'map' && <BottomBarContainer /> }
                 <WalkEditorContainer />
-                <GeocodeModalContainer />
                 <Snackbar
                     open={this.props.open_snackbar}
                     message={this.props.message}

@@ -50,7 +50,7 @@ class NavBar extends Component {
     constructor(props) {
         super(props);
         this.autoGeolocationIntervalID = null;
-        this.state = { topAnchorEl: null, pathAnchorEl: null, autoGeolocation: false };
+        this.state = { topAnchorEl: null, autoGeolocation: false };
     }
     setCurrentPosition(updateCenter) {
         if (navigator.geolocation) {
@@ -114,7 +114,7 @@ class NavBar extends Component {
         };
     }
     closeAllMenus() {
-        this.setState({ topAnchorEl: null, pathAnchorEl: null, accountAnchorEl: null });
+        this.setState({ topAnchorEl: null, accountAnchorEl: null });
     }
     render() {
         const { classes, current_user, selected_path } = this.props;
@@ -160,8 +160,6 @@ class NavBar extends Component {
                     onClose={this.handleMenuClose('topAnchorEl')}
                 >
                     <EndMenuItem key="view" onClick={ this.handleShow.bind(this) }>toggle view</EndMenuItem>
-                    <ParentMenuItem key="path" subMenuAnchor="pathAnchorEl">path</ParentMenuItem>
-                    <EndMenuItem key="geocode" onClick={ () => this.props.openGeocodeModal(true)}>search location...</EndMenuItem>
                     <Divider key="divider" />
                     {
                         this.props.external_links.map(link => 
@@ -182,17 +180,6 @@ class NavBar extends Component {
                             (<EndMenuItem key="logout" onClick={this.handleLogout.bind(this)}>logout</EndMenuItem>)
                         ] : [<EndMenuItem key="login" onClick={this.handleLogin.bind(this)}>login with twitter</EndMenuItem>]
                     }                        
-                </Menu>
-                <Menu
-                    anchorEl={this.state.pathAnchorEl}
-                    open={Boolean(this.state.pathAnchorEl)}
-                    onClose={this.handleMenuClose('pathAnchorEl')}
-                >
-                    <EndMenuItem key="edit" onClick={() => this.props.setEditingPath(true) } disabled={! selected_path}>edit</EndMenuItem>,
-                    <EndMenuItem key="delete" onClick={() => this.props.deleteSelectedPath() }  disabled={! selected_path}>delete</EndMenuItem>,
-                    <EndMenuItem key="clear" onClick={() => this.props.clearPaths() }>clear</EndMenuItem>,
-                    <EndMenuItem key="download" onClick={() => this.props.downloadPath() } disabled={! selected_path}>download</EndMenuItem>,
-                    <EndMenuItem key="upload" onClick={() => this.props.uploadPath() }>upload...</EndMenuItem>
                 </Menu>
             </AppBar>
         );

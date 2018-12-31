@@ -2277,6 +2277,12 @@ dom-serializer@0, dom-serializer@~0.1.0:
     domelementtype "~1.1.1"
     entities "~1.1.1"
 
+dom7@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/dom7/-/dom7-2.1.2.tgz#a914070c0abe8465384997a9c4f34475f67f75bd"
+  dependencies:
+    ssr-window "^1.0.1"
+
 domain-browser@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.2.0.tgz#3d31f50191a6749dd1375a7f522e823d42e54eda"
@@ -6387,6 +6393,14 @@ react-event-listener@^0.6.2:
     prop-types "^15.6.0"
     warning "^4.0.1"
 
+react-id-swiper@^1.6.8:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/react-id-swiper/-/react-id-swiper-1.6.8.tgz#0b04def5333be75f698b061e18522fc5e52a4b6e"
+  dependencies:
+    object-assign "^4.1.1"
+    prop-types "^15.6.2"
+    swiper "4.4.1"
+
 react-is@^16.3.2, react-is@^16.5.2:
   version "16.7.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.7.0.tgz#c1bd21c64f1f1364c6f70695ec02d69392f41bfa"
@@ -6454,6 +6468,14 @@ react-router@^4.4.0-beta.6:
     tiny-invariant "^1.0.2"
     tiny-warning "^1.0.0"
 
+react-swipe@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/react-swipe/-/react-swipe-6.0.3.tgz#ee0f783cedcf9da595c9f04d6e62b99d87756460"
+  dependencies:
+    lodash.isequal "^4.5.0"
+    prop-types "^15.6.0"
+    swipe-js-iso "^2.1.4"
+
 react-test-renderer@^16.0.0-0:
   version "16.6.3"
   resolved "https://registry.yarnpkg.com/react-test-renderer/-/react-test-renderer-16.6.3.tgz#5f3a1a7d5c3379d46f7052b848b4b72e47c89f38"
@@ -6472,14 +6494,14 @@ react-transition-group@^2.2.1:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.4"
 
-react@^16.3.0:
-  version "16.6.3"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.6.3.tgz#25d77c91911d6bbdd23db41e70fb094cc1e0871c"
+react@^16.7.0:
+  version "16.7.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.7.0.tgz#b674ec396b0a5715873b350446f7ea0802ab6381"
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.11.2"
+    scheduler "^0.12.0"
 
 read-pkg-up@^1.0.1:
   version "1.0.1"
@@ -6892,6 +6914,13 @@ scheduler@^0.11.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
 
+scheduler@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.12.0.tgz#8ab17699939c0aedc5a196a657743c496538647b"
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+
 seamless-immutable@^7.1.3:
   version "7.1.4"
   resolved "https://registry.yarnpkg.com/seamless-immutable/-/seamless-immutable-7.1.4.tgz#6e9536def083ddc4dea0207d722e0e80d0f372f8"
@@ -7184,6 +7213,10 @@ sshpk@^1.7.0:
     safer-buffer "^2.0.2"
     tweetnacl "~0.14.0"
 
+ssr-window@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ssr-window/-/ssr-window-1.0.1.tgz#30752a6a4666e7767f0b7e6aa6fc2fdbd0d9b369"
+
 stable@~0.1.6:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/stable/-/stable-0.1.8.tgz#836eb3c8382fe2936feaf544631017ce7d47a3cf"
@@ -7392,6 +7425,17 @@ svgo@^1.0.0, svgo@^1.0.5:
     stable "~0.1.6"
     unquote "~1.1.1"
     util.promisify "~1.0.0"
+
+swipe-js-iso@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/swipe-js-iso/-/swipe-js-iso-2.1.4.tgz#172dec43a5cbc13d0a3a4a68284119c267b31990"
+
+swiper@4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/swiper/-/swiper-4.4.1.tgz#9eeca17c5bfa4a27663963b2640119e5fc668255"
+  dependencies:
+    dom7 "^2.1.2"
+    ssr-window "^1.0.1"
 
 symbol-observable@1.2.0, symbol-observable@^1.0.3, symbol-observable@^1.0.4, symbol-observable@^1.1.0:
   version "1.2.0"
