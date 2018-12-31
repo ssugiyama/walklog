@@ -230,6 +230,7 @@ class BottomBar extends Component {
                                     }}
                                     onChange={e => this.setState({location: e.target.value})}
                                     onKeyPress={e => { if (e.charCode == 13) this.handleSubmitLocation(); }}
+                                    onBlur={e => { this.handleSubmitLocation(); }}
                                 />
                             </div>
                         </div>            
