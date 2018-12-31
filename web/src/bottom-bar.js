@@ -40,7 +40,7 @@ const styles = theme => ({
     },
     fabButton: {
         position: 'absolute',
-        zIndex: 1,
+        zIndex: 10,
         top: -20,
         left: 0,
         right: 0,
@@ -132,6 +132,7 @@ class BottomBar extends Component {
         return (
             <Toolbar className={classes.root}>
                 <Fab size="small" aria-label="swipe buttons" 
+                    color="secondary"
                     className={classes.fabButton} 
                     onClick={() => { this.swiper.slideNext();}} >
                     <SwapHoriz />
