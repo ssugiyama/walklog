@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import Typography from '@material-ui/core/Typography';
 import {  theme } from './app';
-import { Chart } from 'chart';
+import { Chart } from 'chart.js';
 
 const styles = {
     elevationBox: {
