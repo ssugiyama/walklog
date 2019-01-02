@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap, setEditingPath } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap, setEditingPath, openConfirmModal } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -116,6 +116,32 @@ class Map extends Component {
             if (!this.path_manager.editable) {
                 this.props.setEditingPath(false);
             }
+        });
+        google.maps.event.addListener(this.path_manager, 'polylinecomplete',  polyline => {
+            new Promise((resolve, reject) => {
+                if (this.props.selected_path) {
+                    this.props.openConfirmModal({
+                        title: 'path mode',
+                        text: 'append to current path?',
+                        actions: [
+                            {
+                                label: 'cancel',
+                                value: false,
+                            },
+                            {
+                                label: 'append',
+                                value: true,
+                            },
+                        ],
+                        resolve: resolve,
+                    });
+                }
+                else {
+                    resolve(false);
+                }
+            }).then(append => {
+                this.path_manager.applyPath(polyline.getPath().getArray(), append);
+            });
         });
         const circleOpts = Object.assign({}, mapStyles.circle, {
             center: this.props.center,
@@ -291,6 +317,11 @@ class Map extends Component {
             setTimeout(() => elem.click(), 0);
             this.props.removeFromActionQueue();
         }
+        else if (action.type == ActionTypes.ADD_POINT) {
+            const pt = new google.maps.LatLng(action.lat, action.lng);
+            this.path_manager.applyPath([pt], action.append);
+            this.props.removeFromActionQueue();
+        }
     }
     toPolygon(id, str) {
         const paths = str.split(' ').map(element => google.maps.geometry.encoding.decodePath(element));
@@ -383,7 +414,7 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         setSearchForm, setSelectedPath, setCenter, 
         setZoom, removeFromActionQueue, 
-        toggleView, setMap, setEditingPath
+        toggleView, setMap, setEditingPath, openConfirmModal,
     }, dispatch);
 }
 

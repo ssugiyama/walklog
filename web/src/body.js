@@ -6,6 +6,7 @@ import BottomBarContainer from './bottom-bar';
 import WalkEditorContainer from './walk-editor';;
 import { connect } from 'react-redux';
 import ContentBoxContainer from './content-box';
+import ConfirmModalContainer from './confirm-modal';
 import { bindActionCreators } from 'redux';
 import { openSnackbar, toggleView } from './actions';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -28,8 +29,11 @@ const styles = theme => ({
 });
 
 class Body extends Component {
+    constructor(props) {
+        super(props);
+    }
     handleRequestClose() {
-        this.props.openSnackbar(false);
+        this.props.openSnackbar(null);
     }
     handleShow() {
         this.props.toggleView();
@@ -51,8 +55,9 @@ class Body extends Component {
                 <ContentBoxContainer />
                 { view == 'map' && <BottomBarContainer /> }
                 <WalkEditorContainer />
+                <ConfirmModalContainer />
                 <Snackbar
-                    open={this.props.open_snackbar}
+                    open={this.props.message != null}
                     message={this.props.message}
                     autoHideDuration={4000}
                     onClose={this.handleRequestClose.bind(this)}
@@ -63,8 +68,8 @@ class Body extends Component {
 }
 
 function mapStateToProps(state) {
-    const { message, open_snackbar, view } = state.main;
-    return { message, open_snackbar, view, };
+    const { message, view } = state.main;
+    return { message, view };
 }
 
 function mapDispatchToProps(dispatch) {

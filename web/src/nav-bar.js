@@ -4,15 +4,15 @@ import { connect } from 'react-redux';
 import {
     toggleView,
     openWalkEditor,
-    openGeocodeModal,
     setGeoMarker,
     setEditingPath,
     deleteSelectedPath,
     clearPaths,
     downloadPath,
     uploadPath,
-    setMessage,
     openSnackbar,
+    openConfirmModal,
+    addPoint,
 } from './actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -30,6 +30,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Checkbox from '@material-ui/core/Checkbox';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { withStyles } from '@material-ui/core/styles';
+import {APPEND_PATH_CONFIRM_INFO} from './contsants';
 
 const styles = {
     root: {
@@ -52,11 +53,12 @@ class NavBar extends Component {
         this.autoGeolocationIntervalID = null;
         this.state = { topAnchorEl: null, autoGeolocation: false };
     }
-    setCurrentPosition(updateCenter) {
+    setCurrentPosition(updateCenter, append) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition( pos => {
                 const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
                 this.props.setGeoMarker(geo_marker, updateCenter);
+                this.props.addPoint(pos.coords.latitude, pos.coords.longitude, append);
             }, () => {
                 alert('Unable to retrieve your location');
             });
@@ -99,17 +101,25 @@ class NavBar extends Component {
         return (event, value) => {
             this.setState({ autoGeolocation: value});
             if (value && !this.autoGeolocationIntervalID) {
-                this.setCurrentPosition(true);
-                this.autoGeolocationIntervalID = setInterval(() => {
-                    this.setCurrentPosition(false);
-                }, AUTO_GEOLOCATION_INTERVAL);
-                this.props.setMessage('Start following your location');
-                this.props.openSnackbar(true);
+                new Promise((resolve, reject) => {
+                    if (this.props.selected_path) {
+                        const info = Object.assign({}, APPEND_PATH_CONFIRM_INFO, {resolve});
+                        this.props.openConfirmModal(info);
+                    }
+                    else {
+                        resolve(false);
+                    }
+                }).then(append => {
+                    this.setCurrentPosition(true, append);
+                    this.autoGeolocationIntervalID = setInterval(() => {
+                        this.setCurrentPosition(false, true);
+                    }, AUTO_GEOLOCATION_INTERVAL);
+                    this.props.openSnackbar('start following your location');
+                });
             } else if (!value && this.autoGeolocationIntervalID) {
                 clearInterval(this.autoGeolocationIntervalID);
                 this.autoGeolocationIntervalID = null;
-                this.props.setMessage('Stop following your location');
-                this.props.openSnackbar(true);
+                this.props.openSnackbar('stop following your location');
             }
         };
     }
@@ -195,9 +205,9 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleView, openWalkEditor, openGeocodeModal, setGeoMarker, 
+    return bindActionCreators({ toggleView, openWalkEditor, setGeoMarker, 
         setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath,
-        setMessage, openSnackbar,
+        openSnackbar, addPoint, openConfirmModal,
     }, dispatch);
 }
 

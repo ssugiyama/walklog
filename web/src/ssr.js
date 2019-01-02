@@ -68,8 +68,7 @@ export default function handleSSR(req, res) {
         .then(() =>{
             if (req.session.messages && req.session.messages.length > 0) {
                 const msg = req.session.messages.pop() || '';
-                store.dispatch(setMessage(msg));
-                store.dispatch(openSnackbar(true));
+                store.dispatch(openSnackbar(msg, false));
             }
         }).then(() => store.dispatch(setCurrentUser(req.user)))
         .then(() => Users.findAll().then(users => store.dispatch(setUsers(users))))

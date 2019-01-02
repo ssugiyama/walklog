@@ -99,6 +99,13 @@ export function clearPaths() {
     };
 }
 
+export function addPoint(lat, lng, append) {
+    return {
+        type: ActionTypes.ADD_POINT,
+        lat, lng, append
+    };
+}
+
 export function setEditingPath(editing_path) {
     return {
         type: ActionTypes.SET_EDITING_PATH,
@@ -197,17 +204,17 @@ export function setUsers(users) {
     };
 }
 
-export function setMessage(message) {
-    return {
-        type: ActionTypes.SET_MESSAGE,
-        message,
-    };    
-}
-
-export function openSnackbar(open) {
+export function openSnackbar(message, ask_append) {
     return {
         type: ActionTypes.OPEN_SNACKBAR,
-        open,
+        message, ask_append
+    };
+}
+
+export function openConfirmModal(confirm_info) {
+    return {
+        type: ActionTypes.OPEN_CONFIRM_MODAL,
+        confirm_info,
     };   
 }
 
@@ -241,5 +248,11 @@ export function setMap(map) {
     return {
         type: ActionTypes.SET_MAP,
         map
+    };
+}
+
+export function askAppend() {
+    return {
+        type: ActionType.ASK_APPEND,
     };
 }

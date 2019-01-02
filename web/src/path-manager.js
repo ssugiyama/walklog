@@ -25,19 +25,31 @@ export default class PathManager extends google.maps.MVCObject {
         this.set('prevSelection', null);
         this.set('prevHighlight', null);
         google.maps.event.addListener(this.drawingManager, 'polylinecomplete', polyline => {
-            if (this.selection && confirm('Will you append the path?')) {
-                polyline.getPath().forEach(elm => {
-                    this.selection.getPath().push(elm);
-                });
-                polyline.setMap(null);
-                this.updateLength();
-            }
-            else {
-                this.addPolyline(polyline);
-                this.set('selection', polyline);
-            }
+            google.maps.event.trigger(this, 'polylinecomplete', polyline);
             this.drawingManager.setDrawingMode(null);
         });
+    }
+    applyPath(path, append) {
+        if (this.selection && append) {
+            if (this.highlight == this.selection) {
+                const pl = new google.maps.Polyline({});
+                const newpath = Object.assign([], this.selection.getPath().getArray());
+                newpath.push(...path);
+                pl.setPath(newpath);
+                this.addPolyline(pl);
+                this.set('selection', pl);
+            }
+            else {
+                this.selection.getPath().push(...path);
+                this.updateLength();
+            }
+        }
+        else {
+            const pl = new google.maps.Polyline({});
+            pl.setPath(path);
+            this.addPolyline(pl);
+            this.set('selection', pl);
+        }
     }
 
     pathToHash(path) {

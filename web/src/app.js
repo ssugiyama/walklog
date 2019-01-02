@@ -57,7 +57,7 @@ const initialState = {
     editing_path: false,
     view: 'content',
     open_walk_editor: false,
-    open_snackbar: false,
+    confirm_info: null,
     open_geocode_modal: false,
     map: null,
     street_view: null,
@@ -77,11 +77,12 @@ const initialState = {
     panorama_index: 0,
     panorama_count: 0,
     overlay: false,
-    message: '',
+    message: null,
     users: [],
     current_user: null,
     external_links: [],
     last_query: null,
+    ask_append: false,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -161,6 +162,14 @@ const mainReducer = function(state = initialState, action) {
             const action_queue = state.action_queue.concat(action);
             const search_form = Object.assign({}, state.search_form, {searchPath: null });
             return Object.assign({}, state, {selected_path: null, action_queue, search_form});
+        }
+    case ActionTypes.ADD_POINT:
+        {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                delete window.localStorage.selected_path;
+            }
+            const action_queue = state.action_queue.concat(action);
+            return Object.assign({}, state, {action_queue});
         }
     case ActionTypes.DOWNLOAD_PATH:
     case ActionTypes.UPLOAD_PATH:
@@ -242,15 +251,15 @@ const mainReducer = function(state = initialState, action) {
             const users = action.users;
             return Object.assign({}, state, {users});
         }
-    case ActionTypes.SET_MESSAGE:
-        {
-            const message = action.message;
-            return Object.assign({}, state, {message});
-        }
     case ActionTypes.OPEN_SNACKBAR:
         {
-            const open_snackbar = action.open;
-            return Object.assign({}, state, {open_snackbar});
+            const {message} = action;
+            return Object.assign({}, state, {message});
+        }
+    case ActionTypes.OPEN_CONFIRM_MODAL:
+        {
+            const {confirm_info} = action;
+            return Object.assign({}, state, {confirm_info});
         }
     case ActionTypes.SET_LAST_QUERY:
         {   
