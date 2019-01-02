@@ -30,7 +30,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Checkbox from '@material-ui/core/Checkbox';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { withStyles } from '@material-ui/core/styles';
-import {APPEND_PATH_CONFIRM_INFO} from './contsants';
+import {APPEND_PATH_CONFIRM_INFO} from './constants';
 
 const styles = {
     root: {

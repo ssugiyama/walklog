@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
+import {APPEND_PATH_CONFIRM_INFO} from './constants';
 
 import config from './config';
 const styles = theme => ({
@@ -120,21 +121,8 @@ class Map extends Component {
         google.maps.event.addListener(this.path_manager, 'polylinecomplete',  polyline => {
             new Promise((resolve, reject) => {
                 if (this.props.selected_path) {
-                    this.props.openConfirmModal({
-                        title: 'path mode',
-                        text: 'append to current path?',
-                        actions: [
-                            {
-                                label: 'cancel',
-                                value: false,
-                            },
-                            {
-                                label: 'append',
-                                value: true,
-                            },
-                        ],
-                        resolve: resolve,
-                    });
+                    const info = Object.assign({}, APPEND_PATH_CONFIRM_INFO, {resolve});
+                    this.props.openConfirmModal(info);
                 }
                 else {
                     resolve(false);
