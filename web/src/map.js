@@ -218,9 +218,6 @@ class Map extends Component {
         if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
             this.path_manager.showPath(this.props.selected_path, true);
         }
-        else if (! this.props.selected_path) {
-            this.path_manager.deletePath();
-        }
         if (this.props.highlighted_path && this.props.highlighted_path != this.path_manager.getEncodedHighlight()) {
             this.path_manager.showPath(this.props.highlighted_path, false, true);
         }

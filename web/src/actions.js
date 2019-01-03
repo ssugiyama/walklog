@@ -87,12 +87,6 @@ export function addPaths(paths) {
     };
 }
 
-export function deleteSelectedPath() {
-    return {
-        type: ActionTypes.DELETE_SELECTED_PATH
-    };
-}
-
 export function clearPaths() {
     return {
         type: ActionTypes.CLEAR_PATHS

@@ -8,7 +8,6 @@ export const SET_SELECTED_ITEM = Symbol('set_selected_item');
 export const SET_SELECTED_PATH = Symbol('set_selected_path');
 export const TOGGLE_VIEW = Symbol('toggle_view');
 export const ADD_PATHS = Symbol('add_paths');
-export const DELETE_SELECTED_PATH = Symbol('delete_selected_path');
 export const CLEAR_PATHS = Symbol('clear_paths');
 export const SET_EDITING_PATH = Symbol('set_editing_path');
 export const OPEN_WALK_EDITOR = Symbol('open_walk_editor');

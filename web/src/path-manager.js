@@ -25,6 +25,7 @@ export default class PathManager extends google.maps.MVCObject {
         this.set('prevSelection', null);
         this.set('prevHighlight', null);
         google.maps.event.addListener(this.drawingManager, 'polylinecomplete', polyline => {
+            polyline.setMap(null);
             google.maps.event.trigger(this, 'polylinecomplete', polyline);
             this.drawingManager.setDrawingMode(null);
         });
@@ -59,17 +60,17 @@ export default class PathManager extends google.maps.MVCObject {
         return obj.getHash('B64');
     }
 
-    deletePath() {
-        if(this.selection != null){
-            const selection = this.selection;
-            const key = this.pathToHash(this.getEncodedSelection());
+    deletePolyline(pl) {
+        if (pl == this.selection) {
+            if (pl.getEditable()) return;
             this.set('selection', null);
-            // retain highlight
-            const highlightKey = this.pathToHash(this.getEncodedHighlight());
-            if (key == highlightKey) return;
-            selection.setMap(null);
-            delete this.polylines[key];
         }
+        if ( pl == this.highlight) {
+            return;
+        }
+        const key = this.pathToHash(pl.getPath());
+        pl.setMap(null);
+        delete this.polylines[key];
     }
 
     deleteAll() {
@@ -133,9 +134,15 @@ export default class PathManager extends google.maps.MVCObject {
         google.maps.event.addListener(pl, 'click', () => {
             this.set('selection', pl == this.selection ? null : pl);
         });
+        // google.maps.event.addListener(pl, 'rightclick', () => {
+        //     this.deletePolyline(pl);
+        // });
         var deleteNode = mev => {
             if (mev.vertex != null) {
                 pl.getPath().removeAt(mev.vertex);
+            }
+            else {
+                this.deletePolyline(pl);
             }
         };
         google.maps.event.addListener(pl, 'rightclick', deleteNode);

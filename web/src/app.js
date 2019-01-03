@@ -60,7 +60,6 @@ const initialState = {
     confirm_info: null,
     open_geocode_modal: false,
     map: null,
-    street_view: null,
     info_window: {
         open: false,
         message: null,
@@ -82,7 +81,6 @@ const initialState = {
     current_user: null,
     external_links: [],
     last_query: null,
-    ask_append: false,
 };
 
 const mainReducer = function(state = initialState, action) {
@@ -145,14 +143,6 @@ const mainReducer = function(state = initialState, action) {
         {
             const action_queue = state.action_queue.concat(action);
             return Object.assign({}, state, {action_queue});
-        }
-    case ActionTypes.DELETE_SELECTED_PATH:
-        {
-            if (typeof window !== 'undefined' && window.localStorage) {
-                delete window.localStorage.selected_path;
-            }
-            const search_form = Object.assign({}, state.search_form, {searchPath: null });
-            return Object.assign({}, state, {selected_path: null, search_form});
         }
     case ActionTypes.CLEAR_PATHS:
         {
