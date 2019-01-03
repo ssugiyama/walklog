@@ -57,8 +57,6 @@ const initialState = {
     editing_path: false,
     view: 'content',
     open_walk_editor: false,
-    confirm_info: null,
-    open_geocode_modal: false,
     map: null,
     info_window: {
         open: false,
@@ -245,11 +243,6 @@ const mainReducer = function(state = initialState, action) {
         {
             const {message} = action;
             return Object.assign({}, state, {message});
-        }
-    case ActionTypes.OPEN_CONFIRM_MODAL:
-        {
-            const {confirm_info} = action;
-            return Object.assign({}, state, {confirm_info});
         }
     case ActionTypes.SET_LAST_QUERY:
         {   

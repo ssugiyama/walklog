@@ -29,4 +29,3 @@ export const SET_ADJACENT_ITEM_IDS = Symbol('set_adjacent_item_ids');
 export const SET_MAP = Symbol('set_map');
 export const SET_GEO_MARKER = Symbol('set_geo_marker');
 export const ADD_POINT = Symbol('add_path');
-export const OPEN_CONFIRM_MODAL = Symbol('open_confirm_modal');

@@ -205,13 +205,6 @@ export function openSnackbar(message, ask_append) {
     };
 }
 
-export function openConfirmModal(confirm_info) {
-    return {
-        type: ActionTypes.OPEN_CONFIRM_MODAL,
-        confirm_info,
-    };   
-}
-
 export function downloadPath() {
     return {
         type: ActionTypes.DOWNLOAD_PATH,

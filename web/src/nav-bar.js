@@ -11,7 +11,6 @@ import {
     downloadPath,
     uploadPath,
     openSnackbar,
-    openConfirmModal,
     addPoint,
 } from './actions';
 import AppBar from '@material-ui/core/AppBar';
@@ -30,6 +29,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Checkbox from '@material-ui/core/Checkbox';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { withStyles } from '@material-ui/core/styles';
+import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
 
 const styles = {
@@ -51,7 +51,7 @@ class NavBar extends Component {
     constructor(props) {
         super(props);
         this.autoGeolocationIntervalID = null;
-        this.state = { topAnchorEl: null, autoGeolocation: false };
+        this.state = { topAnchorEl: null, autoGeolocation: false, confirm_info: {open: false } };
     }
     setCurrentPosition(updateCenter, append) {
         if (navigator.geolocation) {
@@ -103,13 +103,13 @@ class NavBar extends Component {
             if (value && !this.autoGeolocationIntervalID) {
                 new Promise((resolve, reject) => {
                     if (this.props.selected_path) {
-                        const info = Object.assign({}, APPEND_PATH_CONFIRM_INFO, {resolve});
-                        this.props.openConfirmModal(info);
+                        this.setState({confirm_info: {open: true, resolve}});
                     }
                     else {
                         resolve(false);
                     }
                 }).then(append => {
+                    this.setState({confirm_info: {open: false}});
                     this.setCurrentPosition(true, append);
                     this.autoGeolocationIntervalID = setInterval(() => {
                         this.setCurrentPosition(false, true);
@@ -191,6 +191,7 @@ class NavBar extends Component {
                         ] : [<EndMenuItem key="login" onClick={this.handleLogin.bind(this)}>login with twitter</EndMenuItem>]
                     }                        
                 </Menu>
+                <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={this.state.confirm_info.open} resolve={this.state.confirm_info.resolve} />
             </AppBar>
         );
     }
@@ -207,7 +208,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({ toggleView, openWalkEditor, setGeoMarker, 
         setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath,
-        openSnackbar, addPoint, openConfirmModal,
+        openSnackbar, addPoint,
     }, dispatch);
 }
 

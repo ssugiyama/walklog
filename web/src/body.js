@@ -6,7 +6,6 @@ import BottomBarContainer from './bottom-bar';
 import WalkEditorContainer from './walk-editor';;
 import { connect } from 'react-redux';
 import ContentBoxContainer from './content-box';
-import ConfirmModalContainer from './confirm-modal';
 import { bindActionCreators } from 'redux';
 import { openSnackbar, toggleView } from './actions';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -55,7 +54,6 @@ class Body extends Component {
                 <ContentBoxContainer />
                 { view == 'map' && <BottomBarContainer /> }
                 <WalkEditorContainer />
-                <ConfirmModalContainer />
                 <Snackbar
                     open={this.props.message != null}
                     message={this.props.message}

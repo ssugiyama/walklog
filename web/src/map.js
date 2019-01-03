@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap, setEditingPath, openConfirmModal } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap, setEditingPath } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
-
+import ConfirmModal from './confirm-modal';
 import config from './config';
+
 const styles = theme => ({
     mapCompact: {
         margin: '8px 16px',
@@ -53,6 +54,7 @@ class Map extends Component {
         this.map_ref = React.createRef();
         this.download_ref = React.createRef();
         this.upload_ref = React.createRef();
+        this.state = {confirm_info: {open: false}};
     }
     initMap() {
         if (window.localStorage.center) {
@@ -121,13 +123,13 @@ class Map extends Component {
         google.maps.event.addListener(this.path_manager, 'polylinecomplete',  polyline => {
             new Promise((resolve, reject) => {
                 if (this.props.selected_path) {
-                    const info = Object.assign({}, APPEND_PATH_CONFIRM_INFO, {resolve});
-                    this.props.openConfirmModal(info);
+                    this.setState({confirm_info: {open: true, resolve}});
                 }
                 else {
                     resolve(false);
                 }
             }).then(append => {
+                this.setState({confirm_info: {open: false}});
                 this.path_manager.applyPath(polyline.getPath().getArray(), append);
             });
         });
@@ -358,6 +360,7 @@ class Map extends Component {
                 })}></div>
                 <a ref={this.download_ref} style={{display: 'none'}} download='walklog.json'></a>
                 <input ref={this.upload_ref} type="file" style={{display: 'none'}} />
+                <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={this.state.confirm_info.open} resolve={this.state.confirm_info.resolve} />
             </React.Fragment>
         );
     }
@@ -399,7 +402,7 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         setSearchForm, setSelectedPath, setCenter, 
         setZoom, removeFromActionQueue, 
-        toggleView, setMap, setEditingPath, openConfirmModal,
+        toggleView, setMap, setEditingPath,
     }, dispatch);
 }
 
