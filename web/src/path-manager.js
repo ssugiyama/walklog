@@ -62,7 +62,6 @@ export default class PathManager extends google.maps.MVCObject {
 
     deletePolyline(pl) {
         if (pl == this.selection) {
-            if (pl.getEditable()) return;
             this.set('selection', null);
         }
         if ( pl == this.highlight) {
@@ -134,14 +133,11 @@ export default class PathManager extends google.maps.MVCObject {
         google.maps.event.addListener(pl, 'click', () => {
             this.set('selection', pl == this.selection ? null : pl);
         });
-        // google.maps.event.addListener(pl, 'rightclick', () => {
-        //     this.deletePolyline(pl);
-        // });
         var deleteNode = mev => {
             if (mev.vertex != null) {
                 pl.getPath().removeAt(mev.vertex);
             }
-            else {
+            else if (!pl.getEditable()) {
                 this.deletePolyline(pl);
             }
         };
