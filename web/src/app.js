@@ -24,7 +24,6 @@ for (let y = currentYear; y >= 1997; y--) {
 }
 
 const initialState = {
-    action_queue: [],
     search_form: {
         id: '',
         date: '',
@@ -57,7 +56,7 @@ const initialState = {
     editing_path: false,
     view: 'content',
     open_walk_editor: false,
-    map: null,
+    map_loaded: false,
     info_window: {
         open: false,
         message: null,
@@ -132,39 +131,6 @@ const mainReducer = function(state = initialState, action) {
             const walk_editor_mode = action.mode;
             return Object.assign({}, state, {open_walk_editor, walk_editor_mode});
         }
-    case ActionTypes.OPEN_GEOCODE_MODAL:
-        {
-            const open_geocode_modal = action.open;
-            return Object.assign({}, state, {open_geocode_modal});
-        }
-    case ActionTypes.ADD_PATHS:
-        {
-            const action_queue = state.action_queue.concat(action);
-            return Object.assign({}, state, {action_queue});
-        }
-    case ActionTypes.CLEAR_PATHS:
-        {
-            if (typeof window !== 'undefined' && window.localStorage) {
-                delete window.localStorage.selected_path;
-            }
-            const action_queue = state.action_queue.concat(action);
-            const search_form = Object.assign({}, state.search_form, {searchPath: null });
-            return Object.assign({}, state, {selected_path: null, action_queue, search_form});
-        }
-    case ActionTypes.ADD_POINT:
-        {
-            if (typeof window !== 'undefined' && window.localStorage) {
-                delete window.localStorage.selected_path;
-            }
-            const action_queue = state.action_queue.concat(action);
-            return Object.assign({}, state, {action_queue});
-        }
-    case ActionTypes.DOWNLOAD_PATH:
-    case ActionTypes.UPLOAD_PATH:
-        {
-            const action_queue = state.action_queue.concat(action);
-            return Object.assign({}, state, {action_queue});
-        }
     case ActionTypes.SET_EDITING_PATH:
         {
             const editing_path = action.editing_path;
@@ -199,11 +165,6 @@ const mainReducer = function(state = initialState, action) {
                 window.localStorage.zoom = zoom;
             }
             return Object.assign({}, state, {zoom});
-        }
-    case ActionTypes.REMOVE_FROM_ACTION_QUEUE:
-        {
-            const action_queue = state.action_queue.slice(0, -1);
-            return Object.assign({}, state, {action_queue});
         }
     case ActionTypes.SET_PANORAMA_COUNT:
         {
@@ -254,11 +215,11 @@ const mainReducer = function(state = initialState, action) {
             const {next_id, prev_id} = action;
             return Object.assign({}, state, {next_id, prev_id});
         }
-    case ActionTypes.SET_MAP:
-    {
-        const map = action.map;
-        return Object.assign({}, state, {map});
-    }
+    case ActionTypes.SET_MAP_LOADED:
+        {
+            const map_loaded = true;
+            return Object.assign({}, state, {map_loaded});
+        }
     default:
         return state;
     }

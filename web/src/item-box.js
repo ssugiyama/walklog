@@ -148,7 +148,10 @@ class ItemBox extends Component {
                             <Typography variant="subtitle1">StreetView</Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
-                                <PanoramaBox />
+                                <NoSsr>
+<PanoramaBox />
+                                </NoSsr>
+                                
                             </ExpansionPanelDetails>
                         </ExpansionPanel>
                     }

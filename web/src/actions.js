@@ -80,26 +80,6 @@ export function toggleView() {
     };
 }
 
-export function addPaths(paths) {
-    return {
-        type: ActionTypes.ADD_PATHS,
-        paths
-    };
-}
-
-export function clearPaths() {
-    return {
-        type: ActionTypes.CLEAR_PATHS
-    };
-}
-
-export function addPoint(lat, lng, append) {
-    return {
-        type: ActionTypes.ADD_POINT,
-        lat, lng, append
-    };
-}
-
 export function setEditingPath(editing_path) {
     return {
         type: ActionTypes.SET_EDITING_PATH,
@@ -112,13 +92,6 @@ export function openWalkEditor(open, mode) {
         type: ActionTypes.OPEN_WALK_EDITOR,
         open,
         mode
-    };
-}
-
-export function openGeocodeModal(open) {
-    return {
-        type: ActionTypes.OPEN_GEOCODE_MODAL,
-        open
     };
 }
 
@@ -154,12 +127,6 @@ export function setZoom(zoom) {
     return {
         type: ActionTypes.SET_ZOOM,
         zoom,
-    };
-}
-
-export function removeFromActionQueue() {
-    return {
-        type: ActionTypes.REMOVE_FROM_ACTION_QUEUE,
     };
 }
 
@@ -205,18 +172,6 @@ export function openSnackbar(message, ask_append) {
     };
 }
 
-export function downloadPath() {
-    return {
-        type: ActionTypes.DOWNLOAD_PATH,
-    };
-}
-
-export function uploadPath() {
-    return {
-        type: ActionTypes.UPLOAD_PATH,
-    };
-}
-
 export function setLastQuery(last_query) {
     return {
         type: ActionTypes.SET_LAST_QUERY,
@@ -231,15 +186,8 @@ export function setAdjacentItemIds(next_id, prev_id) {
     };
 }
 
-export function setMap(map) {
+export function setMapLoaded() {
     return {
-        type: ActionTypes.SET_MAP,
-        map
-    };
-}
-
-export function askAppend() {
-    return {
-        type: ActionType.ASK_APPEND,
+        type: ActionTypes.SET_MAP_LOADED,
     };
 }

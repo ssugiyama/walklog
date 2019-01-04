@@ -5,11 +5,6 @@ import {
     toggleView,
     openWalkEditor,
     setGeoMarker,
-    setEditingPath,
-    deleteSelectedPath,
-    clearPaths,
-    downloadPath,
-    uploadPath,
     openSnackbar,
     addPoint,
 } from './actions';
@@ -31,6 +26,7 @@ import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { withStyles } from '@material-ui/core/styles';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
+import MapContext from './map-context';
 
 const styles = {
     root: {
@@ -58,7 +54,7 @@ class NavBar extends Component {
             navigator.geolocation.getCurrentPosition( pos => {
                 const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
                 this.props.setGeoMarker(geo_marker, updateCenter);
-                this.props.addPoint(pos.coords.latitude, pos.coords.longitude, append);
+                this.context.addPoint(pos.coords.latitude, pos.coords.longitude, append);
             }, () => {
                 alert('Unable to retrieve your location');
             });
@@ -197,6 +193,8 @@ class NavBar extends Component {
     }
 }
 
+NavBar.contextType = MapContext;
+
 function mapStateToProps(state) {
     return {
         selected_path: state.main.selected_path,
@@ -207,7 +205,6 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({ toggleView, openWalkEditor, setGeoMarker, 
-        setEditingPath, deleteSelectedPath, clearPaths, downloadPath, uploadPath,
         openSnackbar, addPoint,
     }, dispatch);
 }

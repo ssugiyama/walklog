@@ -10,6 +10,7 @@ import NavigationArrowForward from '@material-ui/icons/ArrowForward';
 import NavigationArrowBack from '@material-ui/icons/ArrowBack';
 import AvFastForward from '@material-ui/icons/FastForward';
 import AvFastRewind from '@material-ui/icons/FastRewind';
+import MapContext from './map-context';
 
 // import { withStyles } from 'material-ui/styles';
 
@@ -74,7 +75,7 @@ class PanoramaBox extends Component {
     }
     updatePath(highlighted_path) {
         if (! highlighted_path) {
-            const panorama = this.props.overlay ? this.props.map.getStreetView() : this.panorama;
+            const panorama = this.props.overlay ? this.context.map.getStreetView() : this.panorama;
             if (panorama) {
                 panorama.setVisible(false);
             }
@@ -92,7 +93,7 @@ class PanoramaBox extends Component {
         const item = this.panoramaPointsAndHeadings[index];
         const pt = item[0];
         const heading = item[1];
-        const panorama = this.props.overlay ? this.props.map.getStreetView() : this.panorama;
+        const panorama = this.props.overlay ? this.context.map.getStreetView() : this.panorama;
         this.streetViewService.getPanoramaByLocation(pt, 50, (data, status) => {
             if (status == google.maps.StreetViewStatus.OK) {
                 panorama.setPano(data.location.pano);
@@ -110,11 +111,10 @@ class PanoramaBox extends Component {
         if (nextProps.panorama_index != this.props.panorama_index) return true;
         if (nextProps.panorama_count != this.props.panorama_count) return true;
         if (nextProps.overlay != this.props.overlay) return true;
-        if (nextProps.map != this.props.map) return true;
         return false;
     }
     updatePanorama(pathUpdated) {
-        if ( !this.props.map ) return;
+        if ( !this.props.map_loaded ) return;
         if ( !this.panorama ) {
             this.streetViewService = new google.maps.StreetViewService();
             this.panorama = new google.maps.StreetViewPanorama(this.body_ref.current, {
@@ -137,6 +137,7 @@ class PanoramaBox extends Component {
         this.updatePanorama(true);
     }
     componentDidUpdate(prevProps) {
+        console.log(this.context);
         const pathUpdated = !prevProps.map || prevProps.highlighted_path != this.props.highlighted_path;
         this.updatePanorama(pathUpdated);
     }
@@ -144,9 +145,10 @@ class PanoramaBox extends Component {
         this.setStreetView(null);
     }
     setStreetView(panorama) {
-        this.props.map.setStreetView(panorama);
+        this.context.map.setStreetView(panorama);
     }
     render() {
+        console.log(this.context);
         return (
             <div>
                 <div>
@@ -170,10 +172,12 @@ class PanoramaBox extends Component {
     }
 }
 
+PanoramaBox.contextType = MapContext;
+
 function mapStateToProps(state) {
-    const { view, highlighted_path, panorama_index, panorama_count, overlay, map } = state.main;
+    const { view, highlighted_path, panorama_index, panorama_count, overlay, map_loaded } = state.main;
     return {
-        view, highlighted_path,  panorama_index, panorama_count, overlay, map
+        view, highlighted_path,  panorama_index, panorama_count, overlay, map_loaded
     };
 }
 

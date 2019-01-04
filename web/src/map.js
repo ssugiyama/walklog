@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMap, setEditingPath } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMapLoaded, setEditingPath } from './actions';
 import { connect } from 'react-redux';
 import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
 import ConfirmModal from './confirm-modal';
 import config from './config';
+import MapContext from './map-context';
 
 const styles = theme => ({
     mapCompact: {
@@ -171,7 +172,15 @@ class Map extends Component {
         this.upload_ref.current.addEventListener('change', e => {
             this.processUpload(e);
         });
-        this.props.setMap(this.map);
+        this.props.setMapLoaded();
+        const public_procs = {
+            addPoint: this.addPoint.bind(this),
+            uploadPath: this.uploadPath.bind(this),
+            downloadPath: this.downloadPath.bind(this),
+            clearPaths: this.clearPaths.bind(this),
+            addPaths: this.addPaths.bind(this),
+        };
+        this.context.setMap(this.map, public_procs);
         this.componentDidUpdate();
     }
     componentDidMount() {
@@ -226,7 +235,6 @@ class Map extends Component {
         else if( ! this.props.highlighted_path ) {
             this.path_manager.set('highlight', null);
         }
-        this.processActionQueue();
         if (this.props.editing_path) {
             this.path_manager.set('editable', true);
         }
@@ -277,37 +285,27 @@ class Map extends Component {
             }
         }
     }
-    processActionQueue() {
-        const len = this.props.action_queue.length;
-        if (len == 0) return;
-        const action = this.props.action_queue[len-1];
-        if (action.type == ActionTypes.ADD_PATHS) {
-            for (let path of action.paths) {
-                this.path_manager.showPath(path, false, false);
-            }
-            this.props.removeFromActionQueue();
-        }
-        else if (action.type == ActionTypes.CLEAR_PATHS) {
-            this.path_manager.deleteAll();
-            this.props.removeFromActionQueue();
-        }
-        else if (action.type == ActionTypes.DOWNLOAD_PATH) {
-            const content = this.path_manager.selectionAsGeoJSON();
-            const blob = new Blob([ content ], { 'type' : 'application/json' });
-            const elem = ReactDOM.findDOMNode(this.download_ref.current);
-            elem.href = window.URL.createObjectURL(blob);
-            setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
-            this.props.removeFromActionQueue();
-        }
-        else if (action.type == ActionTypes.UPLOAD_PATH) {
-            const elem = ReactDOM.findDOMNode(this.upload_ref.current);
-            setTimeout(() => elem.click(), 0);
-            this.props.removeFromActionQueue();
-        }
-        else if (action.type == ActionTypes.ADD_POINT) {
-            const pt = new google.maps.LatLng(action.lat, action.lng);
-            this.path_manager.applyPath([pt], action.append);
-            this.props.removeFromActionQueue();
+    addPoint(lat, lng, append) {
+        const pt = new google.maps.LatLng(lat, lng);
+        this.path_manager.applyPath([pt], append);
+    }
+    uploadPath() {
+        const elem = ReactDOM.findDOMNode(this.upload_ref.current);
+        setTimeout(() => elem.click(), 0);
+    }
+    downloadPath() {
+        const content = this.path_manager.selectionAsGeoJSON();
+        const blob = new Blob([ content ], { 'type' : 'application/json' });
+        const elem = ReactDOM.findDOMNode(this.download_ref.current);
+        elem.href = window.URL.createObjectURL(blob);
+        setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
+    }
+    clearPaths() {
+        this.path_manager.deleteAll();
+    }
+    addPaths(paths) {
+        for (let path of paths) {
+            this.path_manager.showPath(path, false, false);
         }
     }
     toPolygon(id, str) {
@@ -388,12 +386,14 @@ class Map extends Component {
     }
 }
 
+Map.contextType = MapContext;
+
 function mapStateToProps(state) {
     const { filter, latitude, longitude, radius, cities } = state.main.search_form;
-    const { selected_path, highlighted_path, editing_path, action_queue, panorama, info_window, center, geo_marker, zoom, view, overlay } = state.main;
+    const { selected_path, highlighted_path, editing_path, panorama, info_window, center, geo_marker, zoom, view, overlay } = state.main;
     return {
         filter, latitude, longitude, radius, cities,
-        selected_path, highlighted_path, editing_path, action_queue, panorama,
+        selected_path, highlighted_path, editing_path, panorama,
         info_window, center, geo_marker, zoom, view, overlay,
     };
 }
@@ -402,7 +402,7 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         setSearchForm, setSelectedPath, setCenter, 
         setZoom, removeFromActionQueue, 
-        toggleView, setMap, setEditingPath,
+        toggleView, setMapLoaded, setEditingPath,
     }, dispatch);
 }
 

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setPanoramaCount, setPanoramaIndex, setOverlay, setGeoMarker,
-    setEditingPath, deleteSelectedPath, clearPaths, setSearchForm, downloadPath, uploadPath } from './actions';
+    setEditingPath, deleteSelectedPath, setSearchForm, } from './actions';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
@@ -28,6 +28,7 @@ import Swiper from 'react-id-swiper';
 import SearchIcon from '@material-ui/icons/Search';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import InputBase from '@material-ui/core/InputBase';
+import MapContext from './map-context';
 
 const styles = theme => ({
     root: {
@@ -123,7 +124,7 @@ class BottomBar extends Component {
         });
     }
     componentDidUpdate(prevProps, prevSate) {
-        if ( this.props.map && !this.geocoder) {
+        if ( this.props.map_loaded && !this.geocoder) {
             this.geocoder = new google.maps.Geocoder();
         }
     }
@@ -202,13 +203,13 @@ class BottomBar extends Component {
                                 <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
                             </Tooltip>
                             <Tooltip title="clear all" position="top-center">
-                                <IconButton onClick={() => this.props.clearPaths() }><NavigationRefresh /></IconButton>
+                                <IconButton onClick={() => this.context.clearPaths() }><NavigationRefresh /></IconButton>
                             </Tooltip>
                             <Tooltip title="download" position="top-center">
-                                <IconButton onClick={() => this.props.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
+                                <IconButton onClick={() => this.context.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
                             </Tooltip>
                             <Tooltip title="upload" position="top-center">
-                                <IconButton onClick={() => this.props.uploadPath() }><FileUpload /></IconButton>
+                                <IconButton onClick={() => this.context.uploadPath() }><FileUpload /></IconButton>
                             </Tooltip>
                             <Typography variant="body1" style={{ display: 'inline' }}>{`${this.state.length.toFixed(1)}km`}</Typography>
                         </div>            
@@ -239,11 +240,13 @@ class BottomBar extends Component {
     }
 }
 
+BottomBar.contextType = MapContext;
+
 function mapStateToProps(state) {
     const { filter, radius } = state.main.search_form;
-    const { selected_path, panorama, panorama_index, panorama_count, overlay, map } = state.main;
+    const { selected_path, panorama, panorama_index, panorama_count, overlay, map_loaded } = state.main;
     return {
-        filter, radius, selected_path, panorama, panorama_index, panorama_count, overlay, map
+        filter, radius, selected_path, panorama, panorama_index, panorama_count, overlay, map_loaded
     };
 }
 
@@ -253,10 +256,7 @@ function mapDispatchToProps(dispatch) {
         setPanoramaIndex, 
         setOverlay,
         setEditingPath, 
-        deleteSelectedPath, 
-        clearPaths, 
-        downloadPath,
-        uploadPath,
+        deleteSelectedPath,
         setSearchForm,
         setGeoMarker
     }, dispatch);

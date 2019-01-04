@@ -15,6 +15,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
 import NoSsr from '@material-ui/core/NoSsr';
+import MapContext from './map-context';
 
 const styles = theme => ({
     root: {
@@ -30,6 +31,11 @@ const styles = theme => ({
 class Body extends Component {
     constructor(props) {
         super(props);
+        this.state = {mapContext: {map: null, setMap: this.setMap.bind(this)}};
+    }
+    setMap(map, public_procs) {
+        const newContext = Object.assign({}, this.state.mapContext, {map, ...public_procs});
+        this.setState({mapContext: newContext});
     }
     handleRequestClose() {
         this.props.openSnackbar(null);
@@ -46,20 +52,22 @@ class Body extends Component {
                     [classes.rootMap]: view == 'map',
                 }
             )}>
-                <CssBaseline />
-                <NavBarContainer />
-                <NoSsr>
-                    <MapContainer />
-                </NoSsr>
-                <ContentBoxContainer />
-                { view == 'map' && <BottomBarContainer /> }
-                <WalkEditorContainer />
-                <Snackbar
-                    open={this.props.message != null}
-                    message={this.props.message}
-                    autoHideDuration={4000}
-                    onClose={this.handleRequestClose.bind(this)}
-                />
+                <MapContext.Provider value={this.state.mapContext}>
+                    <CssBaseline />
+                    <NavBarContainer />
+                    <NoSsr>
+                        <MapContainer />
+                    </NoSsr>
+                    <ContentBoxContainer />
+                    { view == 'map' && <BottomBarContainer /> }
+                    <WalkEditorContainer />
+                    <Snackbar
+                        open={this.props.message != null}
+                        message={this.props.message}
+                        autoHideDuration={4000}
+                        onClose={this.handleRequestClose.bind(this)}
+                    />
+                </MapContext.Provider>
             </div>
         );
     }
