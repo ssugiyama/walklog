@@ -137,7 +137,7 @@ class PanoramaBox extends Component {
         this.updatePanorama(true);
     }
     componentDidUpdate(prevProps) {
-        const pathUpdated = !prevProps.map_loaded || prevProps.highlighted_path != this.props.highlighted_path;
+        const pathUpdated = !this.panoramaPointsAndHeadings || prevProps.highlighted_path != this.props.highlighted_path;
         this.updatePanorama(pathUpdated);
     }
     componentWillUnmount() {
