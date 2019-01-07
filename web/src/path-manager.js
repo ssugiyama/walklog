@@ -133,7 +133,9 @@ export default class PathManager extends google.maps.MVCObject {
         const key = this.pathToHash(pl.getPath());
         this.polylines[key] = pl;
         google.maps.event.addListener(pl, 'click', () => {
-            if (!pl.getEditable()) {
+            if (pl.getEditable()) {
+                pl.setEditable(false);
+            } else {
                 this.set('selection', pl == this.selection ? null : pl);
             }
         });
