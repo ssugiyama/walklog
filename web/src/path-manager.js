@@ -133,7 +133,9 @@ export default class PathManager extends google.maps.MVCObject {
         const key = this.pathToHash(pl.getPath());
         this.polylines[key] = pl;
         google.maps.event.addListener(pl, 'click', () => {
-            this.set('selection', pl == this.selection ? null : pl);
+            if (!pl.getEditable()) {
+                this.set('selection', pl == this.selection ? null : pl);
+            }
         });
         var deleteNode = mev => {
             if (mev.vertex != null) {
