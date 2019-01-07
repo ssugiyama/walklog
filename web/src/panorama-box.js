@@ -137,8 +137,7 @@ class PanoramaBox extends Component {
         this.updatePanorama(true);
     }
     componentDidUpdate(prevProps) {
-        console.log(this.context);
-        const pathUpdated = !prevProps.map || prevProps.highlighted_path != this.props.highlighted_path;
+        const pathUpdated = !prevProps.map_loaded || prevProps.highlighted_path != this.props.highlighted_path;
         this.updatePanorama(pathUpdated);
     }
     componentWillUnmount() {
@@ -148,7 +147,6 @@ class PanoramaBox extends Component {
         this.context.map.setStreetView(panorama);
     }
     render() {
-        console.log(this.context);
         return (
             <div>
                 <div>

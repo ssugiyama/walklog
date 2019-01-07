@@ -144,13 +144,14 @@ class BottomBar extends Component {
                 { this.props.overlay ? (
                     <div>
                         <div className={classes.bottomBarGroup}>
+                            <Typography variant="caption">StreetView</Typography>
                             <Tooltip title="-10" position="top-center">
                                 <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
                             </Tooltip>
                             <Tooltip title="-1" position="top-center">
                                 <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
                             </Tooltip>
-                            <span><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></span>
+                            <Typography variant="body1" style={{ display: 'inline' }}>{ this.props.panorama_index+1 } / { this.props.panorama_count } </Typography>
                             <Tooltip title="+1" position="top-center">
                                 <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
                             </Tooltip>
