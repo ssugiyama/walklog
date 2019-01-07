@@ -41,7 +41,9 @@ export default class PathManager extends google.maps.MVCObject {
                 this.set('selection', pl);
             }
             else {
-                this.selection.getPath().push(...path);
+                for (let pt of path) {
+                    this.selection.getPath().push(pt);
+                }
                 this.updateLength();
             }
         }

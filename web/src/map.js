@@ -226,10 +226,10 @@ class Map extends Component {
         if (prevProps.geo_marker && this.props.geo_marker && prevProps.geo_marker.show != this.props.geo_marker.show ) {
             this.geo_marker.setMap(this.props.geo_marker.show ? this.map : null);
         }
-        if (this.props.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
+        if (this.props.selected_path && this.props.selected_path != prevProps.selected_path && this.props.selected_path != this.path_manager.getEncodedSelection()) {
             this.path_manager.showPath(this.props.selected_path, true);
         }
-        if (this.props.highlighted_path && this.props.highlighted_path != this.path_manager.getEncodedHighlight()) {
+        if (this.props.highlighted_path && this.props.highlighted_path != prevProps.highlighted_path && this.props.highlighted_path != this.path_manager.getEncodedHighlight()) {
             this.path_manager.showPath(this.props.highlighted_path, false, true);
         }
         else if( ! this.props.highlighted_path ) {

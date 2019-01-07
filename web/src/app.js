@@ -116,7 +116,11 @@ const mainReducer = function(state = initialState, action) {
         {
             const selected_path = action.path;
             if (typeof window !== 'undefined' && window.localStorage) {
-                window.localStorage.selected_path = selected_path;
+                if (!selected_path) {
+                    delete window.localStorage.selected_path;
+                } else {
+                    window.localStorage.selected_path = selected_path;
+                }
             }
             return Object.assign({}, state, {selected_path, editing_path: false});
         }
@@ -298,13 +302,10 @@ const formWatchMiddleware = store => next => action => {
         if (payload.filter && current_filter == 'neighborhood' && state.main.center) {
             query.latitude = state.main.center.lat;
             query.longitude = state.main.center.lng;
-        } else if (payload.filter === 'frechet' ||  payload.filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
+        } else if (current_filter === 'frechet' ||  current_filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
             query.order = 'nearest_first';
-        } else if (payload.filter !== 'frechet' &&  payload.filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
+        } else if (current_filter !== 'frechet' && current_filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
             query.order = 'newest_first';
-        }
-        if (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && !query.searchPath && state.main.selected_path) {
-            query.searchPath = state.main.selected_path;
         }
         const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
         store.dispatch(push({
