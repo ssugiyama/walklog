@@ -12,12 +12,10 @@ import NavigationArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
 import EditorModeEdit from '@material-ui/icons/Edit';
 import Typography from '@material-ui/core/Typography';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import NoSsr from '@material-ui/core/NoSsr';
@@ -25,13 +23,16 @@ import TweetIcon from './tweet-icon';
 import config from './config';
 
 const styles = theme => ({
-    ExpansionPanelSummary: {
-        color: theme.palette.text.primary,
-        backgroundColor: theme.palette.primary.main,
-    },
-    ExpansionPanelDetails: {
+    itemBoxContent: {
         padding: '8px 12px 12px',
         flexDirection: 'column',
+        margin: '4px 0',
+    },
+    tabs: {
+        margin: '4px 0',
+    },
+    tab: {
+        textTransform: 'none',
     },
     itemBoxTitle: {
         fontSize: '100%'
@@ -52,18 +53,22 @@ const styles = theme => ({
     itemBoxControl: {
         width: '100%',
         textAlign: 'center',
-        padding: '8px 12px 12px'
+        padding: '8px 12px 12px',
+        margin: '4px 0',
     },
 });
 
 class ItemBox extends Component {
     constructor(props) {
         super(props);
-        this.state = { };
+        this.state = { tabValue: 0 };
         this.root_ref = React.createRef();
     }
     handleEdit() {
         this.props.openWalkEditor(true, 'update');
+    }
+    handleTabChange(event, tabValue) {
+        this.setState({ tabValue });
     }
     static getDerivedStateFromProps(nextProps, prevState) {
         const data = nextProps.selected_item;
@@ -76,6 +81,7 @@ class ItemBox extends Component {
     }
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.selected_item != this.props.selected_item) return true;
+        if (nextState.tabValue != this.state.tabValue) return true;
         return false;
     }
     componentDidMount() {
@@ -119,41 +125,34 @@ class ItemBox extends Component {
                             data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
                         }
                     </Paper>
-                    { data && 
-                        <ExpansionPanel defaultExpanded={true}>
-                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} className={classes.ExpansionPanelSummary}>
-                            <Typography variant="subtitle1">Comment</Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
-                                <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
-                                </Typography>
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel> 
+                    <Paper>
+                        <Tabs value={this.state.tabValue}
+                            onChange={this.handleTabChange.bind(this)}
+                            className={classes.tabs}
+                            textColor="secondary"
+                            variant="fullWidth" >
+                            <Tab label="Comment"  className={classes.tab} />
+                            <Tab label="Elevation" className={classes.tab} />
+                            <Tab label="StreetView" className={classes.tab}/>
+                        </Tabs>
+                    </Paper>
+                    { data && this.state.tabValue == 0 &&
+                        <Paper className={classes.itemBoxContent}>
+                            <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
+                            </Typography>
+                        </Paper>
                     }
-                    { data && 
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} className={classes.ExpansionPanelSummary}>
-                            <Typography variant="subtitle1">Elevation</Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
-                                <NoSsr>
-                                    <ElevationBox />
-                                </NoSsr>
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                    { data && this.state.tabValue == 1 &&
+                        <Paper className={classes.itemBoxContent}>
+                            <NoSsr>
+                                <ElevationBox />
+                            </NoSsr>
+                        </Paper>
                     }
-                    { data && 
-                        <ExpansionPanel>
-                            <ExpansionPanelSummary  expandIcon={<ExpandMoreIcon />} className={classes.ExpansionPanelSummary}>
-                            <Typography variant="subtitle1">StreetView</Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.ExpansionPanelDetails}>
-                                <NoSsr>
-<PanoramaBox />
-                                </NoSsr>
-                                
-                            </ExpansionPanelDetails>
-                        </ExpansionPanel>
+                    { data && this.state.tabValue == 2 &&
+                        <Paper className={classes.itemBoxContent}>
+                            <PanoramaBox />
+                        </Paper>
                     }
             </div>;
     }
