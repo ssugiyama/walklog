@@ -17,7 +17,7 @@ import MapContext from './map-context';
 const styles = {
     panoramaBoxBody: {
         width: '100%',
-        height: '25vh'
+        height: '20vh'
     },
     panoramaBoxControl: {
         display: 'flex',
