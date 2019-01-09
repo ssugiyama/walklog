@@ -20,7 +20,6 @@ import AvFastRewind from '@material-ui/icons/FastRewind';
 import FileDownload from '@material-ui/icons/GetApp';
 import FileUpload from '@material-ui/icons/Publish';
 import SwapHoriz from '@material-ui/icons/SwapHoriz';
-import MapsMap from '@material-ui/icons/Map';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
@@ -141,6 +140,9 @@ class BottomBar extends Component {
         const OverlayControls = (<div>
             <div className={classes.bottomBarGroup}>
                 <Typography variant="caption">StreetView</Typography>
+                <Tooltip title="back to map" position="top-center">
+                    <IconButton onClick={ () => { this.props.setOverlay(false); }}><NavigationCancel /></IconButton>
+                </Tooltip>
                 <Tooltip title="-10" position="top-center">
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
                 </Tooltip>
@@ -153,9 +155,6 @@ class BottomBar extends Component {
                 </Tooltip>
                 <Tooltip title="+10" position="top-center">
                     <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
-                </Tooltip>
-                <Tooltip title="back to map" position="top-center">
-                    <IconButton onClick={ () => { this.props.setOverlay(false); }}><MapsMap /></IconButton>
                 </Tooltip>
             </div>
         </div>);
