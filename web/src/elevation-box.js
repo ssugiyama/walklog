@@ -9,7 +9,7 @@ import { Chart } from 'chart.js';
 const styles = {
     elevationBox: {
         width: '100%',
-        height: 250,
+        height: '20vh',
     },
 };
 
