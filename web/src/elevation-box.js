@@ -10,6 +10,7 @@ const styles = {
     elevationBox: {
         width: '100%',
         height: '20vh',
+        maxHeight: '20vh',
     },
 };
 
