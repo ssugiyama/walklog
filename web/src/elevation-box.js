@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
-import Typography from '@material-ui/core/Typography';
 import {  theme } from './app';
 import { Chart } from 'chart.js';
 
@@ -10,7 +9,6 @@ const styles = {
     elevationBox: {
         width: '100%',
         height: '20vh',
-        maxHeight: '20vh',
     },
 };
 
@@ -37,47 +35,49 @@ class ElevationBox extends Component {
             this.elevationResults = results;
             const data = results.map(result => result.elevation);
             const labels = results.map(result => '');
-            this.chart = new Chart(this.root_ref.current.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets:[ {
-                        data,
-                        borderWidth: 1,
-                        borderColor: '#ff0000',
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                        pointStyle: 'dot',
-                        radius: 1
-                    }]
-                },
-                options: {
-                    legend: false,
-                    tooltips: {
-                        enabled: false
+            if (!this.chart) {
+                this.chart = new Chart(this.root_ref.current.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels,
                     },
-                    hover: {
-                        intersect: false,
-                        mode: 'index',
-                        onHover: this.handleHover.bind(this)
-                    },
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                fontColor: theme.palette.text.primary,
-                            },
-                            gridLines: {
-                                color: theme.palette.divider,
-                            }
-                        }],
-                        xAxes: [{
-                            gridLines: {
-                                display: false,
-                            }
-                        }]
+                    options: {
+                        legend: false,
+                        tooltips: {
+                            enabled: false
+                        },
+                        hover: {
+                            intersect: false,
+                            mode: 'index',
+                            onHover: this.handleHover.bind(this)
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    fontColor: theme.palette.text.primary,
+                                },
+                                gridLines: {
+                                    color: theme.palette.divider,
+                                }
+                            }],
+                            xAxes: [{
+                                gridLines: {
+                                    display: false,
+                                }
+                            }]
+                        },
                     }
-                
-                }
-            });
+                });
+            }
+            this.chart.data.datasets = [{
+                data,
+                borderWidth: 1,
+                borderColor: '#ff0000',
+                backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                pointStyle: 'dot',
+                radius: 1
+            }];
+            this.chart.update();
         }
     }
     handleHover(ev, elms) {
@@ -103,10 +103,6 @@ class ElevationBox extends Component {
         if ( !this.props.map_loaded ) return;
         if (! this.elevator ) {
             this.elevator = new google.maps.ElevationService();
-        }
-        if (this.chart) {
-            this.chart.destroy();
-            this.chart = null;
         }
         this.requestElevation(this.props.highlighted_path);
     }
