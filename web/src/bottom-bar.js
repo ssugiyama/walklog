@@ -35,6 +35,10 @@ const styles = theme => ({
         backgroundColor: theme.palette.background.default,
     },
     bottomBarGroup: {
+        width: '100%',
+        margin: 'auto',
+    },
+    bottomBarGroupBody: {
         width: 'fit-content',
         margin: 'auto',
     },
@@ -140,92 +144,102 @@ class BottomBar extends Component {
         const OverlayControls = (<div>
             <div className={classes.bottomBarGroup}>
                 <Typography variant="caption">StreetView</Typography>
-                <Tooltip title="back to map" position="top-center">
-                    <IconButton onClick={ () => { this.props.setOverlay(false); }}><NavigationCancel /></IconButton>
-                </Tooltip>
-                <Tooltip title="-10" position="top-center">
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
-                </Tooltip>
-                <Tooltip title="-1" position="top-center">
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                </Tooltip>
-                <Typography variant="body1" style={{ display: 'inline' }}>{ this.props.panorama_index+1 } / { this.props.panorama_count } </Typography>
-                <Tooltip title="+1" position="top-center">
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                </Tooltip>
-                <Tooltip title="+10" position="top-center">
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
-                </Tooltip>
+                <div className={classes.bottomBarGroupBody}>
+                    <Tooltip title="back to map" position="top-center">
+                        <IconButton onClick={ () => { this.props.setOverlay(false); }}><NavigationCancel /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="-10" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="-1" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                    </Tooltip>
+                    <Typography variant="body1" style={{ display: 'inline' }}>{ this.props.panorama_index+1 } / { this.props.panorama_count } </Typography>
+                    <Tooltip title="+1" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="+10" position="top-center">
+                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
+                    </Tooltip>
+                </div>
             </div>
         </div>);
         const NeighborhoodControls = (<div>
             <div className={classes.bottomBarGroup}>
                 <Typography variant="caption">Neighborhood</Typography>
-                <Tooltip title="cancel" position="top-center">
-                    <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
-                </Tooltip>
-                <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
-                    <MenuItem value={1000}>1km</MenuItem>
-                    <MenuItem value={500}>500m</MenuItem>
-                    <MenuItem value={250}>250m</MenuItem>
-                    <MenuItem value={100}>100m</MenuItem>
-                    {
-                        [1000, 500, 250, 100].some(r => r == this.props.radius) ? null
-                        : (<MenuItem value={this.props.radius}>{Math.round(this.props.radius) + 'm'}</MenuItem>)
-                    }
-                </Select>
+                <div className={classes.bottomBarGroupBody}>
+                    <Tooltip title="cancel" position="top-center">
+                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
+                    </Tooltip>
+                    <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
+                        <MenuItem value={1000}>1km</MenuItem>
+                        <MenuItem value={500}>500m</MenuItem>
+                        <MenuItem value={250}>250m</MenuItem>
+                        <MenuItem value={100}>100m</MenuItem>
+                        {
+                            [1000, 500, 250, 100].some(r => r == this.props.radius) ? null
+                            : (<MenuItem value={this.props.radius}>{Math.round(this.props.radius) + 'm'}</MenuItem>)
+                        }
+                    </Select>
+                </div>
             </div>
         </div>);
         const CitiesControls = (<div>
             <div className={classes.bottomBarGroup}>
                 <Typography variant="caption">Cities</Typography>
-                <Tooltip title="cancel" position="top-center">
-                    <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
-                </Tooltip>
-                <Tooltip title="clear" position="top-center">
-                    <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
-                </Tooltip>
+                <div className={classes.bottomBarGroupBody}>
+                    <Tooltip title="cancel" position="top-center">
+                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="clear" position="top-center">
+                        <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
+                    </Tooltip>
+                </div>
             </div>
         </div>);
         const PathControls = (<div>
             <div className={classes.bottomBarGroup}>
                 <Typography variant="caption">{['frechet', 'hausdorff', 'crossing'].includes(this.props.filter) ? 'Select path' : 'Path'}</Typography>
+                <div className={classes.bottomBarGroupBody}>
                 { ['frechet', 'hausdorff', 'crossing'].includes(this.props.filter) &&
-                <Tooltip title="cancel" position="top-center">
-                    <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
-                </Tooltip>}
-                <Tooltip title="edit" position="top-center">
-                    <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
-                </Tooltip>
-                <Tooltip title="clear all" position="top-center">
-                    <IconButton onClick={() => this.context.clearPaths() }><NavigationRefresh /></IconButton>
-                </Tooltip>
-                <Tooltip title="download" position="top-center">
-                    <IconButton onClick={() => this.context.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
-                </Tooltip>
-                <Tooltip title="upload" position="top-center">
-                    <IconButton onClick={() => this.context.uploadPath() }><FileUpload /></IconButton>
-                </Tooltip>
-                <Typography variant="body1" style={{ display: 'inline' }}>{`${this.state.length.toFixed(1)}km`}</Typography>
+                    <Tooltip title="cancel" position="top-center">
+                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
+                    </Tooltip>}
+                    <Tooltip title="edit" position="top-center">
+                        <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="clear all" position="top-center">
+                        <IconButton onClick={() => this.context.clearPaths() }><NavigationRefresh /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="download" position="top-center">
+                        <IconButton onClick={() => this.context.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="upload" position="top-center">
+                        <IconButton onClick={() => this.context.uploadPath() }><FileUpload /></IconButton>
+                    </Tooltip>
+                    <Typography variant="body1" style={{ display: 'inline' }}>{`${this.state.length.toFixed(1)}km`}</Typography>
+                </div>
             </div>
         </div>);
         const SearchControls = (<div>
             <div className={classes.bottomBarGroup}>
                 <Typography variant="caption">Search</Typography>
-                <div className={classes.search}>
-                    <div className={classes.searchIcon}>
-                        <SearchIcon />
+                <div className={classes.bottomBarGroupBody}>
+                    <div className={classes.search}>
+                        <div className={classes.searchIcon}>
+                            <SearchIcon />
+                        </div>
+                        <InputBase
+                            placeholder="location..."
+                            classes={{
+                                root: classes.inputRoot,
+                                input: classes.inputInput,
+                            }}
+                            onChange={e => this.setState({location: e.target.value})}
+                            onKeyPress={e => { if (e.charCode == 13) this.handleSubmitLocation(); }}
+                            onBlur={e => { this.handleSubmitLocation(); }}
+                        />
                     </div>
-                    <InputBase
-                        placeholder="location..."
-                        classes={{
-                            root: classes.inputRoot,
-                            input: classes.inputInput,
-                        }}
-                        onChange={e => this.setState({location: e.target.value})}
-                        onKeyPress={e => { if (e.charCode == 13) this.handleSubmitLocation(); }}
-                        onBlur={e => { this.handleSubmitLocation(); }}
-                    />
                 </div>
             </div>
         </div>);
