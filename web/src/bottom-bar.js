@@ -122,6 +122,7 @@ class BottomBar extends Component {
         this.props.setSearchForm({radius: event.target.value});
     }
     handleSubmitLocation() {
+        if (!this.state.location) return;
         this.geocoder.geocode( { 'address': this.state.location}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
                 this.props.setGeoMarker({ 
