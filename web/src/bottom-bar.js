@@ -200,7 +200,7 @@ class BottomBar extends Component {
         </div>);
         const PathControls = (<div>
             <div className={classes.bottomBarGroup}>
-                <Typography variant="caption">{['frechet', 'hausdorff', 'crossing'].includes(this.props.filter) ? 'Select path' : 'Path'}</Typography>
+                <Typography variant="caption">Path</Typography>
                 <div className={classes.bottomBarGroupBody}>
                     <Tooltip title="edit" position="top-center">
                         <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
