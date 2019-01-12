@@ -111,9 +111,12 @@ class BottomBar extends Component {
         this.setState({groupIndex});
     }
     handleNextButtonClick() {
-        const groupCount = this.props.overlay ? 1 : ['neighborhood', 'cities'].includes(this.props.filter) ? 3 : 2;
+        const groupCount = this.props.overlay ? 1 : this.props.filter == '' ? 2 : 3;
         const groupIndex = this.state.groupIndex < groupCount - 1 ? this.state.groupIndex + 1 : 0;
         this.setState({groupIndex});
+    }
+    handleSelectFilter(event) {
+        this.props.setSearchForm({filter: event.target.value});
     }
     resetCities() {
         this.props.setSearchForm({cities: ''});
@@ -165,13 +168,19 @@ class BottomBar extends Component {
                 </div>
             </div>
         </div>);
-        const NeighborhoodControls = (<div>
+        const FilterControls = (<div>
             <div className={classes.bottomBarGroup}>
-                <Typography variant="caption">Neighborhood</Typography>
+                <Typography variant="caption">Filter</Typography>
                 <div className={classes.bottomBarGroupBody}>
-                    <Tooltip title="cancel" position="top-center">
-                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
-                    </Tooltip>
+                    <Select value={this.props.filter} onChange={this.handleSelectFilter.bind(this)}>
+                        <MenuItem value="">-</MenuItem>
+                        <MenuItem value="neighborhood">Neighborhood</MenuItem>
+                        <MenuItem value="cities">Cities</MenuItem>
+                        <MenuItem value="frechet">Fréchet</MenuItem>
+                        <MenuItem value="hausdorff">Hausdorff</MenuItem>
+                        <MenuItem value="crossing">Crossing</MenuItem>
+                    </Select>
+                    { this.props.filter == 'neighborhood' &&
                     <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
                         <MenuItem value={1000}>1km</MenuItem>
                         <MenuItem value={500}>500m</MenuItem>
@@ -181,20 +190,11 @@ class BottomBar extends Component {
                             [1000, 500, 250, 100].some(r => r == this.props.radius) ? null
                             : (<MenuItem value={this.props.radius}>{Math.round(this.props.radius) + 'm'}</MenuItem>)
                         }
-                    </Select>
-                </div>
-            </div>
-        </div>);
-        const CitiesControls = (<div>
-            <div className={classes.bottomBarGroup}>
-                <Typography variant="caption">Cities</Typography>
-                <div className={classes.bottomBarGroupBody}>
-                    <Tooltip title="cancel" position="top-center">
-                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
-                    </Tooltip>
+                    </Select>}
+                    { this.props.filter == 'cities' &&
                     <Tooltip title="clear" position="top-center">
                         <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
-                    </Tooltip>
+                    </Tooltip>}
                 </div>
             </div>
         </div>);
@@ -202,10 +202,6 @@ class BottomBar extends Component {
             <div className={classes.bottomBarGroup}>
                 <Typography variant="caption">{['frechet', 'hausdorff', 'crossing'].includes(this.props.filter) ? 'Select path' : 'Path'}</Typography>
                 <div className={classes.bottomBarGroupBody}>
-                { ['frechet', 'hausdorff', 'crossing'].includes(this.props.filter) &&
-                    <Tooltip title="cancel" position="top-center">
-                        <IconButton onClick={() => this.props.setSearchForm({filter: ''}) }><NavigationCancel /></IconButton>
-                    </Tooltip>}
                     <Tooltip title="edit" position="top-center">
                         <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
                     </Tooltip>
@@ -249,11 +245,8 @@ class BottomBar extends Component {
             controls.push(OverlayControls);
         }
         else {
-            if (this.props.filter == 'neighborhood') {
-                controls.push(NeighborhoodControls);
-            }
-            else if (this.props.filter == 'cities') {
-                controls.push(CitiesControls);
+            if (this.props.filter != '') {
+                controls.push(FilterControls);
             }
             controls.push(PathControls);
             controls.push(SearchControls)
