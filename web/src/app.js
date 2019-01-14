@@ -307,8 +307,8 @@ const formWatchMiddleware = store => next => action => {
         } else if (current_filter !== 'frechet' && current_filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
             query.order = 'newest_first';
         }
-        if (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && !state.main.search_form.searchPath && state.main.selected_path) {
-            query.searchPath = state.main.selected_path;
+        if (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && action.type != ActionTypes.SET_SELECTED_PATH) {
+            query.searchPath = state.main.selected_path || '';
         }
         const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
         store.dispatch(push({
