@@ -7,12 +7,13 @@ import { push } from 'connected-react-router';
 import { getMoreItems, setSelectedItem, toggleView } from './actions';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
+import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import Button from '@material-ui/core/Button';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import MapContext from './map-context';
@@ -46,7 +47,7 @@ const styles = theme => ({
 class SearchBox extends Component {
     constructor(props) {
         super(props);
-        this.state = {show_distance: false};
+        this.state = {show_distance: true};
     }
     handleShowAll() {
         this.context.addPaths(this.props.rows.map(row => row.path));
@@ -64,8 +65,8 @@ class SearchBox extends Component {
         if (nextState.show_distance != this.state.show_distance) return true;
         return false;
     }
-    handleShowDistance(e, toggled) {
-        this.setState({show_distance: toggled});
+    handleShowDistance(event) {
+        this.setState({show_distance: event.target.value});
     }
     render() {
         const { classes } = this.props;
@@ -99,14 +100,21 @@ class SearchBox extends Component {
                         }
                     </Typography> :
             { this.props.rows.length > 0 && (<Button onClick={ this.handleShowAll.bind(this) } color="secondary">show all paths</Button>) }
-            { this.props.rows.length > 0 && this.props.rows[0].distance !== undefined &&
-                <FormControlLabel
-                    control={<Switch
-                        checked={this.state.show_distance} onChange={this.handleShowDistance.bind(this)} />}
-                    label="show line distance"></FormControlLabel> 
-            }
                 </div>
                 <Table className={classes.table}>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><Typography variant="body2">date</Typography></TableCell>
+                            <TableCell><Typography variant="body2">title</Typography></TableCell>
+                            <TableCell>{
+                                this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
+                                (<Select value={this.state.show_distance} onChange={this.handleShowDistance.bind(this)}>
+                                <MenuItem value={true}><Typography variant="body2">distance</Typography></MenuItem>
+                                <MenuItem value={false}><Typography variant="body2">length</Typography></MenuItem>
+                                </Select>) : (<Typography variant="body2">length</Typography>)
+                            }</TableCell>
+                        </TableRow>
+                    </TableHead>
                     <TableBody>
                         { this.props.rows.map( (item, index) =>
                             <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
