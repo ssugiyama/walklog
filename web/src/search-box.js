@@ -4,7 +4,7 @@ import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { getMoreItems, addPaths, setSelectedItem, toggleView } from './actions';
+import { getMoreItems, setSelectedItem, toggleView } from './actions';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -15,6 +15,7 @@ import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
+import MapContext from './map-context';
 
 const styles = theme => ({
     root: {
@@ -48,7 +49,7 @@ class SearchBox extends Component {
         this.state = {show_distance: false};
     }
     handleShowAll() {
-        this.props.addPaths(this.props.rows.map(row => row.path));
+        this.context.addPaths(this.props.rows.map(row => row.path));
         this.props.toggleView();
     }
     handleGetMore() {
@@ -122,12 +123,14 @@ class SearchBox extends Component {
     }
 }
 
+SearchBox.contextType = MapContext;
+
 function mapStateToProps(state) {
     return Object.assign({}, state.main.result, {last_query: state.main.last_query} );
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ getMoreItems, setSelectedItem, addPaths, toggleView, push }, dispatch);
+    return bindActionCreators({ getMoreItems, setSelectedItem, toggleView, push }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchBox));
