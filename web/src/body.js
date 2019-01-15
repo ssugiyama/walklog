@@ -9,8 +9,6 @@ import ContentBoxContainer from './content-box';
 import { bindActionCreators } from 'redux';
 import { openSnackbar, toggleView } from './actions';
 import Snackbar from '@material-ui/core/Snackbar';
-import Button from '@material-ui/core/Button';
-import MenuIcon from '@material-ui/icons/Menu';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';

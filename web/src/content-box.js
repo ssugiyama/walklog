@@ -1,11 +1,6 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
-import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
-import IconButton from '@material-ui/core/IconButton';
-import NavigationClose from '@material-ui/icons/Close';
-import SearchIcon from '@material-ui/icons/Search';
-import DescriptionIcon from '@material-ui/icons/Description';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';

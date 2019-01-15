@@ -17,7 +17,6 @@ import PanoramaBox from './panorama-box';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import NoSsr from '@material-ui/core/NoSsr';
 import TweetIcon from './tweet-icon';
 import config from './config';

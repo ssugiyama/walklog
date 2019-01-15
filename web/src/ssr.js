@@ -38,7 +38,6 @@ const Wrapper = props => (
         <link rel="manifest" href="/manifest.json" />
         <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5" />
         <link rel="shortcut icon" href="/icons/favicon.ico" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.1/css/swiper.min.css" />
         <meta name="msapplication-config" content="/icons/browserconfig.xml" />
         <meta name="theme-color" content="#ffffff" />
         <link rel="canonical" href={props.canonical} />

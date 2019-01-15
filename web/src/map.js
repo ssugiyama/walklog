@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
 import { setSearchForm, setSelectedPath, setCenter, setZoom, removeFromActionQueue, toggleView, setMapLoaded, setEditingPath } from './actions';
 import { connect } from 'react-redux';
-import * as ActionTypes from './action-types';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
