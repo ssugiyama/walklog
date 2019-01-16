@@ -1,4 +1,4 @@
-FROM chezsugi/postgis
+FROM mdillon/postgis:11-alpine
 MAINTAINER Shinichi SUGIYAMA <shin.sugi@gmail.com>
 
 WORKDIR /tmp
