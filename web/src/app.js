@@ -302,7 +302,8 @@ const formWatchMiddleware = store => next => action => {
         if (payload.filter && current_filter == 'neighborhood' && state.main.center) {
             query.latitude = state.main.center.lat;
             query.longitude = state.main.center.lng;
-        } else if (current_filter === 'frechet' ||  current_filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
+        }
+        if (current_filter === 'frechet' ||  current_filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
             query.order = 'nearest_first';
         } else if (current_filter !== 'frechet' && current_filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
             query.order = 'newest_first';
