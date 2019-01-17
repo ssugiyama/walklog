@@ -3,6 +3,11 @@
  * Module dependencies.
  */
 
+const config     = require('react-global-configuration');
+const configuration = require('./config');
+
+config.set(configuration.shared);
+
 const express    = require('express');
 const bodyParser = require('body-parser');
 const api        = require('./lib/api.js');
@@ -16,7 +21,7 @@ const Walk       = models.sequelize.models.walks;
 const sitemap    = require('sitemap');
 const session    = require('express-session');
 const auth       = require('./lib/auth');
-const config     = require('./dist/config').default;
+
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.use(morgan('tiny'));
@@ -31,11 +36,11 @@ if ('development' == app.get('env')) {
 }
 
 const sess = {
-    secret: config.session_secret,
+    secret: configuration.session_secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
-        maxAge: config.session_max_age,
+        maxAge: configuration.session_max_age,
         secure: 'auto'
     }
 };

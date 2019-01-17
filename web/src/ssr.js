@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import {configureStore, routes, handleRoute, theme}  from './app';
+import {configureStore, routes, handleRoute, getTheme}  from './app';
 import {setCurrentUser, setUsers, setMessage, openSnackbar} from './actions';
 import { matchRoutes } from 'react-router-config';
 import { SheetsRegistry } from 'react-jss/lib/jss';
@@ -10,13 +10,16 @@ import JssProvider from 'react-jss/lib/JssProvider';
 import BodyContainer from './body';
 import { StaticRouter } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
-
-import config from './config';
+import config from 'react-global-configuration';
 import models from '../lib/models';
 
 const Users = models.sequelize.models.users;
 
-const definePreloadedState = state => { return {__html: 'window.__PRELOADED_STATE__ = ' + JSON.stringify(state) } };
+const definePreloadedStateAndConfig = state => 
+    ({__html: 
+        `window.__PRELOADED_STATE__ =  ${JSON.stringify(state)}; 
+         window.__INITIAL_CONFIG__ = ${config.serialize()};`
+    });
 
 const Wrapper = props => (
     <html lang="en" style={{ height: '100%' }}>
@@ -45,7 +48,7 @@ const Wrapper = props => (
     </head>
     <body style={{ margin: 0, height: '100%' }}>
         <div id="body" dangerouslySetInnerHTML={{ __html: props.markup }} style={{ height: '100%' }}></div>
-        <script dangerouslySetInnerHTML={definePreloadedState(props.preloadedState)}>
+        <script dangerouslySetInnerHTML={definePreloadedStateAndConfig(props.preloadedState)}>
         </script>
         <script src="./bundle.js"></script>
         <script type="text/javascript" async defer src="https://platform.twitter.com/widgets.js"></script>
@@ -78,7 +81,7 @@ export default function handleSSR(req, res) {
             const markup = renderToString(
                 <Provider store={store}>
                     <JssProvider registry={sheetsRegistry} generateClassName={generateClassName}>
-                        <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
+                        <MuiThemeProvider theme={getTheme()} sheetsManager={new Map()}>
                             <StaticRouter location={req.url} context={context}>
                                 <BodyContainer />
                             </StaticRouter>
@@ -87,10 +90,12 @@ export default function handleSSR(req, res) {
             </Provider>);
             const css = sheetsRegistry.toString();
             const state = store.getState();
-            state.main.external_links = config.external_links;
-            let title = config.site_name;
-            let description = config.site_description;
-            const { site_name, base_url, twitter_site, google_api_key }  = config;
+            state.main.external_links = config.get('external_links');
+            let title = config.get('site_name');
+            let description = config.get('site_description');
+            const site_name =config.get('site_name');
+            const base_url = config.get('base_url');
+            const twitter_site = config.get('twitter_site');
             let canonical = base_url + '/';
             if (state.main.selected_item) {
                 const data = state.main.selected_item;
@@ -103,7 +108,6 @@ export default function handleSSR(req, res) {
                 css,
                 title,
                 description,
-                google_api_key,
                 canonical,
                 site_name,
                 base_url,

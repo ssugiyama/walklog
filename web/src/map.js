@@ -7,7 +7,7 @@ import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
 import ConfirmModal from './confirm-modal';
-import config from './config';
+import config from 'react-global-configuration';
 import MapContext from './map-context';
 
 const styles = theme => ({
@@ -184,7 +184,7 @@ class Map extends Component {
     }
     componentDidMount() {
         window.initMap = this.initMap.bind(this);
-        loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.google_api_key);
+        loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.get('google_api_key'));
     }
     citiesChanges() {
         const a = new Set(this.props.cities.split(/,/));

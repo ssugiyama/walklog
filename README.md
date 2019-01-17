@@ -8,22 +8,33 @@ walklog is a management tool of walking paths.
 
 visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into db directory.
 
-    % cp web/src/config.js.sample web/src/config.js
+    % cp web/config.js.sample web/config.js
 
-and edit web/src/config.js.
+and edit web/config.js 
 
-    export default {
-        'site_name': 'walklog',
-        'base_url': 'http://localhost:3000',
-        'twitter_site': '@chez_sugi',
-        'google_api_key': '',
-        'session_secret': 'keyboard cat',
-        'session_max_age': 7*24*60*60*1000,
-        'twitter_consumer_key': '',
-        'twitter_consumer_secret': '',
-        'twitter_allowed_users': null,
-        'external_links': [],
+    const config = {
+        session_secret: 'keyboard cat',
+        session_max_age: 7*24*60*60*1000,
+        twitter_consumer_key: '',
+        twitter_consumer_secret: '',
+        twitter_allowed_users: null,
+        shared: {
+            site_name: 'walklog',
+            site_description: 'webapp for walk logging',
+            base_url: 'http://localhost:3000',
+            google_api_key: '',
+            twitter_site: '@chez_sugi',
+            external_links : [{
+                href : 'http://example.com',
+                name : 'example'
+            }],
+            theme_primary : 'bluegrey',
+            theme_secondary : 'orange',
+            theme_type : 'light',
+        }
     };
+
+    module.exports = config;
 
 - `google_api_key` : needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
 - `twitter_consumer_key` and `twitter_consumer_secret`: needed for twitter authentication. get at https://apps.twtter.com
@@ -36,25 +47,25 @@ and edit web/src/config.js.
 
 ## without docker 
 
-###0. requirement
+### 0. requirement
 
 - postgresql
 - postgis 1.5 or higher
 - node.js
 
-###1. create database and install postgis functions.
+### 1. create database and install postgis functions.
     % cd db
     % createdb walklog -E utf8
     % psql walklog -f $(POSTGIS_DIR)/postgis.sql
     % psql walklog -f $(POSTGIS_DIR)/spatial_ref_sys.sql
     % psql walklog -f schema.sql
 
-###2. setup areas table
+### 2. setup areas table
     % unzip japan_ver81.zip
     % shp2pgsql -s 4326 -g the_geom -I -W sjis japan_ver81.shp areas > areas.sql
     % psql walklog -f areas.sql
 
-###3. setup and start api server
+### 3. setup and start api server
     % cd ../web
     % npm install && npm run build-cli && npm run build-svr
     % cp -a assets/* public
