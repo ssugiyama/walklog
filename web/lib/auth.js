@@ -15,7 +15,7 @@ const Users = models.sequelize.models.users;
 passport.use(new TwitterStrategy({
     consumerKey: configulation.twitter_consumer_key,
     consumerSecret: configulation.twitter_consumer_secret,
-    callbackURL: configulation.base_url + '/auth/twitter/callback',
+    callbackURL: configulation.shared.base_url + '/auth/twitter/callback',
 }, function(token, tokenSecret, profile, done) {
     if (configulation.twitter_allowed_users && !configulation.twitter_allowed_users.includes(profile.username)) {
         done(null, false, {message: 'Sorry! Allowed users only.'});
