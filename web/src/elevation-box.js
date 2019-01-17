@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
-import {  theme } from './app';
+import { getTheme } from './app';
 import { Chart } from 'chart.js';
+
+const theme = getTheme();
 
 const styles = {
     elevationBox: {
