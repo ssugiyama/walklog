@@ -18,6 +18,8 @@ and edit web/config.js
         twitter_consumer_key: '',
         twitter_consumer_secret: '',
         twitter_allowed_users: null,
+        db_url: 'postgres://postgres@db/postgres',
+        port: 3000,
         shared: {
             site_name: 'walklog',
             site_description: 'webapp for walk logging',
@@ -50,8 +52,9 @@ and edit web/config.js
 ### 0. requirement
 
 - postgresql
-- postgis 1.5 or higher
+- postgis 2.4 or higher
 - node.js
+- yarn 
 
 ### 1. create database and install postgis functions.
     % cd db
@@ -67,9 +70,9 @@ and edit web/config.js
 
 ### 3. setup and start api server
     % cd ../web
-    % npm install && npm run build-cli && npm run build-svr
+    % yarn install && yarn run build-cli && yarn run build-svr
     % cp -a assets/* public
-    % PORT=3000 WALKLOG_URL=postgres://user:password@host:5432/walklog npm start
+    % yarn start
 
 You may access http://localhost:3000 . 
 

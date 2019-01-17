@@ -4,6 +4,8 @@ const config = {
     twitter_consumer_key: '',
     twitter_consumer_secret: '',
     twitter_allowed_users: null,
+    db_url: 'postgres://postgres@db/postgres',
+    port: 3000,
     shared: {
         site_name: 'walklog',
         site_description: 'webapp for walk logging',

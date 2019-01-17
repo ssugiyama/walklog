@@ -23,7 +23,7 @@ const session    = require('express-session');
 const auth       = require('./lib/auth');
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', configuration.port || 3000);
 app.use(morgan('tiny'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));

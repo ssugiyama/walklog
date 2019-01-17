@@ -1,3 +1,4 @@
+const configuration = require('../config');
 const Sequelize = require('sequelize');
 const encoder = require('./path_encoder');
 const wkx     = require('wkx');
@@ -11,7 +12,7 @@ exports.SRID = SRID;
 exports.EARTH_RADIUS = EARTH_RADIUS;
 exports.SRID_FOR_SIMILAR_SEARCH = 32662;
 
-const db_url = process.env.WALKLOG_URL || 'postgres://postgres@db/postgres';
+const db_url = configuration.db_url || 'postgres://postgres@db/postgres';
 
 const sequelize = new Sequelize(db_url, {
     dialect: 'postgres',
