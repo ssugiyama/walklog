@@ -1,0 +1,23 @@
+const config = {
+    session_secret: 'keyboard cat',
+    session_max_age: 7*24*60*60*1000,
+    twitter_consumer_key: '',
+    twitter_consumer_secret: '',
+    twitter_allowed_users: null,
+    shared: {
+        site_name: 'walklog',
+        site_description: 'webapp for walk logging',
+        base_url: 'http://localhost:3000',
+        google_api_key: '',
+        twitter_site: '@chez_sugi',
+        external_links : [{
+            href : 'http://example.com',
+            name : 'example'
+        }],
+        theme_primary : 'bluegrey',
+        theme_secondary : 'orange',
+        theme_type : 'light',
+    }
+};
+
+module.exports = config;
