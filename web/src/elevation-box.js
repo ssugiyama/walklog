@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
-// import { getTheme } from './app';
 import { Chart } from 'chart.js';
+import { withTheme } from 'react-jss';
 
-// const theme = getTheme();
 
 const styles = {
     elevationBox: {
@@ -33,6 +32,7 @@ class ElevationBox extends Component {
         });
     }
     plotElevation(results, status) {
+        const { theme } = this.props;
         if (status == google.maps.ElevationStatus.OK) {
             this.elevationResults = results;
             const data = results.map(result => result.elevation);
@@ -54,14 +54,14 @@ class ElevationBox extends Component {
                             onHover: this.handleHover.bind(this)
                         },
                         scales: {
-                            // yAxes: [{
-                                // ticks: {
-                                //     fontColor: theme.palette.text.primary,
-                                // },
-                                // gridLines: {
-                                //     color: theme.palette.divider,
-                                // }
-                            // }],
+                            yAxes: [{
+                                ticks: {
+                                    fontColor: theme.palette.text.primary,
+                                },
+                                gridLines: {
+                                    color: theme.palette.divider,
+                                }
+                            }],
                             xAxes: [{
                                 gridLines: {
                                     display: false,
@@ -135,4 +135,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ setInfoWindow }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ElevationBox);
+export default withTheme(connect(mapStateToProps, mapDispatchToProps)(ElevationBox));
