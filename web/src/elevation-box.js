@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
-import { getTheme } from './app';
+// import { getTheme } from './app';
 import { Chart } from 'chart.js';
 
-const theme = getTheme();
+// const theme = getTheme();
 
 const styles = {
     elevationBox: {
@@ -54,14 +54,14 @@ class ElevationBox extends Component {
                             onHover: this.handleHover.bind(this)
                         },
                         scales: {
-                            yAxes: [{
-                                ticks: {
-                                    fontColor: theme.palette.text.primary,
-                                },
-                                gridLines: {
-                                    color: theme.palette.divider,
-                                }
-                            }],
+                            // yAxes: [{
+                                // ticks: {
+                                //     fontColor: theme.palette.text.primary,
+                                // },
+                                // gridLines: {
+                                //     color: theme.palette.divider,
+                                // }
+                            // }],
                             xAxes: [{
                                 gridLines: {
                                     display: false,
