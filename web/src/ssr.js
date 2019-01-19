@@ -15,11 +15,12 @@ import models from '../lib/models';
 
 const Users = models.sequelize.models.users;
 
-const definePreloadedStateAndConfig = state => 
-    ({__html: 
-        `window.__PRELOADED_STATE__ =  ${JSON.stringify(state)}; 
-         window.__INITIAL_CONFIG__ = ${config.serialize()};`
-    });
+const raw = content => ({ __html: content });
+
+const definePreloadedStateAndConfig = state => raw(
+    `window.__PRELOADED_STATE__ =  ${JSON.stringify(state)};
+     window.__INITIAL_CONFIG__ = ${config.serialize()}`
+);
 
 const Wrapper = props => (
     <html lang="en" style={{ height: '100%' }}>
@@ -53,7 +54,7 @@ const Wrapper = props => (
         <script src="./bundle.js"></script>
         <script type="text/javascript" async defer src="https://platform.twitter.com/widgets.js"></script>
         <script src="/register-sw.js"></script>
-        <style id="jss-server-side">{props.css}</style>
+        <style id="jss-server-side" dangerouslySetInnerHTML={raw(props.css)}></style>
     </body>
 </html>);
 
