@@ -19,6 +19,7 @@ import Tab from '@material-ui/core/Tab';
 import { withStyles } from '@material-ui/core/styles';
 import NoSsr from '@material-ui/core/NoSsr';
 import TweetIcon from './tweet-icon';
+import SwipeableViews from 'react-swipeable-views';
 import config from 'react-global-configuration';
 
 const styles = theme => ({
@@ -135,25 +136,21 @@ class ItemBox extends Component {
                             <Tab label="StreetView" className={classes.tab}/>
                         </Tabs>
                     </Paper>
-                    { data && this.state.tabValue == 0 &&
+                    <SwipeableViews index={this.state.tabValue} onChangeIndex={this.handleTabChange.bind(this, null)} disableLazyLoading enableMouseEvents>
                         <Paper className={classes.itemBoxContent}>
                             <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
                             </Typography>
                         </Paper>
-                    }
-                    { data && this.state.tabValue == 1 &&
                         <Paper className={classes.itemBoxContent}>
                             <NoSsr>
                                 <ElevationBox />
                             </NoSsr>
                         </Paper>
-                    }
-                    { data && this.state.tabValue == 2 &&
                         <Paper className={classes.itemBoxContent}>
                             <PanoramaBox />
                         </Paper>
-                    }
-            </div>;
+                    </SwipeableViews>
+                </div>;
     }
 }
 
