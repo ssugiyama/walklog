@@ -111,46 +111,47 @@ class ItemBox extends Component {
                 '/?select=1&offset=' + offset + 
                     (last_query ? '&' + last_query : '') : null;
         const { classes } = this.props;
-        return  <div ref={this.root_ref}>
-                    <Paper className={classes.itemBoxControl}>
-                        <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
-                        <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
-                        <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
-                        {
-                            data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
-                        }
-                        <IconButton component="a" href={this.state.tweet_url}><TweetIcon /></IconButton>
-                        <Typography variant="h6" color={title ? 'default' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
-                        {
-                            data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
-                        }
+        return  data && 
+            (<div ref={this.root_ref}>
+                <Paper className={classes.itemBoxControl}>
+                    <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
+                    <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
+                    <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
+                    {
+                        data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
+                    }
+                    <IconButton component="a" href={this.state.tweet_url}><TweetIcon /></IconButton>
+                    <Typography variant="h6" color={title ? 'default' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
+                    {
+                        data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
+                    }
+                </Paper>
+                <Paper>
+                    <Tabs value={this.state.tabValue}
+                        onChange={this.handleTabChange.bind(this)}
+                        className={classes.tabs}
+                        textColor="secondary"
+                        variant="fullWidth" >
+                        <Tab label="Comment"  className={classes.tab} />
+                        <Tab label="Elevation" className={classes.tab} />
+                        <Tab label="StreetView" className={classes.tab}/>
+                    </Tabs>
+                </Paper>
+                <SwipeableViews index={this.state.tabValue} onChangeIndex={this.handleTabChange.bind(this, null)} disableLazyLoading enableMouseEvents>
+                    <Paper className={classes.itemBoxContent}>
+                        <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
+                        </Typography>
                     </Paper>
-                    <Paper>
-                        <Tabs value={this.state.tabValue}
-                            onChange={this.handleTabChange.bind(this)}
-                            className={classes.tabs}
-                            textColor="secondary"
-                            variant="fullWidth" >
-                            <Tab label="Comment"  className={classes.tab} />
-                            <Tab label="Elevation" className={classes.tab} />
-                            <Tab label="StreetView" className={classes.tab}/>
-                        </Tabs>
+                    <Paper className={classes.itemBoxContent}>
+                        <NoSsr>
+                            <ElevationBox />
+                        </NoSsr>
                     </Paper>
-                    <SwipeableViews index={this.state.tabValue} onChangeIndex={this.handleTabChange.bind(this, null)} disableLazyLoading enableMouseEvents>
-                        <Paper className={classes.itemBoxContent}>
-                            <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
-                            </Typography>
-                        </Paper>
-                        <Paper className={classes.itemBoxContent}>
-                            <NoSsr>
-                                <ElevationBox />
-                            </NoSsr>
-                        </Paper>
-                        <Paper className={classes.itemBoxContent}>
-                            <PanoramaBox />
-                        </Paper>
-                    </SwipeableViews>
-                </div>;
+                    <Paper className={classes.itemBoxContent}>
+                        <PanoramaBox />
+                    </Paper>
+                </SwipeableViews>
+            </div>);
     }
 }
 
