@@ -62,7 +62,6 @@ class ItemBox extends Component {
     constructor(props) {
         super(props);
         this.state = { tabValue: 0 };
-        this.root_ref = React.createRef();
     }
     handleEdit() {
         this.props.openWalkEditor(true, 'update');
@@ -83,9 +82,6 @@ class ItemBox extends Component {
         if (nextProps.selected_item != this.props.selected_item) return true;
         if (nextState.tabValue != this.state.tabValue) return true;
         return false;
-    }
-    componentDidMount() {
-        this.root_ref.current.parentNode.scrollTop = 0;
     }
     render() {
         const data = this.props.selected_item;
@@ -112,7 +108,7 @@ class ItemBox extends Component {
                     (last_query ? '&' + last_query : '') : null;
         const { classes } = this.props;
         return  data && 
-            (<div ref={this.root_ref}>
+            (<div>
                 <Paper className={classes.itemBoxControl}>
                     <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
                     <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
