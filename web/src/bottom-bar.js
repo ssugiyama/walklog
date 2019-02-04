@@ -6,20 +6,16 @@ import { setPanoramaCount, setPanoramaIndex, setOverlay, setGeoMarker,
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
-import Fab from '@material-ui/core/Fab';
 import MenuItem from '@material-ui/core/MenuItem';
 import EditorModeEdit from '@material-ui/icons/Edit';
-import ActionDelete from '@material-ui/icons/Remove';
 import NavigationRefresh from '@material-ui/icons/Block';
 import NavigationCancel from '@material-ui/icons/Cancel';
-import ActionSwapVert from '@material-ui/icons/SwapVert';
 import NavigationArrowForward from '@material-ui/icons/ArrowForward';
 import NavigationArrowBack from '@material-ui/icons/ArrowBack';
 import AvFastForward from '@material-ui/icons/FastForward';
 import AvFastRewind from '@material-ui/icons/FastRewind';
 import FileDownload from '@material-ui/icons/GetApp';
 import FileUpload from '@material-ui/icons/Publish';
-import SwapHoriz from '@material-ui/icons/SwapHoriz';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
@@ -28,6 +24,8 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 import InputBase from '@material-ui/core/InputBase';
 import MapContext from './map-context';
 import SwipeableViews from 'react-swipeable-views';
+import NavigateBefore from '@material-ui/icons/NavigateBefore';
+import NavigateNext from '@material-ui/icons/NavigateNext';
 
 const styles = theme => ({
     root: {
@@ -41,14 +39,6 @@ const styles = theme => ({
     bottomBarGroupBody: {
         width: 'fit-content',
         margin: 'auto',
-    },
-    fabButton: {
-        position: 'absolute',
-        zIndex: 10,
-        top: -20,
-        left: 0,
-        right: 0,
-        margin: '0 auto',
     },
     search: {
         position: 'relative',
@@ -105,14 +95,16 @@ class BottomBar extends Component {
         }
     }
     static getDerivedStateFromProps(nextProps, prevState) {
-        return { length:  BottomBar.computeLength(nextProps.selected_path)};
+        return {
+            length:  BottomBar.computeLength(nextProps.selected_path),
+            groupCount: nextProps.overlay ? 1 : nextProps.filter == '' ? 2 : 3,
+        };
     }
     handleIndexChange(groupIndex) {
         this.setState({groupIndex});
     }
-    handleNextButtonClick() {
-        const groupCount = this.props.overlay ? 1 : this.props.filter == '' ? 2 : 3;
-        const groupIndex = this.state.groupIndex < groupCount - 1 ? this.state.groupIndex + 1 : 0;
+    handleNextButtonClick(d) {
+        const groupIndex = this.state.groupIndex + d;
         this.setState({groupIndex});
     }
     handleSelectFilter(event) {
@@ -249,20 +241,15 @@ class BottomBar extends Component {
                 controls.push(FilterControls);
             }
             controls.push(PathControls);
-            controls.push(SearchControls)
+            controls.push(SearchControls);
         }
         return (
             <Toolbar className={classes.root}>
-                <Fab size="small" aria-label="swipe buttons" 
-                    color="secondary"
-                    disabled={this.props.overlay}
-                    className={classes.fabButton} 
-                    onClick={this.handleNextButtonClick.bind(this)} >
-                    <SwapHoriz />
-                </Fab>
+                <IconButton onClick={this.handleNextButtonClick.bind(this, -1)}  disabled={this.state.groupIndex <= 0}><NavigateBefore /></IconButton>
                 <SwipeableViews style={{width : '100%'}} index={this.state.groupIndex} onChangeIndex={this.handleIndexChange.bind(this)} disableLazyLoading enableMouseEvents>
                     {controls}
                 </SwipeableViews>
+                <IconButton onClick={this.handleNextButtonClick.bind(this, 1)}  disabled={this.state.groupIndex >= this.state.groupCount - 1}><NavigateNext /></IconButton>
             </Toolbar>
         );
     }

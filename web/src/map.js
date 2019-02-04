@@ -9,6 +9,9 @@ import {APPEND_PATH_CONFIRM_INFO} from './constants';
 import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './map-context';
+import Fab from '@material-ui/core/Fab';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import ExpandLess from '@material-ui/icons/ExpandLess';
 
 const styles = theme => ({
     mapCompact: {
@@ -22,7 +25,19 @@ const styles = theme => ({
         margin: '0 0 4px 0',
         marginLeft: 'env(safe-area-inset-left)',
         marginRight: 'env(safe-area-inset-right)',
-    }
+    },
+    fabButton: {
+        position: 'absolute',
+        zIndex: 10,
+        left: 'calc(50% - 20px)',
+        margin: '0 auto',
+    },
+    fabButtonCompact: {
+        top: 'calc(40vh + 48px)',
+    },
+    fabButtonExpand: {
+        bottom: 50,
+    },
 });
 
 const mapStyles = {
@@ -355,6 +370,14 @@ class Map extends Component {
                     [classes.mapCompact]: view == 'content',
                     [classes.mapExpand]: view == 'map',
                 })}></div>
+                <Fab size="small" aria-label="toggle view"
+                    color="secondary"
+                    className={classNames(classes.fabButton, {
+                        [classes.fabButtonExpand]: view == 'map', 
+                        [classes.fabButtonCompact]: view == 'content'})}
+                    onClick={event => { this.props.toggleView(); }} >
+                    {  view == 'content' ? <ExpandMore /> : <ExpandLess /> }
+                </Fab>
                 <a ref={this.download_ref} style={{display: 'none'}} download='walklog.json'></a>
                 <input ref={this.upload_ref} type="file" style={{display: 'none'}} />
                 <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={this.state.confirm_info.open} resolve={this.state.confirm_info.resolve} />
