@@ -110,9 +110,6 @@ class Map extends Component {
                     .then(json => this.addCity(json[0].jcode))
                     .catch(ex => alert(ex));
             }
-            else {
-                this.props.toggleView();
-            }
         });
         google.maps.event.addListener(this.map, 'center_changed', () => {
             this.props.setCenter(this.map.getCenter().toJSON());
