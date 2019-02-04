@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {
-    toggleView,
     openWalkEditor,
     setGeoMarker,
     openSnackbar,
@@ -64,9 +63,6 @@ class NavBar extends Component {
     }
     handleNewWalk() {
         this.props.openWalkEditor(true, 'create');
-    }
-    handleShow() {
-        this.props.toggleView();
     }
     handleMenuOpen(anchorEl) {
         return event => {
@@ -144,7 +140,7 @@ class NavBar extends Component {
         } ;
         return (
             <AppBar position="static" className={classes.root}>
-                <Toolbar onClick={ this.handleShow.bind(this) }>
+                <Toolbar>
                     <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MenuIcon /></IconButton>
                     <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
                     <Checkbox
@@ -164,8 +160,6 @@ class NavBar extends Component {
                     open={Boolean(this.state.topAnchorEl)}
                     onClose={this.handleMenuClose('topAnchorEl')}
                 >
-                    <EndMenuItem key="view" onClick={ this.handleShow.bind(this) }>toggle view</EndMenuItem>
-                    <Divider key="divider" />
                     {
                         this.props.external_links.map(link => 
                             <EndMenuItem component="a" href={link.href} target="_blank" key={link.name} >{link.name}</EndMenuItem>
@@ -203,7 +197,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleView, openWalkEditor, setGeoMarker, 
+    return bindActionCreators({ openWalkEditor, setGeoMarker, 
         openSnackbar, addPoint,
     }, dispatch);
 }
