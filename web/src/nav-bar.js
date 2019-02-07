@@ -53,6 +53,9 @@ class NavBar extends Component {
                 if (isFirst) {
                     this.props.openSnackbar('start following your location');
                     this.setState({ autoGeolocation: true});
+                    this.autoGeolocationIntervalID = setInterval(() => {
+                        this.setCurrentPosition(false, false);
+                    }, AUTO_GEOLOCATION_INTERVAL);
                 }
                 new Promise((resolve, reject) => {
                     if (this.props.selected_path && isFirst) {
@@ -105,15 +108,14 @@ class NavBar extends Component {
     } 
     handleAutoGeolocationChange() {
         return (event, value) => {
-            if (value && !this.autoGeolocationIntervalID) {
-                this.setCurrentPosition(true, true);
-                this.autoGeolocationIntervalID = setInterval(() => {
-                    this.setCurrentPosition(false, false);
-                }, AUTO_GEOLOCATION_INTERVAL);
-            } else if (!value && this.autoGeolocationIntervalID) {
-                this.setState({ autoGeolocation: false});
+            if (this.autoGeolocationIntervalID) {
                 clearInterval(this.autoGeolocationIntervalID);
-                this.autoGeolocationIntervalID = null;
+                this.autoGeolocationIntervalID;
+            }
+            if (value) {
+                this.setCurrentPosition(true, true);
+            } else {
+                this.setState({ autoGeolocation: false});
                 this.props.openSnackbar('stop following your location');
             }
         };
