@@ -47,17 +47,32 @@ class NavBar extends Component {
         this.autoGeolocationIntervalID = null;
         this.state = { topAnchorEl: null, autoGeolocation: false, confirm_info: {open: false } };
     }
-    setCurrentPosition(updateCenter, append) {
+    setCurrentPosition(updateCenter, isFirst) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition( pos => {
-                const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
-                this.props.setGeoMarker(geo_marker, updateCenter);
-                this.context.addPoint(pos.coords.latitude, pos.coords.longitude, append);
+                if (isFirst) {
+                    this.props.openSnackbar('start following your location');
+                    this.setState({ autoGeolocation: true});
+                }
+                new Promise((resolve, reject) => {
+                    if (this.props.selected_path && isFirst) {
+                        this.setState({confirm_info: {open: true, resolve}});
+                    }
+                    else {
+                        resolve(!isFirst);
+                    }
+                }).then(append => {
+                    this.setState({confirm_info: {open: false}});
+                    const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
+                    this.props.setGeoMarker(geo_marker, updateCenter);
+                    this.context.addPoint(pos.coords.latitude, pos.coords.longitude, append);
+                });
             }, () => {
                 alert('Unable to retrieve your location');
             });
         }
         else {
+            this.setState({ autoGeolocation: false});
             alert('Geolocation is not supported by your browser');
         }
     }
@@ -90,24 +105,13 @@ class NavBar extends Component {
     } 
     handleAutoGeolocationChange() {
         return (event, value) => {
-            this.setState({ autoGeolocation: value});
             if (value && !this.autoGeolocationIntervalID) {
-                new Promise((resolve, reject) => {
-                    if (this.props.selected_path) {
-                        this.setState({confirm_info: {open: true, resolve}});
-                    }
-                    else {
-                        resolve(false);
-                    }
-                }).then(append => {
-                    this.setState({confirm_info: {open: false}});
-                    this.setCurrentPosition(true, append);
-                    this.autoGeolocationIntervalID = setInterval(() => {
-                        this.setCurrentPosition(false, true);
-                    }, AUTO_GEOLOCATION_INTERVAL);
-                    this.props.openSnackbar('start following your location');
-                });
+                this.setCurrentPosition(true, true);
+                this.autoGeolocationIntervalID = setInterval(() => {
+                    this.setCurrentPosition(false, false);
+                }, AUTO_GEOLOCATION_INTERVAL);
             } else if (!value && this.autoGeolocationIntervalID) {
+                this.setState({ autoGeolocation: false});
                 clearInterval(this.autoGeolocationIntervalID);
                 this.autoGeolocationIntervalID = null;
                 this.props.openSnackbar('stop following your location');
