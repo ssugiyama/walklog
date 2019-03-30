@@ -253,7 +253,7 @@ api.post('/save', function(req, res) {
         }
     }
     else {
-        query = 'INSERT INTO walks (user_id, date, title, image, "comment", path, length, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ST_LENGTH(?, TRUE)/1000, NOW(), NOW()) RETURNING *';
+        query = 'INSERT INTO walks (user_id, date, title, image, "comment", path, length, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ST_LENGTH(?, TRUE)/1000, NOW(), NOW()) RETURNING *';
         values = [req.user.id, req.body.date, req.body.title, req.body.image, req.body.comment, linestring, linestring];
     }
     models.sequelize.query(query, {model: Walk, replacements: values}).then(function (rows) {
