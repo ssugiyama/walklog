@@ -50,12 +50,24 @@ const styles = theme => ({
             color: 'inherit'
         }
     },
+    itemBoxImage: {
+        float: 'left',
+        width: 320,
+        margin: '0 20px 20px 0'
+    },
     itemBoxControl: {
         width: '100%',
         textAlign: 'center',
         padding: '8px 12px 12px',
         margin: '4px 0',
     },
+    '@media (max-width:600px)': {
+        itemBoxImage: {
+            float: 'none',
+            margin: '0 auto 0 auto',
+            display: 'inherit'
+        },
+    }
 });
 
 class ItemBox extends Component {
@@ -89,10 +101,11 @@ class ItemBox extends Component {
         if (staticContext && !data) {
             staticContext.status = 404;
         }
-        let title, createMarkup, data_user;
+        let title, createMarkup, data_user, image;
         if (data) {
             title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
             createMarkup = () => { return { __html: marked(data.comment || '') }; };
+            image = data.image;
             for (let u of this.props.users) {
                 if (u.id == data.user_id) data_user = u;
             }
@@ -135,6 +148,7 @@ class ItemBox extends Component {
                 </Paper>
                 <SwipeableViews index={this.state.tabValue} onChangeIndex={this.handleTabChange.bind(this, null)} disableLazyLoading enableMouseEvents>
                     <Paper className={classes.itemBoxContent}>
+                        {image && <img src={image} className={classes.itemBoxImage} />}
                         <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
                         </Typography>
                     </Paper>

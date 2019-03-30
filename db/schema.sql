@@ -16,6 +16,7 @@ CREATE TABLE walks (
     date date NOT NULL,
     title text NOT NULL,
     comment text NULL,
+    image text NULL,
     length double precision,
     path geometry,
     created_at timestamp without time zone,

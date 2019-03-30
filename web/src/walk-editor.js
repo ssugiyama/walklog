@@ -24,7 +24,7 @@ class WalkEditor extends Component {
         this.setState({initialized: false});
     }
     handleSubmit() {
-        const keys = ['date', 'title', 'comment'];
+        const keys = ['date', 'title', 'image', 'comment'];
 
         if (! this.state.id || this.state.update_path) {
             keys.push('path');
@@ -114,6 +114,7 @@ class WalkEditor extends Component {
                     <FormGroup row>
                         <TextField type="date" value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" label='date' fullWidth={true} />
                         <TextField defaultValue={this.state.title} onChange={this.handleChange.bind(this, 'title')} label="title" fullWidth={true} />
+                        <TextField defaultValue={this.state.image} onChange={this.handleChange.bind(this, 'image')} label="image" fullWidth={true} />
                         <TextField multiline rows={4} rowsMax={20}
                                 defaultValue={this.state.comment} onChange={this.handleChange.bind(this, 'comment')} label="comment" fullWidth={true} />
                         {

@@ -27,7 +27,7 @@ const searchFunc = params => {
         };
         const where = [];
         const order = order_hash[params.order || 'newest_first'];
-        const attributes = ['id', 'date', 'title', 'comment', 'path', 'length', 'user_id'];
+        const attributes = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'user_id'];
         if (params.id) {
             where.push({id: params.id});
         }
@@ -244,17 +244,17 @@ api.post('/save', function(req, res) {
     let values;
     if (req.body.id) {
         if (linestring) {
-            query = 'UPDATE walks SET date = ?, title = ?, "comment" = ?, path = ?, length = ST_LENGTH(?, TRUE)/1000, updated_at = NOW() WHERE id = ? AND user_id = ?RETURNING *';
-            values = [req.body.date, req.body.title, req.body.comment, linestring, linestring, req.body.id, req.user.id];
+            query = 'UPDATE walks SET date = ?, title = ?, image= ?, "comment" = ?, path = ?, length = ST_LENGTH(?, TRUE)/1000, updated_at = NOW() WHERE id = ? AND user_id = ?RETURNING *';
+            values = [req.body.date, req.body.title, req.body.image, req.body.comment, linestring, linestring, req.body.id, req.user.id];
         }
         else {
-            query = 'UPDATE walks SET date = ?, title = ?, "comment" = ?, updated_at = NOW() WHERE id = ? AND user_id = ? RETURNING *';
-            values = [req.body.date, req.body.title, req.body.comment, req.body.id, req.user.id];
+            query = 'UPDATE walks SET date = ?, title = ?, image = ?, "comment" = ?, updated_at = NOW() WHERE id = ? AND user_id = ? RETURNING *';
+            values = [req.body.date, req.body.title, req.body.image, req.body.comment, req.body.id, req.user.id];
         }
     }
     else {
-        query = 'INSERT INTO walks (user_id, date, title, "comment", path, length, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ST_LENGTH(?, TRUE)/1000, NOW(), NOW()) RETURNING *';
-        values = [req.user.id, req.body.date, req.body.title, req.body.comment, linestring, linestring];
+        query = 'INSERT INTO walks (user_id, date, title, image, "comment", path, length, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ST_LENGTH(?, TRUE)/1000, NOW(), NOW()) RETURNING *';
+        values = [req.user.id, req.body.date, req.body.title, req.body.image, req.body.comment, linestring, linestring];
     }
     models.sequelize.query(query, {model: Walk, replacements: values}).then(function (rows) {
         res.json(rows.map(function (row) { return row.asObject(true); } ));

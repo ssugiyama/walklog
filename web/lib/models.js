@@ -45,6 +45,7 @@ const Walks = sequelize.define('walks', {
     date:   Sequelize.STRING,
     title:      Sequelize.STRING,
     comment:    Sequelize.STRING,
+    image: Sequelize.STRING,
     length: {
         type: Sequelize.FLOAT,
     },
@@ -98,6 +99,7 @@ Walks.prototype.asObject =  function (includePath) {
         date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
         title:      this.title,
         comment:    this.comment,
+        image:      this.image,
         length :    this.length,
         path :      (includePath && this.path) ? this.encodedPath() : null,
         created_at: this.created_at,
