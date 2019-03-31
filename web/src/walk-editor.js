@@ -85,7 +85,7 @@ class WalkEditor extends Component {
                 date = item.date;
             }
             else {
-                item = {id: '', date: '', title: '', comment: ''};
+                item = {id: '', date: '', title: '', image: '', comment: ''};
                 date = moment().format('YYYY-MM-DD');
             }
             if (path == null && nextProps.walk_editor_mode == 'create') {
