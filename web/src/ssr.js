@@ -35,7 +35,7 @@ const Wrapper = props => (
         <meta property="og:site_name" content={props.site_name} />
         <meta property="og:title" content={props.title} />
         <meta property="og:description" content={props.description} />
-        <meta property="og:image" content={props.image || (props.base_url + '/walklog.png')} />
+        <meta property="og:image" content={props.image} />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32" />
         <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16" />
@@ -96,6 +96,7 @@ export default function handleSSR(req, res) {
             let description = config.get('site_description');
             const site_name =config.get('site_name');
             const base_url = config.get('base_url');
+            let image =  base_url + '/walklog.png';
             const twitter_site = config.get('twitter_site');
             let canonical = base_url + '/';
             if (state.main.selected_item) {
@@ -103,11 +104,13 @@ export default function handleSSR(req, res) {
                 title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
                 description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
                 canonical = base_url + '/' + data.id;
+                image = data.image;
             }
             const props = {
                 markup,
                 css,
                 title,
+                image,
                 description,
                 canonical,
                 site_name,
