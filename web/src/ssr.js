@@ -96,7 +96,7 @@ export default function handleSSR(req, res) {
             let description = config.get('site_description');
             const site_name =config.get('site_name');
             const base_url = config.get('base_url');
-            let image =  base_url + '/walklog.png';
+            let image;
             const twitter_site = config.get('twitter_site');
             let canonical = base_url + '/';
             if (state.main.selected_item) {
@@ -106,6 +106,7 @@ export default function handleSSR(req, res) {
                 canonical = base_url + '/' + data.id;
                 image = data.image;
             }
+            if (! image) image = base_url + '/walklog.png';
             const props = {
                 markup,
                 css,
