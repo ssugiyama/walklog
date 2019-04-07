@@ -1,4 +1,6 @@
 const express = require('express')
+  ,   multer  = require('multer')
+  ,   nanoid  = require('nanoid')
   ,   models  = require('./models')
   ,   fs      = require('fs')
   ,   Sequelize = require('sequelize')
@@ -11,6 +13,20 @@ const Op = Sequelize.Op;
 
 const api = express.Router();
 module.exports = api;
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './public/uploads');
+    },
+    filename: (req, file, cb) => {
+        const match = file.originalname.match(/\.\w+$/);
+        const ext = match ? match[0] : '';
+        const basename = nanoid();
+        cb(null, match ? basename + ext : basename);
+    }
+});
+  
+const upload = multer({ storage: storage });
 
 const searchFunc = params => {
     return new Promise((resolve, reject) => {
@@ -233,34 +249,38 @@ api.get('/cities', function(req, res){
     });
 });
 
-api.post('/save', function(req, res) {
+api.post('/save', upload.single('image'), function(req, res) {
     if (! req.user) {
         res.status(403);
         return;
     }
-
-    const linestring = req.body.path ? Walk.decodePath(req.body.path) : null;
-    let query;
-    let values;
+    if (req.body.path) {
+        req.body.path = Walk.decodePath(req.body.path);
+        req.body.length = sequelize.literal(`ST_LENGTH('${req.body.path}', true)/1000`);
+    }
+    if (req.file && req.file.filename) {
+        req.body.image = req.file.filename;
+    }
     if (req.body.id) {
-        if (linestring) {
-            query = 'UPDATE walks SET date = ?, title = ?, image= ?, "comment" = ?, path = ?, length = ST_LENGTH(?, TRUE)/1000, updated_at = NOW() WHERE id = ? AND user_id = ?RETURNING *';
-            values = [req.body.date, req.body.title, req.body.image, req.body.comment, linestring, linestring, req.body.id, req.user.id];
-        }
-        else {
-            query = 'UPDATE walks SET date = ?, title = ?, image = ?, "comment" = ?, updated_at = NOW() WHERE id = ? AND user_id = ? RETURNING *';
-            values = [req.body.date, req.body.title, req.body.image, req.body.comment, req.body.id, req.user.id];
-        }
+        Walk.findByPk(req.body.id).then(walk => {
+            delete req.body.id;
+            walk.update(req.body).then(() => {
+                walk.reload().then(() =>
+                    res.json([walk.asObject(true)])
+                );
+            }).catch (reason => {
+                res.status(500).json({error: reason});
+            });
+        });
     }
     else {
-        query = 'INSERT INTO walks (user_id, date, title, image, "comment", path, length, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ST_LENGTH(?, TRUE)/1000, NOW(), NOW()) RETURNING *';
-        values = [req.user.id, req.body.date, req.body.title, req.body.image, req.body.comment, linestring, linestring];
+        req.body.user_id = req.user.id;
+        Walk.create(req.body).then(walk => {
+            res.json([walk.asObject(true)]);
+        }).catch (reason => {
+            res.status(500).json({error: reason});
+        });
     }
-    models.sequelize.query(query, {model: Walk, replacements: values}).then(function (rows) {
-        res.json(rows.map(function (row) { return row.asObject(true); } ));
-    }).catch (function (reason) {
-        res.status(500).json({error: reason});
-    });
 });
 
 api.get('/destroy/:id', function(req, res) {

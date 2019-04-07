@@ -13,33 +13,37 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
 import Switch from '@material-ui/core/Switch';
 import moment from 'moment';
+import ImageUploader from './image-uploader';
 
 class WalkEditor extends Component {
     constructor(props) {
         super(props);
         this.state = {id: '', date: null, title: '', comment: '', initialized: false};
+        this.keys = new Set();
     }
     handleClose() {
         this.props.openWalkEditor(false);
         this.setState({initialized: false});
     }
     handleSubmit() {
-        const keys = ['date', 'title', 'image', 'comment'];
-
         if (! this.state.id || this.state.update_path) {
-            keys.push('path');
+            this.keys.add('path');
         }
         if (this.state.id) {
-            keys.push('id');
+            this.keys.add('id');
         }
-        const params = keys.map(key => `${key}=${encodeURIComponent(this.state[key])}`).join('&');
+        else {
+            this.keys.add('date');
+        }
+        // const params = keys.map(key => `${key}=${encodeURIComponent(this.state[key])}`).join('&');
+        const formData = new FormData();
+        for (const key of this.keys) {
+            formData.append(key, this.state[key]);
+        }
         fetch('/api/save', {
             method: 'POST',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params
+            body: formData
         }).then(response => {
             if (!response.ok) {
                 throw Error(response.statusText);
@@ -65,14 +69,21 @@ class WalkEditor extends Component {
                 return response;
             }).then(() => {
                 this.props.setSelectedItem(null);
-                const query = { id: this.state.id };
                 this.props.push({pathname: '/' + this.state.id, query: {force_fetch: 1} });
                 this.handleClose();
             }).catch(ex => alert(ex));
         }
     }
     handleChange(name, e) {
+        this.keys.add(name);
         this.setState({[name]: e.target.value});
+    }
+    handleSelectFile(name, value) {
+        this.keys.add(name);
+        this.setState({[name]: value});
+    }
+    handleSwitch(name, e, checked) {
+        this.setState({[name]: checked});
     }
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.open_walk_editor && ! prevState.initialized) {
@@ -114,13 +125,13 @@ class WalkEditor extends Component {
                     <FormGroup row>
                         <TextField type="date" value={this.state.date} onChange={this.handleChange.bind(this, 'date')} container="inline" mode="landscape" label='date' fullWidth={true} />
                         <TextField defaultValue={this.state.title} onChange={this.handleChange.bind(this, 'title')} label="title" fullWidth={true} />
-                        <TextField defaultValue={this.state.image} onChange={this.handleChange.bind(this, 'image')} label="image" fullWidth={true} />
+                        <ImageUploader label="image" value={this.state.image} onChange={this.handleSelectFile.bind(this, 'image')} ></ImageUploader>
                         <TextField multiline rows={4} rowsMax={20}
                                 defaultValue={this.state.comment} onChange={this.handleChange.bind(this, 'comment')} label="comment" fullWidth={true} />
                         {
                             this.props.walk_editor_mode == 'update' &&
                             <FormControlLabel
-                                control={<Switch onChange={this.handleChange.bind(this, 'update_path')}  checked={this.state.update_path} disabled={this.state.path == null} />}
+                                control={<Switch onChange={this.handleSwitch.bind(this, 'update_path')}  checked={this.state.update_path} disabled={this.state.path == null} />}
                                 label="update path?" />
                         }
                     </FormGroup>

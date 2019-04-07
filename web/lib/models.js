@@ -4,6 +4,7 @@ const encoder = require('./path_encoder');
 const wkx     = require('wkx');
 const util    = require('util');
 const moment  = require('moment');
+const configulation   = require('../config');
 
 const EARTH_RADIUS = 6370986;
 const SRID = 4326;
@@ -50,7 +51,7 @@ const Walks = sequelize.define('walks', {
         type: Sequelize.FLOAT,
     },
     distance: {
-        type: Sequelize.FLOAT,
+        type: Sequelize.VIRTUAL,
     },
     path: {
         type : Sequelize.TEXT,
@@ -99,7 +100,7 @@ Walks.prototype.asObject =  function (includePath) {
         date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
         title:      this.title,
         comment:    this.comment,
-        image:      this.image,
+        image:      this.image && (configulation.shared.base_url + '/uploads/' + this.image),
         length :    this.length,
         path :      (includePath && this.path) ? this.encodedPath() : null,
         created_at: this.created_at,
