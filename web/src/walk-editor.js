@@ -113,6 +113,11 @@ class WalkEditor extends Component {
             return null;
         }
     }
+    componentDidUpdate(prevProps) {
+        if (prevProps.open_walk_editor === false && this.props.open_walk_editor === true) {
+            this.keys = new Set();
+        }
+    }
     render() {
         return (
             <Dialog
