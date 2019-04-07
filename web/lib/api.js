@@ -263,6 +263,10 @@ api.post('/save', upload.single('image'), function(req, res) {
     }
     if (req.body.id) {
         Walk.findByPk(req.body.id).then(walk => {
+            if (walk.user_id != req.user.id) {
+                res.status(403);
+                return; 
+            }
             delete req.body.id;
             walk.update(req.body).then(() => {
                 walk.reload().then(() =>
@@ -288,9 +292,15 @@ api.get('/destroy/:id', function(req, res) {
         res.status(403);
         return;
     }
-    Walk.destroy({where : { id : req.params.id } }).then(function () {
-        res.end('');
-    }).catch (function (reason) {
-        res.status(500).json({error: reason});
+    Walk.findByPk(req.body.id).then(walk => {
+        if (walk.user_id != req.user.id) {
+            res.status(403);
+            return; 
+        }
+        walk.destroy().then(function () {
+            res.end('');
+        }).catch (function (reason) {
+            res.status(500).json({error: reason});
+        });
     });
 });
