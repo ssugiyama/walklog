@@ -31,13 +31,16 @@ const styles = theme => ({
         },
     },
     cell: {
-        paddingLeft: 2,
-        paddingRight: 2,
+        padding: '4px 2px 4px 2px',
         '&:nth-of-type(1)': {
             width: 80,
             whiteSpace: 'nowrap',
         },
-        '&:nth-of-type(3)': {
+        '&:nth-of-type(2)': {
+            width: 80,
+            whiteSpace: 'nowrap',
+        },
+        '&:nth-of-type(4)': {
             width: 40,
             textAlign: 'right',
         },
@@ -71,6 +74,10 @@ class SearchBox extends Component {
     render() {
         const { classes } = this.props;
         const moreUrl = `/?offset=${this.props.offset}` + (this.props.last_query && `&${this.props.last_query}`);
+        const users = {};
+        for (const u of this.props.users) {
+            users[u.id] = u;
+        }
         return (
             <Paper className={classes.root}>
                 <SearchFormContainer />
@@ -104,9 +111,10 @@ class SearchBox extends Component {
                 <Table className={classes.table}>
                     <TableHead>
                         <TableRow>
-                            <TableCell><Typography variant="body2">date</Typography></TableCell>
-                            <TableCell><Typography variant="body2">title</Typography></TableCell>
-                            <TableCell>{
+                            <TableCell classes={{ root: classes.cell}}><Typography variant="body2">user</Typography></TableCell>
+                            <TableCell classes={{ root: classes.cell}}><Typography variant="body2">date</Typography></TableCell>
+                            <TableCell classes={{ root: classes.cell}}><Typography variant="body2">title</Typography></TableCell>
+                            <TableCell classes={{ root: classes.cell}}>{
                                 this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
                                 (<Select value={this.state.show_distance} onChange={this.handleShowDistance.bind(this)}>
                                 <MenuItem value={true}><Typography variant="body2">distance</Typography></MenuItem>
@@ -118,9 +126,10 @@ class SearchBox extends Component {
                     <TableBody>
                         { this.props.rows.map( (item, index) =>
                             <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
-                                <TableCell className={classes.cell}>{item.date}</TableCell>
-                                <TableCell className={classes.cell}>{item.title}</TableCell>
-                                <TableCell className={classes.cell}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
+                                <TableCell classes={{ root: classes.cell}}>{users[item.user_id] ? users[item.user_id].username : ''}</TableCell>
+                                <TableCell classes={{ root: classes.cell}}>{item.date}</TableCell>
+                                <TableCell classes={{ root: classes.cell}}>{item.title}</TableCell>
+                                <TableCell classes={{ root: classes.cell}}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
                             </TableRow>)
                         }
                     </TableBody>
@@ -134,7 +143,9 @@ class SearchBox extends Component {
 SearchBox.contextType = MapContext;
 
 function mapStateToProps(state) {
-    return Object.assign({}, state.main.result, {last_query: state.main.last_query} );
+    return Object.assign({}, state.main.result, 
+        {last_query: state.main.last_query}, 
+        {users: state.main.users} );
 }
 
 function mapDispatchToProps(dispatch) {
