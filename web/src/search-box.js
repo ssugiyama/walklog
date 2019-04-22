@@ -33,7 +33,7 @@ const styles = theme => ({
     cell: {
         padding: '4px 2px 4px 2px',
         '&:nth-of-type(1)': {
-            width: 80,
+            width: 40,
             whiteSpace: 'nowrap',
         },
         '&:nth-of-type(2)': {
@@ -44,6 +44,10 @@ const styles = theme => ({
             width: 40,
             textAlign: 'right',
         },
+    },
+    userPhoto: {
+        width: 20,
+        height:20,
     }
 });
 
@@ -124,14 +128,18 @@ class SearchBox extends Component {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        { this.props.rows.map( (item, index) =>
-                            <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
-                                <TableCell classes={{ root: classes.cell}}>{users[item.user_id] ? users[item.user_id].username : ''}</TableCell>
-                                <TableCell classes={{ root: classes.cell}}>{item.date}</TableCell>
-                                <TableCell classes={{ root: classes.cell}}>{item.title}</TableCell>
-                                <TableCell classes={{ root: classes.cell}}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
-                            </TableRow>)
-                        }
+                        { this.props.rows.map( (item, index) => {
+                            const u = users[item.user_id];
+                            return (
+                                <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
+                                    <TableCell classes={{ root: classes.cell}}>
+                                        { u && <img className={classes.userPhoto} src={u.photo} alt={u.username} title={u.username} />}
+                                    </TableCell>
+                                    <TableCell classes={{ root: classes.cell}}>{item.date}</TableCell>
+                                    <TableCell classes={{ root: classes.cell}}>{item.title}</TableCell>
+                                    <TableCell classes={{ root: classes.cell}}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
+                                </TableRow>);
+                        })}
                     </TableBody>
                 </Table>
                 { this.props.offset > 0 && <Button style={{width: '100%'}} color="secondary" component={Link} to={moreUrl}>more</Button>  }
