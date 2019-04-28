@@ -1,0 +1,8 @@
+data
+web/.cache
+web/npm-debug.log
+web/node_modules
+web/public
+web/dist
+public
+web/config.js
