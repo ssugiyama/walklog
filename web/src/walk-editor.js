@@ -18,7 +18,7 @@ import ImageUploader from './image-uploader';
 class WalkEditor extends Component {
     constructor(props) {
         super(props);
-        this.state = {id: '', date: null, title: '', comment: '', initialized: false};
+        this.state = {id: '', date: null, title: '', comment: '', initialized: false, processing: false};
         this.keys = new Set();
     }
     handleClose() {
@@ -26,6 +26,7 @@ class WalkEditor extends Component {
         this.setState({initialized: false});
     }
     handleSubmit() {
+        this.setState({processing: true});
         if (! this.state.id || this.state.update_path) {
             this.keys.add('path');
         }
@@ -58,6 +59,7 @@ class WalkEditor extends Component {
           .catch(ex => alert(ex));
     }
     handleDelete(e) {
+        this.setState({processing: true});
         e.preventDefault();
         if (confirm('Are you sure to delete?')) {
             fetch('/api/destroy/' + this.state.id, {
@@ -91,6 +93,7 @@ class WalkEditor extends Component {
             const path = nextProps.selected_path;
             let item, update_path, date;
             const initialized = true;
+            const processing = false;
             if (nextProps.walk_editor_mode == 'update') {
                 item = nextProps.selected_item;
                 date = item.date;
@@ -106,7 +109,7 @@ class WalkEditor extends Component {
             else if (path == null) {
                 update_path = false;
             }
-            const state = Object.assign({}, item, {path, update_path, date, initialized});
+            const state = Object.assign({}, item, {path, update_path, date, initialized, processing});
             return state;
         }
         else {
@@ -143,9 +146,9 @@ class WalkEditor extends Component {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleClose.bind(this)}>cancel</Button>
-                    <Button onClick={this.handleSubmit.bind(this)} color="primary">{ this.props.walk_editor_mode || 'create' }</Button>
+                    <Button disabled={this.state.processing} onClick={this.handleSubmit.bind(this)} color="primary">{ this.props.walk_editor_mode || 'create' }</Button>
                     {this.props.walk_editor_mode == 'update' && 
-                        <Button onClick={this.handleDelete.bind(this)} color="secondary">delete</Button>}
+                        <Button disabled={this.state.processing} onClick={this.handleDelete.bind(this)} color="secondary">delete</Button>}
                 </DialogActions>
                 
             </Dialog>
