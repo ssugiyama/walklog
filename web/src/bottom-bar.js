@@ -97,14 +97,15 @@ class BottomBar extends Component {
     static getDerivedStateFromProps(nextProps, prevState) {
         return {
             length:  BottomBar.computeLength(nextProps.selected_path),
-            groupCount: nextProps.overlay ? 1 : nextProps.filter == '' ? 2 : 3,
+            groupCount: nextProps.overlay ? 1 : 3,
         };
     }
     handleIndexChange(groupIndex) {
         this.setState({groupIndex});
     }
     handleNextButtonClick(d) {
-        const groupIndex = this.state.groupIndex + d;
+        let groupIndex = (this.state.groupIndex + d) % this.state.groupCount ;
+        if (groupIndex < 0) groupIndex += this.state.groupCount;
         this.setState({groupIndex});
     }
     handleSelectFilter(event) {
@@ -237,19 +238,17 @@ class BottomBar extends Component {
             controls.push(OverlayControls);
         }
         else {
-            if (this.props.filter != '') {
-                controls.push(FilterControls);
-            }
+            controls.push(FilterControls);
             controls.push(PathControls);
             controls.push(SearchControls);
         }
         return (
             <Toolbar className={classes.root}>
-                <IconButton onClick={this.handleNextButtonClick.bind(this, -1)}  disabled={this.state.groupIndex <= 0}><NavigateBefore /></IconButton>
+                <IconButton onClick={this.handleNextButtonClick.bind(this, -1)}  disabled={this.state.groupCount <= 1}><NavigateBefore /></IconButton>
                 <SwipeableViews style={{width : '100%'}} index={this.state.groupIndex} onChangeIndex={this.handleIndexChange.bind(this)} disableLazyLoading enableMouseEvents>
                     {controls}
                 </SwipeableViews>
-                <IconButton onClick={this.handleNextButtonClick.bind(this, 1)}  disabled={this.state.groupIndex >= this.state.groupCount - 1}><NavigateNext /></IconButton>
+                <IconButton onClick={this.handleNextButtonClick.bind(this, 1)}  disabled={this.state.groupCount <= 1}><NavigateNext /></IconButton>
             </Toolbar>
         );
     }
