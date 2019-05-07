@@ -8,6 +8,7 @@ services:
   web:
     restart: always
     build: web
+    env_file: .env
     volumes:
       - ./public:/var/www/public
       - ./web/src:/var/www/src

@@ -168,7 +168,7 @@ class NavBar extends Component {
                 >
                     {
                         this.props.external_links.map(link => 
-                            <EndMenuItem component="a" href={link.href} target="_blank" key={link.name} >{link.name}</EndMenuItem>
+                            <EndMenuItem component="a" href={link[1]} target="_blank" key={link[0]} >{link[0]}</EndMenuItem>
                         )
                     }
                 </Menu>

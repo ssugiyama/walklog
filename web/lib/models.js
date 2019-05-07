@@ -1,10 +1,8 @@
-const configuration = require('../config');
 const Sequelize = require('sequelize');
 const encoder = require('./path_encoder');
 const wkx     = require('wkx');
 const util    = require('util');
 const moment  = require('moment');
-const configulation   = require('../config');
 
 const EARTH_RADIUS = 6370986;
 const SRID = 4326;
@@ -13,7 +11,7 @@ exports.SRID = SRID;
 exports.EARTH_RADIUS = EARTH_RADIUS;
 exports.SRID_FOR_SIMILAR_SEARCH = 32662;
 
-const db_url = configuration.db_url || 'postgres://postgres@db/postgres';
+const db_url = process.env.DB_URL || 'postgres://postgres@db/postgres';
 
 const sequelize = new Sequelize(db_url, {
     dialect: 'postgres',
@@ -100,7 +98,7 @@ Walks.prototype.asObject =  function (includePath) {
         date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
         title:      this.title,
         comment:    this.comment,
-        image:      this.image && (configulation.shared.base_url + '/uploads/' + this.image),
+        image:      this.image && (process.env.BASE_URL + '/uploads/' + this.image),
         length :    this.length,
         path :      (includePath && this.path) ? this.encodedPath() : null,
         created_at: this.created_at,

@@ -8,40 +8,34 @@ walklog is a management tool of walking paths.
 
 visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into db directory.
 
-    % cp web/config.js.sample web/config.js
+    % cp web/.env.sample web/,env
 
-and edit web/config.js 
+and edit web/.env 
 
-    const config = {
-        session_secret: 'keyboard cat',
-        session_max_age: 7*24*60*60*1000,
-        twitter_consumer_key: '',
-        twitter_consumer_secret: '',
-        twitter_allowed_users: null,
-        db_url: 'postgres://postgres@db/postgres',
-        port: 3000,
-        shared: {
-            site_name: 'walklog',
-            site_description: 'webapp for walk logging',
-            base_url: 'http://localhost:3000',
-            google_api_key: '',
-            twitter_site: '@chez_sugi',
-            external_links : [{
-                href : 'http://example.com',
-                name : 'example'
-            }],
-            theme_primary : 'bluegrey',
-            theme_secondary : 'orange',
-            theme_type : 'light',
-        }
-    };
+```
+SESSION_SECRET='keyboard cat'
+SESSION_MAX_AGE=604800000
+TWITTER_CONSUMER_KEY=
+TWITTER_CONSUMER_SECRET=
+TWITTER_ALLOWED_USERS='user1,user2'
+DB_URL='postgres://postgres@db/postgres'
+PORT=3000
+SITE_NAME='walklog'
+DESCRIPTION='webapp for walk logging',
+BASE_URL='http://localhost:3000'
+GOOGLE_API_KEY=
+TWITTER_SITE='@chez_sugi'
+EXTERNAL_LINKS='example=http://example.com;example2=http://example2.com'
+THEME_PRIMARY='bluegrey'
+THEME_SECONDARY='orange'
+THEME_TYPE='light'
+```
 
-    module.exports = config;
-
-- `google_api_key` : needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
-- `twitter_consumer_key` and `twitter_consumer_secret`: needed for twitter authentication. get at https://apps.twtter.com
-- `'twitter_allowed_users` : specify array of screennames if restrict the users who can login
-
+- GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
+- TWITTER_CONSUMER_KEY and TWITTER_CONSUMER_SECRET: needed for twitter authentication. get at https://apps.twtter.com
+- TWITTER_ALLOWED_USERS: specify screennames concatenated with ',' if restrict the users who can login
+- EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
+'
 ## with docker
     % mkdir data public
     % docker-compose up -d
@@ -72,7 +66,7 @@ and edit web/config.js
     % cd ../web
     % yarn install && yarn run build-cli && yarn run build-svr
     % cp -a assets/* public
-    % yarn start
+    % sh -c "$(cat .env| tr '\n' ' ') yarn start"
 
 You may access http://localhost:3000 . 
 

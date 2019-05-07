@@ -1,7 +1,6 @@
 const express = require('express');
 const passport = require('passport');
 const TwitterStrategy = require('passport-twitter').Strategy;
-const configulation   = require('../config');
 const models   = require('./models');
 /*
  * GET home page.
@@ -13,11 +12,12 @@ exports.router = auth;
 const Users = models.sequelize.models.users;
 
 passport.use(new TwitterStrategy({
-    consumerKey: configulation.twitter_consumer_key,
-    consumerSecret: configulation.twitter_consumer_secret,
-    callbackURL: configulation.shared.base_url + '/auth/twitter/callback',
+    consumerKey: process.env.TWITTER_CONSUMER_KEY,
+    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+    callbackURL: process.env.BASE_URL + '/auth/twitter/callback',
 }, function(token, tokenSecret, profile, done) {
-    if (configulation.twitter_allowed_users && !configulation.twitter_allowed_users.includes(profile.username)) {
+    const allowed_users = process.env.TWITTER_ALLOWED_USERS && process.env.TWITTER_ALLOWED_USERS.split(/,\s*/);
+    if (allowed_users && !allowed_users.includes(profile.username)) {
         done(null, false, {message: 'Sorry! Allowed users only.'});
         return;
     }

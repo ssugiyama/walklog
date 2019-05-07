@@ -4,9 +4,19 @@
  */
 
 const config     = require('react-global-configuration');
-const configuration = require('./config');
+const configuration = {
+    site_name: process.env.SITE_NAME,
+    site_description: process.env.SITE_DESCRIPTION,
+    base_url: process.env.BASE_URL,
+    google_api_key: process.env.GOOGLE_API_KEY,
+    twitter_site: process.env.TWITTER_SITE,
+    external_links : process.env.EXTERNAL_LINKS && process.env.EXTERNAL_LINKS.split(/;/).map(item => item.split(/=/, 2)),
+    theme_primary : process.env.THEME_PRIMARY,
+    theme_secondary : process.env.THEME_SECONDARY,
+    theme_type : process.env.THEME_TYPE,
+};
 
-config.set(configuration.shared);
+config.set(configuration);
 
 const express    = require('express');
 const bodyParser = require('body-parser');
@@ -23,7 +33,7 @@ const session    = require('express-session');
 const auth       = require('./lib/auth');
 
 // all environments
-app.set('port', configuration.port || 3000);
+app.set('port', process.env.PORT || 3000);
 app.use(morgan('tiny'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -36,11 +46,11 @@ if ('development' == app.get('env')) {
 }
 
 const sess = {
-    secret: configuration.session_secret,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
-        maxAge: configuration.session_max_age,
+        maxAge: parseInt(process.env.SESSION_MAX_AGE),
         secure: 'auto'
     }
 };
