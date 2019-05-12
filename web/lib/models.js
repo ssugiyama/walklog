@@ -53,6 +53,9 @@ const Walks = sequelize.define('walks', {
     },
     path: {
         type : Sequelize.TEXT,
+    },
+    user_id: {
+        type: Sequelize.INTEGER,
     }
 }, {
     underscored: true,

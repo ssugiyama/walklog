@@ -32,7 +32,7 @@ passport.serializeUser(function(user, done) {
     done(null, user.id);
 });
 passport.deserializeUser(function(obj, done) {
-    Users.findById(obj).then(user => done(null, user));
+    Users.findByPk(obj).then(user => done(null, user));
 });
 
 exports.passport = passport;
