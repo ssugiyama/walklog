@@ -66,7 +66,7 @@ THEME_TYPE=light
     % cd ../web
     % yarn install && yarn run build-cli && yarn run build-svr
     % cp -a assets/* public
-    % sh -c "$(cat .env| tr '\n' ' ') yarn start"
+    % yarn run start-with-dotenv
 
 You may access http://localhost:3000 . 
 
