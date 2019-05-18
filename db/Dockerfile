@@ -2,8 +2,6 @@ FROM mdillon/postgis:11-alpine
 MAINTAINER Shinichi SUGIYAMA <shin.sugi@gmail.com>
 
 WORKDIR /tmp
-RUN apk add --no-cache unzip
-ADD schema.sql .
-ADD japan_ver*.zip .
-ADD walklog-init.sh /docker-entrypoint-initdb.d/
-RUN chmod +x /docker-entrypoint-initdb.d/walklog-init.sh
+ADD schema.sql /docker-entrypoint-initdb.d/
+ADD manage-areas.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/manage-areas.sh

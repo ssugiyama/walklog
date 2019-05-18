@@ -6,7 +6,7 @@ walklog is a management tool of walking paths.
     % git clone https://github.com/ssugiyama/walklog.git
     % cd walklog
 
-visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip into db directory.
+visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip and extract files in some work directory. alternatively you can download data from  National Land Numerical Information (http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-N03.html) and convert into shp format.
 
     % cp web/.env.sample web/.env
 
@@ -41,6 +41,12 @@ THEME_TYPE=light
     % docker-compose up -d
     % docker-compose run --rm web /var/www/setup.sh
 
+### setup area table
+
+*work_dir* is the directory which you put shp files in.
+
+    % docker-compose run -v *work_dir*:/tmp --rm db manage-areas.sh -h db *shp_file*
+
 ## without docker 
 
 ### 0. requirement
@@ -58,9 +64,8 @@ THEME_TYPE=light
     % psql walklog -f schema.sql
 
 ### 2. setup areas table
-    % unzip japan_ver81.zip
-    % shp2pgsql -s 4326 -g the_geom -I -W sjis japan_ver81.shp areas > areas.sql
-    % psql walklog -f areas.sql
+    % cd *work_dir*
+    % $(project_root)/db/manage-areas.sh *shp_file* 
 
 ### 3. setup and start api server
     % cd ../web
