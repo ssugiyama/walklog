@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-cli": "parcel build -d public -o bundle src/client-root.js",
+    "build-cli": "NODE_ENV=production parcel build -d public -o bundle src/client-root.js",
     "build-svr": "babel src -d ./dist",
-    "start": "node index.js",
-    "start-with-dotenv": "node -r dotenv/config index.js",
+    "start": "NODE_ENV=production node index.js",
+    "start-with-dotenv": "NODE_ENV=production node -r dotenv/config index.js",
     "watch": "parcel watch -d public -o bundle src/client-root.js",
     "test": "jest"
   },

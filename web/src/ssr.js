@@ -46,6 +46,7 @@ const Wrapper = props => (
         <meta name="theme-color" content="#ffffff" />
         <link rel="canonical" href={props.canonical} />
         <title>{props.title}</title>
+        <style id="jss-server-side" dangerouslySetInnerHTML={raw(props.css)}></style>
     </head>
     <body style={{ margin: 0, height: '100%' }}>
         <div id="body" dangerouslySetInnerHTML={{ __html: props.markup }} style={{ height: '100%' }}></div>
@@ -54,7 +55,6 @@ const Wrapper = props => (
         <script src="./bundle.js"></script>
         <script type="text/javascript" async defer src="https://platform.twitter.com/widgets.js"></script>
         <script src="/register-sw.js"></script>
-        <style id="jss-server-side" dangerouslySetInnerHTML={raw(props.css)}></style>
     </body>
 </html>);
 
