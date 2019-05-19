@@ -28,13 +28,14 @@ TWITTER_SITE=@chez_sugi
 EXTERNAL_LINKS=example=http://example.com;example2=http://example2.com
 THEME_PRIMARY=bluegrey
 THEME_SECONDARY=orange
-THEME_TYPE=light
+THEME_TYPE=
 ```
 
 - GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
 - TWITTER_CONSUMER_KEY and TWITTER_CONSUMER_SECRET: needed for twitter authentication. get at https://apps.twtter.com
 - TWITTER_ALLOWED_USERS: specify screennames concatenated with ',' if restrict the users who can login
 - EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
+- THEME_TYPE: if blank, reflects browser's color scheme(a.k.a 'dark mode')
 '
 ## with docker
     % mkdir data public

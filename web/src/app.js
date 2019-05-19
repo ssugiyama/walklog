@@ -422,13 +422,22 @@ export const routes = [
     }
 ];
 
-export const getTheme = () => createMuiTheme({
-    palette: {
-        primary: colors[config.get('theme_primary') || 'indigo'],
-        secondary: colors[config.get('theme_secondary') || 'pink'],
-        type: config.get('theme_type') || 'light',
-    },
-    typography: {
-        useNextVariants: true,
+export const getTheme = () => {
+    let theme_type = config.get('theme_type');
+    if (typeof matchMedia === 'function' && ! ['dark', 'light'].includes(theme_type))
+    {
+        theme_type =  matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else if (! ['dark', 'light'].includes(theme_type)) {
+        theme_type = 'light';
     }
-});
+    return createMuiTheme({
+        palette: {
+            primary: colors[config.get('theme_primary') || 'indigo'],
+            secondary: colors[config.get('theme_secondary') || 'pink'],
+            type: theme_type,
+        },
+        typography: {
+            useNextVariants: true,
+        }
+    })
+};
