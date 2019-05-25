@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { memo, useState, useContext } from 'react';
 import { bindActionCreators } from 'redux';
 import SearchFormContainer from './search-form';
 import { connect } from 'react-redux';
@@ -51,104 +51,93 @@ const styles = theme => ({
     }
 });
 
-class SearchBox extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {show_distance: true};
-    }
-    handleShowAll() {
-        this.context.addPaths(this.props.rows.map(row => row.path));
-        this.props.toggleView();
-    }
-    handleGetMore() {
-        this.props.getMoreItems(this.props.params);
-    }
-    handleSelect(index) {
-        const item = this.props.rows[index];
-        this.props.push( '/' + item.id );
-    }
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.rows != this.props.rows) return true;
-        if (nextState.show_distance != this.state.show_distance) return true;
-        return false;
-    }
-    handleShowDistance(event) {
-        this.setState({show_distance: event.target.value});
-    }
-    render() {
-        const { classes } = this.props;
-        const moreUrl = `/?offset=${this.props.offset}` + (this.props.last_query && `&${this.props.last_query}`);
-        const users = {};
-        for (const u of this.props.users) {
-            users[u.id] = u;
-        }
-        return (
-            <Paper className={classes.root}>
-                <SearchFormContainer />
-                <div>
-                    <Typography variant="body1" color={this.props.error ? 'error' : 'default'} style={{ display: 'inline-block' }}>
-                        {
-                            ( () => {
-                                if (this.props.error) {
-                                    return <span>error: {this.props.error.message}</span>;
-                                }
-                                else if (this.props.searching) {
-                                    return <span>Searching now...</span>;
-                                }
-                                else {
-                                    switch (this.props.count) {
-                                    case null:
-                                        return <span>successfully saved</span>;
-                                    case 0:
-                                        return <span>No results</span>;
-                                    case 1:
-                                        return <span>1 / 1 item</span>;
-                                    default:
-                                        return <span>{this.props.rows.length}  / {this.props.count}  items</span>;
-                                    }
-                                }
-                            })()
-                        }
-                    </Typography> :
-            { this.props.rows.length > 0 && (<Button onClick={ this.handleShowAll.bind(this) } color="secondary">show all paths</Button>) }
-                </div>
-                <Table className={classes.table}>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell classes={{ root: classes.cell}}><Typography variant="body2">user</Typography></TableCell>
-                            <TableCell classes={{ root: classes.cell}}><Typography variant="body2">date</Typography></TableCell>
-                            <TableCell classes={{ root: classes.cell}}><Typography variant="body2">title</Typography></TableCell>
-                            <TableCell classes={{ root: classes.cell}}>{
-                                this.props.rows.length > 0 && this.props.rows[0].distance !== undefined ?
-                                (<Select value={this.state.show_distance} onChange={this.handleShowDistance.bind(this)}>
-                                <MenuItem value={true}><Typography variant="body2">distance</Typography></MenuItem>
-                                <MenuItem value={false}><Typography variant="body2">length</Typography></MenuItem>
-                                </Select>) : (<Typography variant="body2">length</Typography>)
-                            }</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        { this.props.rows.map( (item, index) => {
-                            const u = users[item.user_id];
-                            return (
-                                <TableRow className={classes.row} key={index} onClick={this.handleSelect.bind(this, index)}>
-                                    <TableCell classes={{ root: classes.cell}}>
-                                        { u && <img className={classes.userPhoto} src={u.photo} alt={u.username} title={u.username} />}
-                                    </TableCell>
-                                    <TableCell classes={{ root: classes.cell}}>{item.date}</TableCell>
-                                    <TableCell classes={{ root: classes.cell}}>{item.title}</TableCell>
-                                    <TableCell classes={{ root: classes.cell}}>{this.state.show_distance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
-                                </TableRow>);
-                        })}
-                    </TableBody>
-                </Table>
-                { this.props.offset > 0 && <Button style={{width: '100%'}} color="secondary" component={Link} to={moreUrl}>more</Button>  }
-            </Paper>
-        );
-    }
-}
+const SearchBox = props => {
+    const [showDistance, setShowDistance] = useState(true); 
+    const context = useContext(MapContext);
+    const { toggleView, push } = props;
+    const { last_query, offset, count, error, rows, users, searching  } = props;
+    const handleShowAll = () => {
+        context.state.addPaths(rows.map(row => row.path));
+        toggleView();
+    };
 
-SearchBox.contextType = MapContext;
+    const handleSelect = (index) => {
+        const item = rows[index];
+        push( '/' + item.id );
+    };
+    const handleShowDistance = (value) => {
+        setShowDistance(value);
+    };
+    const { classes } = props;
+    const moreUrl = `/?offset=${offset}` + (last_query && `&${last_query}`);
+    const user_objs = {};
+    for (const u of users) {
+        user_objs[u.id] = u;
+    }
+    return (
+        <Paper className={classes.root}>
+            <SearchFormContainer />
+            <div>
+                <Typography variant="body1" color={error ? 'error' : 'default'} style={{ display: 'inline-block' }}>
+                    {
+                        ( () => {
+                            if (error) {
+                                return <span>error: {error.message}</span>;
+                            }
+                            else if (searching) {
+                                return <span>Searching now...</span>;
+                            }
+                            else {
+                                switch (count) {
+                                case null:
+                                    return <span>successfully saved</span>;
+                                case 0:
+                                    return <span>No results</span>;
+                                case 1:
+                                    return <span>1 / 1 item</span>;
+                                default:
+                                    return <span>{rows.length}  / {count}  items</span>;
+                                }
+                            }
+                        })()
+                    }
+                </Typography> :
+        { rows.length > 0 && (<Button onClick={ handleShowAll } color="secondary">show all paths</Button>) }
+            </div>
+            <Table className={classes.table}>
+                <TableHead>
+                    <TableRow>
+                        <TableCell classes={{ root: classes.cell}}><Typography variant="body2">user</Typography></TableCell>
+                        <TableCell classes={{ root: classes.cell}}><Typography variant="body2">date</Typography></TableCell>
+                        <TableCell classes={{ root: classes.cell}}><Typography variant="body2">title</Typography></TableCell>
+                        <TableCell classes={{ root: classes.cell}}>{
+                            rows.length > 0 && rows[0].distance !== undefined ?
+                            (<Select value={showDistance} onChange={e => handleShowDistance(e.target.value)}>
+                            <MenuItem value={true}><Typography variant="body2">distance</Typography></MenuItem>
+                            <MenuItem value={false}><Typography variant="body2">length</Typography></MenuItem>
+                            </Select>) : (<Typography variant="body2">length</Typography>)
+                        }</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    { rows.map( (item, index) => {
+                        const u = user_objs[item.user_id];
+                        return (
+                            <TableRow className={classes.row} key={index} onClick={() => handleSelect(index)}>
+                                <TableCell classes={{ root: classes.cell}}>
+                                    { u && <img className={classes.userPhoto} src={u.photo} alt={u.username} title={u.username} />}
+                                </TableCell>
+                                <TableCell classes={{ root: classes.cell}}>{item.date}</TableCell>
+                                <TableCell classes={{ root: classes.cell}}>{item.title}</TableCell>
+                                <TableCell classes={{ root: classes.cell}}>{showDistance && item.distance !== undefined ? item.distance.toFixed(1) : item.length.toFixed(1)}</TableCell>
+                            </TableRow>);
+                    })}
+                </TableBody>
+            </Table>
+            { offset > 0 && <Button style={{width: '100%'}} color="secondary" component={Link} to={moreUrl}>more</Button>  }
+        </Paper>
+    );
+};
 
 function mapStateToProps(state) {
     return Object.assign({}, state.main.result, 
@@ -160,4 +149,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ getMoreItems, setSelectedItem, toggleView, push }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchBox));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(SearchBox)));

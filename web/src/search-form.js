@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
+import React, { memo, useCallback } from 'react';
 import { bindActionCreators } from 'redux';
-import 'whatwg-fetch';
 import { connect } from 'react-redux';
 import { setSearchForm, search } from './actions';
 import Button from '@material-ui/core/Button';
@@ -43,75 +42,73 @@ const order_options_with_nearest = [
 const styles = {
 };
 
-class SearchForm extends Component {
-    constructor(props) {
-        super(props);
-    }
-    handleChange(name) {
-        return event => this.props.setSearchForm({[name]: event.target.value});
-    }
-    render() {
-        const classes = this.props.classes;
-        return (
-            <form role="form">
-                <input type="hidden" name="latitude" value="" />
-                <input type="hidden" name="longitude" value="" />
-                <input type="hidden" name="radius" value="" />
-                <input type="hidden" name="cities" value=""  />
-                <input type="hidden" name="searchPath" value=""  />
-                <div>
-                    <TextField select label="filter" value={this.props.filter} onChange={this.handleChange('filter')} style={{width: '50%'}}>
-                        <MenuItem value="">-</MenuItem>
-                        <MenuItem value="neighborhood">Neighborhood</MenuItem>
-                        <MenuItem value="cities">Cities</MenuItem>
-                        <MenuItem value="frechet">Fréchet</MenuItem>
-                        <MenuItem value="hausdorff">Hausdorff</MenuItem>
-                        <MenuItem value="crossing">Crossing</MenuItem>
-                    </TextField>
-                    <TextField select label="user" value={this.props.user} onChange={this.handleChange('user')} 
-                        style={{width: '50%'}}
-                    >
-                        <MenuItem value="">-</MenuItem>
-                        {this.props.users.map(u => <MenuItem value={u.id} key={u.id}>{u.username}</MenuItem>)}
-                    </TextField>
-                </div>
-                <div>
-                    <TextField select label="month" value={parseInt(this.props.month) || ''} onChange={this.handleChange('month')} 
-                        style={{width: '50%'}}
-                    >
-                        {month_options.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
-                    </TextField>
-                    <TextField select label="year" value={parseInt(this.props.year) || ''} onChange={this.handleChange('year')} 
-                        style={{width: '50%'}} 
-                    >
-                        <MenuItem value="">-</MenuItem>
-                        {this.props.years.map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
-                    </TextField>
-                </div>
-                <div>
-                    <TextField select label="order" value={this.props.order} onChange={this.handleChange('order')} 
-                        style={{width: '50%', verticalAlign: 'bottom'}} 
-                    >
-                        {
-                            (this.props.filter == 'hausdorff' || this.props.filter == 'frechet' ? order_options_with_nearest : order_options).map(option =>
-                                <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>
-                            )
-                        }
-                    </TextField>
-                    <TextField id="search_form_limit" label="limit" value={this.props.limit} onChange={this.handleChange('limit')} style={{width: '50%'}} />
-                </div>
-                <div>
-                    <Button style={{width: '100%'}} color="secondary" component={Link} to="/?force_fetch=1" >Reset</Button>
-                </div>
-            </form>
-        );
-    }
-}
+const SearchForm = props => {
+    
+    const { setSearchForm, } = props;
+    const { years, users, filter, month, year, user, limit, order } = props;
+    const handleChange = useCallback((name, value) => {
+        setSearchForm({[name]: value});
+    });
+    
+    return (
+        <form role="form">
+            <input type="hidden" name="latitude" value="" />
+            <input type="hidden" name="longitude" value="" />
+            <input type="hidden" name="radius" value="" />
+            <input type="hidden" name="cities" value=""  />
+            <input type="hidden" name="searchPath" value=""  />
+            <div>
+                <TextField select label="filter" value={filter} onChange={e => handleChange('filter', e.target.value)} style={{width: '50%'}}>
+                    <MenuItem value="">-</MenuItem>
+                    <MenuItem value="neighborhood">Neighborhood</MenuItem>
+                    <MenuItem value="cities">Cities</MenuItem>
+                    <MenuItem value="frechet">Fréchet</MenuItem>
+                    <MenuItem value="hausdorff">Hausdorff</MenuItem>
+                    <MenuItem value="crossing">Crossing</MenuItem>
+                </TextField>
+                <TextField select label="user" value={user} onChange={e => handleChange('user', e.target.value)} 
+                    style={{width: '50%'}}
+                >
+                    <MenuItem value="">-</MenuItem>
+                    {users.map(u => <MenuItem value={u.id} key={u.id}>{u.username}</MenuItem>)}
+                </TextField>
+            </div>
+            <div>
+                <TextField select label="month" value={parseInt(month) || ''} onChange={handleChange('month')} 
+                    style={{width: '50%'}}
+                >
+                    {month_options.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
+                </TextField>
+                <TextField select label="year" value={parseInt(year) || ''} onChange={e => handleChange('year', e.target.value)} 
+                    style={{width: '50%'}} 
+                >
+                    <MenuItem value="">-</MenuItem>
+                    {years.map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+                </TextField>
+            </div>
+            <div>
+                <TextField select label="order" value={order} onChange={e => handleChange('order', e.target.value)} 
+                    style={{width: '50%', verticalAlign: 'bottom'}} 
+                >
+                    {
+                        (filter == 'hausdorff' || filter == 'frechet' ? order_options_with_nearest : order_options).map(option =>
+                            <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>
+                        )
+                    }
+                </TextField>
+                <TextField id="search_form_limit" label="limit" value={limit} onChange={e => handleChange('limit', e.target.value)} style={{width: '50%'}} />
+            </div>
+            <div>
+                <Button style={{width: '100%'}} color="secondary" component={Link} to="/?force_fetch=1" >Reset</Button>
+            </div>
+        </form>
+    );
+};
 
 function mapStateToProps(state) {
-    const { years, view, users } = state.main;
+    const { years, users } = state.main;
     return Object.assign({}, state.main.search_form, { 
-        years, view, users,
+        years, users,
     });
 }
 
@@ -119,4 +116,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({setSearchForm, search }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchForm));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(SearchForm)));

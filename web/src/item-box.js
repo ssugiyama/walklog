@@ -1,9 +1,8 @@
-import React, { Component } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { push } from 'connected-react-router';
-import { setSelectedItem, getMoreItems, openWalkEditor } from './actions';
+import { openWalkEditor } from './actions';
 import marked from 'marked';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
@@ -70,100 +69,92 @@ const styles = theme => ({
     }
 });
 
-class ItemBox extends Component {
-    constructor(props) {
-        super(props);
-        this.state = { tabValue: 0 };
-    }
-    handleEdit() {
-        this.props.openWalkEditor(true, 'update');
-    }
-    handleTabChange(event, tabValue) {
-        this.setState({ tabValue });
-    }
-    static getDerivedStateFromProps(nextProps, prevState) {
-        const data = nextProps.selected_item;
+const ItemBox = props => {
+    const [tabValue, setTabValue] = useState(0);
+    const { openWalkEditor } = props; 
+    const {classes, location, last_query, next_id, prev_id, offset, staticContext, 
+        selected_item, current_user, users} = props;
+    const handleEdit = () => {
+        openWalkEditor(true, 'update');
+    };
+    const handleTabChange = useCallback(tabValue => {
+        setTabValue(tabValue);
+    });
+
+    const tweetUrl = useMemo(() => {
+        const data = selected_item;
         if (! data) return null;
         const href = config.get('base_url') + '/' + data.id;
         const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
-        return {
-            tweet_url: `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`,
-        };
+        return `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`;
+    }, [selected_item]); 
+   
+    const data = selected_item;
+    
+    if (staticContext && !data) {
+        staticContext.status = 404;
     }
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.selected_item != this.props.selected_item) return true;
-        if (nextState.tabValue != this.state.tabValue) return true;
-        return false;
-    }
-    render() {
-        const data = this.props.selected_item;
-        const {location, last_query, next_id, prev_id, offset, staticContext} = this.props;
-        if (staticContext && !data) {
-            staticContext.status = 404;
+    let title, createMarkup, data_user, image;
+    if (data) {
+        title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
+        createMarkup = () => { return { __html: marked(data.comment || '') }; };
+        image = data.image;
+        for (let u of users) {
+            if (u.id == data.user_id) data_user = u;
         }
-        let title, createMarkup, data_user, image;
-        if (data) {
-            title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
-            createMarkup = () => { return { __html: marked(data.comment || '') }; };
-            image = data.image;
-            for (let u of this.props.users) {
-                if (u.id == data.user_id) data_user = u;
-            }
-        }
-        const upUrl = location && location.search == '?force_fetch=1'
-            ? '/' + location.search
-            : last_query && last_query != 'restore_url=1' ? '/?' + last_query : '/';
-        const nextUrl = next_id && '/' + next_id;
-        const prevUrl = prev_id ? 
-            '/' + prev_id : 
-            offset > 0 ? 
-                '/?select=1&offset=' + offset + 
-                    (last_query ? '&' + last_query : '') : null;
-        const { classes } = this.props;
-        return  data && 
-            (<div>
-                <Paper className={classes.itemBoxControl}>
-                    <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
-                    <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
-                    <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
-                    {
-                        data && this.props.current_user && data.user_id && this.props.current_user.id == data.user_id ? (<IconButton onClick={this.handleEdit.bind(this)} ><EditorModeEdit /></IconButton>) : null
-                    }
-                    <IconButton component="a" href={this.state.tweet_url}><TweetIcon /></IconButton>
-                    <Typography variant="h6" color={title ? 'default' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
-                    {
-                        data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
-                    }
-                </Paper>
-                <Paper>
-                    <Tabs value={this.state.tabValue}
-                        onChange={this.handleTabChange.bind(this)}
-                        className={classes.tabs}
-                        textColor="secondary"
-                        variant="fullWidth" >
-                        <Tab label="Comment"  className={classes.tab} />
-                        <Tab label="Elevation" className={classes.tab} />
-                        <Tab label="StreetView" className={classes.tab}/>
-                    </Tabs>
-                </Paper>
-                <SwipeableViews index={this.state.tabValue} onChangeIndex={this.handleTabChange.bind(this, null)} disableLazyLoading enableMouseEvents>
-                    <Paper className={classes.itemBoxContent}>
-                        {image && <img src={image} className={classes.itemBoxImage} />}
-                        <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
-                        </Typography>
-                    </Paper>
-                    <Paper className={classes.itemBoxContent}>
-                        <NoSsr>
-                            <ElevationBox />
-                        </NoSsr>
-                    </Paper>
-                    <Paper className={classes.itemBoxContent}>
-                        <PanoramaBox />
-                    </Paper>
-                </SwipeableViews>
-            </div>);
     }
-}
+    const upUrl = location && location.search == '?force_fetch=1'
+        ? '/' + location.search
+        : last_query && last_query != 'restore_url=1' ? '/?' + last_query : '/';
+    const nextUrl = next_id && '/' + next_id;
+    const prevUrl = prev_id ? 
+        '/' + prev_id : 
+        offset > 0 ? 
+            '/?select=1&offset=' + offset + 
+                (last_query ? '&' + last_query : '') : null;
+    return  data && 
+        (<div>
+            <Paper className={classes.itemBoxControl}>
+                <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
+                <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
+                <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
+                {
+                    data && current_user && data.user_id && current_user.id == data.user_id ? (<IconButton onClick={handleEdit} ><EditorModeEdit /></IconButton>) : null
+                }
+                <IconButton component="a" href={tweetUrl}><TweetIcon /></IconButton>
+                <Typography variant="h6" color={title ? 'default' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
+                {
+                    data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
+                }
+            </Paper>
+            <Paper>
+                <Tabs value={tabValue}
+                    onChange={(e, value) => handleTabChange(value)}
+                    className={classes.tabs}
+                    textColor="secondary"
+                    variant="fullWidth" >
+                    <Tab label="Comment"  className={classes.tab} />
+                    <Tab label="Elevation" className={classes.tab} />
+                    <Tab label="StreetView" className={classes.tab}/>
+                </Tabs>
+            </Paper>
+            <SwipeableViews index={tabValue} onChangeIndex={index => handleTabChange(index)} disableLazyLoading enableMouseEvents>
+                <Paper className={classes.itemBoxContent}>
+                    {image && <img src={image} className={classes.itemBoxImage} />}
+                    <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
+                    </Typography>
+                </Paper>
+                <Paper className={classes.itemBoxContent}>
+                    <NoSsr>
+                        <ElevationBox />
+                    </NoSsr>
+                </Paper>
+                <Paper className={classes.itemBoxContent}>
+                    <PanoramaBox />
+                </Paper>
+            </SwipeableViews>
+        </div>);  
+};
 
 function mapStateToProps(state) {
     return {
@@ -182,7 +173,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ push, setSelectedItem, getMoreItems, openWalkEditor }, dispatch);
+    return bindActionCreators({ openWalkEditor }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(ItemBox));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(ItemBox)));

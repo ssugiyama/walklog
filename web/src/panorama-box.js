@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { memo, useRef, useContext, useEffect } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { toggleView, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
@@ -36,19 +36,24 @@ const styles = {
     },
 };
 
-class PanoramaBox extends Component {
-    constructor(props) {
-        super(props);
-        this.panoramaInterval = 50;
-        this.body_ref = React.createRef();
-    }
-    handleOverlayChange(e, toggled) {
-        this.props.setOverlay(toggled);
-    }
-    interpolatePoints(pt1, pt2, r) {
+const PANORAMA_INTERVAL = 50;
+
+const PanoramaBox = props => {
+
+    const body_ref = useRef();
+    const {  setPanoramaCount, setPanoramaIndex, setOverlay } = props; 
+    const {  highlighted_path,  panorama_index, panorama_count, overlay, map_loaded } = props;
+    const panorama = useRef();
+    const panoramaPointsAndHeadings = useRef();
+    const streetViewService = useRef();
+    const handleOverlayChange = (e, toggled) => {
+        setOverlay(toggled);
+    };
+    const interpolatePoints = (pt1, pt2, r) => {
         return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
-    }
-    getPanoramaPointsAndHeadings(highlighted_path) {
+    };
+    const context = useContext(MapContext);
+    const getPanoramaPointsAndHeadings = (highlighted_path) => {
         if (!highlighted_path) return null;
         const pph = [];
         const path = highlighted_path;
@@ -63,114 +68,115 @@ class PanoramaBox extends Component {
             h = google.maps.geometry.spherical.computeHeading(pt1, pt2);
 
             while(way < dsum+d ) {
-                const pt = this.interpolatePoints(pt1, pt2, (way - dsum)/d);
+                const pt = interpolatePoints(pt1, pt2, (way - dsum)/d);
                 pph.push([pt, h]);
-                way += this.panoramaInterval;
+                way += PANORAMA_INTERVAL;
             }
             dsum += d;
         }
         pph.push([pt2, h]);
         return pph;
+    };
 
-    }
-    updatePath(highlighted_path) {
+    const updatePath = (highlighted_path) => {
         if (! highlighted_path) {
-            const panorama = this.props.overlay ? this.context.map.getStreetView() : this.panorama;
-            if (panorama) {
-                panorama.setVisible(false);
+            const pnrm = overlay ? context.state.map.getStreetView() : panorama.current;
+            if (pnrm) {
+                pnrm.setVisible(false);
             }
-            this.setStreetView(null);
+            setStreetView(null);
             return;
         }
         const path = google.maps.geometry.encoding.decodePath(highlighted_path);
-        this.panoramaPointsAndHeadings = this.getPanoramaPointsAndHeadings(path);
-        this.props.setPanoramaCount(this.panoramaPointsAndHeadings.length);
+        panoramaPointsAndHeadings.current = getPanoramaPointsAndHeadings(path);
+        setPanoramaCount(panoramaPointsAndHeadings.current.length);
         // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
-        this.props.setPanoramaIndex(0);
-    }
-    showPanorama() {
-        const index = this.props.panorama_index;
-        const item = this.panoramaPointsAndHeadings[index];
+        setPanoramaIndex(0);
+    };
+
+    const showPanorama = () => {
+        const index = panorama_index;
+        const item = panoramaPointsAndHeadings.current[index];
         const pt = item[0];
         const heading = item[1];
-        const panorama = this.props.overlay ? this.context.map.getStreetView() : this.panorama;
-        this.streetViewService.getPanoramaByLocation(pt, 50, (data, status) => {
+        const pnrm = overlay ? context.state.map.getStreetView() : panorama.current;
+        streetViewService.current.getPanoramaByLocation(pt, 50, (data, status) => {
             if (status == google.maps.StreetViewStatus.OK) {
-                panorama.setPano(data.location.pano);
-                panorama.setPov({heading: heading, zoom: 1, pitch: 0});
-                panorama.setVisible(true);
+                pnrm.setPano(data.location.pano);
+                pnrm.setPov({heading: heading, zoom: 1, pitch: 0});
+                pnrm.setVisible(true);
             }
             else {
-                panorama.setVisible(false);
+                pnrm.setVisible(false);
             }
         });
-        google.maps.event.trigger(panorama, 'resize');
-    }
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.highlighted_path != this.props.highlighted_path) return true;
-        if (nextProps.panorama_index != this.props.panorama_index) return true;
-        if (nextProps.panorama_count != this.props.panorama_count) return true;
-        if (nextProps.overlay != this.props.overlay) return true;
-        return false;
-    }
-    updatePanorama(pathUpdated) {
-        if ( !this.props.map_loaded ) return;
-        if ( !this.panorama ) {
-            this.streetViewService = new google.maps.StreetViewService();
-            this.panorama = new google.maps.StreetViewPanorama(this.body_ref.current, {
+        google.maps.event.trigger(pnrm, 'resize');
+    };
+
+    const updatePanorama = (pathUpdated) => {
+        if ( !map_loaded ) return;
+        if ( !panorama.current ) {
+            streetViewService.current = new google.maps.StreetViewService();
+            panorama.current = new google.maps.StreetViewPanorama(body_ref.current, {
                 addressControl: true,
                 navigationControl: true,
                 enableCloseButton: false,
             });
         }
         if ( pathUpdated ) {
-            this.updatePath(this.props.highlighted_path);
+            updatePath(highlighted_path);
         }
-        if (this.props.overlay){
-            this.setStreetView(null);
-        } else {
-            this.setStreetView(this.panorama);
-        }
-        this.showPanorama();
-    }
-    componentDidMount() {
-        this.updatePanorama(true);
-    }
-    componentDidUpdate(prevProps) {
-        const pathUpdated = !this.panoramaPointsAndHeadings || prevProps.highlighted_path != this.props.highlighted_path;
-        this.updatePanorama(pathUpdated);
-    }
-    componentWillUnmount() {
-        this.setStreetView(null);
-    }
-    setStreetView(panorama) {
-        this.context.map.setStreetView(panorama);
-    }
-    render() {
-        return (
-            <div>
-                <div>
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={this.props.overlay} onChange={this.handleOverlayChange.bind(this)} />}
-                        label="overlay">
-                    </FormControlLabel>
-                </div>
-                <div style={styles.panoramaBoxBody} ref={this.body_ref}></div>
-                <div style={styles.panoramaBoxControl}>
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                    <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ this.props.panorama_index+1 } </span> / <span>{ this.props.panorama_count } </span></Typography>
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                    <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
-                </div>
-            </div>
-        );
-    }
-}
+        showPanorama();
+    };
+    
+    // unmount
+    useEffect(() =>{
+        return () => {
+            setStreetView(null);
+        };
+    }, []);
 
-PanoramaBox.contextType = MapContext;
+    useEffect(() =>{
+        if (overlay){
+            setStreetView(null);
+        } else {
+            setStreetView(panorama.current);
+        }
+        updatePanorama(false);
+    }, [overlay]);
+    useEffect(() => {
+        updatePanorama(true);
+    }, [highlighted_path, map_loaded]);
+  
+    useEffect(() => {
+        updatePanorama(false);
+    }, [panorama_index]);
+
+    const setStreetView = (pnrm) => {
+        if (context.state.map)
+            context.state.map.setStreetView(pnrm);
+    };
+    return (
+        <div>
+            <div>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={overlay} onChange={handleOverlayChange} />}
+                    label="overlay">
+                </FormControlLabel>
+            </div>
+            <div style={styles.panoramaBoxBody} ref={body_ref}></div>
+            <div style={styles.panoramaBoxControl}>
+                <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 10); } }><AvFastRewind /></IconButton>
+                <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ panorama_index+1 } </span> / <span>{ panorama_count } </span></Typography>
+                <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 10); }}><AvFastForward /></IconButton>
+            </div>
+        </div>
+    );  
+};
 
 function mapStateToProps(state) {
     const { view, highlighted_path, panorama_index, panorama_count, overlay, map_loaded } = state.main;
@@ -183,4 +189,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PanoramaBox);
+export default connect(mapStateToProps, mapDispatchToProps)(memo(PanoramaBox));

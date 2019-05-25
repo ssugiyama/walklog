@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
+import React, { useRef, useEffect, memo } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
 import { withTheme } from 'react-jss';
-
 
 const styles = {
     elevationBox: {
@@ -13,13 +12,42 @@ const styles = {
     },
 };
 
-class ElevationBox extends Component {
-    constructor(props) {
-        super(props);
-        this.chart = null;
-        this.root_ref = React.createRef();
-    }
-    requestElevation(highlighted_path) {
+const ElevationBox = props => {
+    const root_ref = useRef();
+    const chart = useRef();
+    const elevator = useRef();
+    const elevationResults = useRef();
+    const { highlighted_path, map_loaded, setInfoWindow } = props;
+
+    // test code for local
+    // const interpolatePoints = (pt1, pt2, r) => {
+    //     return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
+    // };
+    // const getElevationPointsAndElevation = (highlighted_path) => {
+    //     if (!highlighted_path) return null;
+    //     const pp = [];
+    //     const path = highlighted_path;
+    //     const count = path.length;
+    //     let way = 0;
+    //     let dsum = 0;
+    //     let pt2;
+    //     for (let i= 0; i < count-1; i++) {
+    //         let pt1 = path[i];
+    //         pt2 = path[i+1];
+    //         const d = google.maps.geometry.spherical.computeDistanceBetween(pt1, pt2);
+
+    //         while(way < dsum+d ) {
+    //             const pt = interpolatePoints(pt1, pt2, (way - dsum)/d);
+    //             const h = Math.random()* 50 + 10;
+    //             pp.push({elevation: h, location: pt});
+    //             way += 50;
+    //         }
+    //         dsum += d;
+    //     }
+    //     return pp;
+    // };
+
+    const requestElevation = () =>  {
         if (!highlighted_path) return;
         const path = google.maps.geometry.encoding.decodePath(highlighted_path);
 
@@ -27,18 +55,20 @@ class ElevationBox extends Component {
             'path': path,
             'samples': 256
         };
-        this.elevator.getElevationAlongPath(pathRequest, (results, status) => {
-            this.plotElevation(results, status);
+        elevator.current.getElevationAlongPath(pathRequest, (results, status) => {
+            plotElevation(results, status);
         });
-    }
-    plotElevation(results, status) {
-        const { theme } = this.props;
+        // const results = getElevationPointsAndElevation(path);
+        // plotElevation(results, google.maps.ElevationStatus.OK)
+    };
+    const plotElevation = (results, status) => {
+        const { theme } = props;
         if (status == google.maps.ElevationStatus.OK) {
-            this.elevationResults = results;
+            elevationResults.current = results;
             const data = results.map(result => result.elevation);
             const labels = results.map(result => '');
-            if (!this.chart) {
-                this.chart = new Chart(this.root_ref.current.getContext('2d'), {
+            if (! chart.current) {
+                chart.current = new Chart(root_ref.current.getContext('2d'), {
                     type: 'line',
                     data: {
                         labels,
@@ -51,7 +81,7 @@ class ElevationBox extends Component {
                         hover: {
                             intersect: false,
                             mode: 'index',
-                            onHover: this.handleHover.bind(this)
+                            onHover: handleHover
                         },
                         scales: {
                             yAxes: [{
@@ -71,7 +101,7 @@ class ElevationBox extends Component {
                     }
                 });
             }
-            this.chart.data.datasets = [{
+            chart.current.data.datasets = [{
                 data,
                 borderWidth: 1,
                 borderColor: '#ff0000',
@@ -79,50 +109,39 @@ class ElevationBox extends Component {
                 pointStyle: 'dot',
                 radius: 1
             }];
-            this.chart.update();
+            chart.current.update();
         }
-    }
-    handleHover(ev, elms) {
+    };
+    const handleHover = (ev, elms) => {
         if (elms.length == 0) {
-            this.props.setInfoWindow({open: false});
+            setInfoWindow({open: false});
         }
         else {
-            var elevation = this.elevationResults[elms[0]._index];
+            const elevation = elevationResults.current[elms[0]._index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
-            this.props.setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
+            setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
         }
-    }
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.highlighted_path !== this.props.highlighted_path || nextProps.map_loaded !== this.props.map_loaded) {
-            return true;
+    };
+    const updateChart = () => {
+        if ( !map_loaded ) return;
+        if (! elevator.current ) {
+            elevator.current = new google.maps.ElevationService();
         }
-        else {
-            return false;
-        }
-    }
-    updateChart() {
-        if ( !this.props.map_loaded ) return;
-        if (! this.elevator ) {
-            this.elevator = new google.maps.ElevationService();
-        }
-        this.requestElevation(this.props.highlighted_path);
-    }
-    componentDidMount() {
-        this.updateChart();
-    }
-    componentDidUpdate(prevProps) {
-        this.updateChart();
-    }
-    render() {
-        if (this.props.highlighted_path)
-            return (
-                <canvas style={styles.elevationBox} ref={this.root_ref}></canvas>
-            );
-        else
-            return null;
-    }
-}
+        requestElevation();
+    };
+    useEffect(() => {
+        updateChart();
+    });
+
+    if (highlighted_path)
+        return (
+            <canvas style={styles.elevationBox} ref={root_ref}></canvas>
+        );
+    else
+        return null;
+    
+};
 
 function mapStateToProps(state) {
     const { highlighted_path, map_loaded } = state.main;
@@ -135,4 +154,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ setInfoWindow }, dispatch);
 }
 
-export default withTheme(connect(mapStateToProps, mapDispatchToProps)(ElevationBox));
+export default withTheme(connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox)));

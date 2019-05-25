@@ -1,11 +1,10 @@
-import React, { Component } from 'react';
+import React, { useContext, useEffect, useState, memo } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {
     openWalkEditor,
     setGeoMarker,
     openSnackbar,
-    addPoint,
 } from './actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -41,158 +40,160 @@ const styles = {
 
 const AUTO_GEOLOCATION_INTERVAL = 30000;
 
-class NavBar extends Component {
-    constructor(props) {
-        super(props);
-        this.autoGeolocationIntervalID = null;
-        this.state = { topAnchorEl: null, autoGeolocation: false, confirm_info: {open: false } };
-    }
-    setCurrentPosition(updateCenter, isFirst) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition( pos => {
-                if (isFirst) {
-                    this.props.openSnackbar('start following your location');
-                    this.setState({ autoGeolocation: true});
-                    this.autoGeolocationIntervalID = setInterval(() => {
-                        this.setCurrentPosition(false, false);
-                    }, AUTO_GEOLOCATION_INTERVAL);
-                }
-                new Promise((resolve, reject) => {
-                    if (this.props.selected_path && isFirst) {
-                        this.setState({confirm_info: {open: true, resolve}});
-                    }
-                    else {
-                        resolve(!isFirst);
-                    }
-                }).then(append => {
-                    this.setState({confirm_info: {open: false}});
-                    const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
-                    this.props.setGeoMarker(geo_marker, updateCenter);
-                    this.context.addPoint(pos.coords.latitude, pos.coords.longitude, append);
-                });
-            }, () => {
-                alert('Unable to retrieve your location');
-            });
-        }
-        else {
-            this.setState({ autoGeolocation: false});
-            alert('Geolocation is not supported by your browser');
-        }
-    }
-    handleNewWalk() {
-        this.props.openWalkEditor(true, 'create');
-    }
-    handleMenuOpen(anchorEl) {
+const NavBar = (props) => {
+    const [topAnchorEl, setTopAnchorEl] = useState(null);
+    const [accountAnchorEl, setAccountAnchorEl] = useState(null);
+    const [autoGeolocation, setAutoGeolocation] = useState(false);
+    const [confirmInfo, setConfirmInfo] = useState({open: false});
+    const context = useContext(MapContext);
+    const { addPoint } = context.state;
+    const { openWalkEditor, setGeoMarker, openSnackbar } = props;
+    const {  selected_path, current_user  } = props;
+    const addCurrentPosition = (pos, append) => {
+        setConfirmInfo({open: false});
+        const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
+        setGeoMarker(geo_marker, !append);
+        addPoint(pos.coords.latitude, pos.coords.longitude, append);
+    };
+    const getCurrentPosition = (onSuccess, onFailure) => {
+        navigator.geolocation.getCurrentPosition( pos => {
+            onSuccess(pos);    
+        }, () => {
+            if (onFailure) onFailure();
+        });
+    };
+    const handleNewWalk = () => {
+        openWalkEditor(true, 'create');
+    };
+    const handleMenuOpen = (setter) => {
         return event => {
             event.stopPropagation();
-            this.setState({ [anchorEl]: event.currentTarget });
+            setter(event.currentTarget);
         };
-    }
-    handleMenuClose(anchorEl) {
+    };
+    const handleMenuClose = (setter) => {
         return event => { 
             event.stopPropagation();
-            this.setState({ [anchorEl]: null });
+            setter(null);
         };
-    }
-    handleLogin() {
+    };
+    const handleLogin = () => {
         window.location.href = '/auth/twitter?redirect=' + window.location.href;
-    }
-    handleLogout() {
+    };
+    const handleLogout = () => {
         window.location.href = '/auth/logout?redirect=' + window.location.href;
-    }
-    ignoreClick() {
+    };
+    const ignoreClick = () => {
         return event => {
             event.stopPropagation();
             return false;
         };
-    } 
-    handleAutoGeolocationChange() {
-        return (event, value) => {
-            if (this.autoGeolocationIntervalID) {
-                clearInterval(this.autoGeolocationIntervalID);
-                this.autoGeolocationIntervalID;
-            }
-            if (value) {
-                this.setCurrentPosition(true, true);
-            } else {
-                this.setState({ autoGeolocation: false});
-                this.props.openSnackbar('stop following your location');
-            }
-        };
-    }
-    closeAllMenus() {
-        this.setState({ topAnchorEl: null, accountAnchorEl: null });
-    }
-    render() {
-        const { classes, current_user, selected_path } = this.props;
-        const EndMenuItem = props => {
-            const onClick = props.onClick;
-            const cpProps = Object.assign({}, props);
-            delete cpProps.onClick;
-            return <MenuItem onClick={() => {
-                this.closeAllMenus();
-                if (onClick) onClick();
-                return true;
-            }} {...cpProps}>{props.children}</MenuItem> ;
-        };
-        const ParentMenuItem = props => {
-            const subMenuAnchor = props.subMenuAnchor;
-            return <MenuItem key="path" onClick={this.handleMenuOpen(subMenuAnchor)}>
-                <ListItemText>{props.children}</ListItemText>
-                <ListItemIcon>
-                    <ArrowDownIcon />
-                </ListItemIcon>
-            </MenuItem>;
-        } ;
-        return (
-            <AppBar position="static" className={classes.root}>
-                <Toolbar>
-                    <IconButton onClick={this.handleMenuOpen('topAnchorEl')} color="inherit"><MenuIcon /></IconButton>
-                    <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
-                    <Checkbox
-                        icon={<MyLocationIcon />}
-                        checkedIcon={<MyLocationIcon />}
-                        checked={this.state.autoGeolocation}
-                        onChange={this.handleAutoGeolocationChange()}
-                        onClick={this.ignoreClick()}
-                        value="autoGeolocation"
-                    />
-                    <IconButton onClick={this.handleMenuOpen('accountAnchorEl')} color="inherit">
-                        { current_user ? <img className={classes.userPhoto} src={current_user.photo} /> : <AccountCircleIcon /> }
-                    </IconButton>
-                </Toolbar>
-                <Menu
-                    anchorEl={this.state.topAnchorEl}
-                    open={Boolean(this.state.topAnchorEl)}
-                    onClose={this.handleMenuClose('topAnchorEl')}
-                >
-                    {
-                        this.props.external_links.map(link => 
-                            <EndMenuItem component="a" href={link[1]} target="_blank" key={link[0]} >{link[0]}</EndMenuItem>
-                        )
+    };
+    useEffect(() => {
+        if (autoGeolocation) {
+            const intervalId = setInterval(() => {
+                getCurrentPosition(pos => {
+                    addCurrentPosition(pos, true);
+                });
+            }, AUTO_GEOLOCATION_INTERVAL);
+            return () => {
+                clearInterval(intervalId);
+            };
+        }
+    }, [autoGeolocation]);
+    const handleAutoGeolocationChange = (event, value) => {
+        if (value && navigator.geolocation) {
+            getCurrentPosition(pos => {
+                setAutoGeolocation(true);
+                openSnackbar('start following your location');
+                new Promise((resolve, reject) => {
+                    if (selected_path) {
+                        setConfirmInfo({open: true, resolve});
                     }
-                </Menu>
-                <Menu
-                    anchorEl={this.state.accountAnchorEl}
-                    open={Boolean(this.state.accountAnchorEl)}
-                    onClose={this.handleMenuClose('accountAnchorEl')}
-                >
-                    {
-                        current_user ? [
-                            (<MenuItem key="label" disabled={true}>Logged in as {current_user.username}</MenuItem>),
-                            (<Divider key="divider" />),
-                            (<EndMenuItem key="new walk" onClick={this.handleNewWalk.bind(this)} disabled={this.props.selected_path == null}>new walk...</EndMenuItem>),
-                            (<EndMenuItem key="logout" onClick={this.handleLogout.bind(this)}>logout</EndMenuItem>)
-                        ] : [<EndMenuItem key="login" onClick={this.handleLogin.bind(this)}>login with twitter</EndMenuItem>]
-                    }                        
-                </Menu>
-                <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={this.state.confirm_info.open} resolve={this.state.confirm_info.resolve} />
-            </AppBar>
-        );
-    }
-}
-
-NavBar.contextType = MapContext;
+                    else {
+                        resolve(pos, false);
+                    }
+                }).then(append => addCurrentPosition(pos, append));
+            }, () => {
+                alert('Unable to retrieve your location');
+            });
+        } else if (value) {
+            alert('Geolocation is not supported by your browser');
+        } else {
+            setAutoGeolocation(false);
+            openSnackbar('stop following your location');
+        }
+    };
+    const closeAllMenus = () => {
+        setTopAnchorEl(null);
+        setAccountAnchorEl(null);
+    };
+    const { classes } = props;
+    const EndMenuItem = props => {
+        const onClick = props.onClick;
+        const cpProps = Object.assign({}, props);
+        delete cpProps.onClick;
+        return <MenuItem onClick={() => {
+            closeAllMenus();
+            if (onClick) onClick();
+            return true;
+        }} {...cpProps}>{props.children}</MenuItem> ;
+    };
+    const ParentMenuItem = props => {
+        const subMenuAnchor = props.subMenuAnchor;
+        return <MenuItem key="path" onClick={handleMenuOpen(subMenuAnchor)}>
+            <ListItemText>{props.children}</ListItemText>
+            <ListItemIcon>
+                <ArrowDownIcon />
+            </ListItemIcon>
+        </MenuItem>;
+    } ;
+    return (
+        <AppBar position="static" className={classes.root}>
+            <Toolbar>
+                <IconButton onClick={handleMenuOpen(setTopAnchorEl)} color="inherit"><MenuIcon /></IconButton>
+                <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
+                <Checkbox
+                    icon={<MyLocationIcon />}
+                    checkedIcon={<MyLocationIcon />}
+                    checked={autoGeolocation}
+                    onChange={handleAutoGeolocationChange}
+                    onClick={ignoreClick()}
+                    value="autoGeolocation"
+                />
+                <IconButton onClick={handleMenuOpen(setAccountAnchorEl)} color="inherit">
+                    { current_user ? <img className={classes.userPhoto} src={current_user.photo} /> : <AccountCircleIcon /> }
+                </IconButton>
+            </Toolbar>
+            <Menu
+                anchorEl={topAnchorEl}
+                open={Boolean(topAnchorEl)}
+                onClose={handleMenuClose(setTopAnchorEl)}
+            >
+                {
+                    props.external_links.map(link => 
+                        <EndMenuItem component="a" href={link[1]} target="_blank" key={link[0]} >{link[0]}</EndMenuItem>
+                    )
+                }
+            </Menu>
+            <Menu
+                anchorEl={accountAnchorEl}
+                open={Boolean(accountAnchorEl)}
+                onClose={handleMenuClose(setAccountAnchorEl)}
+            >
+                {
+                    current_user ? [
+                        (<MenuItem key="label" disabled={true}>Logged in as {current_user.username}</MenuItem>),
+                        (<Divider key="divider" />),
+                        (<EndMenuItem key="new walk" onClick={handleNewWalk} disabled={selected_path == null}>new walk...</EndMenuItem>),
+                        (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>)
+                    ] : [<EndMenuItem key="login" onClick={handleLogin}>login with twitter</EndMenuItem>]
+                }                        
+            </Menu>
+            <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
+        </AppBar>
+    );
+};
 
 function mapStateToProps(state) {
     return {
@@ -203,9 +204,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ openWalkEditor, setGeoMarker, 
-        openSnackbar, addPoint,
-    }, dispatch);
+    return bindActionCreators({ openWalkEditor, setGeoMarker, openSnackbar}, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(NavBar));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(NavBar)));

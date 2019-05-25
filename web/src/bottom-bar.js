@@ -1,8 +1,7 @@
-import React, { Component } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useContext, useCallback, memo } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { setPanoramaCount, setPanoramaIndex, setOverlay, setGeoMarker,
-    setEditingPath, deleteSelectedPath, setSearchForm, openSnackbar, } from './actions';
+import { setPanoramaIndex, setOverlay, setGeoMarker, setEditingPath, setSearchForm  } from './actions';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
@@ -81,47 +80,40 @@ const styles = theme => ({
     },
 });
 
-class BottomBar extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {length: 0, location: '', groupIndex: 0 };
-    }
-    static computeLength(selected_path) {
+const BottomBar = props => {
+    const [location, setLocation] = useState('');
+    const [groupIndex, setGroupIndex] = useState(0);
+    const { filter, radius, selected_path, panorama_index, panorama_count, overlay, map_loaded } = props;
+    const { setPanoramaIndex, setOverlay, setEditingPath, setSearchForm, setGeoMarker } = props;
+    const context = useContext(MapContext);
+    const { downloadPath, uploadPath, clearPaths } = context.state;
+    const geocoder = useRef();
+    const length  = useMemo(() => {
         if (selected_path) {
             return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selected_path))/1000;
         }
         else {
             return 0;
         }
-    }
-    static getDerivedStateFromProps(nextProps, prevState) {
-        return {
-            length:  BottomBar.computeLength(nextProps.selected_path),
-            groupCount: nextProps.overlay ? 1 : 3,
-        };
-    }
-    handleIndexChange(groupIndex) {
-        this.setState({groupIndex});
-    }
-    handleNextButtonClick(d) {
-        let groupIndex = (this.state.groupIndex + d) % this.state.groupCount ;
-        if (groupIndex < 0) groupIndex += this.state.groupCount;
-        this.setState({groupIndex});
-    }
-    handleSelectFilter(event) {
-        this.props.setSearchForm({filter: event.target.value});
-    }
-    resetCities() {
-        this.props.setSearchForm({cities: ''});
-    }
-    handleSelectRadius(event) {
-        this.props.setSearchForm({radius: event.target.value});
-    }
-    handleSubmitLocation() {
-        if (!this.state.location) return;
-        this.geocoder.geocode( { 'address': this.state.location}, (results, status) =>  {
+    }, [selected_path]);
+    const groupCount = useMemo(() => overlay ? 1 : 3, [overlay]);
+    useEffect(() => {
+        if (map_loaded) {
+            geocoder.current = new google.maps.Geocoder();
+        }
+    }, [map_loaded]);
+    const handleNextButtonClick = d => () => {
+        setGroupIndex(index => {
+            index = (index + d) % groupCount;
+            if (index < 0) index += groupCount;
+            return index;
+        });
+    };
+    const handleSubmitLocation = useCallback(() => {
+        if (!location) return;
+        geocoder.current.geocode( { 'address': location}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
-                this.props.setGeoMarker({ 
+                setGeoMarker({ 
                     lat: results[0].geometry.location.lat(),
                     lng: results[0].geometry.location.lng(),
                     show: true
@@ -130,150 +122,142 @@ class BottomBar extends Component {
                 alert('Geocode was not successful for the following reason: ' + status);
             }
         });
-    }
-    componentDidUpdate(prevProps, prevSate) {
-        if ( this.props.map_loaded && !this.geocoder) {
-            this.geocoder = new google.maps.Geocoder();
-        }
-    }
-    render() {
-        const classes = this.props.classes;
-        const OverlayControls = (<div>
-            <div className={classes.bottomBarGroup}>
-                <Typography variant="caption">StreetView</Typography>
-                <div className={classes.bottomBarGroupBody}>
-                    <Tooltip title="back to map" position="top-center">
-                        <IconButton onClick={ () => { this.props.setOverlay(false); }}><NavigationCancel /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="-10" position="top-center">
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 10); } }><AvFastRewind /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="-1" position="top-center">
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                    </Tooltip>
-                    <Typography variant="body1" style={{ display: 'inline' }}>{ this.props.panorama_index+1 } / { this.props.panorama_count } </Typography>
-                    <Tooltip title="+1" position="top-center">
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="+10" position="top-center">
-                        <IconButton onClick={ () => { this.props.setPanoramaIndex(this.props.panorama_index + 10); }}><AvFastForward /></IconButton>
-                    </Tooltip>
-                </div>
+    }, [location]);
+    const handleSearchFormChange = useCallback((name, value) =>  {
+        setSearchForm({[name]: value});
+    });
+    const classes = props.classes;
+    const OverlayControls = (<div>
+        <div className={classes.bottomBarGroup}>
+            <Typography variant="caption">StreetView</Typography>
+            <div className={classes.bottomBarGroupBody}>
+                <Tooltip title="back to map" position="top-center">
+                    <IconButton onClick={ () => { setOverlay(false); }}><NavigationCancel /></IconButton>
+                </Tooltip>
+                <Tooltip title="-10" position="top-center">
+                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 10); } }><AvFastRewind /></IconButton>
+                </Tooltip>
+                <Tooltip title="-1" position="top-center">
+                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                </Tooltip>
+                <Typography variant="body1" style={{ display: 'inline' }}>{ panorama_index+1 } / { panorama_count } </Typography>
+                <Tooltip title="+1" position="top-center">
+                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                </Tooltip>
+                <Tooltip title="+10" position="top-center">
+                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 10); }}><AvFastForward /></IconButton>
+                </Tooltip>
             </div>
-        </div>);
-        const FilterControls = (<div>
-            <div className={classes.bottomBarGroup}>
-                <Typography variant="caption">Filter</Typography>
-                <div className={classes.bottomBarGroupBody}>
-                    <Select value={this.props.filter} onChange={this.handleSelectFilter.bind(this)}>
-                        <MenuItem value="">-</MenuItem>
-                        <MenuItem value="neighborhood">Neighborhood</MenuItem>
-                        <MenuItem value="cities">Cities</MenuItem>
-                        <MenuItem value="frechet">Fréchet</MenuItem>
-                        <MenuItem value="hausdorff">Hausdorff</MenuItem>
-                        <MenuItem value="crossing">Crossing</MenuItem>
-                    </Select>
-                    { this.props.filter == 'neighborhood' &&
-                    <Select value={this.props.radius} onChange={this.handleSelectRadius.bind(this)}>
-                        <MenuItem value={1000}>1km</MenuItem>
-                        <MenuItem value={500}>500m</MenuItem>
-                        <MenuItem value={250}>250m</MenuItem>
-                        <MenuItem value={100}>100m</MenuItem>
-                        {
-                            [1000, 500, 250, 100].some(r => r == this.props.radius) ? null
-                            : (<MenuItem value={this.props.radius}>{Math.round(this.props.radius) + 'm'}</MenuItem>)
-                        }
-                    </Select>}
-                    { this.props.filter == 'cities' &&
-                    <Tooltip title="clear" position="top-center">
-                        <IconButton onClick={this.resetCities.bind(this)}><NavigationRefresh /></IconButton>
-                    </Tooltip>}
-                </div>
+        </div>
+    </div>);
+    const FilterControls = (<div>
+        <div className={classes.bottomBarGroup}>
+            <Typography variant="caption">Filter</Typography>
+            <div className={classes.bottomBarGroupBody}>
+                <Select value={filter} onChange={e => handleSearchFormChange('filter', e.target.value)}>
+                    <MenuItem value="">-</MenuItem>
+                    <MenuItem value="neighborhood">Neighborhood</MenuItem>
+                    <MenuItem value="cities">Cities</MenuItem>
+                    <MenuItem value="frechet">Fréchet</MenuItem>
+                    <MenuItem value="hausdorff">Hausdorff</MenuItem>
+                    <MenuItem value="crossing">Crossing</MenuItem>
+                </Select>
+                { filter == 'neighborhood' &&
+                <Select value={radius} onChange={e => handleSearchFormChange('radius', e.target.value)}>
+                    <MenuItem value={1000}>1km</MenuItem>
+                    <MenuItem value={500}>500m</MenuItem>
+                    <MenuItem value={250}>250m</MenuItem>
+                    <MenuItem value={100}>100m</MenuItem>
+                    {
+                        [1000, 500, 250, 100].some(r => r == radius) ? null
+                        : (<MenuItem value={radius}>{Math.round(radius) + 'm'}</MenuItem>)
+                    }
+                </Select>}
+                { filter == 'cities' &&
+                <Tooltip title="clear" position="top-center">
+                    <IconButton onClick={e => handleSearchFormChange('cities', '')}><NavigationRefresh /></IconButton>
+                </Tooltip>}
             </div>
-        </div>);
-        const PathControls = (<div>
-            <div className={classes.bottomBarGroup}>
-                <Typography variant="caption">Path</Typography>
-                <div className={classes.bottomBarGroupBody}>
-                    <Tooltip title="edit" position="top-center">
-                        <IconButton onClick={() => this.props.setEditingPath(true) } disabled={! this.props.selected_path} ><EditorModeEdit /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="clear all" position="top-center">
-                        <IconButton onClick={() => this.context.clearPaths() }><NavigationRefresh /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="download" position="top-center">
-                        <IconButton onClick={() => this.context.downloadPath() }  disabled={! this.props.selected_path}><FileDownload /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="upload" position="top-center">
-                        <IconButton onClick={() => this.context.uploadPath() }><FileUpload /></IconButton>
-                    </Tooltip>
-                    <Typography variant="body1" style={{ display: 'inline' }}>{`${this.state.length.toFixed(1)}km`}</Typography>
-                </div>
+        </div>
+    </div>);
+    const PathControls = (<div>
+        <div className={classes.bottomBarGroup}>
+            <Typography variant="caption">Path</Typography>
+            <div className={classes.bottomBarGroupBody}>
+                <Tooltip title="edit" position="top-center">
+                    <IconButton onClick={() => setEditingPath(true) } disabled={! selected_path} ><EditorModeEdit /></IconButton>
+                </Tooltip>
+                <Tooltip title="clear all" position="top-center">
+                    <IconButton onClick={() => clearPaths() }><NavigationRefresh /></IconButton>
+                </Tooltip>
+                <Tooltip title="download" position="top-center">
+                    <IconButton onClick={() => downloadPath() }  disabled={! selected_path}><FileDownload /></IconButton>
+                </Tooltip>
+                <Tooltip title="upload" position="top-center">
+                    <IconButton onClick={() => uploadPath() }><FileUpload /></IconButton>
+                </Tooltip>
+                <Typography variant="body1" style={{ display: 'inline' }}>{`${length.toFixed(1)}km`}</Typography>
             </div>
-        </div>);
-        const SearchControls = (<div>
-            <div className={classes.bottomBarGroup}>
-                <Typography variant="caption">Search</Typography>
-                <div className={classes.bottomBarGroupBody}>
-                    <div className={classes.search}>
-                        <div className={classes.searchIcon}>
-                            <SearchIcon />
-                        </div>
-                        <InputBase
-                            placeholder="location..."
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            onChange={e => this.setState({location: e.target.value})}
-                            onKeyPress={e => { if (e.charCode == 13) this.handleSubmitLocation(); }}
-                            onBlur={e => { this.handleSubmitLocation(); }}
-                        />
+        </div>
+    </div>);
+    const SearchControls = (<div>
+        <div className={classes.bottomBarGroup}>
+            <Typography variant="caption">Search</Typography>
+            <div className={classes.bottomBarGroupBody}>
+                <div className={classes.search}>
+                    <div className={classes.searchIcon}>
+                        <SearchIcon />
                     </div>
+                    <InputBase
+                        placeholder="location..."
+                        classes={{
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
+                        }}
+                        onChange={e => setLocation(e.target.value)}
+                        onKeyPress={e => { if (e.charCode == 13) handleSubmitLocation(); }}
+                        onBlur={e => { handleSubmitLocation(); }}
+                    />
                 </div>
             </div>
-        </div>);
-        const controls = [];
-        if (this.props.overlay) {
-            controls.push(OverlayControls);
-        }
-        else {
-            controls.push(FilterControls);
-            controls.push(PathControls);
-            controls.push(SearchControls);
-        }
-        return (
-            <Toolbar className={classes.root}>
-                <IconButton onClick={this.handleNextButtonClick.bind(this, -1)}  disabled={this.state.groupCount <= 1}><NavigateBefore /></IconButton>
-                <SwipeableViews style={{width : '100%'}} index={this.state.groupIndex} onChangeIndex={this.handleIndexChange.bind(this)} disableLazyLoading enableMouseEvents>
-                    {controls}
-                </SwipeableViews>
-                <IconButton onClick={this.handleNextButtonClick.bind(this, 1)}  disabled={this.state.groupCount <= 1}><NavigateNext /></IconButton>
-            </Toolbar>
-        );
+        </div>
+    </div>);
+    const controls = [];
+    if (overlay) {
+        controls.push(OverlayControls);
     }
-}
-
-BottomBar.contextType = MapContext;
+    else {
+        controls.push(FilterControls);
+        controls.push(PathControls);
+        controls.push(SearchControls);
+    }
+    return (
+        <Toolbar className={classes.root}>
+            <IconButton onClick={handleNextButtonClick(-1)}  disabled={groupCount <= 1}><NavigateBefore /></IconButton>
+            <SwipeableViews style={{width : '100%'}} index={groupIndex} onChangeIndex={index => setGroupIndex(index)} disableLazyLoading enableMouseEvents>
+                {controls}
+            </SwipeableViews>
+            <IconButton onClick={handleNextButtonClick(1)}  disabled={groupCount <= 1}><NavigateNext /></IconButton>
+        </Toolbar>
+    );
+};
 
 function mapStateToProps(state) {
     const { filter, radius } = state.main.search_form;
-    const { selected_path, panorama, panorama_index, panorama_count, overlay, map_loaded } = state.main;
+    const { selected_path, panorama_index, panorama_count, overlay, map_loaded } = state.main;
     return {
-        filter, radius, selected_path, panorama, panorama_index, panorama_count, overlay, map_loaded
+        filter, radius, selected_path, panorama_index, panorama_count, overlay, map_loaded
     };
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ 
-        setPanoramaCount, 
+    return bindActionCreators({
         setPanoramaIndex, 
         setOverlay,
         setEditingPath, 
-        deleteSelectedPath,
         setSearchForm,
         setGeoMarker
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(BottomBar));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(BottomBar)));
