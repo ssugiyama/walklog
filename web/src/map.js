@@ -102,7 +102,8 @@ const Map = props => {
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             disableDoubleClickZoom: true,
             scaleControl: true,
-            scrollwheel : true,
+            scrollwheel : false,
+            gestureHandling: 'auto',
             streetViewControl: true,
             mapTypeControlOptions: {
                 position: google.maps.ControlPosition.TOP_RIGHT,
