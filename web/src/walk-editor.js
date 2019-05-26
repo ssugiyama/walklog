@@ -50,7 +50,7 @@ const WalkEditor = props => {
    
     const handleClose = useCallback(() => {
         openWalkEditor(false);
-        setState(state => Object.assign({}, state, {initialized: true}));
+        setState(state => Object.assign({}, state, {initialized: false}));
     });
     const handleSubmit = useCallback(() => {
         setState(state => Object.assign({}, state, {processing: true}));
