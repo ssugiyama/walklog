@@ -98,7 +98,7 @@ const Map = props => {
         }
         const options = {
             zoom: zoom,
-            center: center,
+            center: center.current,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             disableDoubleClickZoom: true,
             scaleControl: true,
@@ -167,7 +167,7 @@ const Map = props => {
             });
         });
         const circleOpts = Object.assign({}, mapStyles.circle, {
-            center: center,
+            center: center.current,
             radius: parseFloat(radius)
         });
         distanceWidget.current = new google.maps.Circle(circleOpts);
@@ -265,8 +265,8 @@ const Map = props => {
     }, [info_window])
     useEffect(() => {
         if (! map.current) return;
-        map.current.setCenter(center);
-    }, [center]);
+        map.current.setCenter(center.current);
+    }, [center.current]);
     useEffect(() => {
         if (! map.current) return;
         marker.current.setPosition({lat: geo_marker.lat, lng: geo_marker.lng});
