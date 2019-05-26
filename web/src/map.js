@@ -62,6 +62,7 @@ function loadJS(src) {
     script.async = true;
     ref.parentNode.insertBefore(script, ref);
 }
+const CENTER_INTERVAL = 30000;
 
 const Map = props => {
     const map_elem_ref = useRef();
@@ -89,6 +90,8 @@ const Map = props => {
     cities.current = props.cities;
     const selected_path = useRef();
     selected_path.current = props.selected_path;
+    const centerIntervalID = useRef();
+    
     const initMap = () => {
         if (window.localStorage.center) {
             setCenter(JSON.parse(window.localStorage.center));
@@ -102,8 +105,6 @@ const Map = props => {
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             disableDoubleClickZoom: true,
             scaleControl: true,
-            scrollwheel : false,
-            gestureHandling: 'auto',
             streetViewControl: true,
             mapTypeControlOptions: {
                 position: google.maps.ControlPosition.TOP_RIGHT,
@@ -131,9 +132,12 @@ const Map = props => {
             }
         });
         google.maps.event.addListener(map.current, 'center_changed', () => {
-            const c =  map.current.getCenter().toJSON();
-            if (center.current.lon != c.lon || center.current.lng != c.lng)
-                setCenter(c);
+            if (! centerIntervalID.current) {
+                centerIntervalID.current = setTimeout(() => {
+                    setCenter(map.current.getCenter().toJSON());
+                    centerIntervalID.current = null;
+                }, CENTER_INTERVAL);
+            } 
         });
         google.maps.event.addListener(map.current, 'zoom_changed', () => {
             setZoom(map.current.getZoom());
@@ -246,7 +250,7 @@ const Map = props => {
             if (!b.has(j)) return true;
         }
         return false;
-    }
+    };
     const handleResize = () => {
         setTimeout(() => {
             google.maps.event.trigger(map.current, 'resize');
@@ -265,7 +269,9 @@ const Map = props => {
     }, [info_window])
     useEffect(() => {
         if (! map.current) return;
-        map.current.setCenter(center.current);
+        const c =  map.current.getCenter().toJSON();
+        if (center.current.lon != c.lon || center.current.lng != c.lng)
+            map.current.setCenter(center.current);
     }, [center.current]);
     useEffect(() => {
         if (! map.current) return;
