@@ -233,11 +233,15 @@ const BottomBar = props => {
     }
     return (
         <Toolbar className={classes.root}>
-            <IconButton onClick={handleNextButtonClick(-1)}  disabled={groupCount <= 1}><NavigateBefore /></IconButton>
+            {
+                groupCount > 1 && (<IconButton onClick={handleNextButtonClick(-1)}> <NavigateBefore /></IconButton>)
+            }
             <SwipeableViews style={{width : '100%'}} index={groupIndex} onChangeIndex={index => setGroupIndex(index)} disableLazyLoading enableMouseEvents>
                 {controls}
             </SwipeableViews>
-            <IconButton onClick={handleNextButtonClick(1)}  disabled={groupCount <= 1}><NavigateNext /></IconButton>
+            {
+                groupCount > 1 && (<IconButton onClick={handleNextButtonClick(1)}><NavigateNext /></IconButton>)
+            }
         </Toolbar>
     );
 };

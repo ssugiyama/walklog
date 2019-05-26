@@ -93,14 +93,18 @@ const PanoramaBox = props => {
         setPanoramaCount(panoramaPointsAndHeadings.current.length);
         // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
         setPanoramaIndex(0);
+        showPanorama();
     };
 
     const showPanorama = () => {
+        if ( !map_loaded || ! panoramaPointsAndHeadings.current ) return;
+
         const index = panorama_index;
         const item = panoramaPointsAndHeadings.current[index];
         const pt = item[0];
         const heading = item[1];
         const pnrm = overlay ? context.state.map.getStreetView() : panorama.current;
+        
         streetViewService.current.getPanoramaByLocation(pt, 50, (data, status) => {
             if (status == google.maps.StreetViewStatus.OK) {
                 pnrm.setPano(data.location.pano);
@@ -113,19 +117,6 @@ const PanoramaBox = props => {
         });
         google.maps.event.trigger(pnrm, 'resize');
     };
-
-    const updatePanorama = () => {
-        if ( !map_loaded || ! panoramaPointsAndHeadings.current ) return;
-        if ( !panorama.current ) {
-            streetViewService.current = new google.maps.StreetViewService();
-            panorama.current = new google.maps.StreetViewPanorama(body_ref.current, {
-                addressControl: true,
-                navigationControl: true,
-                enableCloseButton: false,
-            });
-        }
-        showPanorama();
-    };
     
     // unmount
     useEffect(() =>{
@@ -134,13 +125,25 @@ const PanoramaBox = props => {
         };
     }, []);
 
+    useEffect(() => {
+        if (map_loaded &&  !panorama.current ) {
+            streetViewService.current = new google.maps.StreetViewService();
+            panorama.current = new google.maps.StreetViewPanorama(body_ref.current, {
+                addressControl: true,
+                navigationControl: true,
+                enableCloseButton: false,
+            });
+        }
+    }, [map_loaded]);
+
     useEffect(() =>{
+        if (! map_loaded) return;
         if (overlay){
             setStreetView(null);
         } else {
             setStreetView(panorama.current);
         }
-        updatePanorama();
+        showPanorama();
     }, [overlay]);
 
     useEffect(() => {
@@ -148,7 +151,7 @@ const PanoramaBox = props => {
     }, [highlighted_path, map_loaded]);
   
     useEffect(() => {
-        updatePanorama();
+        showPanorama();
     }, [panorama_index]);
 
     const setStreetView = (pnrm) => {
