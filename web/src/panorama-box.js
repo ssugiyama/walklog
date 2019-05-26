@@ -79,6 +79,7 @@ const PanoramaBox = props => {
     };
 
     const updatePath = (highlighted_path) => {
+        if ( ! map_loaded ) return;
         if (! highlighted_path) {
             const pnrm = overlay ? context.state.map.getStreetView() : panorama.current;
             if (pnrm) {
@@ -113,8 +114,8 @@ const PanoramaBox = props => {
         google.maps.event.trigger(pnrm, 'resize');
     };
 
-    const updatePanorama = (pathUpdated) => {
-        if ( !map_loaded ) return;
+    const updatePanorama = () => {
+        if ( !map_loaded || ! panoramaPointsAndHeadings.current ) return;
         if ( !panorama.current ) {
             streetViewService.current = new google.maps.StreetViewService();
             panorama.current = new google.maps.StreetViewPanorama(body_ref.current, {
@@ -122,9 +123,6 @@ const PanoramaBox = props => {
                 navigationControl: true,
                 enableCloseButton: false,
             });
-        }
-        if ( pathUpdated ) {
-            updatePath(highlighted_path);
         }
         showPanorama();
     };
@@ -142,14 +140,15 @@ const PanoramaBox = props => {
         } else {
             setStreetView(panorama.current);
         }
-        updatePanorama(false);
+        updatePanorama();
     }, [overlay]);
+
     useEffect(() => {
-        updatePanorama(true);
+        updatePath(highlighted_path);
     }, [highlighted_path, map_loaded]);
   
     useEffect(() => {
-        updatePanorama(false);
+        updatePanorama();
     }, [panorama_index]);
 
     const setStreetView = (pnrm) => {
