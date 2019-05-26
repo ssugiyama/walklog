@@ -286,7 +286,7 @@ const Map = props => {
     useEffect(() => {
         if (! path_manager.current) return;
         if (highlighted_path)
-            path_manager.current.showPath(highlighted_path, true);
+            path_manager.current.showPath(highlighted_path, false, true);
         else
             path_manager.current.set('highlight', null);
     }, [highlighted_path]);
