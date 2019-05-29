@@ -12,7 +12,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
-import NoSsr from '@material-ui/core/NoSsr';
 import MapContext from './map-context';
 
 const styles = theme => ({
@@ -45,9 +44,7 @@ const Body = props => {
             <MapContext.Provider value={{state, setState}}>
                 <CssBaseline />
                 <NavBarContainer />
-                <NoSsr>
-                    <MapContainer />
-                </NoSsr>
+                <MapContainer />
                 <ContentBoxContainer />
                 { view == 'map' && <BottomBarContainer /> }
                 <WalkEditorContainer />

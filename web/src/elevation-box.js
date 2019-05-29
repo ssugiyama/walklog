@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
 import { withTheme } from 'react-jss';
+import { compare_with_map_loaded } from './utils';
 
 const styles = {
     elevationBox: {
@@ -14,9 +15,7 @@ const styles = {
 
 const ElevationBox = props => {
     const root_ref = useRef();
-    const chart = useRef();
-    const elevator = useRef();
-    const elevationResults = useRef();
+    const refs = useRef();
     const { highlighted_path, map_loaded, setInfoWindow } = props;
 
     // test code for local
@@ -55,7 +54,7 @@ const ElevationBox = props => {
             'path': path,
             'samples': 256
         };
-        elevator.current.getElevationAlongPath(pathRequest, (results, status) => {
+        refs.elevator.getElevationAlongPath(pathRequest, (results, status) => {
             plotElevation(results, status);
         });
         // const results = getElevationPointsAndElevation(path);
@@ -64,11 +63,11 @@ const ElevationBox = props => {
     const plotElevation = (results, status) => {
         const { theme } = props;
         if (status == google.maps.ElevationStatus.OK) {
-            elevationResults.current = results;
+            refs.elevationResults = results;
             const data = results.map(result => result.elevation);
             const labels = results.map(result => '');
-            if (! chart.current) {
-                chart.current = new Chart(root_ref.current.getContext('2d'), {
+            if (! refs.chart) {
+                refs.chart = new Chart(root_ref.current.getContext('2d'), {
                     type: 'line',
                     data: {
                         labels,
@@ -101,7 +100,7 @@ const ElevationBox = props => {
                     }
                 });
             }
-            chart.current.data.datasets = [{
+            refs.chart.data.datasets = [{
                 data,
                 borderWidth: 1,
                 borderColor: '#ff0000',
@@ -109,7 +108,7 @@ const ElevationBox = props => {
                 pointStyle: 'dot',
                 radius: 1
             }];
-            chart.current.update();
+            refs.chart.update();
         }
     };
     const handleHover = (ev, elms) => {
@@ -117,7 +116,7 @@ const ElevationBox = props => {
             setInfoWindow({open: false});
         }
         else {
-            const elevation = elevationResults.current[elms[0]._index];
+            const elevation = refs.elevationResults[elms[0]._index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
             setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
@@ -125,8 +124,8 @@ const ElevationBox = props => {
     };
     const updateChart = () => {
         if ( !map_loaded ) return;
-        if (! elevator.current ) {
-            elevator.current = new google.maps.ElevationService();
+        if (! refs.elevator ) {
+            refs.elevator = new google.maps.ElevationService();
         }
         requestElevation();
     };
@@ -154,4 +153,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ setInfoWindow }, dispatch);
 }
 
-export default withTheme(connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox)));
+export default withTheme(connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox, compare_with_map_loaded)));

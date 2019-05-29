@@ -12,6 +12,7 @@ import MapContext from './map-context';
 import Fab from '@material-ui/core/Fab';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
+import { compare_with_map_loaded } from './utils';
 
 const styles = theme => ({
     mapCompact: {
@@ -69,29 +70,17 @@ const Map = props => {
     const download_ref = useRef();
     const upload_ref = useRef();
     const [confirmInfo, setConfirmInfo] = useState({open: false});
-    const fetchingCities = useRef();
-    const map = useRef();
-    const path_manager = useRef();
-    const city_hash = useRef();
-    const distanceWidget = useRef();
-    const infoWindow = useRef();
-    const marker = useRef();
+    const refs = useRef();
     const context = useContext(MapContext);
     const {setSearchForm, setSelectedPath, setCenter, setZoom,  
         toggleView, setMapLoaded, setEditingPath,} = props;
     const {classes, latitude, longitude, radius, 
         highlighted_path, editing_path, 
         info_window, geo_marker, zoom, view, map_loaded } = props;
-    const center = useRef();
-    center.current = props.center;
-    const filter = useRef();
-    filter.current = props.filter;
-    const cities = useRef();
-    cities.current = props.cities;
-    const selected_path = useRef();
-    selected_path.current = props.selected_path;
-    const centerIntervalID = useRef();
-    
+    for (const p of ['center', 'filter', 'cities', 'selected_path']) {
+        refs[p] = props[p];
+    }
+        
     const initMap = () => {
         if (window.localStorage.center) {
             setCenter(JSON.parse(window.localStorage.center));
@@ -101,7 +90,7 @@ const Map = props => {
         }
         const options = {
             zoom: zoom,
-            center: center.current,
+            center: refs.center,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             disableDoubleClickZoom: true,
             scaleControl: true,
@@ -118,12 +107,12 @@ const Map = props => {
         map_elem_ref.current.addEventListener('touchmove', event => {
             event.preventDefault();
         });
-        map.current = new google.maps.Map(map_elem_ref.current, options);
-        google.maps.event.addListener(map.current, 'click', event => {
-            if (filter.current == 'neighborhood'){
-                distanceWidget.current.setCenter(event.latLng.toJSON());
+        refs.map = new google.maps.Map(map_elem_ref.current, options);
+        google.maps.event.addListener(refs.map, 'click', event => {
+            if (refs.filter == 'neighborhood'){
+                refs.distanceWidget.setCenter(event.latLng.toJSON());
             }
-            else if (filter.current == 'cities') {
+            else if (refs.filter == 'cities') {
                 const params = `latitude=${event.latLng.lat()}&longitude=${event.latLng.lng()}`;
                 fetch('/api/cities?' + params)
                     .then(response => response.json())
@@ -131,35 +120,35 @@ const Map = props => {
                     .catch(ex => alert(ex));
             }
         });
-        google.maps.event.addListener(map.current, 'center_changed', () => {
-            if (! centerIntervalID.current) {
-                centerIntervalID.current = setTimeout(() => {
-                    setCenter(map.current.getCenter().toJSON());
-                    centerIntervalID.current = null;
+        google.maps.event.addListener(refs.map, 'center_changed', () => {
+            if (! refs.centerIntervalID) {
+                refs.centerIntervalID = setTimeout(() => {
+                    setCenter(refs.map.getCenter().toJSON());
+                    refs.centerIntervalID = null;
                 }, CENTER_INTERVAL);
             } 
         });
-        google.maps.event.addListener(map.current, 'zoom_changed', () => {
-            setZoom(map.current.getZoom());
+        google.maps.event.addListener(refs.map, 'zoom_changed', () => {
+            setZoom(refs.map.getZoom());
         });
         const PathManager = require('./path-manager').default;
-        path_manager.current = new PathManager({map: map.current});
+        refs.path_manager = new PathManager({map: refs.map});
         const path_changed = () => {
-            const next_path = path_manager.current.getEncodedSelection();
-            if (selected_path.current != next_path) {
+            const next_path = refs.path_manager.getEncodedSelection();
+            if (refs.selected_path != next_path) {
                 setSelectedPath(next_path);
             }
         };
-        google.maps.event.addListener(path_manager.current, 'length_changed', path_changed);
-        google.maps.event.addListener(path_manager.current, 'selection_changed', path_changed);
-        google.maps.event.addListener(path_manager.current, 'editable_changed',  () => {
-            if (!path_manager.current.editable) {
+        google.maps.event.addListener(refs.path_manager, 'length_changed', path_changed);
+        google.maps.event.addListener(refs.path_manager, 'selection_changed', path_changed);
+        google.maps.event.addListener(refs.path_manager, 'editable_changed',  () => {
+            if (!refs.path_manager.editable) {
                 setEditingPath(false);
             }
         });
-        google.maps.event.addListener(path_manager.current, 'polylinecomplete',  polyline => {
+        google.maps.event.addListener(refs.path_manager, 'polylinecomplete',  polyline => {
             new Promise((resolve, reject) => {
-                if (selected_path.current) {
+                if (refs.selected_path) {
                     setConfirmInfo({open: true, resolve});
                 }
                 else {
@@ -167,40 +156,40 @@ const Map = props => {
                 }
             }).then(append => {
                 setConfirmInfo({open: false});
-                path_manager.current.applyPath(polyline.getPath().getArray(), append);
+                refs.path_manager.applyPath(polyline.getPath().getArray(), append);
             });
         });
         const circleOpts = Object.assign({}, mapStyles.circle, {
-            center: center.current,
+            center: refs.center,
             radius: parseFloat(radius)
         });
-        distanceWidget.current = new google.maps.Circle(circleOpts);
-        google.maps.event.addListener(distanceWidget.current, 'center_changed', () => {
+        refs.distanceWidget = new google.maps.Circle(circleOpts);
+        google.maps.event.addListener(refs.distanceWidget, 'center_changed', () => {
             setSearchForm({
-                latitude: distanceWidget.current.getCenter().lat(),
-                longitude: distanceWidget.current.getCenter().lng()
+                latitude: refs.distanceWidget.getCenter().lat(),
+                longitude: refs.distanceWidget.getCenter().lng()
             });
         });
-        google.maps.event.addListener(distanceWidget.current, 'radius_changed', () => {
+        google.maps.event.addListener(refs.distanceWidget, 'radius_changed', () => {
             setSearchForm({
-                radius: distanceWidget.current.getRadius()
+                radius: refs.distanceWidget.getRadius()
             });
         });
-        map.current.mapTypes.set('gsi', gsiMapOption());
+        refs.map.mapTypes.set('gsi', gsiMapOption());
         const gsiLogo = document.createElement('div');
         gsiLogo.innerHTML = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" >地理院タイル</a>';
         gsiLogo.style.display = 'none';
-        google.maps.event.addListener( map.current, 'maptypeid_changed', () => {
-            const currentMapTypeID = map.current.getMapTypeId();
+        google.maps.event.addListener( refs.map, 'maptypeid_changed', () => {
+            const currentMapTypeID = refs.map.getMapTypeId();
             if ( currentMapTypeID == 'gsi' ) {
                 gsiLogo.style.display = 'inline';
             } else {
                 gsiLogo.style.display = 'none';
             }
         });
-        map.current.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
-        infoWindow.current = new google.maps.InfoWindow();
-        marker.current = new google.maps.Marker(mapStyles.marker);
+        refs.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
+        refs.infoWindow = new google.maps.InfoWindow();
+        refs.marker = new google.maps.Marker(mapStyles.marker);
         if (window.localStorage.selected_path) {
             setSelectedPath(window.localStorage.selected_path);
         }
@@ -209,28 +198,28 @@ const Map = props => {
             processUpload(e);
         });
         context.setState({
-            map: map.current,
+            map: refs.map,
             addPoint: (lat, lng, append) => {
                 const pt = new google.maps.LatLng(lat, lng);
-                path_manager.current.applyPath([pt], append);
+                refs.path_manager.applyPath([pt], append);
             },
             uploadPath: () =>  {
                 const elem = ReactDOM.findDOMNode(upload_ref.current);
                 setTimeout(() => elem.click(), 0);
             },
             downloadPath: () =>  {
-                const content = path_manager.current.selectionAsGeoJSON();
+                const content = refs.path_manager.selectionAsGeoJSON();
                 const blob = new Blob([ content ], { 'type' : 'application/json' });
                 const elem = ReactDOM.findDOMNode(download_ref.current);
                 elem.href = window.URL.createObjectURL(blob);
                 setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
             },
             clearPaths: () => {
-                path_manager.current.deleteAll();
+                refs.path_manager.deleteAll();
             },
             addPaths: (paths) => {
                 for (let path of paths) {
-                    path_manager.current.showPath(path, false, false);
+                    refs.path_manager.showPath(path, false, false);
                 }
             },
         });
@@ -243,8 +232,8 @@ const Map = props => {
     }, []);
     
     const citiesChanges = () => {
-        const a = new Set(cities.split(/,/));
-        const b = new Set(Object.keys(city_hash.current || {}));
+        const a = new Set(refs.cities.split(/,/));
+        const b = new Set(Object.keys(refs.city_hash || {}));
         if (a.length !== b.length) return true;
         for (let j of a) {
             if (!b.has(j)) return true;
@@ -253,98 +242,102 @@ const Map = props => {
     };
     const handleResize = () => {
         setTimeout(() => {
-            google.maps.event.trigger(map.current, 'resize');
+            google.maps.event.trigger(refs.map, 'resize');
         }, 500);
     };
     useEffect(() =>{
-        if (! map.current) return;
+        if (! refs.map) return;
         if (info_window.open) {
-            infoWindow.current.open(map.current);
-            infoWindow.current.setPosition(info_window.position);
-            infoWindow.current.setContent(info_window.message);
+            refs.infoWindow.open(refs.map);
+            refs.infoWindow.setPosition(info_window.position);
+            refs.infoWindow.setContent(info_window.message);
         }
         else {
-            infoWindow.current.close();
+            refs.infoWindow.close();
         }
     }, [info_window])
     useEffect(() => {
-        if (! map.current) return;
-        const c =  map.current.getCenter().toJSON();
-        if (center.current.lon != c.lon || center.current.lng != c.lng)
-            map.current.setCenter(center.current);
-    }, [center.current]);
+        if (! refs.map) return;
+        const c =  refs.map.getCenter().toJSON();
+        if (refs.center.lon != c.lon || refs.center.lng != c.lng)
+            refs.map.setCenter(refs.center);
+    }, [refs.center]);
     useEffect(() => {
-        if (! map.current) return;
-        marker.current.setPosition({lat: geo_marker.lat, lng: geo_marker.lng});
-        marker.current.setMap(geo_marker.show ? map.current : null);
+        if (! refs.map) return;
+        refs.marker.setPosition({lat: geo_marker.lat, lng: geo_marker.lng});
+        refs.marker.setMap(geo_marker.show ? refs.map : null);
     }, [geo_marker]);
     useEffect(() => {
-        if (! path_manager.current) return;
-        if (selected_path.current)
-            path_manager.current.showPath(selected_path.current, true);
-    }, [selected_path.current]);
+        if (! refs.path_manager) return;
+        if (refs.selected_path)
+            refs.path_manager.showPath(refs.selected_path, true);
+    }, [refs.selected_path]);
     useEffect(() => {
-        if (! path_manager.current) return;
+        if (! refs.path_manager) return;
         if (highlighted_path)
-            path_manager.current.showPath(highlighted_path, false, true);
+            refs.path_manager.showPath(highlighted_path, false, true);
         else
-            path_manager.current.set('highlight', null);
+            refs.path_manager.set('highlight', null);
     }, [highlighted_path]);
     useEffect(() => {
-        if (! path_manager.current) return;
+        if (! refs.path_manager) return;
         if (editing_path) {
-            path_manager.current.set('editable', true);
+            refs.path_manager.set('editable', true);
         }
     }, [editing_path]);
+
     useEffect(() => {
-        if (! distanceWidget.current) return;
-        if (filter.current == 'neighborhood') {
-            distanceWidget.current.setMap(map.current);
-            distanceWidget.current.set('radius', parseFloat(radius));
+        if (! refs.distanceWidget) return;
+        if (refs.filter == 'neighborhood') {
+            refs.distanceWidget.setMap(refs.map);
+            refs.distanceWidget.set('radius', parseFloat(radius));
             const center = { lat: latitude, lng: longitude };
-            distanceWidget.current.setCenter(center);
+            refs.distanceWidget.setCenter(center);
         }
         else {
-            distanceWidget.current.setMap(null);
+            refs.distanceWidget.setMap(null);
         }
-        if (filter.current == 'cities' && citiesChanges() && ! fetchingCities.current) {
-            if (city_hash.current) {
-                for (let id of Object.keys(city_hash.current)) {
-                    const pg = city_hash.current[id];
+    }, [refs.filter, radius, latitude, longitude, map_loaded]);
+    
+    useEffect(() => {
+        if (refs.filter == 'cities' && citiesChanges() && ! refs.fetching) {
+            if (refs.city_hash) {
+                for (let id of Object.keys(refs.city_hash)) {
+                    const pg = refs.city_hash[id];
                     pg.setMap(null);
                 }
             }
-            city_hash.current = {};
-            if (cities) {
-                fetchingCities.current = true;
-                fetch('/api/cities?jcodes=' + cities)
+            refs.city_hash = {};
+            if (refs.cities) {
+                refs.fetching = true;
+                fetch('/api/cities?jcodes=' + refs.cities)
                     .then(response => response.json())
                     .then(cities => {
                         cities.forEach(city => {
                             const pg = toPolygon(city.jcode, city.the_geom);
-                            pg.setMap(map.current);
+                            pg.setMap(refs.map);
                         });
                     })
                     .catch(ex => {
                         alert(ex);
                     })
                     .then(() => {
-                        fetchingCities.current = false;
+                        refs.fetching = false;
                     });
             }
         }
-        if (city_hash.current) {
-            for (let id of Object.keys(city_hash.current)) {
-                const geom = city_hash.current[id];
-                if (filter.current == 'cities') {
-                    geom.setMap(map.current);
+        if (refs.city_hash) {
+            for (let id of Object.keys(refs.city_hash)) {
+                const geom = refs.city_hash[id];
+                if (refs.filter == 'cities') {
+                    geom.setMap(refs.map);
                 }
                 else {
                     geom.setMap(null);
                 }
             }
         }
-    }, [filter.current, radius, latitude, longitude, cities.current, map_loaded]);
+    }, [refs.filter, refs.cities, map_loaded]);
 
     // console.log('render map');
     const toPolygon = (id, str) => {
@@ -352,20 +345,20 @@ const Map = props => {
         const pg =  new google.maps.Polygon({});
         pg.setPaths(paths);
         pg.setOptions(mapStyles.polygon);
-        city_hash.current[id] = pg;
+        refs.city_hash[id] = pg;
         google.maps.event.addListener(pg, 'click',  event => {
             removeCity(id, pg);
         });
         return pg;
     };
     const addCity = (id) => {
-        if (city_hash.current === undefined) city_hash.current = {};
-        if (city_hash.current[id]) return;
-        const new_cities = cities.current.split(/,/).filter(elm => elm).concat(id).join(',');
+        if (refs.city_hash === undefined) refs.city_hash = {};
+        if (refs.city_hash[id]) return;
+        const new_cities = refs.cities.split(/,/).filter(elm => elm).concat(id).join(',');
         setSearchForm({cities: new_cities});
     };
     const removeCity = (id, pg) => {
-        const cities_array = cities.current.split(/,/);
+        const cities_array = refs.cities.split(/,/);
         const index = cities_array.indexOf(id);
         if (index >= 0){
             cities_array.splice(index, 1);
@@ -374,7 +367,7 @@ const Map = props => {
         }
         pg.setMap(null);
         pg = null;
-        delete city_hash.current[id];
+        delete refs.city_hash[id];
     };
     const processUpload = (e) => {
         const file = e.target.files[0];
@@ -449,4 +442,4 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(Map)));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(Map, compare_with_map_loaded)));

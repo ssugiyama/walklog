@@ -87,6 +87,7 @@ const BottomBar = props => {
     const { setPanoramaIndex, setOverlay, setEditingPath, setSearchForm, setGeoMarker } = props;
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
+    const refs = useRef();
     const geocoder = useRef();
     const length  = useMemo(() => {
         if (selected_path) {
@@ -99,7 +100,7 @@ const BottomBar = props => {
     const groupCount = useMemo(() => overlay ? 1 : 3, [overlay]);
     useEffect(() => {
         if (map_loaded) {
-            geocoder.current = new google.maps.Geocoder();
+            refs.geocoder = new google.maps.Geocoder();
         }
     }, [map_loaded]);
     const handleNextButtonClick = d => () => {
@@ -111,7 +112,7 @@ const BottomBar = props => {
     };
     const handleSubmitLocation = useCallback(() => {
         if (!location) return;
-        geocoder.current.geocode( { 'address': location}, (results, status) =>  {
+        refs.geocoder.geocode( { 'address': location}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
                 setGeoMarker({ 
                     lat: results[0].geometry.location.lat(),
