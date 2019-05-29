@@ -41,7 +41,6 @@ const styles = theme => ({
     },        
     itemBoxText: {
         textIndent: '1.2em',
-        fontSize: '85%',
         lineHeight: '1.65',
         letterSpacing: '.1em',
         textAlign: 'justify',

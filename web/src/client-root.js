@@ -3,9 +3,8 @@ import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'connected-react-router';
 import { configureStore, history, getTheme } from './app';
-import { MuiThemeProvider, createGenerateClassName } from '@material-ui/core/styles';
+import { ThemeProvider  } from '@material-ui/styles';
 import BodyContainer from './body';
-import JssProvider from 'react-jss/lib/JssProvider';
 import config from 'react-global-configuration';
 
 config.set(window.__INITIAL_CONFIG__);
@@ -22,14 +21,11 @@ const ClientRoot = () => {
     return <ConnectedRouter history={history}><BodyContainer /></ConnectedRouter>;  
 };
 
-const generateClassName = createGenerateClassName();
 ReactDOM.hydrate(
     <Provider store={store}>
-        <JssProvider generateClassName={generateClassName}>
-            <MuiThemeProvider theme={getTheme()}>
-                <ClientRoot />
-            </MuiThemeProvider>
-        </JssProvider>
+        <ThemeProvider theme={getTheme()}>
+            <ClientRoot />
+        </ThemeProvider>
     </Provider>,
     document.querySelector('#body')
 );

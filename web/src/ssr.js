@@ -2,11 +2,9 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import {configureStore, routes, handleRoute, getTheme}  from './app';
-import {setCurrentUser, setUsers, setMessage, openSnackbar} from './actions';
+import {setCurrentUser, setUsers, openSnackbar} from './actions';
 import { matchRoutes } from 'react-router-config';
-import { SheetsRegistry } from 'react-jss/lib/jss';
-import { MuiThemeProvider, createGenerateClassName } from '@material-ui/core/styles';
-import JssProvider from 'react-jss/lib/JssProvider';
+import { ServerStyleSheets, ThemeProvider } from '@material-ui/styles';
 import BodyContainer from './body';
 import { StaticRouter } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
@@ -77,19 +75,19 @@ export default function handleSSR(req, res) {
         .then(() => Users.findAll().then(users => store.dispatch(setUsers(users))))
         .then(() => {
             let context = {};
-            const sheetsRegistry = new SheetsRegistry();
-            const generateClassName = createGenerateClassName();
+            const sheets = new ServerStyleSheets();
             const markup = renderToString(
-                <Provider store={store}>
-                    <JssProvider registry={sheetsRegistry} generateClassName={generateClassName}>
-                        <MuiThemeProvider theme={getTheme()} sheetsManager={new Map()}>
+                sheets.collect(
+                    <Provider store={store}>
+                        <ThemeProvider theme={getTheme()}>
                             <StaticRouter location={req.url} context={context}>
                                 <BodyContainer />
                             </StaticRouter>
-                        </MuiThemeProvider>
-                    </JssProvider>
-            </Provider>);
-            const css = sheetsRegistry.toString();
+                        </ThemeProvider>
+                    </Provider>
+                )
+            );
+            const css = sheets.toString();
             const state = store.getState();
             state.main.external_links = config.get('external_links');
             let title = config.get('site_name');

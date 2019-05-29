@@ -435,9 +435,6 @@ export const getTheme = () => {
             primary: colors[config.get('theme_primary') || 'indigo'],
             secondary: colors[config.get('theme_secondary') || 'pink'],
             type: theme_type,
-        },
-        typography: {
-            useNextVariants: true,
         }
-    })
+    });
 };

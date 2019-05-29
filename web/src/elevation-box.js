@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
-import { withTheme } from 'react-jss';
+import { withTheme } from '@material-ui/styles';
 import { compare_with_map_loaded } from './utils';
 
 const styles = {
