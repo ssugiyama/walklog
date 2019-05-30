@@ -64,6 +64,7 @@ function loadJS(src) {
     ref.parentNode.insertBefore(script, ref);
 }
 const CENTER_INTERVAL = 30000;
+const RESIZE_INTERVAL = 500;
 
 const Map = props => {
     const map_elem_ref = useRef();
@@ -241,9 +242,12 @@ const Map = props => {
         return false;
     };
     const handleResize = () => {
-        setTimeout(() => {
-            google.maps.event.trigger(refs.map, 'resize');
-        }, 500);
+        if (! refs.resizeIntervalID) {
+            refs.resizeIntervalID = setTimeout(() => {
+                google.maps.event.trigger(refs.map, 'resize');
+                refs.resizeIntervalID = null;
+            }, RESIZE_INTERVAL);
+        }
     };
     useEffect(() =>{
         if (! refs.map) return;
