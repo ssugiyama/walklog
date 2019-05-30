@@ -104,7 +104,7 @@ const ItemBox = props => {
     }
     const upUrl = location && location.search == '?force_fetch=1'
         ? '/' + location.search
-        : last_query && last_query != 'restore_url=1' ? '/?' + last_query : '/';
+        : last_query ? '/?' + last_query : '/';
     const nextUrl = next_id && '/' + next_id;
     const prevUrl = prev_id ? 
         '/' + prev_id : 

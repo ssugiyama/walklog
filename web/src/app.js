@@ -356,13 +356,6 @@ const dataFetchMiddleware = store => next => {
                 handleRoute(match.params.id, query, state.main.selected_path, '/', state.main.result.rows, queryChanged, next);
             }
             isFirstLocation = false;
-            if (window && window.localStorage) {
-                if ( query.restore_url) {
-                    location.href = (localStorage.last_url || '/');
-                    return;
-                }
-                localStorage.last_url = action.payload.location.pathname + action.payload.location.search;
-            }
         }
         return next(action);
     };
