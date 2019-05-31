@@ -282,7 +282,7 @@ const Map = props => {
             refs.path_manager.showPath(highlighted_path, false, true);
         else
             refs.path_manager.set('highlight', null);
-    }, [highlighted_path]);
+    }, [highlighted_path, map_loaded]);
     useEffect(() => {
         if (! refs.path_manager) return;
         if (editing_path) {

@@ -146,7 +146,7 @@ const PanoramaBox = props => {
             setStreetView(refs.panorama);
         }
         showPanorama();
-    }, [overlay]);
+    }, [overlay, map_loaded]);
 
     useEffect(() => {
         updatePath(highlighted_path);
