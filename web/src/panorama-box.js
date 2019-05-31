@@ -12,13 +12,13 @@ import AvFastForward from '@material-ui/icons/FastForward';
 import AvFastRewind from '@material-ui/icons/FastRewind';
 import MapContext from './map-context';
 import { compare_with_map_loaded } from './utils';
-
-// import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
+import classNames from 'classnames';
 
 const styles = {
     panoramaBoxBody: {
         width: '100%',
-        height: '20vh'
+        height: '30vh'
     },
     panoramaBoxControl: {
         display: 'flex',
@@ -35,6 +35,9 @@ const styles = {
         float: 'right',
         marginTop: 40,
     },
+    panoramaHidden: {
+        display: 'none',
+    },
 };
 
 const PANORAMA_INTERVAL = 50;
@@ -43,7 +46,7 @@ const PanoramaBox = props => {
 
     const body_ref = useRef();
     const {  setPanoramaCount, setPanoramaIndex, setOverlay } = props; 
-    const {  highlighted_path,  panorama_index, panorama_count, overlay, map_loaded } = props;
+    const {  highlighted_path,  panorama_index, panorama_count, overlay, map_loaded, classes } = props;
     const refs = useRef();
     const handleOverlayChange = (e, toggled) => {
         setOverlay(toggled);
@@ -167,8 +170,10 @@ const PanoramaBox = props => {
                     label="overlay">
                 </FormControlLabel>
             </div>
-            <div style={styles.panoramaBoxBody} ref={body_ref}></div>
-            <div style={styles.panoramaBoxControl}>
+            <div className={classNames(classes.panoramaBoxBody, {
+                [classes.panoramaHidden]: overlay,
+            })} ref={body_ref}></div>
+            <div className={classes.panoramaBoxControl}>
                 <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 10); } }><AvFastRewind /></IconButton>
                 <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 1); }}><NavigationArrowBack /></IconButton>
                 <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ panorama_index+1 } </span> / <span>{ panorama_count } </span></Typography>
@@ -190,4 +195,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(memo(PanoramaBox, compare_with_map_loaded));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(PanoramaBox, compare_with_map_loaded)));
