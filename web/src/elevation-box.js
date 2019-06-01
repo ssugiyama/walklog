@@ -5,7 +5,6 @@ import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
 import { withTheme } from '@material-ui/styles';
 import { compare_with_map_loaded } from './utils';
-import { withStyles } from '@material-ui/core/styles';
 
 const styles = {
     elevationBox: {
@@ -17,7 +16,7 @@ const styles = {
 const ElevationBox = props => {
     const root_ref = useRef();
     const refs = useRef();
-    const { highlighted_path, map_loaded, setInfoWindow, classes } = props;
+    const { highlighted_path, map_loaded, setInfoWindow } = props;
 
     // test code for local
     // const interpolatePoints = (pt1, pt2, r) => {
@@ -136,7 +135,7 @@ const ElevationBox = props => {
 
     if (highlighted_path)
         return (
-            <canvas className={classes.elevationBox} ref={root_ref}></canvas>
+            <canvas style={styles.elevationBox} ref={root_ref}></canvas>
         );
     else
         return null;
@@ -154,4 +153,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ setInfoWindow }, dispatch);
 }
 
-export default withTheme(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(ElevationBox, compare_with_map_loaded))));
+export default withTheme(connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox, compare_with_map_loaded)));
