@@ -16,12 +16,14 @@ import { compare_with_map_loaded } from './utils';
 
 const styles = theme => ({
     mapCompact: {
+        color: 'black',
         margin: '0 0 4px 0',
         height: '40vh',
         marginLeft: 'env(safe-area-inset-left)',
         marginRight: 'env(safe-area-inset-right)',
     },
     mapExpand: {
+        color: 'black',
         flexGrow: 1,
         margin: '0 0 4px 0',
         marginLeft: 'env(safe-area-inset-left)',
