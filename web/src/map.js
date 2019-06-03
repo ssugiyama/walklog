@@ -78,7 +78,7 @@ const Map = props => {
     const {setSearchForm, setSelectedPath, setCenter, setZoom,  
         toggleView, setMapLoaded, setEditingPath,} = props;
     const {classes, latitude, longitude, radius, 
-        highlighted_path, editing_path, 
+        highlighted_path, editing_path,
         info_window, geo_marker, zoom, view, map_loaded } = props;
     for (const p of ['center', 'filter', 'cities', 'selected_path']) {
         refs[p] = props[p];
@@ -261,7 +261,7 @@ const Map = props => {
         else {
             refs.infoWindow.close();
         }
-    }, [info_window])
+    }, [info_window]);
     useEffect(() => {
         if (! refs.map) return;
         const c =  refs.map.getCenter().toJSON();
@@ -275,14 +275,14 @@ const Map = props => {
     }, [geo_marker]);
     useEffect(() => {
         if (! refs.path_manager) return;
-        if (refs.selected_path)
+        if (refs.selected_path && refs.selected_path != refs.path_manager.getEncodedSelection())
             refs.path_manager.showPath(refs.selected_path, true);
-    }, [refs.selected_path]);
+    }, [refs.selected_path, map_loaded]);
     useEffect(() => {
         if (! refs.path_manager) return;
-        if (highlighted_path)
+        if (highlighted_path && highlighted_path != refs.path_manager.getEncodedHighlight())
             refs.path_manager.showPath(highlighted_path, false, true);
-        else
+        else if (! highlighted_path)
             refs.path_manager.set('highlight', null);
     }, [highlighted_path, map_loaded]);
     useEffect(() => {
@@ -290,7 +290,7 @@ const Map = props => {
         if (editing_path) {
             refs.path_manager.set('editable', true);
         }
-    }, [editing_path]);
+    }, [editing_path, refs.selected_path]);
 
     useEffect(() => {
         if (! refs.distanceWidget) return;

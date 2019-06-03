@@ -74,7 +74,7 @@ const SearchForm = props => {
                 </TextField>
             </div>
             <div>
-                <TextField select label="month" value={parseInt(month) || ''} onChange={handleChange('month')} 
+                <TextField select label="month" value={parseInt(month) || ''} onChange={e => handleChange('month', e.target.value)} 
                     style={{width: '50%'}}
                 >
                     {month_options.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
