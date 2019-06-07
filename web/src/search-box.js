@@ -17,6 +17,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import MapContext from './map-context';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const styles = theme => ({
     root: {
@@ -48,6 +49,13 @@ const styles = theme => ({
     userPhoto: {
         width: 20,
         height:20,
+    },
+    moreButton: {
+        width: 'calc(100% - 20px)',
+        margin: 10,
+    },
+    leftIcon: {
+        marginRight: theme.spacing(1),
     }
 });
 
@@ -102,7 +110,7 @@ const SearchBox = props => {
                         })()
                     }
                 </Typography> :
-        { rows.length > 0 && (<Button onClick={ handleShowAll } color="secondary">show all paths</Button>) }
+        { rows.length > 0 && (<Button variant="outlined" onClick={ handleShowAll } color="secondary">show all paths</Button>) }
             </div>
             <Table className={classes.table}>
                 <TableHead>
@@ -134,7 +142,10 @@ const SearchBox = props => {
                     })}
                 </TableBody>
             </Table>
-            { offset > 0 && <Button style={{width: '100%'}} color="secondary" component={Link} to={moreUrl}>more</Button>  }
+            { offset > 0 && 
+                <Button variant="outlined" className={classes.moreButton} color="primary" component={Link} to={moreUrl}>
+                    <ExpandMoreIcon className={classes.leftIcon}/> more
+                </Button>  }
         </Paper>
     );
 };

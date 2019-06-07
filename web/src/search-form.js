@@ -3,10 +3,12 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setSearchForm, search } from './actions';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 const month_options = [
     { label: '-', value: '' },
@@ -39,19 +41,25 @@ const order_options_with_nearest = [
     { label: 'nearest first', value: 'nearest_first' },
 ];
 
-const styles = {
-};
+const styles = theme => ({
+    resetButton: {
+        margin: 10
+    },
+    leftIcon: {
+        marginRight: theme.spacing(1),
+    }
+});
 
 const SearchForm = props => {
     
     const { setSearchForm, } = props;
-    const { years, users, filter, month, year, user, limit, order } = props;
+    const { years, users, filter, month, year, user, limit, order, classes } = props;
     const handleChange = useCallback((name, value) => {
         setSearchForm({[name]: value});
     });
     
     return (
-        <form role="form">
+        <form role="form" className={classes.root}>
             <input type="hidden" name="latitude" value="" />
             <input type="hidden" name="longitude" value="" />
             <input type="hidden" name="radius" value="" />
@@ -98,8 +106,10 @@ const SearchForm = props => {
                 </TextField>
                 <TextField id="search_form_limit" label="limit" value={limit} onChange={e => handleChange('limit', e.target.value)} style={{width: '50%'}} />
             </div>
-            <div>
-                <Button style={{width: '100%'}} color="secondary" component={Link} to="/?force_fetch=1" >Reset</Button>
+            <div style={{ textAlign: 'center' }}>
+                <Button variant="outlined" className={classes.resetButton} color="primary" component={Link} to="/?force_fetch=1" >
+                    <RefreshIcon className={classes.leftIcon} /> reset
+                </Button>
             </div>
         </form>
     );

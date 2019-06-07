@@ -6,9 +6,10 @@ import { openWalkEditor } from './actions';
 import marked from 'marked';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
+import Fab from '@material-ui/core/Fab';
 import NavigationArrowForward from '@material-ui/icons/ArrowForward';
 import NavigationArrowBack from '@material-ui/icons/ArrowBack';
-import ArrowUpward from '@material-ui/icons/ArrowUpward';
+import ListIcon from '@material-ui/icons/List';
 import EditorModeEdit from '@material-ui/icons/Edit';
 import Typography from '@material-ui/core/Typography';
 import ElevationBox from './elevation-box';
@@ -58,6 +59,11 @@ const styles = theme => ({
         textAlign: 'center',
         padding: '8px 12px 12px',
         margin: '4px 0',
+    },
+    backButton: {
+        float: 'left',
+        marginLeft: 10,
+        marginTop: 10,
     },
     '@media (max-width:600px)': {
         itemBoxImage: {
@@ -114,8 +120,8 @@ const ItemBox = props => {
     return  data && 
         (<div>
             <Paper className={classes.itemBoxControl}>
+                <Fab className={classes.backButton} size="small" color="primary" component={Link} to={upUrl}><ListIcon /></Fab>
                 <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
-                <IconButton color="secondary" component={Link} to={upUrl}><ArrowUpward /></IconButton>
                 <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
                 {
                     data && current_user && data.user_id && current_user.id == data.user_id ? (<IconButton onClick={handleEdit} ><EditorModeEdit /></IconButton>) : null
