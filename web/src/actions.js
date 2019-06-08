@@ -165,10 +165,10 @@ export function setUsers(users) {
     };
 }
 
-export function openSnackbar(message, ask_append) {
+export function openSnackbar(message, askAppend) {
     return {
         type: ActionTypes.OPEN_SNACKBAR,
-        message, ask_append
+        message, askAppend
     };
 }
 

@@ -44,7 +44,7 @@ const PANORAMA_INTERVAL = 50;
 
 const PanoramaBox = props => {
 
-    const body_ref = useRef();
+    const bodyRef = useRef();
     const {  setPanoramaCount, setPanoramaIndex, setOverlay } = props; 
     const {  highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded, classes } = props;
     const refs = useRef();
@@ -130,7 +130,7 @@ const PanoramaBox = props => {
     useEffect(() => {
         if (mapLoaded &&  !refs.panorama ) {
             refs.streetViewService = new google.maps.StreetViewService();
-            refs.panorama = new google.maps.StreetViewPanorama(body_ref.current, {
+            refs.panorama = new google.maps.StreetViewPanorama(bodyRef.current, {
                 addressControl: true,
                 navigationControl: true,
                 enableCloseButton: false,
@@ -172,7 +172,7 @@ const PanoramaBox = props => {
             </div>
             <div className={classNames(classes.panoramaBoxBody, {
                 [classes.panoramaHidden]: overlay,
-            })} ref={body_ref}></div>
+            })} ref={bodyRef}></div>
             <div className={classes.panoramaBoxControl}>
                 <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 10); } }><AvFastRewindIcon /></IconButton>
                 <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 1); }}><NavigationArrowBackIcon /></IconButton>

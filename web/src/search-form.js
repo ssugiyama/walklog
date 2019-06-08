@@ -106,7 +106,7 @@ const SearchForm = props => {
                 <TextField id="searchForm_limit" label="limit" value={limit} onChange={e => handleChange('limit', e.target.value)} style={{width: '50%'}} />
             </div>
             <div style={{ textAlign: 'center' }}>
-                <Button variant="outlined" className={classes.resetButton} color="primary" component={Link} to="/?force_fetch=1" >
+                <Button variant="outlined" className={classes.resetButton} color="primary" component={Link} to="/?forceFetch=1" >
                     <RefreshIcon className={classes.leftIcon} /> reset
                 </Button>
             </div>

@@ -42,8 +42,8 @@ const WalkEditor = props => {
             if (path == null) {
                 updatePath = false;
             }
-            const new_state = Object.assign({}, item, {path, updatePath, date, initialized, processing});
-            setState(new_state);
+            const newState = Object.assign({}, item, {path, updatePath, date, initialized, processing});
+            setState(newState);
         }
     }
     const keys = useRef([]);
@@ -80,10 +80,10 @@ const WalkEditor = props => {
         }).then(
             response => response.json()
         ).then(json => {
-            push({pathname: '/' + json[0].id, search: 'force_fetch=1' });
+            push({pathname: '/' + json[0].id, search: 'forceFetch=1' });
             handleClose();
         })
-        .catch(ex => alert(ex));
+            .catch(ex => alert(ex));
     }, [state]);
     const handleDelete = useCallback((e) => {
         setState(state => Object.assign({}, state, {processing: true}));
@@ -98,7 +98,7 @@ const WalkEditor = props => {
                 return response;
             }).then(() => {
                 setSelectedItem(null);
-                push({pathname: '/' + state.id, query: {force_fetch: 1} });
+                push({pathname: '/' + state.id, query: {forceFetch: 1} });
                 handleClose();
             }).catch(ex => alert(ex));
         }
@@ -127,7 +127,7 @@ const WalkEditor = props => {
                     <TextField defaultValue={state.title} onChange={e => handleChange('title', e.target.value)} label="title" fullWidth={true} />
                     <ImageUploader label="image" value={state.image} onChange={e => handleChange('image', e)} ></ImageUploader>
                     <TextField multiline rows={4} rowsMax={20}
-                            defaultValue={state.comment} onChange={e => handleChange('comment', e.target.value)} label="comment" fullWidth={true} />
+                        defaultValue={state.comment} onChange={e => handleChange('comment', e.target.value)} label="comment" fullWidth={true} />
                     {
                         walkEditorMode == 'update' &&
                         <FormControlLabel

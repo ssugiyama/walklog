@@ -69,9 +69,9 @@ const CENTER_INTERVAL = 30000;
 const RESIZE_INTERVAL = 500;
 
 const Map = props => {
-    const map_elem_ref = useRef();
-    const download_ref = useRef();
-    const upload_ref = useRef();
+    const mapElemRef = useRef();
+    const downloadRef = useRef();
+    const uploadRef = useRef();
     const [confirmInfo, setConfirmInfo] = useState({open: false});
     const refs = useRef();
     const context = useContext(MapContext);
@@ -107,10 +107,10 @@ const Map = props => {
                 style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             }
         };
-        map_elem_ref.current.addEventListener('touchmove', event => {
+        mapElemRef.current.addEventListener('touchmove', event => {
             event.preventDefault();
         });
-        refs.map = new google.maps.Map(map_elem_ref.current, options);
+        refs.map = new google.maps.Map(mapElemRef.current, options);
         google.maps.event.addListener(refs.map, 'click', event => {
             if (refs.filter == 'neighborhood'){
                 refs.distanceWidget.setCenter(event.latLng.toJSON());
@@ -135,21 +135,21 @@ const Map = props => {
             setZoom(refs.map.getZoom());
         });
         const PathManager = require('./path-manager').default;
-        refs.path_manager = new PathManager({map: refs.map});
-        const path_changed = () => {
-            const next_path = refs.path_manager.getEncodedSelection();
-            if (refs.selectedPath != next_path) {
-                setSelectedPath(next_path);
+        refs.pathManager = new PathManager({map: refs.map});
+        const pathChanged = () => {
+            const nextPath = refs.pathManager.getEncodedSelection();
+            if (refs.selectedPath != nextPath) {
+                setSelectedPath(nextPath);
             }
         };
-        google.maps.event.addListener(refs.path_manager, 'length_changed', path_changed);
-        google.maps.event.addListener(refs.path_manager, 'selection_changed', path_changed);
-        google.maps.event.addListener(refs.path_manager, 'editable_changed',  () => {
-            if (!refs.path_manager.editable) {
+        google.maps.event.addListener(refs.pathManager, 'length_changed', pathChanged);
+        google.maps.event.addListener(refs.pathManager, 'selection_changed', pathChanged);
+        google.maps.event.addListener(refs.pathManager, 'editable_changed',  () => {
+            if (!refs.pathManager.editable) {
                 setEditingPath(false);
             }
         });
-        google.maps.event.addListener(refs.path_manager, 'polylinecomplete',  polyline => {
+        google.maps.event.addListener(refs.pathManager, 'polylinecomplete',  polyline => {
             new Promise((resolve) => {
                 if (refs.selectedPath) {
                     setConfirmInfo({open: true, resolve});
@@ -159,7 +159,7 @@ const Map = props => {
                 }
             }).then(append => {
                 setConfirmInfo({open: false});
-                refs.path_manager.applyPath(polyline.getPath().getArray(), append);
+                refs.pathManager.applyPath(polyline.getPath().getArray(), append);
             });
         });
         const circleOpts = Object.assign({}, mapStyles.circle, {
@@ -197,32 +197,32 @@ const Map = props => {
             setSelectedPath(window.localStorage.selectedPath);
         }
         window.addEventListener('resize', handleResize);
-        upload_ref.current.addEventListener('change', e => {
+        uploadRef.current.addEventListener('change', e => {
             processUpload(e);
         });
         context.setState({
             map: refs.map,
             addPoint: (lat, lng, append) => {
                 const pt = new google.maps.LatLng(lat, lng);
-                refs.path_manager.applyPath([pt], append);
+                refs.pathManager.applyPath([pt], append);
             },
             uploadPath: () =>  {
-                const elem = ReactDOM.findDOMNode(upload_ref.current);
+                const elem = ReactDOM.findDOMNode(uploadRef.current);
                 setTimeout(() => elem.click(), 0);
             },
             downloadPath: () =>  {
-                const content = refs.path_manager.selectionAsGeoJSON();
+                const content = refs.pathManager.selectionAsGeoJSON();
                 const blob = new Blob([ content ], { 'type' : 'application/json' });
-                const elem = ReactDOM.findDOMNode(download_ref.current);
+                const elem = ReactDOM.findDOMNode(downloadRef.current);
                 elem.href = window.URL.createObjectURL(blob);
                 setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
             },
             clearPaths: () => {
-                refs.path_manager.deleteAll();
+                refs.pathManager.deleteAll();
             },
             addPaths: (paths) => {
                 for (let path of paths) {
-                    refs.path_manager.showPath(path, false, false);
+                    refs.pathManager.showPath(path, false, false);
                 }
             },
         });
@@ -236,7 +236,7 @@ const Map = props => {
     
     const citiesChanges = () => {
         const a = new Set(refs.cities.split(/,/));
-        const b = new Set(Object.keys(refs.city_hash || {}));
+        const b = new Set(Object.keys(refs.cityHash || {}));
         if (a.length !== b.length) return true;
         for (let j of a) {
             if (!b.has(j)) return true;
@@ -274,21 +274,21 @@ const Map = props => {
         refs.marker.setMap(geoMarker.show ? refs.map : null);
     }, [geoMarker]);
     useEffect(() => {
-        if (! refs.path_manager) return;
-        if (refs.selectedPath && refs.selectedPath != refs.path_manager.getEncodedSelection())
-            refs.path_manager.showPath(refs.selectedPath, true);
+        if (! refs.pathManager) return;
+        if (refs.selectedPath && refs.selectedPath != refs.pathManager.getEncodedSelection())
+            refs.pathManager.showPath(refs.selectedPath, true);
     }, [refs.selectedPath, mapLoaded]);
     useEffect(() => {
-        if (! refs.path_manager) return;
-        if (highlightedPath && highlightedPath != refs.path_manager.getEncodedHighlight())
-            refs.path_manager.showPath(highlightedPath, false, true);
+        if (! refs.pathManager) return;
+        if (highlightedPath && highlightedPath != refs.pathManager.getEncodedHighlight())
+            refs.pathManager.showPath(highlightedPath, false, true);
         else if (! highlightedPath)
-            refs.path_manager.set('highlight', null);
+            refs.pathManager.set('highlight', null);
     }, [highlightedPath, mapLoaded]);
     useEffect(() => {
-        if (! refs.path_manager) return;
+        if (! refs.pathManager) return;
         if (pathEditable) {
-            refs.path_manager.set('editable', true);
+            refs.pathManager.set('editable', true);
         }
     }, [pathEditable, refs.selectedPath]);
 
@@ -307,13 +307,13 @@ const Map = props => {
     
     useEffect(() => {
         if (refs.filter == 'cities' && citiesChanges() && ! refs.fetching) {
-            if (refs.city_hash) {
-                for (let id of Object.keys(refs.city_hash)) {
-                    const pg = refs.city_hash[id];
+            if (refs.cityHash) {
+                for (let id of Object.keys(refs.cityHash)) {
+                    const pg = refs.cityHash[id];
                     pg.setMap(null);
                 }
             }
-            refs.city_hash = {};
+            refs.cityHash = {};
             if (refs.cities) {
                 refs.fetching = true;
                 fetch('/api/cities?jcodes=' + refs.cities)
@@ -332,9 +332,9 @@ const Map = props => {
                     });
             }
         }
-        if (refs.city_hash) {
-            for (let id of Object.keys(refs.city_hash)) {
-                const geom = refs.city_hash[id];
+        if (refs.cityHash) {
+            for (let id of Object.keys(refs.cityHash)) {
+                const geom = refs.cityHash[id];
                 if (refs.filter == 'cities') {
                     geom.setMap(refs.map);
                 }
@@ -351,29 +351,29 @@ const Map = props => {
         const pg =  new google.maps.Polygon({});
         pg.setPaths(paths);
         pg.setOptions(mapStyles.polygon);
-        refs.city_hash[id] = pg;
+        refs.cityHash[id] = pg;
         google.maps.event.addListener(pg, 'click',  () => {
             removeCity(id, pg);
         });
         return pg;
     };
     const addCity = (id) => {
-        if (refs.city_hash === undefined) refs.city_hash = {};
-        if (refs.city_hash[id]) return;
-        const new_cities = refs.cities.split(/,/).filter(elm => elm).concat(id).join(',');
-        setSearchForm({cities: new_cities});
+        if (refs.cityHash === undefined) refs.cityHash = {};
+        if (refs.cityHash[id]) return;
+        const newCities = refs.cities.split(/,/).filter(elm => elm).concat(id).join(',');
+        setSearchForm({cities: newCities});
     };
     const removeCity = (id, pg) => {
-        const cities_array = refs.cities.split(/,/);
-        const index = cities_array.indexOf(id);
+        const citiesArray = refs.cities.split(/,/);
+        const index = citiesArray.indexOf(id);
         if (index >= 0){
-            cities_array.splice(index, 1);
-            const new_cities = cities_array.join(',');
-            setSearchForm({cities: new_cities});
+            citiesArray.splice(index, 1);
+            const newCities = citiesArray.join(',');
+            setSearchForm({cities: newCities});
         }
         pg.setMap(null);
         pg = null;
-        delete refs.city_hash[id];
+        delete refs.cityHash[id];
     };
     const processUpload = (e) => {
         const file = e.target.files[0];
@@ -412,7 +412,7 @@ const Map = props => {
 
     return (
         <React.Fragment>
-            <div ref={map_elem_ref} className={classNames({
+            <div ref={mapElemRef} className={classNames({
                 [classes.mapCompact]: view == 'content',
                 [classes.mapExpand]: view == 'map',
             })}></div>
@@ -424,8 +424,8 @@ const Map = props => {
                 onClick={() => { toggleView(); }} >
                 {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
             </Fab>
-            <a ref={download_ref} style={{display: 'none'}} download='walklog.json'></a>
-            <input ref={upload_ref} type="file" style={{display: 'none'}} />
+            <a ref={downloadRef} style={{display: 'none'}} download='walklog.json'></a>
+            <input ref={uploadRef} type="file" style={{display: 'none'}} />
             <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
         </React.Fragment>
     );

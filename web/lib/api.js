@@ -1,12 +1,12 @@
-const express = require('express')
-  ,   multer  = require('multer')
-  ,   nanoid  = require('nanoid')
-  ,   models  = require('./models')
-  ,   fs      = require('fs')
-  ,   Sequelize = require('sequelize')
-  ,   sequelize = models.sequelize
-  ,   Walk    = models.sequelize.models.walks
-  ,   Area    = models.sequelize.models.areas;
+const express = require('express'),
+    multer    = require('multer'),
+    nanoid    = require('nanoid'),
+    models    = require('./models'),
+    fs        = require('fs'),
+    Sequelize = require('sequelize'),
+    sequelize = models.sequelize,
+    Walk      = models.sequelize.models.walks,
+    Area      = models.sequelize.models.areas;
 
 const Op = Sequelize.Op;
 
@@ -29,7 +29,7 @@ const upload = multer({ storage: storage });
 
 const searchFunc = params => {
     return new Promise((resolve, reject) => {
-        const order_hash = {
+        const orderHash = {
             'newest_first'       : ['date', 'desc'],
             'oldest_first'       : 'date',
             'longest_first'      : ['length', 'desc'],
@@ -41,7 +41,7 @@ const searchFunc = params => {
             'nearest_first'      : sequelize.literal('distance'),
         };
         const where = [];
-        const order = order_hash[params.order || 'newest_first'];
+        const order = orderHash[params.order || 'newest_first'];
         const attributes = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'user_id'];
         if (params.id) {
             where.push({id: params.id});
@@ -112,23 +112,23 @@ const searchFunc = params => {
                     });
                     return;
                 }
-                const max_distance = params.max_distance || 4000;
-                const linestring = Walk.decodePath(params.searchPath);
-                const extent     = Walk.getPathExtent(params.searchPath);
-                const dlat       = max_distance*180/Math.PI/models.EARTH_RADIUS;
-                const mlat       = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin-dlat));
-                const dlon       = dlat/Math.cos(mlat/180*Math.PI);
-                const lb         = Walk.getPoint(extent.xmin-dlon, extent.ymin-dlat);
-                const rt         = Walk.getPoint(extent.xmax+dlon, extent.ymax+dlat);
+                const maxDistance = params.max_distance || 4000;
+                const linestring  = Walk.decodePath(params.searchPath);
+                const extent      = Walk.getPathExtent(params.searchPath);
+                const dlat        = maxDistance*180/Math.PI/models.EARTH_RADIUS;
+                const mlat        = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin-dlat));
+                const dlon        = dlat/Math.cos(mlat/180*Math.PI);
+                const lb          = Walk.getPoint(extent.xmin-dlon, extent.ymin-dlat);
+                const rt          = Walk.getPoint(extent.xmax+dlon, extent.ymax+dlat);
 
                 attributes.push([`ST_HausdorffDistance(ST_Transform(path, ${models.SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${models.SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance']);
                 where.push(sequelize.fn('ST_Within', sequelize.col('path'), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', lb, rt), models.SRID)));
                 where.push(sequelize.where(
-                            sequelize.fn('ST_HausdorffDistance', 
-                                sequelize.fn('ST_Transform', sequelize.col('path'), models.SRID_FOR_SIMILAR_SEARCH), 
-                                sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), models.SRID_FOR_SIMILAR_SEARCH)), {
-                                    [Op.lt]: max_distance
-                                }));
+                    sequelize.fn('ST_HausdorffDistance', 
+                        sequelize.fn('ST_Transform', sequelize.col('path'), models.SRID_FOR_SIMILAR_SEARCH), 
+                        sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), models.SRID_FOR_SIMILAR_SEARCH)), {
+                        [Op.lt]: maxDistance
+                    }));
             }
             else if (params.filter == 'frechet') {
                 if (!params.searchPath) {
@@ -138,13 +138,13 @@ const searchFunc = params => {
                     });
                     return;
                 }
-                const max_distance = params.max_distance || 4000;
-                const linestring = Walk.decodePath(params.searchPath);
-                const sp         = Walk.getStartPoint(params.searchPath);
-                const ep         = Walk.getEndPoint(params.searchPath);
-                const dlat       = max_distance*180/Math.PI/models.EARTH_RADIUS;
-                const mlat       = Math.max(Math.abs(sp[1] + dlat), Math.abs(sp[1] - dlat), Math.abs(ep[1] + dlat), Math.abs(ep[1] - dlat));
-                const dlon       = dlat/Math.cos(mlat/180*Math.PI);
+                const maxDistance = params.max_distance || 4000;
+                const linestring  = Walk.decodePath(params.searchPath);
+                const sp          = Walk.getStartPoint(params.searchPath);
+                const ep          = Walk.getEndPoint(params.searchPath);
+                const dlat        = maxDistance*180/Math.PI/models.EARTH_RADIUS;
+                const mlat        = Math.max(Math.abs(sp[1] + dlat), Math.abs(sp[1] - dlat), Math.abs(ep[1] + dlat), Math.abs(ep[1] - dlat));
+                const dlon        = dlat/Math.cos(mlat/180*Math.PI);
                 const slb         = Walk.getPoint(sp[0]-dlon, sp[1]-dlat);
                 const srt         = Walk.getPoint(sp[0]+dlon, sp[1]+dlat);
                 const elb         = Walk.getPoint(ep[0]-dlon, ep[1]-dlat);
@@ -154,11 +154,11 @@ const searchFunc = params => {
                 where.push(sequelize.fn('ST_Within', sequelize.fn('ST_StartPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', slb, srt), models.SRID)));
                 where.push(sequelize.fn('ST_Within', sequelize.fn('ST_EndPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', elb, ert), models.SRID)));
                 where.push(sequelize.where(
-                            sequelize.fn('ST_FrechetDistance',
-                                sequelize.fn('ST_Transform', sequelize.col('path'), models.SRID_FOR_SIMILAR_SEARCH),
-                                sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), models.SRID_FOR_SIMILAR_SEARCH)), {
-                                    [Op.lt]: max_distance
-                                }));
+                    sequelize.fn('ST_FrechetDistance',
+                        sequelize.fn('ST_Transform', sequelize.col('path'), models.SRID_FOR_SIMILAR_SEARCH),
+                        sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), models.SRID_FOR_SIMILAR_SEARCH)), {
+                        [Op.lt]: maxDistance
+                    }));
             }
         }
         const limit  = parseInt(params.limit) || 20;
@@ -206,8 +206,8 @@ api.get('/version', function(req, res){
     fs.readFile('package.json', function (err, data) {
         const json = JSON.parse(data);
         res.json({
-            app_version: json.version,
-            app_env: process.env.NODE_ENV,
+            appVersion: json.version,
+            appEnv: process.env.NODE_ENV,
         });
     });
 });

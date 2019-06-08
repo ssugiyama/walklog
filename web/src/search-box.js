@@ -110,7 +110,7 @@ const SearchBox = props => {
                         })()
                     }
                 </Typography> :
-        { rows.length > 0 && (<Button variant="outlined" onClick={ handleShowAll } color="secondary">show all paths</Button>) }
+                { rows.length > 0 && (<Button variant="outlined" onClick={ handleShowAll } color="secondary">show all paths</Button>) }
             </div>
             <Table className={classes.table}>
                 <TableHead>
@@ -120,10 +120,10 @@ const SearchBox = props => {
                         <TableCell classes={{ root: classes.cell}}><Typography variant="body2">title</Typography></TableCell>
                         <TableCell classes={{ root: classes.cell}}>{
                             rows.length > 0 && rows[0].distance !== undefined ?
-                            (<Select value={showDistance} onChange={e => handleShowDistance(e.target.value)}>
-                            <MenuItem value={true}><Typography variant="body2">distance</Typography></MenuItem>
-                            <MenuItem value={false}><Typography variant="body2">length</Typography></MenuItem>
-                            </Select>) : (<Typography variant="body2">length</Typography>)
+                                (<Select value={showDistance} onChange={e => handleShowDistance(e.target.value)}>
+                                    <MenuItem value={true}><Typography variant="body2">distance</Typography></MenuItem>
+                                    <MenuItem value={false}><Typography variant="body2">length</Typography></MenuItem>
+                                </Select>) : (<Typography variant="body2">length</Typography>)
                         }</TableCell>
                     </TableRow>
                 </TableHead>

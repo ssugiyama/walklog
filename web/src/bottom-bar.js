@@ -170,7 +170,7 @@ const BottomBar = props => {
                     <MenuItem value={100}>100m</MenuItem>
                     {
                         [1000, 500, 250, 100].some(r => r == radius) ? null
-                        : (<MenuItem value={radius}>{Math.round(radius) + 'm'}</MenuItem>)
+                            : (<MenuItem value={radius}>{Math.round(radius) + 'm'}</MenuItem>)
                     }
                 </Select>}
                 { filter == 'cities' &&

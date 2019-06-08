@@ -1,6 +1,6 @@
 'use strict';
 
-function encode_float(f) {
+function encodeFloat(f) {
     let n = Math.round(f*100000);
     n <<= 1;
     if (n < 0) n = -n-1;
@@ -21,7 +21,7 @@ exports.encode = function (path) {
     let prevx = 0;
     let prevy = 0;
     return path.map(function (point) {
-        const ar = encode_float(point[1]-prevy).concat(encode_float(point[0]-prevx));
+        const ar = encodeFloat(point[1]-prevy).concat(encodeFloat(point[0]-prevx));
         prevx = point[0];
         prevy = point[1];
         return Buffer.from(ar).toString('ascii');
@@ -34,10 +34,10 @@ exports.decode = function (str) {
     let n = 0, j = 0;
     for (let i = 0; i < buf.length; i++ ) {
         let k = buf[i] - 63;
-        let is_last = ((k & 0x20) === 0);
+        let isLast = ((k & 0x20) === 0);
         k &= 0x1f;
         n |= (k << (j*5));
-        if (is_last) {
+        if (isLast) {
             fs.push(((n >> 1)*(1 - 2*(n & 1)) - (n & 1))/100000.0);
             n = j = 0;
         } else {

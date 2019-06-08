@@ -236,10 +236,10 @@ export const reducers = combineReducers({
     router: connectRouter(history)
 });
 
-export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryChanged, next) {
-    if (item_id) {
-        if (!query.force_fetch) {
-            const index = rows.findIndex(row => row.id == item_id);
+export function handleRoute(itemId, query, isPathSelected, prefix, rows, queryChanged, next) {
+    if (itemId) {
+        if (!query.forceFetch) {
+            const index = rows.findIndex(row => row.id == itemId);
             if (index >= 0) {
                 const nextId = index > 0 ? rows[index-1].id : null;
                 const prevId = index < rows.length-1 ? rows[index+1].id : null;
@@ -247,13 +247,13 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
                 return next(setSelectedItem(rows[index], index));
             }
         }
-        return next(getItem(item_id, prefix));
+        return next(getItem(itemId, prefix));
     }
     next(setSelectedItem(null, -1));
     if (! queryChanged) return;
     const select = query['select'];
     delete query['select'];
-    delete query['force_fetch'];
+    delete query['forceFetch'];
     const lastQuery = Object.assign({}, query);
     delete lastQuery['offset'];
     const lqs = Object.keys(lastQuery).map(key => key + '=' + encodeURIComponent(lastQuery[key])).join('&');
@@ -281,8 +281,8 @@ const formWatchMiddleware = store => next => action => {
     }
     const state = store.getState();
     const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
-    const current_filter = payload.filter !== undefined ? payload.filter : state.main.searchForm.filter;
-    switch (current_filter) {
+    const currentFilter = payload.filter !== undefined ? payload.filter : state.main.searchForm.filter;
+    switch (currentFilter) {
     case 'neighborhood':
         keys.push('radius', 'longitude', 'latitude');
         break;
@@ -299,16 +299,16 @@ const formWatchMiddleware = store => next => action => {
         const q = Object.assign({}, state.main.searchForm, payload);
         const query = {};
         keys.forEach(key => { query[key] = q[key] || ''; });
-        if (payload.filter && current_filter == 'neighborhood' && state.main.center) {
+        if (payload.filter && currentFilter == 'neighborhood' && state.main.center) {
             query.latitude = state.main.center.lat;
             query.longitude = state.main.center.lng;
         }
-        if (current_filter === 'frechet' ||  current_filter === 'hausdorff' && state.main.searchForm.order !== 'nearest_first') {
+        if (currentFilter === 'frechet' ||  currentFilter === 'hausdorff' && state.main.searchForm.order !== 'nearest_first') {
             query.order = 'nearest_first';
-        } else if (current_filter !== 'frechet' && current_filter !== 'hausdorff' && state.main.searchForm.order === 'nearest_first') {
+        } else if (currentFilter !== 'frechet' && currentFilter !== 'hausdorff' && state.main.searchForm.order === 'nearest_first') {
             query.order = 'newest_first';
         }
-        if (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && action.type != ActionTypes.SET_SELECTED_PATH) {
+        if (['crossing', 'hausdorff', 'frechet'].includes(currentFilter) && action.type != ActionTypes.SET_SELECTED_PATH) {
             query.searchPath = state.main.selectedPath || '';
         }
         const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
@@ -319,14 +319,14 @@ const formWatchMiddleware = store => next => action => {
         if (typeof window !== 'undefined') { // client side only
             if (state.main.view == 'content') {
                 if ( payload.filter
-                    && ( ['neighborhood', 'cities'].includes(current_filter))
-                    || ( ['hausdorff', 'crossing', 'frechet'].includes(current_filter) && ! query.searchPath) ) {
+                    && ( ['neighborhood', 'cities'].includes(currentFilter))
+                    || ( ['hausdorff', 'crossing', 'frechet'].includes(currentFilter) && ! query.searchPath) ) {
                     next(toggleView());
                 }
             }
             else {
-                if ( !payload.filter && ! (current_filter == 'cities' && ! query.cities) && 
-                    ! (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && ! query.searchPath)) {
+                if ( !payload.filter && ! (currentFilter == 'cities' && ! query.cities) && 
+                    ! (['crossing', 'hausdorff', 'frechet'].includes(currentFilter) && ! query.searchPath)) {
                     next(toggleView());
                 }
             }
@@ -348,8 +348,8 @@ const dataFetchMiddleware = store => next => {
             }
             if (!isFirstLocation) {
                 const branch = matchRoutes(routes, action.payload.location.pathname);
-                const last_branch = branch[branch.length - 1];
-                const match = last_branch.match;
+                const lastBranch = branch[branch.length - 1];
+                const match = lastBranch.match;
                 const state = store.getState();
                 const qsearch = action.payload.location.search &&  action.payload.location.search.slice(1);
                 const queryChanged = qsearch != state.main.lastQuery;
@@ -416,18 +416,18 @@ export const routes = [
 ];
 
 export const getTheme = () => {
-    let theme_type = config.get('theme_type');
-    if (typeof matchMedia === 'function' && ! ['dark', 'light'].includes(theme_type))
+    let themeType = config.get('theme_type');
+    if (typeof matchMedia === 'function' && ! ['dark', 'light'].includes(themeType))
     {
-        theme_type =  matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    } else if (! ['dark', 'light'].includes(theme_type)) {
-        theme_type = 'light';
+        themeType =  matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else if (! ['dark', 'light'].includes(themeType)) {
+        themeType = 'light';
     }
     return createMuiTheme({
         palette: {
             primary: colors[config.get('theme_primary') || 'indigo'],
             secondary: colors[config.get('theme_secondary') || 'pink'],
-            type: theme_type,
+            type: themeType,
         }
     });
 };

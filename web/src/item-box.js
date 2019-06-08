@@ -107,7 +107,7 @@ const ItemBox = props => {
             if (u.id == data.userId) dataUser = u;
         }
     }
-    const upUrl = location && location.search == '?force_fetch=1'
+    const upUrl = location && location.search == '?forceFetch=1'
         ? '/' + location.search
         : lastQuery ? '/?' + lastQuery : '/';
     const nextUrl = nextId && '/' + nextId;
