@@ -23,7 +23,7 @@ function searchResult(data, append) {
     };
 }
 
-export function search(props, prefix = '/', select, last_query) {
+export function search(props, prefix = '/', select, lastQuery) {
     const offset = Number(props['offset']);
     return dispatch => {
         if (!select && !offset) {
@@ -39,7 +39,7 @@ export function search(props, prefix = '/', select, last_query) {
                     dispatch(push('/' + data.rows[0].id));
                 }
                 else if (offset > 0) {
-                    dispatch(replace({pathname: '/', search: last_query}));
+                    dispatch(replace({pathname: '/', search: lastQuery}));
                 }
             })
             .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
@@ -51,7 +51,7 @@ export function getItem(id, prefix = '/') {
         return fetch(prefix + 'api/get/' + id)
             .then(response => response.json())
             .then(data => {
-                dispatch(setAdjacentItemIds(data.next_id, data.prev_id));
+                dispatch(setAdjacentItemIds(data.nextId, data.prevId));
                 if (!data.error && data.rows.length > 0) {
                     dispatch(setSelectedItem(data.rows[0], 0));
                 }
@@ -80,10 +80,10 @@ export function toggleView() {
     };
 }
 
-export function setEditingPath(editing_path) {
+export function setEditingPath(pathEditable) {
     return {
         type: ActionTypes.SET_EDITING_PATH,
-        editing_path,
+        pathEditable,
     };
 }
 
@@ -172,17 +172,17 @@ export function openSnackbar(message, ask_append) {
     };
 }
 
-export function setLastQuery(last_query) {
+export function setLastQuery(lastQuery) {
     return {
         type: ActionTypes.SET_LAST_QUERY,
-        last_query,
+        lastQuery,
     };
 }
 
-export function setAdjacentItemIds(next_id, prev_id) {
+export function setAdjacentItemIds(nextId, prevId) {
     return {
         type: ActionTypes.SET_ADJACENT_ITEM_IDS,
-        next_id, prev_id
+        nextId, prevId
     };
 }
 

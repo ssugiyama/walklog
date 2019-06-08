@@ -83,26 +83,26 @@ const styles = theme => ({
 const BottomBar = props => {
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
-    const { filter, radius, selected_path, panorama_index, panorama_count, overlay, map_loaded } = props;
+    const { filter, radius, selectedPath, panoramaIndex, panoramaCount, overlay, mapLoaded } = props;
     const { setPanoramaIndex, setOverlay, setEditingPath, setSearchForm, setGeoMarker } = props;
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
     const refs = useRef();
     const geocoder = useRef();
     const length  = useMemo(() => {
-        if (selected_path) {
-            return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selected_path))/1000;
+        if (selectedPath) {
+            return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selectedPath))/1000;
         }
         else {
             return 0;
         }
-    }, [selected_path]);
+    }, [selectedPath]);
     const groupCount = useMemo(() => overlay ? 1 : 3, [overlay]);
     useEffect(() => {
-        if (map_loaded) {
+        if (mapLoaded) {
             refs.geocoder = new google.maps.Geocoder();
         }
-    }, [map_loaded]);
+    }, [mapLoaded]);
     const handleNextButtonClick = d => () => {
         setGroupIndex(index => {
             index = (index + d) % groupCount;
@@ -136,17 +136,17 @@ const BottomBar = props => {
                     <IconButton onClick={ () => { setOverlay(false); }}><NavigationCancel /></IconButton>
                 </Tooltip>
                 <Tooltip title="-10" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 10); } }><AvFastRewind /></IconButton>
+                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 10); } }><AvFastRewind /></IconButton>
                 </Tooltip>
                 <Tooltip title="-1" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 1); }}><NavigationArrowBack /></IconButton>
+                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 1); }}><NavigationArrowBack /></IconButton>
                 </Tooltip>
-                <Typography variant="body1" style={{ display: 'inline' }}>{ panorama_index+1 } / { panorama_count } </Typography>
+                <Typography variant="body1" style={{ display: 'inline' }}>{ panoramaIndex+1 } / { panoramaCount } </Typography>
                 <Tooltip title="+1" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 1); }}><NavigationArrowForward /></IconButton>
+                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 1); }}><NavigationArrowForward /></IconButton>
                 </Tooltip>
                 <Tooltip title="+10" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 10); }}><AvFastForward /></IconButton>
+                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 10); }}><AvFastForward /></IconButton>
                 </Tooltip>
             </div>
         </div>
@@ -186,13 +186,13 @@ const BottomBar = props => {
             <Typography variant="caption">Path</Typography>
             <div className={classes.bottomBarGroupBody}>
                 <Tooltip title="edit" position="top-center">
-                    <IconButton onClick={() => setEditingPath(true) } disabled={! selected_path} ><EditorModeEdit /></IconButton>
+                    <IconButton onClick={() => setEditingPath(true) } disabled={! selectedPath} ><EditorModeEdit /></IconButton>
                 </Tooltip>
                 <Tooltip title="clear all" position="top-center">
                     <IconButton onClick={() => clearPaths() }><NavigationRefresh /></IconButton>
                 </Tooltip>
                 <Tooltip title="download" position="top-center">
-                    <IconButton onClick={() => downloadPath() }  disabled={! selected_path}><FileDownload /></IconButton>
+                    <IconButton onClick={() => downloadPath() }  disabled={! selectedPath}><FileDownload /></IconButton>
                 </Tooltip>
                 <Tooltip title="upload" position="top-center">
                     <IconButton onClick={() => uploadPath() }><FileUpload /></IconButton>
@@ -248,10 +248,10 @@ const BottomBar = props => {
 };
 
 function mapStateToProps(state) {
-    const { filter, radius } = state.main.search_form;
-    const { selected_path, panorama_index, panorama_count, overlay, map_loaded } = state.main;
+    const { filter, radius } = state.main.searchForm;
+    const { selectedPath, panoramaIndex, panoramaCount, overlay, mapLoaded } = state.main;
     return {
-        filter, radius, selected_path, panorama_index, panorama_count, overlay, map_loaded
+        filter, radius, selectedPath, panoramaIndex, panoramaCount, overlay, mapLoaded
     };
 }
 

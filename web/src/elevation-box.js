@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
 import { withTheme } from '@material-ui/styles';
-import { compare_with_map_loaded } from './utils';
+import { compareWithMapLoaded } from './utils';
 
 const styles = {
     elevationBox: {
@@ -14,18 +14,18 @@ const styles = {
 };
 
 const ElevationBox = props => {
-    const root_ref = useRef();
+    const rootRef = useRef();
     const refs = useRef();
-    const { highlighted_path, map_loaded, setInfoWindow } = props;
+    const { highlightedPath, mapLoaded, setInfoWindow } = props;
 
     // test code for local
     // const interpolatePoints = (pt1, pt2, r) => {
     //     return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
     // };
-    // const getElevationPointsAndElevation = (highlighted_path) => {
-    //     if (!highlighted_path) return null;
+    // const getElevationPointsAndElevation = (highlightedPath) => {
+    //     if (!highlightedPath) return null;
     //     const pp = [];
-    //     const path = highlighted_path;
+    //     const path = highlightedPath;
     //     const count = path.length;
     //     let way = 0;
     //     let dsum = 0;
@@ -47,8 +47,8 @@ const ElevationBox = props => {
     // };
 
     const requestElevation = () =>  {
-        if (!highlighted_path) return;
-        const path = google.maps.geometry.encoding.decodePath(highlighted_path);
+        if (!highlightedPath) return;
+        const path = google.maps.geometry.encoding.decodePath(highlightedPath);
 
         const pathRequest = {
             'path': path,
@@ -67,7 +67,7 @@ const ElevationBox = props => {
             const data = results.map(result => result.elevation);
             const labels = results.map(result => '');
             if (! refs.chart) {
-                refs.chart = new Chart(root_ref.current.getContext('2d'), {
+                refs.chart = new Chart(rootRef.current.getContext('2d'), {
                     type: 'line',
                     data: {
                         labels,
@@ -123,7 +123,7 @@ const ElevationBox = props => {
         }
     };
     const updateChart = () => {
-        if ( !map_loaded ) return;
+        if ( !mapLoaded ) return;
         if (! refs.elevator ) {
             refs.elevator = new google.maps.ElevationService();
         }
@@ -133,9 +133,9 @@ const ElevationBox = props => {
         updateChart();
     });
 
-    if (highlighted_path)
+    if (highlightedPath)
         return (
-            <canvas style={styles.elevationBox} ref={root_ref}></canvas>
+            <canvas style={styles.elevationBox} ref={rootRef}></canvas>
         );
     else
         return null;
@@ -143,9 +143,9 @@ const ElevationBox = props => {
 };
 
 function mapStateToProps(state) {
-    const { highlighted_path, map_loaded } = state.main;
+    const { highlightedPath, mapLoaded } = state.main;
     return {
-        highlighted_path, map_loaded
+        highlightedPath, mapLoaded
     };
 }
 
@@ -153,4 +153,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ setInfoWindow }, dispatch);
 }
 
-export default withTheme(connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox, compare_with_map_loaded)));
+export default withTheme(connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox, compareWithMapLoaded)));

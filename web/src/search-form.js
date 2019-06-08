@@ -10,7 +10,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import RefreshIcon from '@material-ui/icons/Refresh';
 
-const month_options = [
+const monthOptions = [
     { label: '-', value: '' },
     { label: 'Jan', value: 1 },
     { label: 'Feb', value: 2 },
@@ -26,7 +26,7 @@ const month_options = [
     { label: 'Dec', value: 12 },
 ];
 
-const order_options  = [
+const orderOptions  = [
     { label: 'newest first', value: 'newest_first' },
     { label: 'oldest first', value: 'oldest_first' },
     { label: 'longest first', value: 'longest_first' },
@@ -37,7 +37,7 @@ const order_options  = [
     { label: 'westernmost first', value: 'westernmost_first' },
 ];
 
-const order_options_with_nearest = [
+const orderOptionsWithNearest = [
     { label: 'nearest first', value: 'nearest_first' },
 ];
 
@@ -85,7 +85,7 @@ const SearchForm = props => {
                 <TextField select label="month" value={parseInt(month) || ''} onChange={e => handleChange('month', e.target.value)} 
                     style={{width: '50%'}}
                 >
-                    {month_options.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
+                    {monthOptions.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
                 </TextField>
                 <TextField select label="year" value={parseInt(year) || ''} onChange={e => handleChange('year', e.target.value)} 
                     style={{width: '50%'}} 
@@ -99,12 +99,12 @@ const SearchForm = props => {
                     style={{width: '50%', verticalAlign: 'bottom'}} 
                 >
                     {
-                        (filter == 'hausdorff' || filter == 'frechet' ? order_options_with_nearest : order_options).map(option =>
+                        (filter == 'hausdorff' || filter == 'frechet' ? orderOptionsWithNearest : orderOptions).map(option =>
                             <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>
                         )
                     }
                 </TextField>
-                <TextField id="search_form_limit" label="limit" value={limit} onChange={e => handleChange('limit', e.target.value)} style={{width: '50%'}} />
+                <TextField id="searchForm_limit" label="limit" value={limit} onChange={e => handleChange('limit', e.target.value)} style={{width: '50%'}} />
             </div>
             <div style={{ textAlign: 'center' }}>
                 <Button variant="outlined" className={classes.resetButton} color="primary" component={Link} to="/?force_fetch=1" >
@@ -117,7 +117,7 @@ const SearchForm = props => {
 
 function mapStateToProps(state) {
     const { years, users } = state.main;
-    return Object.assign({}, state.main.search_form, { 
+    return Object.assign({}, state.main.searchForm, { 
         years, users,
     });
 }

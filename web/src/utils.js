@@ -1,5 +1,5 @@
-export const compare_with_map_loaded = (prevProps, nextProps) => {
-    if (! nextProps.map_loaded ) return true;
+export const compareWithMapLoaded = (prevProps, nextProps) => {
+    if (! nextProps.mapLoaded ) return true;
     
     const keys = Object.keys(prevProps);
  

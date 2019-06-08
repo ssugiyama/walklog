@@ -1,9 +1,9 @@
 const jsSHA = require('jssha');
 
 export default class PathManager extends google.maps.MVCObject {
-    constructor(opt_options) {
+    constructor(optOptions) {
         super();
-        const options = opt_options || {};
+        const options = optOptions || {};
         this.setValues(options);
         this.polylines = new Object();
         this.generalStyle = {strokeColor: '#0000ff', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
@@ -148,12 +148,12 @@ export default class PathManager extends google.maps.MVCObject {
             }
         };
         google.maps.event.addListener(pl, 'rightclick', deleteNode);
-        var path_callback = () => {
+        var pathCallback = () => {
             this.updateLength();
         };
-        google.maps.event.addListener(pl.getPath(), 'insert_at', path_callback);
-        google.maps.event.addListener(pl.getPath(), 'remove_at', path_callback);
-        google.maps.event.addListener(pl.getPath(), 'set_at', path_callback);
+        google.maps.event.addListener(pl.getPath(), 'insert_at', pathCallback);
+        google.maps.event.addListener(pl.getPath(), 'remove_at', pathCallback);
+        google.maps.event.addListener(pl.getPath(), 'set_at', pathCallback);
     }
 
     selection_changed(){

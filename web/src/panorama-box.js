@@ -6,12 +6,12 @@ import IconButton from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
-import NavigationArrowForward from '@material-ui/icons/ArrowForward';
-import NavigationArrowBack from '@material-ui/icons/ArrowBack';
-import AvFastForward from '@material-ui/icons/FastForward';
-import AvFastRewind from '@material-ui/icons/FastRewind';
+import NavigationArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import NavigationArrowBackIcon from '@material-ui/icons/ArrowBack';
+import AvFastForwardIcon from '@material-ui/icons/FastForward';
+import AvFastRewindIcon from '@material-ui/icons/FastRewind';
 import MapContext from './map-context';
-import { compare_with_map_loaded } from './utils';
+import { compareWithMapLoaded } from './utils';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 
@@ -46,7 +46,7 @@ const PanoramaBox = props => {
 
     const body_ref = useRef();
     const {  setPanoramaCount, setPanoramaIndex, setOverlay } = props; 
-    const {  highlighted_path,  panorama_index, panorama_count, overlay, map_loaded, classes } = props;
+    const {  highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded, classes } = props;
     const refs = useRef();
     const handleOverlayChange = (e, toggled) => {
         setOverlay(toggled);
@@ -55,10 +55,10 @@ const PanoramaBox = props => {
         return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
     };
     const context = useContext(MapContext);
-    const getPanoramaPointsAndHeadings = (highlighted_path) => {
-        if (!highlighted_path) return null;
+    const getPanoramaPointsAndHeadings = (highlightedPath) => {
+        if (!highlightedPath) return null;
         const pph = [];
-        const path = highlighted_path;
+        const path = highlightedPath;
         const count = path.length;
         let way = 0;
         let dsum = 0;
@@ -80,9 +80,9 @@ const PanoramaBox = props => {
         return pph;
     };
 
-    const updatePath = (highlighted_path) => {
-        if ( ! map_loaded ) return;
-        if (! highlighted_path) {
+    const updatePath = (highlightedPath) => {
+        if ( ! mapLoaded ) return;
+        if (! highlightedPath) {
             const pnrm = overlay ? context.state.map.getStreetView() : refs.panorama;
             if (pnrm) {
                 pnrm.setVisible(false);
@@ -90,7 +90,7 @@ const PanoramaBox = props => {
             setStreetView(null);
             return;
         }
-        const path = google.maps.geometry.encoding.decodePath(highlighted_path);
+        const path = google.maps.geometry.encoding.decodePath(highlightedPath);
         refs.panoramaPointsAndHeadings = getPanoramaPointsAndHeadings(path);
         setPanoramaCount(refs.panoramaPointsAndHeadings.length);
         // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
@@ -99,9 +99,9 @@ const PanoramaBox = props => {
     };
 
     const showPanorama = () => {
-        if ( !map_loaded || ! refs.panoramaPointsAndHeadings ) return;
+        if ( !mapLoaded || ! refs.panoramaPointsAndHeadings ) return;
 
-        const index = panorama_index;
+        const index = panoramaIndex;
         const item = refs.panoramaPointsAndHeadings[index];
         const pt = item[0];
         const heading = item[1];
@@ -128,7 +128,7 @@ const PanoramaBox = props => {
     }, []);
 
     useEffect(() => {
-        if (map_loaded &&  !refs.panorama ) {
+        if (mapLoaded &&  !refs.panorama ) {
             refs.streetViewService = new google.maps.StreetViewService();
             refs.panorama = new google.maps.StreetViewPanorama(body_ref.current, {
                 addressControl: true,
@@ -136,25 +136,25 @@ const PanoramaBox = props => {
                 enableCloseButton: false,
             });
         }
-    }, [map_loaded]);
+    }, [mapLoaded]);
 
     useEffect(() =>{
-        if (! map_loaded) return;
+        if (! mapLoaded) return;
         if (overlay){
             setStreetView(null);
         } else {
             setStreetView(refs.panorama);
         }
         showPanorama();
-    }, [overlay, map_loaded]);
+    }, [overlay, mapLoaded]);
 
     useEffect(() => {
-        updatePath(highlighted_path);
-    }, [highlighted_path, map_loaded]);
+        updatePath(highlightedPath);
+    }, [highlightedPath, mapLoaded]);
   
     useEffect(() => {
         showPanorama();
-    }, [panorama_index]);
+    }, [panoramaIndex]);
 
     const setStreetView = (pnrm) => {
         if (context.state.map)
@@ -174,20 +174,20 @@ const PanoramaBox = props => {
                 [classes.panoramaHidden]: overlay,
             })} ref={body_ref}></div>
             <div className={classes.panoramaBoxControl}>
-                <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 10); } }><AvFastRewind /></IconButton>
-                <IconButton onClick={ () => { setPanoramaIndex(panorama_index - 1); }}><NavigationArrowBack /></IconButton>
-                <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ panorama_index+1 } </span> / <span>{ panorama_count } </span></Typography>
-                <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 1); }}><NavigationArrowForward /></IconButton>
-                <IconButton onClick={ () => { setPanoramaIndex(panorama_index + 10); }}><AvFastForward /></IconButton>
+                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 10); } }><AvFastRewindIcon /></IconButton>
+                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 1); }}><NavigationArrowBackIcon /></IconButton>
+                <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ panoramaIndex+1 } </span> / <span>{ panoramaCount } </span></Typography>
+                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 1); }}><NavigationArrowForwardIcon /></IconButton>
+                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 10); }}><AvFastForwardIcon /></IconButton>
             </div>
         </div>
     );  
 };
 
 function mapStateToProps(state) {
-    const { view, highlighted_path, panorama_index, panorama_count, overlay, map_loaded } = state.main;
+    const { view, highlightedPath, panoramaIndex, panoramaCount, overlay, mapLoaded } = state.main;
     return {
-        view, highlighted_path,  panorama_index, panorama_count, overlay, map_loaded
+        view, highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded
     };
 }
 
@@ -195,4 +195,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(PanoramaBox, compare_with_map_loaded)));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(PanoramaBox, compareWithMapLoaded)));

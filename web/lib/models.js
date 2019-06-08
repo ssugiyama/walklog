@@ -11,9 +11,9 @@ exports.SRID = SRID;
 exports.EARTH_RADIUS = EARTH_RADIUS;
 exports.SRID_FOR_SIMILAR_SEARCH = 32662;
 
-const db_url = process.env.DB_URL || 'postgres://postgres@db/postgres';
+const dbUrl = process.env.DB_URL || 'postgres://postgres@db/postgres';
 
-const sequelize = new Sequelize(db_url, {
+const sequelize = new Sequelize(dbUrl, {
     dialect: 'postgres',
     omitNull: true,
     native: false,
@@ -104,10 +104,10 @@ Walks.prototype.asObject =  function (includePath) {
         image:      this.image && (process.env.BASE_URL + '/uploads/' + this.image),
         length :    this.length,
         path :      (includePath && this.path) ? this.encodedPath() : null,
-        created_at: this.created_at,
-        updated_at: this.updated_at,
+        createdAt:  this.created_at,
+        updatedAt:  this.updated_at,
         distance:   this.distance,
-        user_id:    this.user_id,   
+        userId:     this.user_id,   
     };
 };
 
@@ -132,7 +132,7 @@ Areas.prototype.encodedGeom = function () {
 
 Areas.prototype.asObject = function () {
     return {
-        jcode:     this.jcode,
-        the_geom : this.encodedGeom()
+        jcode:   this.jcode,
+        theGeom: this.encodedGeom()
     };
 };

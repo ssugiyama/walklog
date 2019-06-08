@@ -48,11 +48,11 @@ const NavBar = (props) => {
     const context = useContext(MapContext);
     const { addPoint } = context.state;
     const { openWalkEditor, setGeoMarker, openSnackbar } = props;
-    const {  selected_path, current_user  } = props;
+    const {  selectedPath, currentUser  } = props;
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
-        const geo_marker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
-        setGeoMarker(geo_marker, !append);
+        const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
+        setGeoMarker(geoMarker, !append);
         addPoint(pos.coords.latitude, pos.coords.longitude, append);
     };
     const getCurrentPosition = (onSuccess, onFailure) => {
@@ -107,7 +107,7 @@ const NavBar = (props) => {
                 setAutoGeolocation(true);
                 openSnackbar('start following your location');
                 new Promise((resolve, reject) => {
-                    if (selected_path) {
+                    if (selectedPath) {
                         setConfirmInfo({open: true, resolve});
                     }
                     else {
@@ -162,7 +162,7 @@ const NavBar = (props) => {
                     value="autoGeolocation"
                 />
                 <IconButton onClick={handleMenuOpen(setAccountAnchorEl)} color="inherit">
-                    { current_user ? <img className={classes.userPhoto} src={current_user.photo} /> : <AccountCircleIcon /> }
+                    { currentUser ? <img className={classes.userPhoto} src={currentUser.photo} /> : <AccountCircleIcon /> }
                 </IconButton>
             </Toolbar>
             <Menu
@@ -171,7 +171,7 @@ const NavBar = (props) => {
                 onClose={handleMenuClose(setTopAnchorEl)}
             >
                 {
-                    props.external_links.map(link => 
+                    props.externalLinks.map(link => 
                         <EndMenuItem component="a" href={link[1]} target="_blank" key={link[0]} >{link[0]}</EndMenuItem>
                     )
                 }
@@ -182,10 +182,10 @@ const NavBar = (props) => {
                 onClose={handleMenuClose(setAccountAnchorEl)}
             >
                 {
-                    current_user ? [
-                        (<MenuItem key="label" disabled={true}>Logged in as {current_user.username}</MenuItem>),
+                    currentUser ? [
+                        (<MenuItem key="label" disabled={true}>Logged in as {currentUser.username}</MenuItem>),
                         (<Divider key="divider" />),
-                        (<EndMenuItem key="new walk" onClick={handleNewWalk} disabled={selected_path == null}>new walk...</EndMenuItem>),
+                        (<EndMenuItem key="new walk" onClick={handleNewWalk} disabled={selectedPath == null}>new walk...</EndMenuItem>),
                         (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>)
                     ] : [<EndMenuItem key="login" onClick={handleLogin}>login with twitter</EndMenuItem>]
                 }                        
@@ -197,9 +197,9 @@ const NavBar = (props) => {
 
 function mapStateToProps(state) {
     return {
-        selected_path: state.main.selected_path,
-        current_user: state.main.current_user,
-        external_links: state.main.external_links,
+        selectedPath: state.main.selectedPath,
+        currentUser: state.main.currentUser,
+        externalLinks: state.main.externalLinks,
     };
 }
 

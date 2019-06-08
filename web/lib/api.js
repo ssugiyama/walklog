@@ -172,29 +172,29 @@ const searchFunc = params => {
             offset : offset,
             limit  : limit,
         }).then(function (result) {
-            let prev_id, next_id;
+            let prevId, nextId;
             if (params.id) {
                 models.sequelize.query('SELECT id FROM walks where id > ? order by id limit 1',
                     { replacements: [params.id], type: models.sequelize.QueryTypes.SELECT }
                 ).then(ids => {
-                    if (ids.length > 0) next_id = ids[0].id;
+                    if (ids.length > 0) nextId = ids[0].id;
                     return models.sequelize.query('SELECT id FROM walks where id < ? order by id desc limit 1',
                         { replacements: [params.id], type: models.sequelize.QueryTypes.SELECT }
                     );
                 }).then(ids => {
-                    if (ids.length > 0) prev_id = ids[0].id;
+                    if (ids.length > 0) prevId = ids[0].id;
                     resolve({
-                        count: result.count,
-                        rows:  result.rows.map(function (row) { return row.asObject(true); }),
-                        next_id: next_id,
-                        prev_id: prev_id,
+                        count:  result.count,
+                        rows:   result.rows.map(function (row) { return row.asObject(true); }),
+                        nextId: nextId,
+                        prevId: prevId,
                     });
                 });
             } else {
                 resolve({
-                    count: result.count,
+                    count:  result.count,
                     offset: result.count > offset + limit ? offset + limit : 0,
-                    rows:  result.rows.map(function (row) { return row.asObject(true); }),
+                    rows:   result.rows.map(function (row) { return row.asObject(true); }),
                 });
             }
         }).catch (function (reason) {

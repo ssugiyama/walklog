@@ -89,7 +89,7 @@ export default function handleSSR(req, res) {
             );
             const css = sheets.toString();
             const state = store.getState();
-            state.main.external_links = config.get('external_links');
+            state.main.externalLinks = config.get('external_links');
             let title = config.get('site_name');
             let description = config.get('site_description');
             const site_name =config.get('site_name');
@@ -97,8 +97,8 @@ export default function handleSSR(req, res) {
             let image;
             const twitter_site = config.get('twitter_site');
             let canonical = base_url + '/';
-            if (state.main.selected_item) {
-                const data = state.main.selected_item;
+            if (state.main.selectedItem) {
+                const data = state.main.selectedItem;
                 title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
                 description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
                 canonical = base_url + '/' + data.id;

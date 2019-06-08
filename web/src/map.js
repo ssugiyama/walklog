@@ -10,9 +10,9 @@ import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './map-context';
 import Fab from '@material-ui/core/Fab';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import { compare_with_map_loaded } from './utils';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import { compareWithMapLoaded } from './utils';
 
 const styles = theme => ({
     mapCompact: {
@@ -78,9 +78,9 @@ const Map = props => {
     const {setSearchForm, setSelectedPath, setCenter, setZoom,  
         toggleView, setMapLoaded, setEditingPath,} = props;
     const {classes, latitude, longitude, radius, 
-        highlighted_path, editing_path,
-        info_window, geo_marker, zoom, view, map_loaded } = props;
-    for (const p of ['center', 'filter', 'cities', 'selected_path']) {
+        highlightedPath, pathEditable,
+        infoWindow, geoMarker, zoom, view, mapLoaded } = props;
+    for (const p of ['center', 'filter', 'cities', 'selectedPath']) {
         refs[p] = props[p];
     }
         
@@ -138,7 +138,7 @@ const Map = props => {
         refs.path_manager = new PathManager({map: refs.map});
         const path_changed = () => {
             const next_path = refs.path_manager.getEncodedSelection();
-            if (refs.selected_path != next_path) {
+            if (refs.selectedPath != next_path) {
                 setSelectedPath(next_path);
             }
         };
@@ -151,7 +151,7 @@ const Map = props => {
         });
         google.maps.event.addListener(refs.path_manager, 'polylinecomplete',  polyline => {
             new Promise((resolve, reject) => {
-                if (refs.selected_path) {
+                if (refs.selectedPath) {
                     setConfirmInfo({open: true, resolve});
                 }
                 else {
@@ -193,8 +193,8 @@ const Map = props => {
         refs.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
         refs.infoWindow = new google.maps.InfoWindow();
         refs.marker = new google.maps.Marker(mapStyles.marker);
-        if (window.localStorage.selected_path) {
-            setSelectedPath(window.localStorage.selected_path);
+        if (window.localStorage.selectedPath) {
+            setSelectedPath(window.localStorage.selectedPath);
         }
         window.addEventListener('resize', handleResize);
         upload_ref.current.addEventListener('change', e => {
@@ -253,15 +253,15 @@ const Map = props => {
     };
     useEffect(() =>{
         if (! refs.map) return;
-        if (info_window.open) {
+        if (infoWindow.open) {
             refs.infoWindow.open(refs.map);
-            refs.infoWindow.setPosition(info_window.position);
-            refs.infoWindow.setContent(info_window.message);
+            refs.infoWindow.setPosition(infoWindow.position);
+            refs.infoWindow.setContent(infoWindow.message);
         }
         else {
             refs.infoWindow.close();
         }
-    }, [info_window]);
+    }, [infoWindow]);
     useEffect(() => {
         if (! refs.map) return;
         const c =  refs.map.getCenter().toJSON();
@@ -270,27 +270,27 @@ const Map = props => {
     }, [refs.center]);
     useEffect(() => {
         if (! refs.map) return;
-        refs.marker.setPosition({lat: geo_marker.lat, lng: geo_marker.lng});
-        refs.marker.setMap(geo_marker.show ? refs.map : null);
-    }, [geo_marker]);
+        refs.marker.setPosition({lat: geoMarker.lat, lng: geoMarker.lng});
+        refs.marker.setMap(geoMarker.show ? refs.map : null);
+    }, [geoMarker]);
     useEffect(() => {
         if (! refs.path_manager) return;
-        if (refs.selected_path && refs.selected_path != refs.path_manager.getEncodedSelection())
-            refs.path_manager.showPath(refs.selected_path, true);
-    }, [refs.selected_path, map_loaded]);
+        if (refs.selectedPath && refs.selectedPath != refs.path_manager.getEncodedSelection())
+            refs.path_manager.showPath(refs.selectedPath, true);
+    }, [refs.selectedPath, mapLoaded]);
     useEffect(() => {
         if (! refs.path_manager) return;
-        if (highlighted_path && highlighted_path != refs.path_manager.getEncodedHighlight())
-            refs.path_manager.showPath(highlighted_path, false, true);
-        else if (! highlighted_path)
+        if (highlightedPath && highlightedPath != refs.path_manager.getEncodedHighlight())
+            refs.path_manager.showPath(highlightedPath, false, true);
+        else if (! highlightedPath)
             refs.path_manager.set('highlight', null);
-    }, [highlighted_path, map_loaded]);
+    }, [highlightedPath, mapLoaded]);
     useEffect(() => {
         if (! refs.path_manager) return;
-        if (editing_path) {
+        if (pathEditable) {
             refs.path_manager.set('editable', true);
         }
-    }, [editing_path, refs.selected_path]);
+    }, [pathEditable, refs.selectedPath]);
 
     useEffect(() => {
         if (! refs.distanceWidget) return;
@@ -303,7 +303,7 @@ const Map = props => {
         else {
             refs.distanceWidget.setMap(null);
         }
-    }, [refs.filter, radius, latitude, longitude, map_loaded]);
+    }, [refs.filter, radius, latitude, longitude, mapLoaded]);
     
     useEffect(() => {
         if (refs.filter == 'cities' && citiesChanges() && ! refs.fetching) {
@@ -320,7 +320,7 @@ const Map = props => {
                     .then(response => response.json())
                     .then(cities => {
                         cities.forEach(city => {
-                            const pg = toPolygon(city.jcode, city.the_geom);
+                            const pg = toPolygon(city.jcode, city.theGeom);
                             pg.setMap(refs.map);
                         });
                     })
@@ -343,7 +343,7 @@ const Map = props => {
                 }
             }
         }
-    }, [refs.filter, refs.cities, map_loaded]);
+    }, [refs.filter, refs.cities, mapLoaded]);
 
     // console.log('render map');
     const toPolygon = (id, str) => {
@@ -422,7 +422,7 @@ const Map = props => {
                     [classes.fabButtonExpand]: view == 'map', 
                     [classes.fabButtonCompact]: view == 'content'})}
                 onClick={event => { toggleView(); }} >
-                {  view == 'content' ? <ExpandMore /> : <ExpandLess /> }
+                {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
             </Fab>
             <a ref={download_ref} style={{display: 'none'}} download='walklog.json'></a>
             <input ref={upload_ref} type="file" style={{display: 'none'}} />
@@ -432,12 +432,12 @@ const Map = props => {
 };
 
 function mapStateToProps(state) {
-    const { filter, latitude, longitude, radius, cities } = state.main.search_form;
-    const { selected_path, highlighted_path, editing_path, info_window, center, geo_marker, zoom, view, map_loaded  } = state.main;
+    const { filter, latitude, longitude, radius, cities } = state.main.searchForm;
+    const { selectedPath, highlightedPath, pathEditable, infoWindow, center, geoMarker, zoom, view, mapLoaded  } = state.main;
     return {
         filter, latitude, longitude, radius, cities,
-        selected_path, highlighted_path, editing_path, 
-        info_window, center, geo_marker, zoom, view, map_loaded
+        selectedPath, highlightedPath, pathEditable, 
+        infoWindow, center, geoMarker, zoom, view, mapLoaded
     };
 }
 
@@ -448,4 +448,4 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(Map, compare_with_map_loaded)));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(Map, compareWithMapLoaded)));

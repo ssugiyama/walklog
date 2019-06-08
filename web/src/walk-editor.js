@@ -20,29 +20,29 @@ const WalkEditor = props => {
         id: '', date: null, title: '', comment: '', initialized: false, processing: false
     });
     const { push, setSelectedItem, openWalkEditor } = props;
-    const { selected_path, selected_item, open_walk_editor, walk_editor_mode } = props;
+    const { selectedPath, selectedItem, walkEditorOpened, walkEditorMode } = props;
 
-    if (open_walk_editor && ! state.initialized) {
-        const path = selected_path;
-        let item, update_path, date;
+    if (walkEditorOpened && ! state.initialized) {
+        const path = selectedPath;
+        let item, updatePath, date;
         const initialized = true;
         const processing = false;
-        if (walk_editor_mode == 'update') {
-            item = selected_item;
+        if (walkEditorMode == 'update') {
+            item = selectedItem;
             date = item.date;
         }
         else {
             item = {id: '', date: '', title: '', image: '', comment: ''};
             date = moment().format('YYYY-MM-DD');
         }
-        if (path == null && walk_editor_mode == 'create') {
+        if (path == null && walkEditorMode == 'create') {
             alert('draw or select a path on map');
         }
         else {
             if (path == null) {
-                update_path = false;
+                updatePath = false;
             }
-            const new_state = Object.assign({}, item, {path, update_path, date, initialized, processing});
+            const new_state = Object.assign({}, item, {path, updatePath, date, initialized, processing});
             setState(new_state);
         }
     }
@@ -109,18 +109,18 @@ const WalkEditor = props => {
     });
 
     useEffect(() => {
-        if (open_walk_editor) {
+        if (walkEditorOpened) {
             keys.current = new Set();
         }
-    }, [open_walk_editor]);
+    }, [walkEditorOpened]);
 
     return (
         <Dialog
             fullScreen
-            open={open_walk_editor}
+            open={walkEditorOpened}
             onClose={handleClose}
         >
-            <DialogTitle>{ walk_editor_mode == 'update' ? 'Update Walk' : 'New Walk' }</DialogTitle>
+            <DialogTitle>{ walkEditorMode == 'update' ? 'Update Walk' : 'New Walk' }</DialogTitle>
             <DialogContent>
                 <FormGroup row>
                     <TextField type="date" value={state.date} onChange={e => handleChange('date', e.target.value)} container="inline" mode="landscape" label='date' fullWidth={true} />
@@ -129,17 +129,17 @@ const WalkEditor = props => {
                     <TextField multiline rows={4} rowsMax={20}
                             defaultValue={state.comment} onChange={e => handleChange('comment', e.target.value)} label="comment" fullWidth={true} />
                     {
-                        walk_editor_mode == 'update' &&
+                        walkEditorMode == 'update' &&
                         <FormControlLabel
-                            control={<Switch onChange={(e, checked) => handleChange('update_path', checked)}  checked={state.update_path} disabled={state.path == null} />}
+                            control={<Switch onChange={(e, checked) => handleChange('updatePath', checked)}  checked={state.updatePath} disabled={state.path == null} />}
                             label="update path?" />
                     }
                 </FormGroup>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>cancel</Button>
-                <Button disabled={state.processing} onClick={handleSubmit} color="primary">{ walk_editor_mode || 'create' }</Button>
-                {walk_editor_mode == 'update' && 
+                <Button disabled={state.processing} onClick={handleSubmit} color="primary">{ walkEditorMode || 'create' }</Button>
+                {walkEditorMode == 'update' && 
                     <Button disabled={state.processing} onClick={handleDelete} color="secondary">delete</Button>}
             </DialogActions>
             
@@ -149,10 +149,10 @@ const WalkEditor = props => {
 
 function mapStateToProps(state) {
     return {
-        selected_path: state.main.selected_path,
-        selected_item: state.main.selected_item,
-        open_walk_editor: state.main.open_walk_editor,
-        walk_editor_mode: state.main.walk_editor_mode,
+        selectedPath: state.main.selectedPath,
+        selectedItem: state.main.selectedItem,
+        walkEditorOpened: state.main.walkEditorOpened,
+        walkEditorMode: state.main.walkEditorMode,
     };
 }
 

@@ -63,7 +63,7 @@ const SearchBox = props => {
     const [showDistance, setShowDistance] = useState(true); 
     const context = useContext(MapContext);
     const { toggleView, push } = props;
-    const { last_query, offset, count, error, rows, users, searching  } = props;
+    const { lastQuery, offset, count, error, rows, users, searching  } = props;
     const handleShowAll = () => {
         context.state.addPaths(rows.map(row => row.path));
         toggleView();
@@ -77,10 +77,10 @@ const SearchBox = props => {
         setShowDistance(value);
     };
     const { classes } = props;
-    const moreUrl = `/?offset=${offset}` + (last_query && `&${last_query}`);
-    const user_objs = {};
+    const moreUrl = `/?offset=${offset}` + (lastQuery && `&${lastQuery}`);
+    const userObjs = {};
     for (const u of users) {
-        user_objs[u.id] = u;
+        userObjs[u.id] = u;
     }
     return (
         <Paper className={classes.root}>
@@ -129,7 +129,7 @@ const SearchBox = props => {
                 </TableHead>
                 <TableBody>
                     { rows.map( (item, index) => {
-                        const u = user_objs[item.user_id];
+                        const u = userObjs[item.userId];
                         return (
                             <TableRow className={classes.row} key={index} onClick={() => handleSelect(index)}>
                                 <TableCell classes={{ root: classes.cell}}>
@@ -152,7 +152,7 @@ const SearchBox = props => {
 
 function mapStateToProps(state) {
     return Object.assign({}, state.main.result, 
-        {last_query: state.main.last_query}, 
+        {lastQuery: state.main.lastQuery}, 
         {users: state.main.users} );
 }
 

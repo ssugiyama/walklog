@@ -7,10 +7,10 @@ import marked from 'marked';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import Fab from '@material-ui/core/Fab';
-import NavigationArrowForward from '@material-ui/icons/ArrowForward';
-import NavigationArrowBack from '@material-ui/icons/ArrowBack';
+import NavigationArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import NavigationArrowBackIcon from '@material-ui/icons/ArrowBack';
 import ListIcon from '@material-ui/icons/List';
-import EditorModeEdit from '@material-ui/icons/Edit';
+import EditorModeEditIcon from '@material-ui/icons/Edit';
 import Typography from '@material-ui/core/Typography';
 import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
@@ -76,9 +76,8 @@ const styles = theme => ({
 
 const ItemBox = props => {
     const [tabValue, setTabValue] = useState(0);
-    const { openWalkEditor } = props; 
-    const {classes, location, last_query, next_id, prev_id, offset, staticContext, 
-        selected_item, current_user, users} = props;
+    const {classes, location, lastQuery, nextId, prevId, offset, staticContext, 
+        selectedItem, currentUser, users, openWalkEditor} = props;
     const handleEdit = () => {
         openWalkEditor(true, 'update');
     };
@@ -87,49 +86,49 @@ const ItemBox = props => {
     });
 
     const tweetUrl = useMemo(() => {
-        const data = selected_item;
+        const data = selectedItem;
         if (! data) return null;
         const href = config.get('base_url') + '/' + data.id;
         const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
         return `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`;
-    }, [selected_item]); 
+    }, [selectedItem]); 
    
-    const data = selected_item;
+    const data = selectedItem;
     
     if (staticContext && !data) {
         staticContext.status = 404;
     }
-    let title, createMarkup, data_user, image;
+    let title, createMarkup, dataUser, image;
     if (data) {
         title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
         createMarkup = () => { return { __html: marked(data.comment || '') }; };
         image = data.image;
         for (let u of users) {
-            if (u.id == data.user_id) data_user = u;
+            if (u.id == data.userId) dataUser = u;
         }
     }
     const upUrl = location && location.search == '?force_fetch=1'
         ? '/' + location.search
-        : last_query ? '/?' + last_query : '/';
-    const nextUrl = next_id && '/' + next_id;
-    const prevUrl = prev_id ? 
-        '/' + prev_id : 
+        : lastQuery ? '/?' + lastQuery : '/';
+    const nextUrl = nextId && '/' + nextId;
+    const prevUrl = prevId ? 
+        '/' + prevId : 
         offset > 0 ? 
             '/?select=1&offset=' + offset + 
-                (last_query ? '&' + last_query : '') : null;
+                (lastQuery ? '&' + lastQuery : '') : null;
     return  data && 
         (<div>
             <Paper className={classes.itemBoxControl}>
                 <Fab className={classes.backButton} size="small" color="primary" component={Link} to={upUrl}><ListIcon /></Fab>
-                <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBack /></IconButton>
-                <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForward /></IconButton>
+                <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBackIcon /></IconButton>
+                <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForwardIcon /></IconButton>
                 {
-                    data && current_user && data.user_id && current_user.id == data.user_id ? (<IconButton onClick={handleEdit} ><EditorModeEdit /></IconButton>) : null
+                    data && currentUser && data.userId && currentUser.id == data.userId ? (<IconButton onClick={handleEdit} ><EditorModeEditIcon /></IconButton>) : null
                 }
                 <IconButton component="a" href={tweetUrl}><TweetIcon /></IconButton>
                 <Typography variant="h6" color={title ? 'default' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
                 {
-                    data_user ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={data_user.photo} /><span>{data_user.username}</span></Typography>) : null
+                    dataUser ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={dataUser.photo} /><span>{dataUser.username}</span></Typography>) : null
                 }
             </Paper>
             <Paper>
@@ -163,16 +162,16 @@ const ItemBox = props => {
 
 function mapStateToProps(state) {
     return {
-        selected_item: state.main.selected_item,
-        selected_index: state.main.selected_index,
+        selectedItem: state.main.selectedItem,
+        selectedIndex: state.main.selectedIndex,
         rows: state.main.result.rows,
         users: state.main.users,
         count: state.main.result.count,
         offset: state.main.result.offset,
-        next_id: state.main.next_id,
-        prev_id: state.main.prev_id,
-        current_user: state.main.current_user,
-        last_query: state.main.last_query,
+        nextId: state.main.nextId,
+        prevId: state.main.prevId,
+        currentUser: state.main.currentUser,
+        lastQuery: state.main.lastQuery,
         location: state.router.location,
     };
 }

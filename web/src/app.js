@@ -24,7 +24,7 @@ for (let y = currentYear; y >= 1997; y--) {
 }
 
 const initialState = {
-    search_form: {
+    searchForm: {
         id: '',
         date: '',
         filter: '',
@@ -42,50 +42,50 @@ const initialState = {
         rows: [],
         count: 0,
         offset: 0,
-        show_distance: false,
+        showDistance: false,
         error: null,
         searching: false,
     },
-    next_id: null,
-    prev_id: null,
+    nextId: null,
+    prevId: null,
     years: years,
-    selected_item: null,
-    selected_path: null,
-    selected_index: -1,
-    highlighted_path: null,
-    editing_path: false,
+    selectedItem: null,
+    selectedPath: null,
+    selectedIndex: -1,
+    highlightedPath: null,
+    pathEditable: false,
     view: 'content',
-    open_walk_editor: false,
-    map_loaded: false,
-    info_window: {
+    walkEditorOpened: false,
+    mapLoaded: false,
+    infoWindow: {
         open: false,
         message: null,
         position: null
     },
     center: { lat: 35.690, lng: 139.7 },
-    geo_marker: {
+    geoMarker: {
         lat: NaN,
         lng: NaN,
         show: false,
         active: false,
     },
     zoom: 13,
-    panorama_index: 0,
-    panorama_count: 0,
+    panoramaIndex: 0,
+    panoramaCount: 0,
     overlay: false,
     message: null,
     users: [],
-    current_user: null,
-    external_links: [],
-    last_query: null,
+    currentUser: null,
+    externalLinks: [],
+    lastQuery: null,
 };
 
 const mainReducer = function(state = initialState, action) {
     switch (action.type) {
     case ActionTypes.SET_SEARCH_FORM:
         {
-            const search_form = Object.assign({}, state.search_form, action.payload);
-            return Object.assign({}, state, {search_form});
+            const searchForm = Object.assign({}, state.searchForm, action.payload);
+            return Object.assign({}, state, {searchForm});
         }
     case ActionTypes.SEARCH_START:
         {
@@ -100,29 +100,29 @@ const mainReducer = function(state = initialState, action) {
                 error: action.data.error,
                 searching: false,
             };
-            const next_id = null;
-            const prev_id = null;
+            const nextId = null;
+            const prevId = null;
             result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
-            return Object.assign({}, state, {result, next_id, prev_id});
+            return Object.assign({}, state, {result, nextId, prevId});
         }
     case ActionTypes.SET_SELECTED_ITEM:
         {
-            const selected_item = action.item;
-            const selected_index = action.index;
-            const highlighted_path = selected_item ? selected_item.path : null;
-            return Object.assign({}, state, {selected_index, selected_item, highlighted_path});
+            const selectedItem = action.item;
+            const selectedIndex = action.index;
+            const highlightedPath = selectedItem ? selectedItem.path : null;
+            return Object.assign({}, state, {selectedIndex, selectedItem, highlightedPath});
         }
     case ActionTypes.SET_SELECTED_PATH:
         {
-            const selected_path = action.path;
+            const selectedPath = action.path;
             if (typeof window !== 'undefined' && window.localStorage) {
-                if (!selected_path) {
-                    delete window.localStorage.selected_path;
+                if (!selectedPath) {
+                    delete window.localStorage.selectedPath;
                 } else {
-                    window.localStorage.selected_path = selected_path;
+                    window.localStorage.selectedPath = selectedPath;
                 }
             }
-            return Object.assign({}, state, {selected_path, editing_path: false});
+            return Object.assign({}, state, {selectedPath, pathEditable: false});
         }
     case ActionTypes.TOGGLE_VIEW:
         {
@@ -131,19 +131,19 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.OPEN_WALK_EDITOR:
         {
-            const open_walk_editor = action.open;
-            const walk_editor_mode = action.mode;
-            return Object.assign({}, state, {open_walk_editor, walk_editor_mode});
+            const walkEditorOpened = action.open;
+            const walkEditorMode = action.mode;
+            return Object.assign({}, state, {walkEditorOpened, walkEditorMode});
         }
     case ActionTypes.SET_EDITING_PATH:
         {
-            const editing_path = action.editing_path;
-            return Object.assign({}, state, {editing_path});
+            const pathEditable = action.pathEditable;
+            return Object.assign({}, state, {pathEditable});
         }
     case ActionTypes.SET_INFO_WINDOW:
         {
-            const info_window = action.payload;
-            return Object.assign({}, state, {info_window});
+            const infoWindow = action.payload;
+            return Object.assign({}, state, {infoWindow});
         }
     case ActionTypes.SET_CENTER:
         {
@@ -155,10 +155,10 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SET_GEO_MARKER:
         {
-            const geo_marker = action.payload;
-            const obj = { geo_marker };
+            const geoMarker = action.payload;
+            const obj = { geoMarker };
             if (action.updateCenter) {
-                obj.center = { lat: geo_marker.lat, lng: geo_marker.lng};
+                obj.center = { lat: geoMarker.lat, lng: geoMarker.lng};
             }
             return Object.assign({}, state, obj);
         }
@@ -172,15 +172,15 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SET_PANORAMA_COUNT:
         {
-            const panorama_count = action.count;
-            return Object.assign({}, state, {panorama_count});
+            const panoramaCount = action.count;
+            return Object.assign({}, state, {panoramaCount});
         }
     case ActionTypes.SET_PANORAMA_INDEX:
         {
-            let panorama_index = action.index;
-            if (panorama_index < 0) panorama_index = 0;
-            else if(panorama_index >=  state.panorama_count) panorama_index = state.panorama_count -1;
-            return Object.assign({}, state, {panorama_index});
+            let panoramaIndex = action.index;
+            if (panoramaIndex < 0) panoramaIndex = 0;
+            else if(panoramaIndex >=  state.panoramaCount) panoramaIndex = state.panoramaCount -1;
+            return Object.assign({}, state, {panoramaIndex});
         }
     case ActionTypes.SET_OVERLAY:
         {
@@ -196,8 +196,8 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SET_CURRENT_USER:
         {
-            const current_user = action.user;
-            return Object.assign({}, state, {current_user});
+            const currentUser = action.user;
+            return Object.assign({}, state, {currentUser});
         }
     case ActionTypes.SET_USERS:
         {
@@ -211,18 +211,18 @@ const mainReducer = function(state = initialState, action) {
         }
     case ActionTypes.SET_LAST_QUERY:
         {   
-            const last_query = action.last_query;
-            return Object.assign({}, state, {last_query});
+            const lastQuery = action.lastQuery;
+            return Object.assign({}, state, {lastQuery});
         }
     case ActionTypes.SET_ADJACENT_ITEM_IDS:
         {
-            const {next_id, prev_id} = action;
-            return Object.assign({}, state, {next_id, prev_id});
+            const {nextId, prevId} = action;
+            return Object.assign({}, state, {nextId, prevId});
         }
     case ActionTypes.SET_MAP_LOADED:
         {
-            const map_loaded = true;
-            return Object.assign({}, state, {map_loaded});
+            const mapLoaded = true;
+            return Object.assign({}, state, {mapLoaded});
         }
     default:
         return state;
@@ -241,9 +241,9 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
         if (!query.force_fetch) {
             const index = rows.findIndex(row => row.id == item_id);
             if (index >= 0) {
-                const next_id = index > 0 ? rows[index-1].id : null;
-                const prev_id = index < rows.length-1 ? rows[index+1].id : null;
-                next(setAdjacentItemIds(next_id, prev_id));
+                const nextId = index > 0 ? rows[index-1].id : null;
+                const prevId = index < rows.length-1 ? rows[index+1].id : null;
+                next(setAdjacentItemIds(nextId, prevId));
                 return next(setSelectedItem(rows[index], index));
             }
         }
@@ -254,20 +254,20 @@ export function handleRoute(item_id, query, isPathSelected, prefix, rows, queryC
     const select = query['select'];
     delete query['select'];
     delete query['force_fetch'];
-    const last_query = Object.assign({}, query);
-    delete last_query['offset'];
-    const lqs = Object.keys(last_query).map(key => key + '=' + encodeURIComponent(last_query[key])).join('&');
+    const lastQuery = Object.assign({}, query);
+    delete lastQuery['offset'];
+    const lqs = Object.keys(lastQuery).map(key => key + '=' + encodeURIComponent(lastQuery[key])).join('&');
     next(setLastQuery(lqs));
     const numberForms = ['radius', 'latitude', 'longitude'];
-    const search_form = Object.assign({}, initialState.search_form, query);
+    const searchForm = Object.assign({}, initialState.searchForm, query);
     for (let p of numberForms) {
-        search_form[p] = Number(search_form[p]);
+        searchForm[p] = Number(searchForm[p]);
     }
-    if ((search_form.filter == 'crossing' || search_form.filter == 'hausdorff' || search_form.filter == 'frechet') && !isPathSelected && search_form.searchPath) {
-        next(setSelectedPath(search_form.searchPath));
+    if ((searchForm.filter == 'crossing' || searchForm.filter == 'hausdorff' || searchForm.filter == 'frechet') && !isPathSelected && searchForm.searchPath) {
+        next(setSelectedPath(searchForm.searchPath));
     }
-    next(setSearchForm(search_form));
-    return next(search(search_form, prefix, select, lqs));
+    next(setSearchForm(searchForm));
+    return next(search(searchForm, prefix, select, lqs));
 }
 
 const formWatchMiddleware = store => next => action => {
@@ -281,7 +281,7 @@ const formWatchMiddleware = store => next => action => {
     }
     const state = store.getState();
     const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
-    const current_filter = payload.filter !== undefined ? payload.filter : state.main.search_form.filter;
+    const current_filter = payload.filter !== undefined ? payload.filter : state.main.searchForm.filter;
     switch (current_filter) {
     case 'neighborhood':
         keys.push('radius', 'longitude', 'latitude');
@@ -295,21 +295,21 @@ const formWatchMiddleware = store => next => action => {
         keys.push('searchPath');
         break;
     }
-    if (!keys.every(key => payload[key] === undefined || payload[key] === state.main.search_form[key])) {
-        const q = Object.assign({}, state.main.search_form, payload);
+    if (!keys.every(key => payload[key] === undefined || payload[key] === state.main.searchForm[key])) {
+        const q = Object.assign({}, state.main.searchForm, payload);
         const query = {};
         keys.forEach(key => { query[key] = q[key] || ''; });
         if (payload.filter && current_filter == 'neighborhood' && state.main.center) {
             query.latitude = state.main.center.lat;
             query.longitude = state.main.center.lng;
         }
-        if (current_filter === 'frechet' ||  current_filter === 'hausdorff' && state.main.search_form.order !== 'nearest_first') {
+        if (current_filter === 'frechet' ||  current_filter === 'hausdorff' && state.main.searchForm.order !== 'nearest_first') {
             query.order = 'nearest_first';
-        } else if (current_filter !== 'frechet' && current_filter !== 'hausdorff' && state.main.search_form.order === 'nearest_first') {
+        } else if (current_filter !== 'frechet' && current_filter !== 'hausdorff' && state.main.searchForm.order === 'nearest_first') {
             query.order = 'newest_first';
         }
         if (['crossing', 'hausdorff', 'frechet'].includes(current_filter) && action.type != ActionTypes.SET_SELECTED_PATH) {
-            query.searchPath = state.main.selected_path || '';
+            query.searchPath = state.main.selectedPath || '';
         }
         const usp = keys.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
         store.dispatch(push({
@@ -352,8 +352,8 @@ const dataFetchMiddleware = store => next => {
                 const match = last_branch.match;
                 const state = store.getState();
                 const qsearch = action.payload.location.search &&  action.payload.location.search.slice(1);
-                const queryChanged = qsearch != state.main.last_query;
-                handleRoute(match.params.id, query, state.main.selected_path, '/', state.main.result.rows, queryChanged, next);
+                const queryChanged = qsearch != state.main.lastQuery;
+                handleRoute(match.params.id, query, state.main.selectedPath, '/', state.main.result.rows, queryChanged, next);
             }
             isFirstLocation = false;
         }

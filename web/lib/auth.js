@@ -16,8 +16,8 @@ passport.use(new TwitterStrategy({
     consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
     callbackURL: process.env.BASE_URL + '/auth/twitter/callback',
 }, function(token, tokenSecret, profile, done) {
-    const allowed_users = process.env.TWITTER_ALLOWED_USERS && process.env.TWITTER_ALLOWED_USERS.split(/,\s*/);
-    if (allowed_users && !allowed_users.includes(profile.username)) {
+    const allowedUsers = process.env.TWITTER_ALLOWED_USERS && process.env.TWITTER_ALLOWED_USERS.split(/,\s*/);
+    if (allowedUsers && !allowedUsers.includes(profile.username)) {
         done(null, false, {message: 'Sorry! Allowed users only.'});
         return;
     }
