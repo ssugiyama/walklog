@@ -111,7 +111,7 @@ const NavBar = (props) => {
                         setConfirmInfo({open: true, resolve});
                     }
                     else {
-                        resolve(pos, false);
+                        resolve(false);
                     }
                 }).then(append => addCurrentPosition(pos, append));
             }, () => {
