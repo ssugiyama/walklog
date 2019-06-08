@@ -7,7 +7,7 @@ import { renderRoutes } from 'react-router-config';
 import { routes } from './app';
 
 
-const styles = theme => ({
+const styles = () => ({
     root: {
         width: '100%',
     },

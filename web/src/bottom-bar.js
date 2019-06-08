@@ -88,7 +88,6 @@ const BottomBar = props => {
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
     const refs = useRef();
-    const geocoder = useRef();
     const length  = useMemo(() => {
         if (selectedPath) {
             return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selectedPath))/1000;
@@ -176,7 +175,7 @@ const BottomBar = props => {
                 </Select>}
                 { filter == 'cities' &&
                 <Tooltip title="clear" position="top-center">
-                    <IconButton onClick={e => handleSearchFormChange('cities', '')}><NavigationRefresh /></IconButton>
+                    <IconButton onClick={() => handleSearchFormChange('cities', '')}><NavigationRefresh /></IconButton>
                 </Tooltip>}
             </div>
         </div>
@@ -217,7 +216,7 @@ const BottomBar = props => {
                         }}
                         onChange={e => setLocation(e.target.value)}
                         onKeyPress={e => { if (e.charCode == 13) handleSubmitLocation(); }}
-                        onBlur={e => { handleSubmitLocation(); }}
+                        onBlur={() => { handleSubmitLocation(); }}
                     />
                 </div>
             </div>

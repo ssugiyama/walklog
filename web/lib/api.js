@@ -6,8 +6,7 @@ const express = require('express')
   ,   Sequelize = require('sequelize')
   ,   sequelize = models.sequelize
   ,   Walk    = models.sequelize.models.walks
-  ,   Area    = models.sequelize.models.areas
-  ,   Users   = models.sequelize.models.users;
+  ,   Area    = models.sequelize.models.areas;
 
 const Op = Sequelize.Op;
 

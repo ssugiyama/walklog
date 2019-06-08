@@ -22,7 +22,7 @@ import TweetIcon from './tweet-icon';
 import SwipeableViews from 'react-swipeable-views';
 import config from 'react-global-configuration';
 
-const styles = theme => ({
+const styles = () => ({
     itemBoxContent: {
         padding: '8px 12px 12px',
         flexDirection: 'column',

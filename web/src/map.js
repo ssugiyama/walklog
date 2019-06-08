@@ -14,7 +14,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { compareWithMapLoaded } from './utils';
 
-const styles = theme => ({
+const styles = () => ({
     mapCompact: {
         color: 'black',
         margin: '0 0 4px 0',
@@ -150,7 +150,7 @@ const Map = props => {
             }
         });
         google.maps.event.addListener(refs.path_manager, 'polylinecomplete',  polyline => {
-            new Promise((resolve, reject) => {
+            new Promise((resolve) => {
                 if (refs.selectedPath) {
                     setConfirmInfo({open: true, resolve});
                 }
@@ -352,7 +352,7 @@ const Map = props => {
         pg.setPaths(paths);
         pg.setOptions(mapStyles.polygon);
         refs.city_hash[id] = pg;
-        google.maps.event.addListener(pg, 'click',  event => {
+        google.maps.event.addListener(pg, 'click',  () => {
             removeCity(id, pg);
         });
         return pg;
@@ -398,7 +398,7 @@ const Map = props => {
             minZoom: zoomMin,
             maxZoom: zoomMax,
             getTile: (tileCoord, zoom, ownerDocument) => {
-                const img = ownerDocument.createElement("img");
+                const img = ownerDocument.createElement('img');
                 img.id = 'gsi-map-layer-image';
                 img.style.width = '256px';
                 img.style.height = '256px';
@@ -407,7 +407,7 @@ const Map = props => {
                 img.src = `http://cyberjapandata.gsi.go.jp/xyz/${tileType}/${zoom}/${x}/${y}.${tileExtension}`;
                 return img;
             }
-        }
+        };
     };
 
     return (
@@ -421,7 +421,7 @@ const Map = props => {
                 className={classNames(classes.fabButton, {
                     [classes.fabButtonExpand]: view == 'map', 
                     [classes.fabButtonCompact]: view == 'content'})}
-                onClick={event => { toggleView(); }} >
+                onClick={() => { toggleView(); }} >
                 {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
             </Fab>
             <a ref={download_ref} style={{display: 'none'}} download='walklog.json'></a>

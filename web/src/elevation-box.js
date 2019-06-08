@@ -65,7 +65,7 @@ const ElevationBox = props => {
         if (status == google.maps.ElevationStatus.OK) {
             refs.elevationResults = results;
             const data = results.map(result => result.elevation);
-            const labels = results.map(result => '');
+            const labels = results.map(() => '');
             if (! refs.chart) {
                 refs.chart = new Chart(rootRef.current.getContext('2d'), {
                     type: 'line',

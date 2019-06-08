@@ -19,7 +19,7 @@ const ConfirmModal = props => {
             </DialogContent>
             <DialogActions>
             { 
-                actions ? actions.map( (action, index) =>
+                actions ? actions.map( (action) =>
                     <Button key={action.value} onClick={() => resolve(action.value)}>{action.label}</Button>
                 ) : null
             }

@@ -3,7 +3,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import NavBarContainer from './nav-bar';
 import MapContainer from './map';
 import BottomBarContainer from './bottom-bar';
-import WalkEditorContainer from './walk-editor';;
+import WalkEditorContainer from './walk-editor';
 import { connect } from 'react-redux';
 import ContentBoxContainer from './content-box';
 import { bindActionCreators } from 'redux';
@@ -14,7 +14,7 @@ import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
 import MapContext from './map-context';
 
-const styles = theme => ({
+const styles = () => ({
     root: {
         height: '100%',
     },

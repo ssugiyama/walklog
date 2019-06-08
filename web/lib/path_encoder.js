@@ -24,13 +24,13 @@ exports.encode = function (path) {
         const ar = encode_float(point[1]-prevy).concat(encode_float(point[0]-prevx));
         prevx = point[0];
         prevy = point[1];
-        return new Buffer(ar).toString('ascii');
+        return Buffer.from(ar).toString('ascii');
     }).join('');
 };
 
 exports.decode = function (str) {
     const fs = [];
-    const buf = new Buffer(str, 'ascii');
+    const buf = Buffer.from(str, 'ascii');
     let n = 0, j = 0;
     for (let i = 0; i < buf.length; i++ ) {
         let k = buf[i] - 63;

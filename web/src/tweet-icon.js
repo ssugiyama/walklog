@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 export default () => <svg style={{enableBackground:'new 0 0 400 400'}} version="1.1" viewBox="0 0 400 400" x="0px" y="0px" width="24px" height="24px" xmlSpace="preserve">
 <g id="Dark_Blue">
     <circle style={{fill: '#1DA1F2'}} cx="200" cy="200" r="200"/>

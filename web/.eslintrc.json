@@ -15,6 +15,11 @@
     "plugins": [
         "react"
     ],
+    "globals": {
+        "google": true,
+        "process": true,
+        "Buffer": true
+    },
     "rules": {
         "indent": [
             "error",
@@ -31,6 +36,8 @@
         "semi": [
             "error",
             "always"
-        ]
+        ],
+        "react/jsx-uses-react": "error",
+        "react/jsx-uses-vars": "error"
     }
 }

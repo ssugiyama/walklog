@@ -13,9 +13,9 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
+// import ListItemIcon from '@material-ui/core/ListItemIcon';
+// import ListItemText from '@material-ui/core/ListItemText';
+// import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -106,7 +106,7 @@ const NavBar = (props) => {
             getCurrentPosition(pos => {
                 setAutoGeolocation(true);
                 openSnackbar('start following your location');
-                new Promise((resolve, reject) => {
+                new Promise((resolve) => {
                     if (selectedPath) {
                         setConfirmInfo({open: true, resolve});
                     }
@@ -139,15 +139,15 @@ const NavBar = (props) => {
             return true;
         }} {...cpProps}>{props.children}</MenuItem> ;
     };
-    const ParentMenuItem = props => {
-        const subMenuAnchor = props.subMenuAnchor;
-        return <MenuItem key="path" onClick={handleMenuOpen(subMenuAnchor)}>
-            <ListItemText>{props.children}</ListItemText>
-            <ListItemIcon>
-                <ArrowDownIcon />
-            </ListItemIcon>
-        </MenuItem>;
-    } ;
+    // const ParentMenuItem = props => {
+    //     const subMenuAnchor = props.subMenuAnchor;
+    //     return <MenuItem key="path" onClick={handleMenuOpen(subMenuAnchor)}>
+    //         <ListItemText>{props.children}</ListItemText>
+    //         <ListItemIcon>
+    //             <ArrowDownIcon />
+    //         </ListItemIcon>
+    //     </MenuItem>;
+    // } ;
     return (
         <AppBar position="static" className={classes.root}>
             <Toolbar>

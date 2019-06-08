@@ -106,7 +106,7 @@ export default class PathManager extends google.maps.MVCObject {
             if (select) {
                 this.set('selection', pl);
             } else if (highlight) {
-                this.set('highlight', pl)
+                this.set('highlight', pl);
             }
             let xmin, xmax, ymin, ymax;
             for (let i = 0; i < path.length; i++ ) {
