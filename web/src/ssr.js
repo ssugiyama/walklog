@@ -89,13 +89,13 @@ export default function handleSSR(req, res) {
             );
             const css = sheets.toString();
             const state = store.getState();
-            state.main.externalLinks = config.get('external_links');
-            let title = config.get('site_name');
-            let description = config.get('site_description');
-            const siteName =config.get('site_name');
-            const baseUrl = config.get('base_url');
+            state.main.externalLinks = config.get('externalLinks');
+            let title = config.get('siteName');
+            let description = config.get('siteDescription');
+            const siteName =config.get('siteName');
+            const baseUrl = config.get('baseUrl');
             let image;
-            const twitterSite = config.get('twitter_site');
+            const twitterSite = config.get('twitterSite');
             let canonical = baseUrl + '/';
             if (state.main.selectedItem) {
                 const data = state.main.selectedItem;
@@ -126,5 +126,5 @@ export default function handleSSR(req, res) {
                 <Wrapper {...props}>
                 </Wrapper>
             ).pipe(res);
-        }).catch(ex => console.log(ex));
+        }).catch(ex => console.error(ex));
 }

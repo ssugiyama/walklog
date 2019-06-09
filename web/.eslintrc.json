@@ -41,9 +41,11 @@
         "react/jsx-uses-react": "error",
         "react/jsx-uses-vars": "error",
         "camelcase": ["error", {
-                "allow": ["user_id", "passport_id", "the_geom", "_changed$"],
-                "properties": "never"
+                "allow": ["user_id", "passport_id", "the_geom", "_changed$"]
             }
-        ]
+        ],
+        "no-console": ["error", {
+            "allow": ["error", "wran", "info"]
+        }]
     }
 }

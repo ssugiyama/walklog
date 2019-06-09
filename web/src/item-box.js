@@ -88,7 +88,7 @@ const ItemBox = props => {
     const tweetUrl = useMemo(() => {
         const data = selectedItem;
         if (! data) return null;
-        const href = config.get('base_url') + '/' + data.id;
+        const href = config.get('baseUrl') + '/' + data.id;
         const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
         return `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`;
     }, [selectedItem]); 

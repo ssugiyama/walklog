@@ -83,147 +83,147 @@ const initialState = {
 const mainReducer = function(state = initialState, action) {
     switch (action.type) {
     case ActionTypes.SET_SEARCH_FORM:
-        {
-            const searchForm = Object.assign({}, state.searchForm, action.payload);
-            return Object.assign({}, state, {searchForm});
-        }
+    {
+        const searchForm = Object.assign({}, state.searchForm, action.payload);
+        return Object.assign({}, state, {searchForm});
+    }
     case ActionTypes.SEARCH_START:
-        {
-            const result = { rows: [], count: 0, params: '', searching: true };
-            return Object.assign({}, state, {result});
-        }
+    {
+        const result = { rows: [], count: 0, params: '', searching: true };
+        return Object.assign({}, state, {result});
+    }
     case ActionTypes.SEARCH_RESULT:
-        {
-            const result = { 
-                count: action.data.count,
-                offset: action.data.offset,
-                error: action.data.error,
-                searching: false,
-            };
-            const nextId = null;
-            const prevId = null;
-            result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
-            return Object.assign({}, state, {result, nextId, prevId});
-        }
+    {
+        const result = { 
+            count: action.data.count,
+            offset: action.data.offset,
+            error: action.data.error,
+            searching: false,
+        };
+        const nextId = null;
+        const prevId = null;
+        result.rows = action.append ? state.result.rows.concat(action.data.rows || []) : (action.data.rows || []);
+        return Object.assign({}, state, {result, nextId, prevId});
+    }
     case ActionTypes.SET_SELECTED_ITEM:
-        {
-            const selectedItem = action.item;
-            const selectedIndex = action.index;
-            const highlightedPath = selectedItem ? selectedItem.path : null;
-            return Object.assign({}, state, {selectedIndex, selectedItem, highlightedPath});
-        }
+    {
+        const selectedItem = action.item;
+        const selectedIndex = action.index;
+        const highlightedPath = selectedItem ? selectedItem.path : null;
+        return Object.assign({}, state, {selectedIndex, selectedItem, highlightedPath});
+    }
     case ActionTypes.SET_SELECTED_PATH:
-        {
-            const selectedPath = action.path;
-            if (typeof window !== 'undefined' && window.localStorage) {
-                if (!selectedPath) {
-                    delete window.localStorage.selectedPath;
-                } else {
-                    window.localStorage.selectedPath = selectedPath;
-                }
+    {
+        const selectedPath = action.path;
+        if (typeof window !== 'undefined' && window.localStorage) {
+            if (!selectedPath) {
+                delete window.localStorage.selectedPath;
+            } else {
+                window.localStorage.selectedPath = selectedPath;
             }
-            return Object.assign({}, state, {selectedPath, pathEditable: false});
         }
+        return Object.assign({}, state, {selectedPath, pathEditable: false});
+    }
     case ActionTypes.TOGGLE_VIEW:
-        {
-            const view = (state.view == 'content' ? 'map' : 'content');
-            return Object.assign({}, state, {view});
-        }
+    {
+        const view = (state.view == 'content' ? 'map' : 'content');
+        return Object.assign({}, state, {view});
+    }
     case ActionTypes.OPEN_WALK_EDITOR:
-        {
-            const walkEditorOpened = action.open;
-            const walkEditorMode = action.mode;
-            return Object.assign({}, state, {walkEditorOpened, walkEditorMode});
-        }
+    {
+        const walkEditorOpened = action.open;
+        const walkEditorMode = action.mode;
+        return Object.assign({}, state, {walkEditorOpened, walkEditorMode});
+    }
     case ActionTypes.SET_EDITING_PATH:
-        {
-            const pathEditable = action.pathEditable;
-            return Object.assign({}, state, {pathEditable});
-        }
+    {
+        const pathEditable = action.pathEditable;
+        return Object.assign({}, state, {pathEditable});
+    }
     case ActionTypes.SET_INFO_WINDOW:
-        {
-            const infoWindow = action.payload;
-            return Object.assign({}, state, {infoWindow});
-        }
+    {
+        const infoWindow = action.payload;
+        return Object.assign({}, state, {infoWindow});
+    }
     case ActionTypes.SET_CENTER:
-        {
-            const center = action.center;
-            if (typeof window !== 'undefined' && window.localStorage) {
-                window.localStorage.center = JSON.stringify(center);
-            }
-            return Object.assign({}, state, {center});
+    {
+        const center = action.center;
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.center = JSON.stringify(center);
         }
+        return Object.assign({}, state, {center});
+    }
     case ActionTypes.SET_GEO_MARKER:
-        {
-            const geoMarker = action.payload;
-            const obj = { geoMarker };
-            if (action.updateCenter) {
-                obj.center = { lat: geoMarker.lat, lng: geoMarker.lng};
-            }
-            return Object.assign({}, state, obj);
+    {
+        const geoMarker = action.payload;
+        const obj = { geoMarker };
+        if (action.updateCenter) {
+            obj.center = { lat: geoMarker.lat, lng: geoMarker.lng};
         }
+        return Object.assign({}, state, obj);
+    }
     case ActionTypes.SET_ZOOM:
-        {
-            const zoom = action.zoom;
-            if (typeof window !== 'undefined' && window.localStorage) {
-                window.localStorage.zoom = zoom;
-            }
-            return Object.assign({}, state, {zoom});
+    {
+        const zoom = action.zoom;
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.zoom = zoom;
         }
+        return Object.assign({}, state, {zoom});
+    }
     case ActionTypes.SET_PANORAMA_COUNT:
-        {
-            const panoramaCount = action.count;
-            return Object.assign({}, state, {panoramaCount});
-        }
+    {
+        const panoramaCount = action.count;
+        return Object.assign({}, state, {panoramaCount});
+    }
     case ActionTypes.SET_PANORAMA_INDEX:
-        {
-            let panoramaIndex = action.index;
-            if (panoramaIndex < 0) panoramaIndex = 0;
-            else if(panoramaIndex >=  state.panoramaCount) panoramaIndex = state.panoramaCount -1;
-            return Object.assign({}, state, {panoramaIndex});
-        }
+    {
+        let panoramaIndex = action.index;
+        if (panoramaIndex < 0) panoramaIndex = 0;
+        else if(panoramaIndex >=  state.panoramaCount) panoramaIndex = state.panoramaCount -1;
+        return Object.assign({}, state, {panoramaIndex});
+    }
     case ActionTypes.SET_OVERLAY:
-        {
-            const overlay = action.overlay;
-            const newProps = {overlay};
-            if (overlay && state.view == 'content') {
-                newProps.view = 'map';
-            }
-            else if (!overlay && state.view == 'map') {
-                newProps.view = 'content';
-            }
-            return Object.assign({}, state, newProps);
+    {
+        const overlay = action.overlay;
+        const newProps = {overlay};
+        if (overlay && state.view == 'content') {
+            newProps.view = 'map';
         }
+        else if (!overlay && state.view == 'map') {
+            newProps.view = 'content';
+        }
+        return Object.assign({}, state, newProps);
+    }
     case ActionTypes.SET_CURRENT_USER:
-        {
-            const currentUser = action.user;
-            return Object.assign({}, state, {currentUser});
-        }
+    {
+        const currentUser = action.user;
+        return Object.assign({}, state, {currentUser});
+    }
     case ActionTypes.SET_USERS:
-        {
-            const users = action.users;
-            return Object.assign({}, state, {users});
-        }
+    {
+        const users = action.users;
+        return Object.assign({}, state, {users});
+    }
     case ActionTypes.OPEN_SNACKBAR:
-        {
-            const {message} = action;
-            return Object.assign({}, state, {message});
-        }
+    {
+        const {message} = action;
+        return Object.assign({}, state, {message});
+    }
     case ActionTypes.SET_LAST_QUERY:
-        {   
-            const lastQuery = action.lastQuery;
-            return Object.assign({}, state, {lastQuery});
-        }
+    {   
+        const lastQuery = action.lastQuery;
+        return Object.assign({}, state, {lastQuery});
+    }
     case ActionTypes.SET_ADJACENT_ITEM_IDS:
-        {
-            const {nextId, prevId} = action;
-            return Object.assign({}, state, {nextId, prevId});
-        }
+    {
+        const {nextId, prevId} = action;
+        return Object.assign({}, state, {nextId, prevId});
+    }
     case ActionTypes.SET_MAP_LOADED:
-        {
-            const mapLoaded = true;
-            return Object.assign({}, state, {mapLoaded});
-        }
+    {
+        const mapLoaded = true;
+        return Object.assign({}, state, {mapLoaded});
+    }
     default:
         return state;
     }
@@ -416,7 +416,7 @@ export const routes = [
 ];
 
 export const getTheme = () => {
-    let themeType = config.get('theme_type');
+    let themeType = config.get('themeType');
     if (typeof matchMedia === 'function' && ! ['dark', 'light'].includes(themeType))
     {
         themeType =  matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -425,8 +425,8 @@ export const getTheme = () => {
     }
     return createMuiTheme({
         palette: {
-            primary: colors[config.get('theme_primary') || 'indigo'],
-            secondary: colors[config.get('theme_secondary') || 'pink'],
+            primary: colors[config.get('themePrimary') || 'indigo'],
+            secondary: colors[config.get('themeSecondary') || 'pink'],
             type: themeType,
         }
     });

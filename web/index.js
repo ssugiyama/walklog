@@ -5,15 +5,15 @@
 
 const config     = require('react-global-configuration');
 const configuration = {
-    site_name: process.env.SITE_NAME,
-    site_description: process.env.SITE_DESCRIPTION,
-    base_url: process.env.BASE_URL,
-    google_api_key: process.env.GOOGLE_API_KEY,
-    twitter_site: process.env.TWITTER_SITE,
-    external_links : process.env.EXTERNAL_LINKS && process.env.EXTERNAL_LINKS.split(/;/).map(item => item.split(/=/, 2)),
-    theme_primary : process.env.THEME_PRIMARY,
-    theme_secondary : process.env.THEME_SECONDARY,
-    theme_type : process.env.THEME_TYPE,
+    siteName:        process.env.SITE_NAME,
+    siteDescription: process.env.SITE_DESCRIPTION,
+    baseUrl:         process.env.BASE_URL,
+    googleApiKey:    process.env.GOOGLE_API_KEY,
+    twitterSite:     process.env.TWITTER_SITE,
+    externalLinks :  process.env.EXTERNAL_LINKS && process.env.EXTERNAL_LINKS.split(/;/).map(item => item.split(/=/, 2)),
+    themePrimary :   process.env.THEME_PRIMARY,
+    themeSecondary : process.env.THEME_SECONDARY,
+    themeType :      process.env.THEME_TYPE,
 };
 
 config.set(configuration);
@@ -87,5 +87,5 @@ app.use('/sitemap.xml', function(req, res) {
 app.use('/', handleSSR);
 
 http.createServer(app).listen(app.get('port'), function(){
-    console.log('Express server listening on port ' + app.get('port'));
+    console.info('Express server listening on port ' + app.get('port'));
 });

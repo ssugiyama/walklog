@@ -231,7 +231,7 @@ const Map = props => {
     
     useEffect(() => {
         window.initMap = initMap;
-        loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.get('google_api_key'));
+        loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.get('googleApiKey'));
     }, []);
     
     const citiesChanges = () => {
