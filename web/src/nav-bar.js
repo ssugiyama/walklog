@@ -77,11 +77,14 @@ const NavBar = (props) => {
             setter(null);
         };
     };
+    
     const handleLogin = () => {
-        window.location.href = '/auth/twitter?redirect=' + window.location.href;
+        window.location.href = '/auth/twitter?redirect=' +
+            encodeURIComponent(window.location.href);
     };
     const handleLogout = () => {
-        window.location.href = '/auth/logout?redirect=' + window.location.href;
+        window.location.href = '/auth/logout?redirect=' +  
+            encodeURIComponent(window.location.href);
     };
     const ignoreClick = () => {
         return event => {
@@ -197,8 +200,8 @@ const NavBar = (props) => {
 
 function mapStateToProps(state) {
     return {
-        selectedPath: state.main.selectedPath,
-        currentUser: state.main.currentUser,
+        selectedPath:  state.main.selectedPath,
+        currentUser:   state.main.currentUser,
         externalLinks: state.main.externalLinks,
     };
 }
