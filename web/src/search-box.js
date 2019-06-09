@@ -18,6 +18,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import MapContext from './map-context';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ShowChartIcon from '@material-ui/icons/ShowChart';
 
 const styles = theme => ({
     root: {
@@ -110,7 +111,8 @@ const SearchBox = props => {
                         })()
                     }
                 </Typography> :
-                { rows.length > 0 && (<Button variant="outlined" onClick={ handleShowAll } color="secondary">show all paths</Button>) }
+                { rows.length > 0 && 
+                    (<Button variant="outlined" onClick={ handleShowAll } color="secondary"><ShowChartIcon className={classes.leftIcon} />draw</Button>) }
             </div>
             <Table className={classes.table}>
                 <TableHead>
