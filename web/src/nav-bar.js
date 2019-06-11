@@ -20,7 +20,7 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import Checkbox from '@material-ui/core/Checkbox';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
 import MapContext from './map-context';
@@ -38,6 +38,8 @@ const styles = {
     },
 };
 
+const useStyles = makeStyles(styles);
+
 const AUTO_GEOLOCATION_INTERVAL = 30000;
 
 const NavBar = (props) => {
@@ -49,6 +51,8 @@ const NavBar = (props) => {
     const { addPoint } = context.state;
     const { openWalkEditor, setGeoMarker, openSnackbar } = props;
     const {  selectedPath, currentUser  } = props;
+    const classes = useStyles(props);
+
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
         const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
@@ -131,7 +135,6 @@ const NavBar = (props) => {
         setTopAnchorEl(null);
         setAccountAnchorEl(null);
     };
-    const { classes } = props;
     const EndMenuItem = props => {
         const onClick = props.onClick;
         const cpProps = Object.assign({}, props);
@@ -210,4 +213,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ openWalkEditor, setGeoMarker, openSnackbar}, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(NavBar)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(NavBar));

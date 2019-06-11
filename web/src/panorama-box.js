@@ -12,7 +12,7 @@ import AvFastForwardIcon from '@material-ui/icons/FastForward';
 import AvFastRewindIcon from '@material-ui/icons/FastRewind';
 import MapContext from './map-context';
 import { compareWithMapLoaded } from './utils';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import classNames from 'classnames';
 
 const styles = {
@@ -40,13 +40,16 @@ const styles = {
     },
 };
 
+const useStyles = makeStyles(styles);
+
 const PANORAMA_INTERVAL = 50;
 
 const PanoramaBox = props => {
 
     const bodyRef = useRef();
     const {  setPanoramaCount, setPanoramaIndex, setOverlay } = props; 
-    const {  highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded, classes } = props;
+    const {  highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded } = props;
+    const classes = useStyles(props);
     const refs = useRef();
     const handleOverlayChange = (e, toggled) => {
         setOverlay(toggled);
@@ -195,4 +198,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(PanoramaBox, compareWithMapLoaded)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(PanoramaBox, compareWithMapLoaded));

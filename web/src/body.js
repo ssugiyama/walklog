@@ -9,7 +9,7 @@ import ContentBoxContainer from './content-box';
 import { bindActionCreators } from 'redux';
 import { openSnackbar } from './actions';
 import Snackbar from '@material-ui/core/Snackbar';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
 import MapContext from './map-context';
@@ -25,9 +25,12 @@ const styles = () => ({
     },
 });
 
+const useStyles = makeStyles(styles);
+
 const Body = props => {
     const { openSnackbar  } = props;
-    const { message, view, classes } = props;
+    const { message, view } = props;
+    const classes = useStyles(props);
     const [ state, setState ] = useState({});
 
     const handleRequestClose = useCallback(() => {
@@ -68,4 +71,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({openSnackbar}, dispatch);
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Body)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Body));

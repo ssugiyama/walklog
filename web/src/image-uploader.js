@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { FormControl, FormLabel, Button } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 
 const styles = {
     imageBox: {
@@ -24,6 +24,7 @@ const styles = {
     }
 };
 
+const useStyles = makeStyles(styles);
 
 const ImageUploader = props => {
     const [imageUrl, setImageUrl] = useState(props.value);
@@ -55,7 +56,7 @@ const ImageUploader = props => {
         if (onChange && typeof onChange === 'function') onChange('');
     };
 
-    const { classes } = props;
+    const classes = useStyles(props);
     return (
         <FormControl>
             <FormLabel>{props.label}</FormLabel>
@@ -75,4 +76,4 @@ const ImageUploader = props => {
     );
 };
 
-export default withStyles(styles)(memo(ImageUploader));
+export default memo(ImageUploader);

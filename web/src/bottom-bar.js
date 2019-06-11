@@ -17,7 +17,7 @@ import FileDownload from '@material-ui/icons/GetApp';
 import FileUpload from '@material-ui/icons/Publish';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import InputBase from '@material-ui/core/InputBase';
@@ -80,11 +80,14 @@ const styles = theme => ({
     },
 });
 
+const useStyles = makeStyles(styles);
+
 const BottomBar = props => {
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
     const { filter, radius, selectedPath, panoramaIndex, panoramaCount, overlay, mapLoaded } = props;
     const { setPanoramaIndex, setOverlay, setEditingPath, setSearchForm, setGeoMarker } = props;
+    const classes = useStyles(props);
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
     const refs = useRef();
@@ -126,7 +129,6 @@ const BottomBar = props => {
     const handleSearchFormChange = useCallback((name, value) =>  {
         setSearchForm({[name]: value});
     });
-    const classes = props.classes;
     const OverlayControls = (<div>
         <div className={classes.bottomBarGroup}>
             <Typography variant="caption">StreetView</Typography>
@@ -264,4 +266,4 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(BottomBar)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(BottomBar));

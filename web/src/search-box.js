@@ -15,7 +15,7 @@ import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import MapContext from './map-context';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
@@ -60,11 +60,14 @@ const styles = theme => ({
     }
 });
 
+const useStyles = makeStyles(styles);
+
 const SearchBox = props => {
     const [showDistance, setShowDistance] = useState(true); 
     const context = useContext(MapContext);
     const { toggleView, push } = props;
     const { lastQuery, offset, count, error, rows, users, searching  } = props;
+    const classes = useStyles(props);
     const handleShowAll = () => {
         context.state.addPaths(rows.map(row => row.path));
         toggleView();
@@ -77,7 +80,6 @@ const SearchBox = props => {
     const handleShowDistance = (value) => {
         setShowDistance(value);
     };
-    const { classes } = props;
     const moreUrl = `/?offset=${offset}` + (lastQuery && `&${lastQuery}`);
     const userObjs = {};
     for (const u of users) {
@@ -162,4 +164,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ getMoreItems, setSelectedItem, toggleView, push }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(SearchBox)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(SearchBox));

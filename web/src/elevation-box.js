@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
-import { withTheme } from '@material-ui/styles';
+import { useTheme } from '@material-ui/styles';
 import { compareWithMapLoaded } from './utils';
 
 const styles = {
@@ -61,7 +61,7 @@ const ElevationBox = props => {
         // plotElevation(results, google.maps.ElevationStatus.OK)
     };
     const plotElevation = (results, status) => {
-        const { theme } = props;
+        const theme = useTheme();
         if (status == google.maps.ElevationStatus.OK) {
             refs.elevationResults = results;
             const data = results.map(result => result.elevation);
@@ -153,4 +153,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ setInfoWindow }, dispatch);
 }
 
-export default withTheme(connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox, compareWithMapLoaded)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox, compareWithMapLoaded));

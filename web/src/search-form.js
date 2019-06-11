@@ -5,7 +5,7 @@ import { setSearchForm, search } from './actions';
 import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { Link } from 'react-router-dom';
 import RefreshIcon from '@material-ui/icons/Refresh';
 
@@ -49,10 +49,13 @@ const styles = theme => ({
     }
 });
 
+const useStyles = makeStyles(styles);
+
 const SearchForm = props => {
     
     const { setSearchForm, } = props;
-    const { years, users, filter, month, year, user, limit, order, classes } = props;
+    const { years, users, filter, month, year, user, limit, order } = props;
+    const classes = useStyles(props);
     const handleChange = useCallback((name, value) => {
         setSearchForm({[name]: value});
     });
@@ -125,4 +128,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({setSearchForm, search }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(SearchForm)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(SearchForm));

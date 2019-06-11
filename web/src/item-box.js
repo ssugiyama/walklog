@@ -16,7 +16,7 @@ import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import NoSsr from '@material-ui/core/NoSsr';
 import TweetIcon from './tweet-icon';
 import SwipeableViews from 'react-swipeable-views';
@@ -74,10 +74,13 @@ const styles = () => ({
     }
 });
 
+const useStyles = makeStyles(styles);
+
 const ItemBox = props => {
     const [tabValue, setTabValue] = useState(0);
-    const {classes, location, lastQuery, nextId, prevId, offset, staticContext, 
+    const { location, lastQuery, nextId, prevId, offset, staticContext, 
         selectedItem, currentUser, users, openWalkEditor} = props;
+    const classes = useStyles(props);
     const handleEdit = () => {
         openWalkEditor(true, 'update');
     };
@@ -180,4 +183,4 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({ openWalkEditor }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(ItemBox)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(ItemBox));

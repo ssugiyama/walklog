@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { bindActionCreators } from 'redux';
 import { setSearchForm, setSelectedPath, setCenter, setZoom, toggleView, setMapLoaded, setEditingPath } from './actions';
 import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import classNames from 'classnames';
 import {APPEND_PATH_CONFIRM_INFO} from './constants';
 import ConfirmModal from './confirm-modal';
@@ -43,6 +43,8 @@ const styles = () => ({
     },
 });
 
+const useStyles = makeStyles(styles);
+
 const mapStyles = {
     polygon: {
         zIndex: 20,
@@ -77,9 +79,10 @@ const Map = props => {
     const context = useContext(MapContext);
     const {setSearchForm, setSelectedPath, setCenter, setZoom,  
         toggleView, setMapLoaded, setEditingPath,} = props;
-    const {classes, latitude, longitude, radius, 
+    const { latitude, longitude, radius, 
         highlightedPath, pathEditable,
         infoWindow, geoMarker, zoom, view, mapLoaded } = props;
+    const classes = useStyles(props);
     for (const p of ['center', 'filter', 'cities', 'selectedPath']) {
         refs[p] = props[p];
     }
@@ -448,4 +451,4 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(memo(Map, compareWithMapLoaded)));
+export default connect(mapStateToProps, mapDispatchToProps)(memo(Map, compareWithMapLoaded));
