@@ -4,7 +4,8 @@ jobs:
    machine: true
    steps:
      - checkout
-     # start proprietary DB using private Docker image
+     # run test
+     - run: cd web; yarn test
      # with credentials stored in the UI
      - run: |
          docker login -u $DOCKER_USER -p $DOCKER_PASS
