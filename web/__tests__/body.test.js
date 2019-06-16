@@ -1,24 +1,34 @@
 import React from 'react';
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter } from 'react-router-dom';
 import Enzyme, { mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import BodyContainer from '../src/body';
 import configureStore from 'redux-mock-store';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { reducers } from '../src/app';
+import {ThemeProvider} from '@material-ui/styles';
+import config from 'react-global-configuration';
+import { createMuiTheme } from '@material-ui/core';
+
+config.set({
+    themeType: 'dark'
+});
 
 Enzyme.configure({ adapter: new Adapter() });
 
 function setup(path, props) {
-    const state = createStore(reducers).getState();
-    Object.assign(state.main, props);
+    const state = {
+        main: props,
+        router: {},
+    };
     const store = configureStore()(state);
+    const theme = createMuiTheme({});
     return mount(
         <Provider store={store}>
-            <MemoryRouter initialEntries={[path]}>
-                <BodyContainer />
-            </MemoryRouter>
+            <ThemeProvider theme={theme}>
+                <MemoryRouter initialEntries={[path]}>
+                    <BodyContainer />
+                </MemoryRouter>
+            </ThemeProvider>
         </Provider>
     );
 }
@@ -29,11 +39,37 @@ describe('<BodyContainer />', () => {
         wrapper.unmount();
     });
     it('should have <BottomBar /> when path is not /:id', () => {
-        wrapper = setup('/', {view: 'content'}); 
+        wrapper = setup('/', {
+            view: 'content',
+            users: [{
+                id: 1,
+                username: 'Alice',
+                photo: 'http://exmaple.com/photo',
+            }],
+            externalLinks: [],
+            searchForm: {},
+            result: {
+                rows: [],
+            },
+            years: [2000],
+            months: [1],
+        }); 
         expect(wrapper.find('BottomBar').length).toBe(0);
     });
     it('should have <BottomBar /> when path is /:id', () => {
-        wrapper = setup('/1', {view: 'map'}); 
+        wrapper = setup('/1', {
+            view: 'map',
+            users: [{
+                id: 1,
+                username: 'Alice',
+                photo: 'http://exmaple.com/photo',
+            }],
+            externalLinks: [],
+            searchForm: {},
+            result: {
+                rows: [],
+            },
+        }); 
         expect(wrapper.find('BottomBar').length).toBe(1);
     });
 });

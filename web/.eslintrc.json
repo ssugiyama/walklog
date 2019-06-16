@@ -2,7 +2,8 @@
     "env": {
         "browser": true,
         "commonjs": true,
-        "es6": true
+        "es6": true,
+        "jest": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -13,7 +14,9 @@
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
+        "react-hooks",
+        "jest"
     ],
     "globals": {
         "google": true,
@@ -46,6 +49,7 @@
         ],
         "no-console": ["error", {
             "allow": ["error", "wran", "info"]
-        }]
+        }],
+        "react-hooks/rules-of-hooks": "error"
     }
 }

@@ -1,45 +1,50 @@
 import React from 'react';
-import { MemoryRouter } from "react-router-dom"
 import Enzyme, { mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import NavBarContainer from '../src/nav-bar';
+import NavBar from '../src/nav-bar';
 import configureStore from 'redux-mock-store';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { reducers } from '../src/app';
 
 Enzyme.configure({ adapter: new Adapter() });
 
 function setup(props) {
-    const state = createStore(reducers).getState();
-    Object.assign(state.main, props);
-    Object.assign(state.router, {});
+    const state = {
+        main: props,
+        router: {}
+    };
     const store = configureStore()(state);
     return mount(
         <Provider store={store}>
-            <NavBarContainer />
+            <NavBar />
         </Provider>
     );
 }
   
-describe('<NavBarContainer />', () => {
+describe('<NavBar />', () => {
     let wrapper;
+
     afterEach(() => {
         wrapper.unmount();
     });
-    it('not logged in', () => {
+
+    it('should hace IconButton with SvgIcon when logoff', () => {
         wrapper = setup({
+            externalLinks: []
         });
-        expect(wrapper.find('IconButton').at(1).find('AccountCircleIcon').exists()).toBeTruthy();
+        
+        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(3);
+        expect(wrapper.find('ForwardRef(IconButton)').at(2).find('ForwardRef(SvgIcon)').exists()).toBeTruthy();
     });
-    it('logged in', () => {
+    it('should have img with avatar when login', () => {
         wrapper = setup({
-            current_user: {
+            currentUser: {
                 id: 1,
                 username: 'Alice',
                 photo: 'http://exmaple.com/photo',
             },
+            externalLinks: []
         });
-        expect(wrapper.find('IconButton').at(1).find('img').props().src).toBe('http://exmaple.com/photo');
+        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(3);
+        expect(wrapper.find('ForwardRef(IconButton)').at(2).find('img').props().src).toBe('http://exmaple.com/photo');
     });
 });

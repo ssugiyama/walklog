@@ -89,7 +89,7 @@ const SearchBox = props => {
         <Paper className={classes.root}>
             <SearchFormContainer />
             <div>
-                <Typography variant="body1" color={error ? 'error' : 'default'} style={{ display: 'inline-block' }}>
+                <Typography variant="body1" color={error ? 'error' : 'initial'} style={{ display: 'inline-block' }}>
                     {
                         ( () => {
                             if (error) {

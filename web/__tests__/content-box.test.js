@@ -1,24 +1,35 @@
 import React from 'react';
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter } from 'react-router-dom';
 import Enzyme, { mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import ContentBoxContainer from '../src/content-box';
 import configureStore from 'redux-mock-store';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { reducers } from '../src/app';
+import {ThemeProvider} from '@material-ui/styles';
+import config from 'react-global-configuration';
+import { createMuiTheme } from '@material-ui/core';
+
+
+config.set({
+    themeType: 'dark'
+});
 
 Enzyme.configure({ adapter: new Adapter() });
 
 function setup(path, props) {
-    const state = createStore(reducers).getState();
-    Object.assign(state.main, props);
+    const state = {
+        main: props,
+        router: {},
+    };
     const store = configureStore()(state);
+    const theme = createMuiTheme({});
     return mount(
         <Provider store={store}>
-            <MemoryRouter initialEntries={[path]}>
-                <ContentBoxContainer />
-            </MemoryRouter>
+            <ThemeProvider theme={theme}>
+                <MemoryRouter initialEntries={[path]}>
+                    <ContentBoxContainer />
+                </MemoryRouter>
+            </ThemeProvider>
         </Provider>
     );
 }
@@ -29,24 +40,70 @@ describe('<ContentBox />', () => {
         wrapper.unmount();
     });
     it('should be visible when view == content', () => {
-        wrapper = setup('/', {view: 'content'});
+        wrapper = setup('/', {
+            view: 'content', 
+            result: {
+                rows: []
+            },
+            users: [{
+                id: 1,
+                username: 'Alice',
+                photo: 'http://exmaple.com/photo',
+            }],
+            years: [],
+            months: [],
+        });
         const target = wrapper.find('ContentBox');
-        const classes = target.prop('classes');
-        expect(target.children().prop('className')).toBe(classes['root']);
+        expect(target.children().prop('className')).toMatch(/^makeStyles-root-.+$/);
     });
     it('should be invisible when view == map', () => {
-        wrapper = setup('/', {view: 'map'}); 
+        wrapper = setup('/', {
+            view: 'map', 
+            result: {
+                rows: []
+            },
+            users: [{
+                id: 1,
+                username: 'Alice',
+                photo: 'http://exmaple.com/photo',
+            }],
+            years: [],
+            months: [],
+        }); 
         const target = wrapper.find('ContentBox');
-        const classes = target.prop('classes');
-        expect(target.children().prop('className')).toBe(classes['hidden']);
+        expect(target.children().prop('className')).toMatch(/^makeStyles-hidden-.+$/);
     });
     it('should have SearchBox when path is not /:id', () => {
-        wrapper = setup('/', {view: 'map'}); 
+        wrapper = setup('/', {
+            view: 'map', 
+            result: {
+                rows: []
+            },
+            users: [{
+                id: 1,
+                username: 'Alice',
+                photo: 'http://exmaple.com/photo',
+            }],
+            years: [],
+            months: [],
+        }); 
         expect(wrapper.find('SearchBox').length).toBe(1);
         expect(wrapper.find('ItemBox').length).toBe(0);
     });
     it('should have ItemBox when path is /:id', () => {
-        wrapper = setup('/1', {view: 'map'}); 
+        wrapper = setup('/1', {
+            view: 'map', 
+            result: {
+                rows: []
+            },
+            users: [{
+                id: 1,
+                username: 'Alice',
+                photo: 'http://exmaple.com/photo',
+            }],
+            years: [],
+            months: [],
+        }); 
         expect(wrapper.find('SearchBox').length).toBe(0);
         expect(wrapper.find('ItemBox').length).toBe(1);
     });

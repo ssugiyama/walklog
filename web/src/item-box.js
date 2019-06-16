@@ -119,8 +119,8 @@ const ItemBox = props => {
         offset > 0 ? 
             '/?select=1&offset=' + offset + 
                 (lastQuery ? '&' + lastQuery : '') : null;
-    return  data && 
-        (<div>
+    return  (
+        <div>
             <Paper className={classes.itemBoxControl}>
                 <Fab className={classes.backButton} size="small" color="primary" component={Link} to={upUrl}><ListIcon /></Fab>
                 <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBackIcon /></IconButton>
@@ -129,38 +129,43 @@ const ItemBox = props => {
                     data && currentUser && data.userId && currentUser.id == data.userId ? (<IconButton onClick={handleEdit} ><EditorModeEditIcon /></IconButton>) : null
                 }
                 <IconButton component="a" href={tweetUrl}><TweetIcon /></IconButton>
-                <Typography variant="h6" color={title ? 'default' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
+                <Typography variant="h6" color={title ? 'initial' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
                 {
                     dataUser ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={dataUser.photo} /><span>{dataUser.username}</span></Typography>) : null
                 }
             </Paper>
-            <Paper>
-                <Tabs value={tabValue}
-                    onChange={(e, value) => handleTabChange(value)}
-                    className={classes.tabs}
-                    textColor="secondary"
-                    variant="fullWidth" >
-                    <Tab label="Comment"  className={classes.tab} />
-                    <Tab label="Elevation" className={classes.tab} />
-                    <Tab label="StreetView" className={classes.tab}/>
-                </Tabs>
-            </Paper>
-            <SwipeableViews index={tabValue} onChangeIndex={index => handleTabChange(index)} disableLazyLoading enableMouseEvents>
-                <Paper className={classes.itemBoxContent}>
-                    {image && <img src={image} className={classes.itemBoxImage} />}
-                    <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
-                    </Typography>
-                </Paper>
-                <Paper className={classes.itemBoxContent}>
-                    <NoSsr>
-                        <ElevationBox />
-                    </NoSsr>
-                </Paper>
-                <Paper className={classes.itemBoxContent}>
-                    <PanoramaBox />
-                </Paper>
-            </SwipeableViews>
-        </div>);  
+            { data && 
+                <Paper>
+                    <Tabs value={tabValue}
+                        onChange={(e, value) => handleTabChange(value)}
+                        className={classes.tabs}
+                        textColor="secondary"
+                        variant="fullWidth" >
+                        <Tab label="Comment"  className={classes.tab} />
+                        <Tab label="Elevation" className={classes.tab} />
+                        <Tab label="StreetView" className={classes.tab}/>
+                    </Tabs>
+                </Paper> 
+            }
+            { data && 
+                <SwipeableViews index={tabValue} onChangeIndex={index => handleTabChange(index)} disableLazyLoading enableMouseEvents>
+                    <Paper className={classes.itemBoxContent}>
+                        {image && <img src={image} className={classes.itemBoxImage} />}
+                        <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
+                        </Typography>
+                    </Paper>
+                    <Paper className={classes.itemBoxContent}>
+                        <NoSsr>
+                            <ElevationBox />
+                        </NoSsr>
+                    </Paper>
+                    <Paper className={classes.itemBoxContent}>
+                        <PanoramaBox />
+                    </Paper>
+                </SwipeableViews>
+            }
+        </div>
+    );  
 };
 
 function mapStateToProps(state) {
