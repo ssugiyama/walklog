@@ -10,7 +10,7 @@ import { StaticRouter } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
 import config from 'react-global-configuration';
 import models from '../lib/models';
-
+import { createMemoryHistory } from 'history';
 const Users = models.sequelize.models.users;
 
 const raw = content => ({ __html: content });
@@ -62,7 +62,11 @@ export default function handleSSR(req, res) {
     };
     const prefix = `http://localhost:${req.app.get('port')}/`;
     const branch = matchRoutes(routes, req.path);
-    const store = configureStore();
+    
+    // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
+    const history = createMemoryHistory({initialEntries: [req.url]});
+    const store = configureStore(null, history);
+
     const lastBranch = branch[branch.length - 1];
     const match = lastBranch.match;
     handleRoute(match.params.id, req.query, false, prefix, [], true, store.dispatch)

@@ -2,13 +2,15 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'connected-react-router';
-import { configureStore, history, getTheme } from './app';
+import { configureStore, getTheme } from './app';
 import { ThemeProvider  } from '@material-ui/styles';
 import BodyContainer from './body';
+import { createBrowserHistory } from 'history';
 import config from 'react-global-configuration';
 
 config.set(window.__INITIAL_CONFIG__);
-const store = configureStore( window.__PRELOADED_STATE__);
+const history = createBrowserHistory();
+const store = configureStore( window.__PRELOADED_STATE__, history);
 
 const ClientRoot = () => {
     // Remove the server-side injected CSS.

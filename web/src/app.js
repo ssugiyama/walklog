@@ -1,6 +1,5 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
-import { createBrowserHistory, createMemoryHistory } from 'history';
 import { connectRouter, LOCATION_CHANGE, routerMiddleware, push } from 'connected-react-router';
 import { matchRoutes } from 'react-router-config';
 import thunkMiddleware from 'redux-thunk';
@@ -229,13 +228,6 @@ const mainReducer = function(state = initialState, action) {
     }
 };
 
-export const history = typeof document !== 'undefined' ? createBrowserHistory() : createMemoryHistory();
-
-export const reducers = combineReducers({
-    main: mainReducer,
-    router: connectRouter(history)
-});
-
 export function handleRoute(itemId, query, isPathSelected, prefix, rows, queryChanged, next) {
     if (itemId) {
         if (!query.forceFetch) {
@@ -361,22 +353,26 @@ const dataFetchMiddleware = store => next => {
     };
 };
 
-const middlewares = [
-    formWatchMiddleware,
-    routerMiddleware(history),
-    dataFetchMiddleware,
-    thunkMiddleware,
-];
-
-if (process.env.NODE_ENV != 'production') {
-    middlewares.push(logger);
-}
-
-const createStoreWithMiddleware = applyMiddleware(
-    ...middlewares
-)(createStore);
-
-export function configureStore(state) {
+export function configureStore(state, history) {
+    const reducers = combineReducers({
+        main: mainReducer,
+        router: connectRouter(history)
+    });
+    const middlewares = [
+        formWatchMiddleware,
+        routerMiddleware(history),
+        dataFetchMiddleware,
+        thunkMiddleware,
+    ];
+    
+    if (process.env.NODE_ENV != 'production') {
+        middlewares.push(logger);
+    }
+    
+    const createStoreWithMiddleware = applyMiddleware(
+        ...middlewares
+    )(createStore);
+    
     if (state) {
         return createStoreWithMiddleware(reducers, state);
     }
