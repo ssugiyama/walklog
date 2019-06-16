@@ -1,19 +1,33 @@
 version: 2
 jobs:
- build:
-   machine: true
-   steps:
-     - checkout
-     # run test
-     - run: cd web; yarn test
-     # with credentials stored in the UI
-     - run: |
-         docker login -u $DOCKER_USER -p $DOCKER_PASS
+  build:
+    machine: true
+    steps:
+    - checkout
+    - run: docker build -t $DOCKER_USER/walklog_db db
+    - run: docker build -t $DOCKER_USER/walklog_web web
+  test:
+    machine: true
+    steps:
+    - run: docker run --rm $DOCKER_USER/walklog_web yarn test
+  push:
+    machine: true
+    steps:
+    - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+    - run: docker push $DOCKER_USER/walklog_db
+    - run: docker push $DOCKER_USER/walklog_web
 
-     # build the application image
-     - run: docker build -t $DOCKER_USER/walklog_db db
-     - run: docker build -t $DOCKER_USER/walklog_web web
-
-     # deploy the image
-     - run: docker push $DOCKER_USER/walklog_db
-     - run: docker push $DOCKER_USER/walklog_web
+workflows:
+  version: 2
+  build_and_test_and_push:
+    jobs:
+    - build
+    - test:
+      requires:
+      - build
+    - push
+      requires:
+      - build
+      filters:
+        branches:
+          only: master  
