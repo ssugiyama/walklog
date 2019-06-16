@@ -90,7 +90,7 @@ const BottomBar = props => {
     const classes = useStyles(props);
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
-    const refs = useRef();
+    const refs = useRef({});
     const length  = useMemo(() => {
         if (selectedPath) {
             return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selectedPath))/1000;
@@ -102,7 +102,7 @@ const BottomBar = props => {
     const groupCount = useMemo(() => overlay ? 1 : 3, [overlay]);
     useEffect(() => {
         if (mapLoaded) {
-            refs.geocoder = new google.maps.Geocoder();
+            refs.current.geocoder = new google.maps.Geocoder();
         }
     }, [mapLoaded]);
     const handleNextButtonClick = d => () => {
@@ -114,7 +114,7 @@ const BottomBar = props => {
     };
     const handleSubmitLocation = useCallback(() => {
         if (!location) return;
-        refs.geocoder.geocode( { 'address': location}, (results, status) =>  {
+        refs.current.geocoder.geocode( { 'address': location}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
                 setGeoMarker({ 
                     lat: results[0].geometry.location.lat(),

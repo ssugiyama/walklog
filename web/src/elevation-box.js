@@ -15,9 +15,9 @@ const styles = {
 
 const ElevationBox = props => {
     const rootRef = useRef();
-    const refs = useRef();
+    const refs = useRef({});
     const { highlightedPath, mapLoaded, setInfoWindow } = props;
-
+    const theme = useTheme();
     // test code for local
     // const interpolatePoints = (pt1, pt2, r) => {
     //     return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
@@ -54,20 +54,19 @@ const ElevationBox = props => {
             'path': path,
             'samples': 256
         };
-        refs.elevator.getElevationAlongPath(pathRequest, (results, status) => {
+        refs.current.elevator.getElevationAlongPath(pathRequest, (results, status) => {
             plotElevation(results, status);
         });
         // const results = getElevationPointsAndElevation(path);
         // plotElevation(results, google.maps.ElevationStatus.OK)
     };
     const plotElevation = (results, status) => {
-        const theme = useTheme();
         if (status == google.maps.ElevationStatus.OK) {
-            refs.elevationResults = results;
+            refs.current.elevationResults = results;
             const data = results.map(result => result.elevation);
             const labels = results.map(() => '');
-            if (! refs.chart) {
-                refs.chart = new Chart(rootRef.current.getContext('2d'), {
+            if (! refs.current.chart) {
+                refs.current.chart = new Chart(rootRef.current.getContext('2d'), {
                     type: 'line',
                     data: {
                         labels,
@@ -100,7 +99,7 @@ const ElevationBox = props => {
                     }
                 });
             }
-            refs.chart.data.datasets = [{
+            refs.current.chart.data.datasets = [{
                 data,
                 borderWidth: 1,
                 borderColor: '#ff0000',
@@ -108,7 +107,7 @@ const ElevationBox = props => {
                 pointStyle: 'dot',
                 radius: 1
             }];
-            refs.chart.update();
+            refs.current.chart.update();
         }
     };
     const handleHover = (ev, elms) => {
@@ -116,7 +115,7 @@ const ElevationBox = props => {
             setInfoWindow({open: false});
         }
         else {
-            const elevation = refs.elevationResults[elms[0]._index];
+            const elevation = refs.current.elevationResults[elms[0]._index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
             setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
@@ -124,8 +123,8 @@ const ElevationBox = props => {
     };
     const updateChart = () => {
         if ( !mapLoaded ) return;
-        if (! refs.elevator ) {
-            refs.elevator = new google.maps.ElevationService();
+        if (! refs.current.elevator ) {
+            refs.current.elevator = new google.maps.ElevationService();
         }
         requestElevation();
     };

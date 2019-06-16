@@ -46,11 +46,11 @@ const PANORAMA_INTERVAL = 50;
 
 const PanoramaBox = props => {
 
-    const bodyRef = useRef();
+    const bodyRef = useRef({});
     const {  setPanoramaCount, setPanoramaIndex, setOverlay } = props; 
     const {  highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded } = props;
     const classes = useStyles(props);
-    const refs = useRef();
+    const refs = useRef({});
     const handleOverlayChange = (e, toggled) => {
         setOverlay(toggled);
     };
@@ -86,7 +86,7 @@ const PanoramaBox = props => {
     const updatePath = (highlightedPath) => {
         if ( ! mapLoaded ) return;
         if (! highlightedPath) {
-            const pnrm = overlay ? context.state.map.getStreetView() : refs.panorama;
+            const pnrm = overlay ? context.state.map.getStreetView() : refs.current.panorama;
             if (pnrm) {
                 pnrm.setVisible(false);
             }
@@ -94,23 +94,23 @@ const PanoramaBox = props => {
             return;
         }
         const path = google.maps.geometry.encoding.decodePath(highlightedPath);
-        refs.panoramaPointsAndHeadings = getPanoramaPointsAndHeadings(path);
-        setPanoramaCount(refs.panoramaPointsAndHeadings.length);
+        refs.current.panoramaPointsAndHeadings = getPanoramaPointsAndHeadings(path);
+        setPanoramaCount(refs.current.panoramaPointsAndHeadings.length);
         // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
         setPanoramaIndex(0);
         showPanorama();
     };
 
     const showPanorama = () => {
-        if ( !mapLoaded || ! refs.panoramaPointsAndHeadings ) return;
+        if ( !mapLoaded || ! refs.current.panoramaPointsAndHeadings ) return;
 
         const index = panoramaIndex;
-        const item = refs.panoramaPointsAndHeadings[index];
+        const item = refs.current.panoramaPointsAndHeadings[index];
         const pt = item[0];
         const heading = item[1];
-        const pnrm = overlay ? context.state.map.getStreetView() : refs.panorama;
+        const pnrm = overlay ? context.state.map.getStreetView() : refs.current.panorama;
         
-        refs.streetViewService.getPanoramaByLocation(pt, 50, (data, status) => {
+        refs.current.streetViewService.getPanoramaByLocation(pt, 50, (data, status) => {
             if (status == google.maps.StreetViewStatus.OK) {
                 pnrm.setPano(data.location.pano);
                 pnrm.setPov({heading: heading, zoom: 1, pitch: 0});
@@ -131,9 +131,9 @@ const PanoramaBox = props => {
     }, []);
 
     useEffect(() => {
-        if (mapLoaded &&  !refs.panorama ) {
-            refs.streetViewService = new google.maps.StreetViewService();
-            refs.panorama = new google.maps.StreetViewPanorama(bodyRef.current, {
+        if (mapLoaded &&  !refs.current.panorama ) {
+            refs.current.streetViewService = new google.maps.StreetViewService();
+            refs.current.panorama = new google.maps.StreetViewPanorama(bodyRef.current, {
                 addressControl: true,
                 navigationControl: true,
                 enableCloseButton: false,
@@ -146,7 +146,7 @@ const PanoramaBox = props => {
         if (overlay){
             setStreetView(null);
         } else {
-            setStreetView(refs.panorama);
+            setStreetView(refs.current.panorama);
         }
         showPanorama();
     }, [overlay, mapLoaded]);
