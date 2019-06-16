@@ -23,11 +23,11 @@ workflows:
     jobs:
     - build
     - test:
-      requires:
-      - build
-    - push
-      requires:
-      - build
-      filters:
-        branches:
-          only: master  
+        requires:
+        - build
+    - push:
+        requires:
+        - build
+        filters:
+          branches:
+            only: master  
