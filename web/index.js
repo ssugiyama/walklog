@@ -31,6 +31,7 @@ const Walk       = models.sequelize.models.walks;
 const sitemap    = require('sitemap');
 const session    = require('express-session');
 const auth       = require('./lib/auth');
+const FileStore  = require('session-file-store')(session);
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -48,11 +49,8 @@ if ('development' == app.get('env')) {
 const sess = {
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-    cookie: {
-        maxAge: parseInt(process.env.SESSION_MAX_AGE),
-        secure: 'auto'
-    }
+    saveUninitialized: false,
+    store: new FileStore({ttl: process.env.SESSION_MAX_AGE}),
 };
 
 app.use(session(sess));
