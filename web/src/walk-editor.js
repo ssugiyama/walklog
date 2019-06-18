@@ -14,7 +14,7 @@ import Switch from '@material-ui/core/Switch';
 import moment from 'moment';
 import ImageUploader from './image-uploader';
 
-const WalkEditor = props => {
+const WalkEditor = () => {
     const [state, setState] = useState({
         id: '', date: null, title: '', comment: '', initialized: false, processing: false
     });

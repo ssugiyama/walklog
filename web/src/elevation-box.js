@@ -12,7 +12,7 @@ const styles = {
     },
 };
 
-const ElevationBox = props => {
+const ElevationBox = () => {
     const rootRef = useRef();
     const refs = useRef({});
     const highlightedPath = useSelector(state => state.main.highlightedPath);
