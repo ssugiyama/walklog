@@ -5,7 +5,7 @@ import {configureStore, routes, handleRoute, getTheme}  from './app';
 import {setCurrentUser, setUsers, openSnackbar} from './actions';
 import { matchRoutes } from 'react-router-config';
 import { ServerStyleSheets, ThemeProvider } from '@material-ui/styles';
-import BodyContainer from './body';
+import Body from './body';
 import { StaticRouter } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
 import config from 'react-global-configuration';
@@ -85,7 +85,7 @@ export default function handleSSR(req, res) {
                     <Provider store={store}>
                         <ThemeProvider theme={getTheme()}>
                             <StaticRouter location={req.url} context={context}>
-                                <BodyContainer />
+                                <Body />
                             </StaticRouter>
                         </ThemeProvider>
                     </Provider>

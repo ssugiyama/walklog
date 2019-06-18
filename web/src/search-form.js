@@ -1,7 +1,6 @@
 import React, { memo, useCallback } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-import { setSearchForm, search } from './actions';
+import { useSelector, useDispatch } from 'react-redux';
+import { setSearchForm  } from './actions';
 import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
@@ -52,12 +51,18 @@ const styles = theme => ({
 const useStyles = makeStyles(styles);
 
 const SearchForm = props => {
-    
-    const { setSearchForm, } = props;
-    const { years, users, filter, month, year, user, limit, order } = props;
+    const filter = useSelector(state => state.main.searchForm.filter);
+    const month = useSelector(state => state.main.searchForm.month);
+    const year = useSelector(state => state.main.searchForm.year);
+    const user = useSelector(state => state.main.searchForm.user);
+    const limit = useSelector(state => state.main.searchForm.limit);
+    const order = useSelector(state => state.main.searchForm.order);
+    const years = useSelector(state => state.main.years);
+    const users = useSelector(state => state.main.users);
+    const dispatch = useDispatch();
     const classes = useStyles(props);
     const handleChange = useCallback((name, value) => {
-        setSearchForm({[name]: value});
+        dispatch(setSearchForm({[name]: value}));
     });
     
     return (
@@ -117,15 +122,4 @@ const SearchForm = props => {
     );
 };
 
-function mapStateToProps(state) {
-    const { years, users } = state.main;
-    return Object.assign({}, state.main.searchForm, { 
-        years, users,
-    });
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({setSearchForm, search }, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(SearchForm));
+export default memo(SearchForm);

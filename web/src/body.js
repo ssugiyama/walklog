@@ -1,16 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import NavBarContainer from './nav-bar';
-import MapContainer from './map';
-import BottomBarContainer from './bottom-bar';
-import WalkEditorContainer from './walk-editor';
-import { connect } from 'react-redux';
-import ContentBoxContainer from './content-box';
-import { bindActionCreators } from 'redux';
+import NavBar from './nav-bar';
+import Map from './map';
+import BottomBar from './bottom-bar';
+import WalkEditor from './walk-editor';
+import { useDispatch, useSelector } from 'react-redux';
+import ContentBox from './content-box';
 import { openSnackbar } from './actions';
 import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/styles';
-import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
 import MapContext from './map-context';
 
@@ -28,13 +26,14 @@ const styles = () => ({
 const useStyles = makeStyles(styles);
 
 const Body = props => {
-    const { openSnackbar  } = props;
-    const { message, view } = props;
+    const message  = useSelector(state => state.main.message);
+    const view     = useSelector(state => state.main.view);
+    const dispatch = useDispatch();
     const classes = useStyles(props);
     const [ state, setState ] = useState({});
 
     const handleRequestClose = useCallback(() => {
-        openSnackbar(null);
+        dispatch(openSnackbar(null));
     });
   
     return (
@@ -46,11 +45,11 @@ const Body = props => {
         )}>
             <MapContext.Provider value={{state, setState}}>
                 <CssBaseline />
-                <NavBarContainer />
-                <MapContainer />
-                <ContentBoxContainer />
-                { view == 'map' && <BottomBarContainer /> }
-                <WalkEditorContainer />
+                <NavBar />
+                <Map />
+                <ContentBox />
+                { view == 'map' && <BottomBar /> }
+                <WalkEditor />
                 <Snackbar
                     open={message != null}
                     message={message}
@@ -62,13 +61,4 @@ const Body = props => {
     );
 };
 
-function mapStateToProps(state) {
-    const { message, view } = state.main;
-    return { message, view };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({openSnackbar}, dispatch);
-}
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Body));
+export default memo(Body);

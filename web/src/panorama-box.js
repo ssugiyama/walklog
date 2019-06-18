@@ -1,7 +1,6 @@
 import React, { memo, useRef, useContext, useEffect } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-import { toggleView, setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
+import { useSelector, useDispatch } from 'react-redux';
+import { setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
 import IconButton from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from '@material-ui/core/Typography';
@@ -45,14 +44,17 @@ const useStyles = makeStyles(styles);
 const PANORAMA_INTERVAL = 50;
 
 const PanoramaBox = props => {
-
+    const highlightedPath = useSelector(state => state.main.highlightedPath);
+    const panoramaIndex = useSelector(state => state.main.panoramaIndex);
+    const panoramaCount = useSelector(state => state.main.panoramaCount);
+    const overlay = useSelector(state => state.main.overlay);
+    const mapLoaded = useSelector(state => state.main.mapLoaded);
+    const dispatch = useDispatch();
     const bodyRef = useRef({});
-    const {  setPanoramaCount, setPanoramaIndex, setOverlay } = props; 
-    const {  highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded } = props;
     const classes = useStyles(props);
     const refs = useRef({});
     const handleOverlayChange = (e, toggled) => {
-        setOverlay(toggled);
+        dispatch(setOverlay(toggled));
     };
     const interpolatePoints = (pt1, pt2, r) => {
         return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
@@ -95,9 +97,9 @@ const PanoramaBox = props => {
         }
         const path = google.maps.geometry.encoding.decodePath(highlightedPath);
         refs.current.panoramaPointsAndHeadings = getPanoramaPointsAndHeadings(path);
-        setPanoramaCount(refs.current.panoramaPointsAndHeadings.length);
+        dispatch(setPanoramaCount(refs.current.panoramaPointsAndHeadings.length));
         // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
-        setPanoramaIndex(0);
+        dispatch(setPanoramaIndex(0));
         showPanorama();
     };
 
@@ -177,25 +179,14 @@ const PanoramaBox = props => {
                 [classes.panoramaHidden]: overlay,
             })} ref={bodyRef}></div>
             <div className={classes.panoramaBoxControl}>
-                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 10); } }><AvFastRewindIcon /></IconButton>
-                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 1); }}><NavigationArrowBackIcon /></IconButton>
+                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 10)); } }><AvFastRewindIcon /></IconButton>
+                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 1)); }}><NavigationArrowBackIcon /></IconButton>
                 <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ panoramaIndex+1 } </span> / <span>{ panoramaCount } </span></Typography>
-                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 1); }}><NavigationArrowForwardIcon /></IconButton>
-                <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 10); }}><AvFastForwardIcon /></IconButton>
+                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 1)); }}><NavigationArrowForwardIcon /></IconButton>
+                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 10)); }}><AvFastForwardIcon /></IconButton>
             </div>
         </div>
     );  
 };
 
-function mapStateToProps(state) {
-    const { view, highlightedPath, panoramaIndex, panoramaCount, overlay, mapLoaded } = state.main;
-    return {
-        view, highlightedPath,  panoramaIndex, panoramaCount, overlay, mapLoaded
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ toggleView, setPanoramaCount, setPanoramaIndex, setOverlay }, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(PanoramaBox, compareWithMapLoaded));
+export default memo(PanoramaBox, compareWithMapLoaded);

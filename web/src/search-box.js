@@ -1,10 +1,9 @@
 import React, { memo, useState, useContext } from 'react';
-import { bindActionCreators } from 'redux';
-import SearchFormContainer from './search-form';
-import { connect } from 'react-redux';
+import SearchForm from './search-form';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { getMoreItems, setSelectedItem, toggleView } from './actions';
+import { toggleView } from './actions';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
@@ -63,19 +62,26 @@ const styles = theme => ({
 const useStyles = makeStyles(styles);
 
 const SearchBox = props => {
+    const lastQuery = useSelector(state => state.main.lastQuery);
+    const users = useSelector(state => state.main.users);
+    const offset = useSelector(state => state.main.result.offset);
+    const count = useSelector(state => state.main.result.count);
+    const error = useSelector(state => state.main.result.error);
+    const rows = useSelector(state => state.main.result.rows);
+    const searching = useSelector(state => state.main.result.searching);
+    const dispatch = useDispatch();
+
     const [showDistance, setShowDistance] = useState(true); 
     const context = useContext(MapContext);
-    const { toggleView, push } = props;
-    const { lastQuery, offset, count, error, rows, users, searching  } = props;
     const classes = useStyles(props);
     const handleShowAll = () => {
         context.state.addPaths(rows.map(row => row.path));
-        toggleView();
+        dispatch(toggleView());
     };
 
     const handleSelect = (index) => {
         const item = rows[index];
-        push( '/' + item.id );
+        dispatch(push( '/' + item.id ));
     };
     const handleShowDistance = (value) => {
         setShowDistance(value);
@@ -87,7 +93,7 @@ const SearchBox = props => {
     }
     return (
         <Paper className={classes.root}>
-            <SearchFormContainer />
+            <SearchForm />
             <div>
                 <Typography variant="body1" color={error ? 'error' : 'initial'} style={{ display: 'inline-block' }}>
                     {
@@ -154,14 +160,4 @@ const SearchBox = props => {
     );
 };
 
-function mapStateToProps(state) {
-    return Object.assign({}, state.main.result, 
-        {lastQuery: state.main.lastQuery}, 
-        {users: state.main.users} );
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ getMoreItems, setSelectedItem, toggleView, push }, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(SearchBox));
+export default memo(SearchBox);

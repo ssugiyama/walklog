@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo, useContext, useCallback, memo } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { setPanoramaIndex, setOverlay, setGeoMarker, setEditingPath, setSearchForm  } from './actions';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -83,10 +82,16 @@ const styles = theme => ({
 const useStyles = makeStyles(styles);
 
 const BottomBar = props => {
+    const filter        = useSelector(state => state.main.searchForm.filter);
+    const radius        = useSelector(state => state.main.searchForm.radius);
+    const selectedPath  = useSelector(state => state.main.selectedPath);
+    const panoramaIndex = useSelector(state => state.main.panoramaIndex);
+    const panoramaCount = useSelector(state => state.main.panoramaCount);
+    const overlay       = useSelector(state => state.main.overlay);
+    const mapLoaded     = useSelector(state => state.main.mapLoaded);
+    const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
-    const { filter, radius, selectedPath, panoramaIndex, panoramaCount, overlay, mapLoaded } = props;
-    const { setPanoramaIndex, setOverlay, setEditingPath, setSearchForm, setGeoMarker } = props;
     const classes = useStyles(props);
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
@@ -116,38 +121,38 @@ const BottomBar = props => {
         if (!location) return;
         refs.current.geocoder.geocode( { 'address': location}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
-                setGeoMarker({ 
+                dispatch(setGeoMarker({ 
                     lat: results[0].geometry.location.lat(),
                     lng: results[0].geometry.location.lng(),
                     show: true
-                }, true);
+                }, true));
             } else {
                 alert('Geocode was not successful for the following reason: ' + status);
             }
         });
     }, [location]);
     const handleSearchFormChange = useCallback((name, value) =>  {
-        setSearchForm({[name]: value});
+        dispatch(setSearchForm({[name]: value}));
     });
     const OverlayControls = (<div>
         <div className={classes.bottomBarGroup}>
             <Typography variant="caption">StreetView</Typography>
             <div className={classes.bottomBarGroupBody}>
                 <Tooltip title="back to map" position="top-center">
-                    <IconButton onClick={ () => { setOverlay(false); }}><NavigationCancel /></IconButton>
+                    <IconButton onClick={ () => { dispatch(setOverlay(false)); }}><NavigationCancel /></IconButton>
                 </Tooltip>
                 <Tooltip title="-10" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 10); } }><AvFastRewind /></IconButton>
+                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 10)); } }><AvFastRewind /></IconButton>
                 </Tooltip>
                 <Tooltip title="-1" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex - 1); }}><NavigationArrowBack /></IconButton>
+                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 1)); }}><NavigationArrowBack /></IconButton>
                 </Tooltip>
                 <Typography variant="body1" style={{ display: 'inline' }}>{ panoramaIndex+1 } / { panoramaCount } </Typography>
                 <Tooltip title="+1" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 1); }}><NavigationArrowForward /></IconButton>
+                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 1)); }}><NavigationArrowForward /></IconButton>
                 </Tooltip>
                 <Tooltip title="+10" position="top-center">
-                    <IconButton onClick={ () => { setPanoramaIndex(panoramaIndex + 10); }}><AvFastForward /></IconButton>
+                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 10)); }}><AvFastForward /></IconButton>
                 </Tooltip>
             </div>
         </div>
@@ -187,7 +192,7 @@ const BottomBar = props => {
             <Typography variant="caption">Path</Typography>
             <div className={classes.bottomBarGroupBody}>
                 <Tooltip title="edit" position="top-center">
-                    <IconButton onClick={() => setEditingPath(true) } disabled={! selectedPath} ><EditorModeEdit /></IconButton>
+                    <IconButton onClick={() => dispatch(setEditingPath(true)) } disabled={! selectedPath} ><EditorModeEdit /></IconButton>
                 </Tooltip>
                 <Tooltip title="clear all" position="top-center">
                     <IconButton onClick={() => clearPaths() }><NavigationRefresh /></IconButton>
@@ -248,22 +253,4 @@ const BottomBar = props => {
     );
 };
 
-function mapStateToProps(state) {
-    const { filter, radius } = state.main.searchForm;
-    const { selectedPath, panoramaIndex, panoramaCount, overlay, mapLoaded } = state.main;
-    return {
-        filter, radius, selectedPath, panoramaIndex, panoramaCount, overlay, mapLoaded
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({
-        setPanoramaIndex, 
-        setOverlay,
-        setEditingPath, 
-        setSearchForm,
-        setGeoMarker
-    }, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(BottomBar));
+export default memo(BottomBar);

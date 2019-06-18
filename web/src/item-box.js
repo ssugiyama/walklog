@@ -1,6 +1,5 @@
 import React, { memo, useMemo, useState, useCallback } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { openWalkEditor } from './actions';
 import marked from 'marked';
@@ -78,11 +77,18 @@ const useStyles = makeStyles(styles);
 
 const ItemBox = props => {
     const [tabValue, setTabValue] = useState(0);
-    const { location, lastQuery, nextId, prevId, offset, staticContext, 
-        selectedItem, currentUser, users, openWalkEditor} = props;
+    const selectedItem =  useSelector(state => state.main.selectedItem);
+    const users = useSelector(state => state.main.users);
+    const offset =  useSelector(state => state.main.result.offset);
+    const nextId =  useSelector(state => state.main.nextId);
+    const prevId =  useSelector(state => state.main.prevId);
+    const currentUser = useSelector(state =>  state.main.currentUser);
+    const lastQuery = useSelector(state => state.main.lastQuery);
+    const location =  useSelector(state => state.router.location);
+    const dispatch = useDispatch();
     const classes = useStyles(props);
     const handleEdit = () => {
-        openWalkEditor(true, 'update');
+        dispatch(openWalkEditor(true, 'update'));
     };
     const handleTabChange = useCallback(tabValue => {
         setTabValue(tabValue);
@@ -98,9 +104,6 @@ const ItemBox = props => {
    
     const data = selectedItem;
     
-    if (staticContext && !data) {
-        staticContext.status = 404;
-    }
     let title, createMarkup, dataUser, image;
     if (data) {
         title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
@@ -168,24 +171,4 @@ const ItemBox = props => {
     );  
 };
 
-function mapStateToProps(state) {
-    return {
-        selectedItem: state.main.selectedItem,
-        selectedIndex: state.main.selectedIndex,
-        rows: state.main.result.rows,
-        users: state.main.users,
-        count: state.main.result.count,
-        offset: state.main.result.offset,
-        nextId: state.main.nextId,
-        prevId: state.main.prevId,
-        currentUser: state.main.currentUser,
-        lastQuery: state.main.lastQuery,
-        location: state.router.location,
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ openWalkEditor }, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(ItemBox));
+export default memo(ItemBox);

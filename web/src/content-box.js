@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
@@ -18,7 +17,7 @@ const styles = () => ({
 const useStyles = makeStyles(styles);
 
 const ContentBox = props => {
-    const { view } = props;
+    const view = useSelector(state => state.main.view);
     const classes = useStyles(props);
     return (
         <div className={view == 'content' ? classes.root: classes.hidden}>
@@ -27,15 +26,4 @@ const ContentBox = props => {
     );
 };
 
-function mapStateToProps(state) {
-    const { view } = state.main;
-    return Object.assign({}, { 
-        view, 
-    });
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({  }, dispatch);
-}
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(memo(ContentBox)));
+export default withRouter(memo(ContentBox));

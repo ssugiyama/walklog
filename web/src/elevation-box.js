@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, memo } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
 import { useTheme } from '@material-ui/styles';
@@ -16,8 +15,10 @@ const styles = {
 const ElevationBox = props => {
     const rootRef = useRef();
     const refs = useRef({});
-    const { highlightedPath, mapLoaded, setInfoWindow } = props;
-    const theme = useTheme();
+    const highlightedPath = useSelector(state => state.main.highlightedPath);
+    const mapLoaded       = useSelector(state => state.main.mapLoaded);
+    const dispatch        = useDispatch();
+    const theme           = useTheme();
     // test code for local
     // const interpolatePoints = (pt1, pt2, r) => {
     //     return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
@@ -112,13 +113,13 @@ const ElevationBox = props => {
     };
     const handleHover = (ev, elms) => {
         if (elms.length == 0) {
-            setInfoWindow({open: false});
+            dispatch(setInfoWindow({open: false}));
         }
         else {
             const elevation = refs.current.elevationResults[elms[0]._index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
-            setInfoWindow({ open: true, message: y + 'm', position: elevation.location});
+            dispatch(setInfoWindow({ open: true, message: y + 'm', position: elevation.location}));
         }
     };
     const updateChart = () => {
@@ -141,15 +142,4 @@ const ElevationBox = props => {
     
 };
 
-function mapStateToProps(state) {
-    const { highlightedPath, mapLoaded } = state.main;
-    return {
-        highlightedPath, mapLoaded
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ setInfoWindow }, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(ElevationBox, compareWithMapLoaded));
+export default memo(ElevationBox, compareWithMapLoaded);

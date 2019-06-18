@@ -1,6 +1,5 @@
 import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { setSelectedItem, openWalkEditor } from './actions';
 import Button from '@material-ui/core/Button';
@@ -19,8 +18,11 @@ const WalkEditor = props => {
     const [state, setState] = useState({
         id: '', date: null, title: '', comment: '', initialized: false, processing: false
     });
-    const { push, setSelectedItem, openWalkEditor } = props;
-    const { selectedPath, selectedItem, walkEditorOpened, walkEditorMode } = props;
+    const selectedPath = useSelector(state => state.main.selectedPath);
+    const selectedItem = useSelector(state => state.main.selectedItem);
+    const walkEditorOpened = useSelector(state => state.main.walkEditorOpened);
+    const walkEditorMode = useSelector(state => state.main.walkEditorMode);
+    const dispatch = useDispatch();
 
     if (walkEditorOpened && ! state.initialized) {
         const path = selectedPath;
@@ -49,7 +51,7 @@ const WalkEditor = props => {
     const keys = useRef([]);
    
     const handleClose = useCallback(() => {
-        openWalkEditor(false);
+        dispatch(openWalkEditor(false));
         setState(state => Object.assign({}, state, {initialized: false}));
     });
     const handleSubmit = useCallback(() => {
@@ -80,7 +82,7 @@ const WalkEditor = props => {
         }).then(
             response => response.json()
         ).then(json => {
-            push({pathname: '/' + json[0].id, search: 'forceFetch=1' });
+            dispatch(push({pathname: '/' + json[0].id, search: 'forceFetch=1' }));
             handleClose();
         })
             .catch(ex => alert(ex));
@@ -97,8 +99,8 @@ const WalkEditor = props => {
                 }
                 return response;
             }).then(() => {
-                setSelectedItem(null);
-                push({pathname: '/' + state.id, query: {forceFetch: 1} });
+                dispatch(setSelectedItem(null));
+                dispatch(push({pathname: '/' + state.id, query: {forceFetch: 1} }));
                 handleClose();
             }).catch(ex => alert(ex));
         }
@@ -142,22 +144,8 @@ const WalkEditor = props => {
                 {walkEditorMode == 'update' && 
                     <Button disabled={state.processing} onClick={handleDelete} color="secondary">delete</Button>}
             </DialogActions>
-            
         </Dialog>
     );  
 };
 
-function mapStateToProps(state) {
-    return {
-        selectedPath: state.main.selectedPath,
-        selectedItem: state.main.selectedItem,
-        walkEditorOpened: state.main.walkEditorOpened,
-        walkEditorMode: state.main.walkEditorMode,
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ push, setSelectedItem, openWalkEditor }, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(WalkEditor));
+export default memo(WalkEditor);

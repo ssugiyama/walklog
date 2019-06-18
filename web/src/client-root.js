@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'connected-react-router';
 import { configureStore, getTheme } from './app';
 import { ThemeProvider  } from '@material-ui/styles';
-import BodyContainer from './body';
+import Body from './body';
 import { createBrowserHistory } from 'history';
 import config from 'react-global-configuration';
 
@@ -20,7 +20,7 @@ const ClientRoot = () => {
             jssStyles.parentNode.removeChild(jssStyles);
         }
     }, []);
-    return <ConnectedRouter history={history}><BodyContainer /></ConnectedRouter>;  
+    return <ConnectedRouter history={history}><Body /></ConnectedRouter>;  
 };
 
 ReactDOM.hydrate(

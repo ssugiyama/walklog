@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState, memo } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
     openWalkEditor,
     setGeoMarker,
@@ -49,14 +48,15 @@ const NavBar = (props) => {
     const [confirmInfo, setConfirmInfo] = useState({open: false});
     const context = useContext(MapContext);
     const { addPoint } = context.state;
-    const { openWalkEditor, setGeoMarker, openSnackbar } = props;
-    const {  selectedPath, currentUser  } = props;
+    const dispatch = useDispatch();
+    const selectedPath  = useSelector(state => state.main.selectedPath);
+    const currentUser   = useSelector(state => state.main.currentUser); 
+    const externalLinks = useSelector(state => state.main.externalLinks); 
     const classes = useStyles(props);
-
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
         const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
-        setGeoMarker(geoMarker, !append);
+        dispatch(setGeoMarker(geoMarker, !append));
         addPoint(pos.coords.latitude, pos.coords.longitude, append);
     };
     const getCurrentPosition = (onSuccess, onFailure) => {
@@ -67,7 +67,7 @@ const NavBar = (props) => {
         });
     };
     const handleNewWalk = () => {
-        openWalkEditor(true, 'create');
+        dispatch(openWalkEditor(true, 'create'));
     };
     const handleMenuOpen = (setter) => {
         return event => {
@@ -112,7 +112,7 @@ const NavBar = (props) => {
         if (value && navigator.geolocation) {
             getCurrentPosition(pos => {
                 setAutoGeolocation(true);
-                openSnackbar('start following your location');
+                dispatch(openSnackbar('start following your location'));
                 new Promise((resolve) => {
                     if (selectedPath) {
                         setConfirmInfo({open: true, resolve});
@@ -128,7 +128,7 @@ const NavBar = (props) => {
             alert('Geolocation is not supported by your browser');
         } else {
             setAutoGeolocation(false);
-            openSnackbar('stop following your location');
+            dispatch(openSnackbar('stop following your location'));
         }
     };
     const closeAllMenus = () => {
@@ -177,7 +177,7 @@ const NavBar = (props) => {
                 onClose={handleMenuClose(setTopAnchorEl)}
             >
                 {
-                    props.externalLinks.map(link => 
+                    externalLinks.map(link => 
                         <EndMenuItem component="a" href={link[1]} target="_blank" key={link[0]} >{link[0]}</EndMenuItem>
                     )
                 }
@@ -201,16 +201,4 @@ const NavBar = (props) => {
     );
 };
 
-function mapStateToProps(state) {
-    return {
-        selectedPath:  state.main.selectedPath,
-        currentUser:   state.main.currentUser,
-        externalLinks: state.main.externalLinks,
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return bindActionCreators({ openWalkEditor, setGeoMarker, openSnackbar}, dispatch);
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(memo(NavBar));
+export default memo(NavBar);
