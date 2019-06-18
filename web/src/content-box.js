@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import { withRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { routes } from './app';
 
@@ -26,4 +25,4 @@ const ContentBox = props => {
     );
 };
 
-export default withRouter(memo(ContentBox));
+export default memo(ContentBox);
