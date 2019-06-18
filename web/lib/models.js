@@ -17,7 +17,6 @@ const sequelize = new Sequelize(dbUrl, {
     dialect: 'postgres',
     omitNull: true,
     native: false,
-    operatorsAliases: false,
 });
 
 exports.sequelize = sequelize;
