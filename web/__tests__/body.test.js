@@ -6,11 +6,11 @@ import BodyContainer from '../src/body';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import {ThemeProvider} from '@material-ui/styles';
-import config from 'react-global-configuration';
 import { createMuiTheme } from '@material-ui/core';
+import config from 'react-global-configuration';
 
 config.set({
-    themeType: 'dark'
+    googleApiKey: ''
 });
 
 Enzyme.configure({ adapter: new Adapter() });

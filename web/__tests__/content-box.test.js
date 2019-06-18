@@ -6,13 +6,7 @@ import ContentBoxContainer from '../src/content-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import {ThemeProvider} from '@material-ui/styles';
-import config from 'react-global-configuration';
 import { createMuiTheme } from '@material-ui/core';
-
-
-config.set({
-    themeType: 'dark'
-});
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -52,6 +46,7 @@ describe('<ContentBox />', () => {
             }],
             years: [],
             months: [],
+            searchForm: {},
         });
         const target = wrapper.find('ContentBox');
         expect(target.children().prop('className')).toMatch(/^makeStyles-root-.+$/);
@@ -69,6 +64,7 @@ describe('<ContentBox />', () => {
             }],
             years: [],
             months: [],
+            searchForm: {},
         }); 
         const target = wrapper.find('ContentBox');
         expect(target.children().prop('className')).toMatch(/^makeStyles-hidden-.+$/);
@@ -86,6 +82,7 @@ describe('<ContentBox />', () => {
             }],
             years: [],
             months: [],
+            searchForm: {},
         }); 
         expect(wrapper.find('SearchBox').length).toBe(1);
         expect(wrapper.find('ItemBox').length).toBe(0);
@@ -103,6 +100,7 @@ describe('<ContentBox />', () => {
             }],
             years: [],
             months: [],
+            searchForm: {},
         }); 
         expect(wrapper.find('SearchBox').length).toBe(0);
         expect(wrapper.find('ItemBox').length).toBe(1);
