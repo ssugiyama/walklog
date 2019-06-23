@@ -153,7 +153,7 @@ const ItemBox = props => {
                 </Paper> 
             }
             { data && 
-                <SwipeableViews index={tabValue} onChangeIndex={indexCHangeCB} disableLazyLoading enableMouseEvents>
+                <SwipeableViews index={tabValue} onChangeIndex={indexCHangeCB} disableLazyLoading>
                     <Paper className={classes.itemBoxContent}>
                         {image && <img src={image} className={classes.itemBoxImage} />}
                         <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
