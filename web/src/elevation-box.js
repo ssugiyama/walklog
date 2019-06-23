@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, memo } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
@@ -11,13 +11,16 @@ const styles = {
     },
 };
 
-const ElevationBox = () => {
+const useStyles = makeStyles(styles);
+
+const ElevationBox = props => {
     const rootRef = useRef();
     const refs = useRef({});
     const highlightedPath = useSelector(state => state.main.highlightedPath);
     const mapLoaded       = useSelector(state => state.main.mapLoaded);
     const dispatch        = useDispatch();
     const theme           = useTheme();
+    const classes         = useStyles(props);
     // test code for local
     // const interpolatePoints = (pt1, pt2, r) => {
     //     return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
@@ -134,7 +137,7 @@ const ElevationBox = () => {
 
     if (highlightedPath)
         return (
-            <canvas style={styles.elevationBox} ref={rootRef}></canvas>
+            <canvas className={classes.elevationBox} ref={rootRef}></canvas>
         );
     else
         return null;

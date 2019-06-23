@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { setSelectedItem, openWalkEditor } from './actions';
@@ -105,10 +105,15 @@ const WalkEditor = () => {
             }).catch(ex => alert(ex));
         }
     });
-    const handleChange = useCallback((name, value) => {
+    const handleChange = (name, value)=> {
         keys.current.add(name);
         setState(state => Object.assign({}, state, {[name]: value}));
-    });
+    };
+    const dateChangeCB       = useCallback(e => handleChange('date', e.target.value));
+    const titleChangeCB      = useCallback(e => handleChange('title', e.target.value));
+    const commentChangeCB    = useCallback(e => handleChange('comment', e.target.value));
+    const imageChangeCB      = useCallback(e => handleChange('date', e));
+    const updatePathChangeCB = useCallback((e, checked) => handleChange('updatePath', checked));
 
     useEffect(() => {
         if (walkEditorOpened) {
@@ -125,15 +130,15 @@ const WalkEditor = () => {
             <DialogTitle>{ walkEditorMode == 'update' ? 'Update Walk' : 'New Walk' }</DialogTitle>
             <DialogContent>
                 <FormGroup row>
-                    <TextField type="date" value={state.date} onChange={e => handleChange('date', e.target.value)} container="inline" mode="landscape" label='date' fullWidth={true} />
-                    <TextField defaultValue={state.title} onChange={e => handleChange('title', e.target.value)} label="title" fullWidth={true} />
-                    <ImageUploader label="image" value={state.image} onChange={e => handleChange('image', e)} ></ImageUploader>
+                    <TextField type="date" value={state.date} onChange={dateChangeCB} container="inline" mode="landscape" label='date' fullWidth={true} />
+                    <TextField defaultValue={state.title} onChange={titleChangeCB} label="title" fullWidth={true} />
+                    <ImageUploader label="image" value={state.image} onChange={imageChangeCB} ></ImageUploader>
                     <TextField multiline rows={4} rowsMax={20}
-                        defaultValue={state.comment} onChange={e => handleChange('comment', e.target.value)} label="comment" fullWidth={true} />
+                        defaultValue={state.comment} onChange={commentChangeCB} label="comment" fullWidth={true} />
                     {
                         walkEditorMode == 'update' &&
                         <FormControlLabel
-                            control={<Switch onChange={(e, checked) => handleChange('updatePath', checked)}  checked={state.updatePath} disabled={state.path == null} />}
+                            control={<Switch onChange={updatePathChangeCB}  checked={state.updatePath} disabled={state.path == null} />}
                             label="update path?" />
                     }
                 </FormGroup>

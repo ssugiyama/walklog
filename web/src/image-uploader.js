@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { FormControl, FormLabel, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -46,15 +46,15 @@ const ImageUploader = props => {
         const onChange = props.onChange;
         if (onChange && typeof onChange === 'function') onChange(file);
     };
-    const handleSelect = () => {
+    const handleSelect = useCallback(() => {
         const elem = ReactDOM.findDOMNode(fileInputRef.current);
         setTimeout(() => elem.click(), 0);
-    };
-    const handleClear = () => {
+    });
+    const handleClear = useCallback(() => {
         setImageUrl(null);
         const onChange = props.onChange;
         if (onChange && typeof onChange === 'function') onChange('');
-    };
+    });
 
     const classes = useStyles(props);
     return (

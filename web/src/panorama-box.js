@@ -1,4 +1,4 @@
-import React, { memo, useRef, useContext, useEffect } from 'react';
+import React, { useRef, useContext, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
 import IconButton from '@material-ui/core/IconButton';
@@ -35,6 +35,9 @@ const styles = {
     },
     panoramaHidden: {
         display: 'none',
+    },
+    grow: {
+        flexGrow: 1,
     },
 };
 
@@ -164,6 +167,13 @@ const PanoramaBox = props => {
         if (context.state.map)
             context.state.map.setStreetView(pnrm);
     };
+    const createPanoramaIndexButtonClickCB = d => () => dispatch(setPanoramaIndex(panoramaIndex + d));
+    const panoramaIndexButtonClickCBs = {
+        '-10': useCallback(createPanoramaIndexButtonClickCB(-10), [panoramaIndex]),
+        '-1':  useCallback(createPanoramaIndexButtonClickCB(-1), [panoramaIndex]),
+        '+1':  useCallback(createPanoramaIndexButtonClickCB(1), [panoramaIndex]),
+        '+10': useCallback(createPanoramaIndexButtonClickCB(10), [panoramaIndex]),
+    };
     return (
         <div>
             <div>
@@ -178,11 +188,11 @@ const PanoramaBox = props => {
                 [classes.panoramaHidden]: overlay,
             })} ref={bodyRef}></div>
             <div className={classes.panoramaBoxControl}>
-                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 10)); } }><AvFastRewindIcon /></IconButton>
-                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 1)); }}><NavigationArrowBackIcon /></IconButton>
-                <Typography variant="body2" style={{ flexGrow: 1 }}><span>{ panoramaIndex+1 } </span> / <span>{ panoramaCount } </span></Typography>
-                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 1)); }}><NavigationArrowForwardIcon /></IconButton>
-                <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 10)); }}><AvFastForwardIcon /></IconButton>
+                <IconButton onClick={panoramaIndexButtonClickCBs['-10']}><AvFastRewindIcon /></IconButton>
+                <IconButton onClick={panoramaIndexButtonClickCBs['-1']}><NavigationArrowBackIcon /></IconButton>
+                <Typography variant="body2" className={classes.grow}><span>{ panoramaIndex+1 } </span> / <span>{ panoramaCount } </span></Typography>
+                <IconButton onClick={panoramaIndexButtonClickCBs['+1']}><NavigationArrowForwardIcon /></IconButton>
+                <IconButton onClick={panoramaIndexButtonClickCBs['+10']}><AvFastForwardIcon /></IconButton>
             </div>
         </div>
     );  

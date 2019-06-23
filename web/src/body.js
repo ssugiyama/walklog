@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import NavBar from './nav-bar';
 import Map from './map';

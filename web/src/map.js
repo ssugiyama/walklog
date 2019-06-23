@@ -1,4 +1,4 @@
-import React, { memo, useRef, useEffect, useState, useContext } from 'react';
+import React, { useRef, useEffect, useState, useContext, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { setSearchForm, setSelectedPath, setCenter, setZoom, toggleView, setMapLoaded, setEditingPath } from './actions';
 import { useSelector, useDispatch } from 'react-redux';
@@ -38,6 +38,9 @@ const styles = () => ({
     },
     fabButtonExpand: {
         bottom: 50,
+    },
+    hidden: {
+        display: 'none',
     },
 });
 
@@ -419,7 +422,7 @@ const Map = props => {
             }
         };
     };
-
+    const toggleViewCB = useCallback(() => dispatch(toggleView()));
     return (
         <React.Fragment>
             <div ref={mapElemRef} className={classNames({
@@ -431,11 +434,11 @@ const Map = props => {
                 className={classNames(classes.fabButton, {
                     [classes.fabButtonExpand]: view == 'map', 
                     [classes.fabButtonCompact]: view == 'content'})}
-                onClick={() => { dispatch(toggleView()); }} >
+                onClick={toggleViewCB} >
                 {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
             </Fab>
-            <a ref={downloadRef} style={{display: 'none'}} download='walklog.json'></a>
-            <input ref={uploadRef} type="file" style={{display: 'none'}} />
+            <a ref={downloadRef} className={classes.hidden} download='walklog.json'></a>
+            <input ref={uploadRef} type="file" className={classes.hidden} />
             <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
         </React.Fragment>
     );

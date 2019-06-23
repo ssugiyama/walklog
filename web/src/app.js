@@ -381,15 +381,17 @@ export function configureStore(state, history) {
     }
 }
 
+const styles = {
+    padding: '8px 16px',
+    paddingLeft: 'env(safe-area-inset-left)',
+    paddingRight: 'env(safe-area-inset-right)',
+    maxWidth: 800,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+};
+
 const SideRoot = ({ route }) => (
-    <div style={{
-        padding: '8px 16px',
-        paddingLeft: 'env(safe-area-inset-left)',
-        paddingRight: 'env(safe-area-inset-right)',
-        maxWidth: 800,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-    }}>
+    <div style={styles}>
         {renderRoutes(route.routes)}
     </div>
 );

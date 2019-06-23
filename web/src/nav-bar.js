@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, memo } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     openWalkEditor,
@@ -66,36 +66,38 @@ const NavBar = (props) => {
             if (onFailure) onFailure();
         });
     };
-    const handleNewWalk = () => {
+    const handleNewWalk = useCallback(() => {
         dispatch(openWalkEditor(true, 'create'));
-    };
+    });
     const handleMenuOpen = (setter) => {
         return event => {
             event.stopPropagation();
             setter(event.currentTarget);
         };
     };
+    const mainMenuOpenCB = useCallback(handleMenuOpen(setTopAnchorEl));
+    const accountMenuOpenCB = useCallback(handleMenuOpen(setAccountAnchorEl));
     const handleMenuClose = (setter) => {
         return event => { 
             event.stopPropagation();
             setter(null);
         };
     };
-    
-    const handleLogin = () => {
+    const mainMenuCloseCB = useCallback(handleMenuClose(setTopAnchorEl));
+    const accountMenuCloseCB = useCallback(handleMenuClose(setAccountAnchorEl));
+
+    const handleLogin = useCallback(() => {
         window.location.href = '/auth/twitter?redirect=' +
             encodeURIComponent(window.location.href);
-    };
-    const handleLogout = () => {
+    });
+    const handleLogout = useCallback(() => {
         window.location.href = '/auth/logout?redirect=' +  
             encodeURIComponent(window.location.href);
-    };
-    const ignoreClick = () => {
-        return event => {
-            event.stopPropagation();
-            return false;
-        };
-    };
+    });
+    const ignoreClick = useCallback(event => {
+        event.stopPropagation();
+        return false;
+    });
     useEffect(() => {
         if (autoGeolocation) {
             const intervalId = setInterval(() => {
@@ -108,7 +110,7 @@ const NavBar = (props) => {
             };
         }
     }, [autoGeolocation]);
-    const handleAutoGeolocationChange = (event, value) => {
+    const handleAutoGeolocationChange = useCallback((event, value) => {
         if (value && navigator.geolocation) {
             getCurrentPosition(pos => {
                 setAutoGeolocation(true);
@@ -130,7 +132,7 @@ const NavBar = (props) => {
             setAutoGeolocation(false);
             dispatch(openSnackbar('stop following your location'));
         }
-    };
+    });
     const closeAllMenus = () => {
         setTopAnchorEl(null);
         setAccountAnchorEl(null);
@@ -157,24 +159,24 @@ const NavBar = (props) => {
     return (
         <AppBar position="static" className={classes.root}>
             <Toolbar>
-                <IconButton onClick={handleMenuOpen(setTopAnchorEl)} color="inherit"><MenuIcon /></IconButton>
+                <IconButton onClick={mainMenuOpenCB} color="inherit"><MenuIcon /></IconButton>
                 <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
                 <Checkbox
                     icon={<MyLocationIcon />}
                     checkedIcon={<MyLocationIcon />}
                     checked={autoGeolocation}
                     onChange={handleAutoGeolocationChange}
-                    onClick={ignoreClick()}
+                    onClick={ignoreClick}
                     value="autoGeolocation"
                 />
-                <IconButton onClick={handleMenuOpen(setAccountAnchorEl)} color="inherit">
+                <IconButton onClick={accountMenuOpenCB} color="inherit">
                     { currentUser ? <img className={classes.userPhoto} src={currentUser.photo} /> : <AccountCircleIcon /> }
                 </IconButton>
             </Toolbar>
             <Menu
                 anchorEl={topAnchorEl}
                 open={Boolean(topAnchorEl)}
-                onClose={handleMenuClose(setTopAnchorEl)}
+                onClose={mainMenuCloseCB}
             >
                 {
                     externalLinks.map(link => 
@@ -185,7 +187,7 @@ const NavBar = (props) => {
             <Menu
                 anchorEl={accountAnchorEl}
                 open={Boolean(accountAnchorEl)}
-                onClose={handleMenuClose(setAccountAnchorEl)}
+                onClose={accountMenuCloseCB}
             >
                 {
                     currentUser ? [

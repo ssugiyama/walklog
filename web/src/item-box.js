@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { openWalkEditor } from './actions';
@@ -90,10 +90,12 @@ const ItemBox = props => {
     const handleEdit = () => {
         dispatch(openWalkEditor(true, 'update'));
     };
-    const handleTabChange = useCallback(tabValue => {
-        setTabValue(tabValue);
+    const tabChangeCB = useCallback((e, value) => {
+        setTabValue(value);
     });
-
+    const indexCHangeCB = useCallback(index => {
+        setTabValue(index);
+    });
     const tweetUrl = useMemo(() => {
         const data = selectedItem;
         if (! data) return null;
@@ -140,7 +142,7 @@ const ItemBox = props => {
             { data && 
                 <Paper>
                     <Tabs value={tabValue}
-                        onChange={(e, value) => handleTabChange(value)}
+                        onChange={tabChangeCB}
                         className={classes.tabs}
                         textColor="secondary"
                         variant="fullWidth" >
@@ -151,7 +153,7 @@ const ItemBox = props => {
                 </Paper> 
             }
             { data && 
-                <SwipeableViews index={tabValue} onChangeIndex={index => handleTabChange(index)} disableLazyLoading enableMouseEvents>
+                <SwipeableViews index={tabValue} onChangeIndex={indexCHangeCB} disableLazyLoading enableMouseEvents>
                     <Paper className={classes.itemBoxContent}>
                         {image && <img src={image} className={classes.itemBoxImage} />}
                         <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>

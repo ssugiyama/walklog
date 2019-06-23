@@ -1,4 +1,4 @@
-import React, { memo, useState, useContext } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import SearchForm from './search-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -56,7 +56,10 @@ const styles = theme => ({
     },
     leftIcon: {
         marginRight: theme.spacing(1),
-    }
+    },
+    inlineBlock: {
+        display: 'inline-block',
+    },
 });
 
 const useStyles = makeStyles(styles);
@@ -74,18 +77,18 @@ const SearchBox = props => {
     const [showDistance, setShowDistance] = useState(true); 
     const context = useContext(MapContext);
     const classes = useStyles(props);
-    const handleShowAll = () => {
+    const handleShowAll = useCallback(() => {
         context.state.addPaths(rows.map(row => row.path));
         dispatch(toggleView());
-    };
+    });
 
     const handleSelect = (index) => {
         const item = rows[index];
         dispatch(push( '/' + item.id ));
     };
-    const handleShowDistance = (value) => {
-        setShowDistance(value);
-    };
+    const handleShowDistance = useCallback(e => {
+        setShowDistance(e.target.value);
+    });
     const moreUrl = `/?offset=${offset}` + (lastQuery && `&${lastQuery}`);
     const userObjs = {};
     for (const u of users) {
@@ -95,7 +98,7 @@ const SearchBox = props => {
         <Paper className={classes.root}>
             <SearchForm />
             <div>
-                <Typography variant="body1" color={error ? 'error' : 'initial'} style={{ display: 'inline-block' }}>
+                <Typography variant="body1" color={error ? 'error' : 'initial'} className={classes.inlineBlock}>
                     {
                         ( () => {
                             if (error) {
@@ -130,7 +133,7 @@ const SearchBox = props => {
                         <TableCell classes={{ root: classes.cell}}><Typography variant="body2">title</Typography></TableCell>
                         <TableCell classes={{ root: classes.cell}}>{
                             rows.length > 0 && rows[0].distance !== undefined ?
-                                (<Select value={showDistance} onChange={e => handleShowDistance(e.target.value)}>
+                                (<Select value={showDistance} onChange={handleShowDistance}>
                                     <MenuItem value={true}><Typography variant="body2">distance</Typography></MenuItem>
                                     <MenuItem value={false}><Typography variant="body2">length</Typography></MenuItem>
                                 </Select>) : (<Typography variant="body2">length</Typography>)

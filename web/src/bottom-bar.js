@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useContext, useCallback, memo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useContext, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPanoramaIndex, setOverlay, setGeoMarker, setEditingPath, setSearchForm  } from './actions';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -77,6 +77,12 @@ const styles = theme => ({
             width: 200,
         },
     },
+    swipeableViews: {
+        width: '100%',
+    },
+    inline: {
+        display: 'inline',
+    },
 });
 
 const useStyles = makeStyles(styles);
@@ -110,15 +116,104 @@ const BottomBar = props => {
             refs.current.geocoder = new google.maps.Geocoder();
         }
     }, [mapLoaded]);
-    const handleNextButtonClick = d => () => {
-        setGroupIndex(index => {
-            index = (index + d) % groupCount;
-            if (index < 0) index += groupCount;
-            return index;
-        });
+    
+    const createPanoramaIndexButtonClickCB = d => () => dispatch(setPanoramaIndex(panoramaIndex + d));
+    const panoramaIndexButtonClickCBs = {
+        '-10': useCallback(createPanoramaIndexButtonClickCB(-10), [panoramaIndex]),
+        '-1':  useCallback(createPanoramaIndexButtonClickCB(-1), [panoramaIndex]),
+        '+1':  useCallback(createPanoramaIndexButtonClickCB(1), [panoramaIndex]),
+        '+10': useCallback(createPanoramaIndexButtonClickCB(10), [panoramaIndex]),
     };
-    const handleSubmitLocation = useCallback(() => {
+    const overlayButtonClickCB = useCallback(() => dispatch(setOverlay(false)), []);
+    const OverlayControls = (<div>
+        <div className={classes.bottomBarGroup}>
+            <Typography variant="caption">StreetView</Typography>
+            <div className={classes.bottomBarGroupBody}>
+                <Tooltip title="back to map" position="top-center">
+                    <IconButton onClick={overlayButtonClickCB}><NavigationCancel /></IconButton>
+                </Tooltip>
+                <Tooltip title="-10" position="top-center">
+                    <IconButton onClick={panoramaIndexButtonClickCBs['-10'] }><AvFastRewind /></IconButton>
+                </Tooltip>
+                <Tooltip title="-1" position="top-center">
+                    <IconButton onClick={panoramaIndexButtonClickCBs['-1']}><NavigationArrowBack /></IconButton>
+                </Tooltip>
+                <Typography variant="body1" className={classes.inline}>{ panoramaIndex+1 } / { panoramaCount } </Typography>
+                <Tooltip title="+1" position="top-center">
+                    <IconButton onClick={panoramaIndexButtonClickCBs['+1']}><NavigationArrowForward /></IconButton>
+                </Tooltip>
+                <Tooltip title="+10" position="top-center">
+                    <IconButton onClick={panoramaIndexButtonClickCBs['+10']}><AvFastForward /></IconButton>
+                </Tooltip>
+            </div>
+        </div>
+    </div>);
+
+    const searchFormChangeCBs = {
+        'filter': useCallback(e =>  dispatch(setSearchForm({filter: e.target.value})), []),
+        'radius': useCallback(e =>  dispatch(setSearchForm({radius: e.target.value})), []),
+        'cities': useCallback(() => dispatch(setSearchForm({cities: ''})), []),
+    };
+    const FilterControls = (<div>
+        <div className={classes.bottomBarGroup}>
+            <Typography variant="caption">Filter</Typography>
+            <div className={classes.bottomBarGroupBody}>
+                <Select value={filter} onChange={searchFormChangeCBs['filter']}>
+                    <MenuItem value="">-</MenuItem>
+                    <MenuItem value="neighborhood">Neighborhood</MenuItem>
+                    <MenuItem value="cities">Cities</MenuItem>
+                    <MenuItem value="frechet">Fréchet</MenuItem>
+                    <MenuItem value="hausdorff">Hausdorff</MenuItem>
+                    <MenuItem value="crossing">Crossing</MenuItem>
+                </Select>
+                { filter == 'neighborhood' &&
+                <Select value={radius} onChange={searchFormChangeCBs['radius']}>
+                    <MenuItem value={1000}>1km</MenuItem>
+                    <MenuItem value={500}>500m</MenuItem>
+                    <MenuItem value={250}>250m</MenuItem>
+                    <MenuItem value={100}>100m</MenuItem>
+                    {
+                        [1000, 500, 250, 100].some(r => r == radius) ? null
+                            : (<MenuItem value={radius}>{Math.round(radius) + 'm'}</MenuItem>)
+                    }
+                </Select>}
+                { filter == 'cities' &&
+                <Tooltip title="clear" position="top-center">
+                    <IconButton onClick={searchFormChangeCBs['cities']}><NavigationRefresh /></IconButton>
+                </Tooltip>}
+            </div>
+        </div>
+    </div>);
+
+    const editButtonClickCB = useCallback(() => dispatch(setEditingPath(true)));
+    const clearButtonClickCB = useCallback(() => clearPaths(), [mapLoaded]);
+    const downloadButtonClickCB = useCallback(() => downloadPath(), [mapLoaded]);
+    const uploadButtonClickCB = useCallback(() => uploadPath(), [mapLoaded]);
+    const PathControls = (<div>
+        <div className={classes.bottomBarGroup}>
+            <Typography variant="caption">Path</Typography>
+            <div className={classes.bottomBarGroupBody}>
+                <Tooltip title="edit" position="top-center">
+                    <IconButton onClick={editButtonClickCB} disabled={! selectedPath} ><EditorModeEdit /></IconButton>
+                </Tooltip>
+                <Tooltip title="clear all" position="top-center">
+                    <IconButton onClick={clearButtonClickCB}><NavigationRefresh /></IconButton>
+                </Tooltip>
+                <Tooltip title="download" position="top-center">
+                    <IconButton onClick={downloadButtonClickCB}  disabled={! selectedPath}><FileDownload /></IconButton>
+                </Tooltip>
+                <Tooltip title="upload" position="top-center">
+                    <IconButton onClick={uploadButtonClickCB}><FileUpload /></IconButton>
+                </Tooltip>
+                <Typography variant="body1" className={classes.inline}>{`${length.toFixed(1)}km`}</Typography>
+            </div>
+        </div>
+    </div>);
+
+    const locationChangeCB = useCallback(e => setLocation(e.target.value));
+    const submitLocationCB = useCallback(e => {
         if (!location) return;
+        if (e instanceof KeyboardEvent && e.charCode != 13) return;
         refs.current.geocoder.geocode( { 'address': location}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
                 dispatch(setGeoMarker({ 
@@ -131,82 +226,7 @@ const BottomBar = props => {
             }
         });
     }, [location]);
-    const handleSearchFormChange = useCallback((name, value) =>  {
-        dispatch(setSearchForm({[name]: value}));
-    });
-    const OverlayControls = (<div>
-        <div className={classes.bottomBarGroup}>
-            <Typography variant="caption">StreetView</Typography>
-            <div className={classes.bottomBarGroupBody}>
-                <Tooltip title="back to map" position="top-center">
-                    <IconButton onClick={ () => { dispatch(setOverlay(false)); }}><NavigationCancel /></IconButton>
-                </Tooltip>
-                <Tooltip title="-10" position="top-center">
-                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 10)); } }><AvFastRewind /></IconButton>
-                </Tooltip>
-                <Tooltip title="-1" position="top-center">
-                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex - 1)); }}><NavigationArrowBack /></IconButton>
-                </Tooltip>
-                <Typography variant="body1" style={{ display: 'inline' }}>{ panoramaIndex+1 } / { panoramaCount } </Typography>
-                <Tooltip title="+1" position="top-center">
-                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 1)); }}><NavigationArrowForward /></IconButton>
-                </Tooltip>
-                <Tooltip title="+10" position="top-center">
-                    <IconButton onClick={ () => { dispatch(setPanoramaIndex(panoramaIndex + 10)); }}><AvFastForward /></IconButton>
-                </Tooltip>
-            </div>
-        </div>
-    </div>);
-    const FilterControls = (<div>
-        <div className={classes.bottomBarGroup}>
-            <Typography variant="caption">Filter</Typography>
-            <div className={classes.bottomBarGroupBody}>
-                <Select value={filter} onChange={e => handleSearchFormChange('filter', e.target.value)}>
-                    <MenuItem value="">-</MenuItem>
-                    <MenuItem value="neighborhood">Neighborhood</MenuItem>
-                    <MenuItem value="cities">Cities</MenuItem>
-                    <MenuItem value="frechet">Fréchet</MenuItem>
-                    <MenuItem value="hausdorff">Hausdorff</MenuItem>
-                    <MenuItem value="crossing">Crossing</MenuItem>
-                </Select>
-                { filter == 'neighborhood' &&
-                <Select value={radius} onChange={e => handleSearchFormChange('radius', e.target.value)}>
-                    <MenuItem value={1000}>1km</MenuItem>
-                    <MenuItem value={500}>500m</MenuItem>
-                    <MenuItem value={250}>250m</MenuItem>
-                    <MenuItem value={100}>100m</MenuItem>
-                    {
-                        [1000, 500, 250, 100].some(r => r == radius) ? null
-                            : (<MenuItem value={radius}>{Math.round(radius) + 'm'}</MenuItem>)
-                    }
-                </Select>}
-                { filter == 'cities' &&
-                <Tooltip title="clear" position="top-center">
-                    <IconButton onClick={() => handleSearchFormChange('cities', '')}><NavigationRefresh /></IconButton>
-                </Tooltip>}
-            </div>
-        </div>
-    </div>);
-    const PathControls = (<div>
-        <div className={classes.bottomBarGroup}>
-            <Typography variant="caption">Path</Typography>
-            <div className={classes.bottomBarGroupBody}>
-                <Tooltip title="edit" position="top-center">
-                    <IconButton onClick={() => dispatch(setEditingPath(true)) } disabled={! selectedPath} ><EditorModeEdit /></IconButton>
-                </Tooltip>
-                <Tooltip title="clear all" position="top-center">
-                    <IconButton onClick={() => clearPaths() }><NavigationRefresh /></IconButton>
-                </Tooltip>
-                <Tooltip title="download" position="top-center">
-                    <IconButton onClick={() => downloadPath() }  disabled={! selectedPath}><FileDownload /></IconButton>
-                </Tooltip>
-                <Tooltip title="upload" position="top-center">
-                    <IconButton onClick={() => uploadPath() }><FileUpload /></IconButton>
-                </Tooltip>
-                <Typography variant="body1" style={{ display: 'inline' }}>{`${length.toFixed(1)}km`}</Typography>
-            </div>
-        </div>
-    </div>);
+
     const SearchControls = (<div>
         <div className={classes.bottomBarGroup}>
             <Typography variant="caption">Search</Typography>
@@ -221,14 +241,15 @@ const BottomBar = props => {
                             root: classes.inputRoot,
                             input: classes.inputInput,
                         }}
-                        onChange={e => setLocation(e.target.value)}
-                        onKeyPress={e => { if (e.charCode == 13) handleSubmitLocation(); }}
-                        onBlur={() => { handleSubmitLocation(); }}
+                        onChange={locationChangeCB}
+                        onKeyPress={submitLocationCB}
+                        onBlur={submitLocationCB}
                     />
                 </div>
             </div>
         </div>
     </div>);
+
     const controls = [];
     if (overlay) {
         controls.push(OverlayControls);
@@ -238,16 +259,26 @@ const BottomBar = props => {
         controls.push(PathControls);
         controls.push(SearchControls);
     }
+    const createNnextButtonClickCB = d => () => {
+        setGroupIndex(index => {
+            index = (index + d) % groupCount;
+            if (index < 0) index += groupCount;
+            return index;
+        });
+    };
+    const nextButtonClickCB = useCallback(createNnextButtonClickCB(1));
+    const prevButtonClickCB = useCallback(createNnextButtonClickCB(-1));
+    const indexChangeCB = useCallback(index => setGroupIndex(index));
     return (
         <Toolbar className={classes.root}>
             {
-                groupCount > 1 && (<IconButton onClick={handleNextButtonClick(-1)}> <NavigateBefore /></IconButton>)
+                groupCount > 1 && (<IconButton onClick={prevButtonClickCB}> <NavigateBefore /></IconButton>)
             }
-            <SwipeableViews style={{width : '100%'}} index={groupIndex} onChangeIndex={index => setGroupIndex(index)} disableLazyLoading enableMouseEvents>
+            <SwipeableViews className={classes.swipeableViews} index={groupIndex} onChangeIndex={indexChangeCB} disableLazyLoading enableMouseEvents>
                 {controls}
             </SwipeableViews>
             {
-                groupCount > 1 && (<IconButton onClick={handleNextButtonClick(1)}><NavigateNext /></IconButton>)
+                groupCount > 1 && (<IconButton onClick={nextButtonClickCB}><NavigateNext /></IconButton>)
             }
         </Toolbar>
     );

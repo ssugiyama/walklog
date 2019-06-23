@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -8,7 +8,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 const ConfirmModal = props => {
     const { open, title, resolve, text, actions } = props;
-  
+    
     return (
         <Dialog
             open={open}

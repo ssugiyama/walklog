@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchForm  } from './actions';
 import Button from '@material-ui/core/Button';
@@ -45,7 +45,14 @@ const styles = theme => ({
     },
     leftIcon: {
         marginRight: theme.spacing(1),
-    }
+    },
+    formInput: {
+        width: '50%',
+        verticalAlign: 'center',
+    },
+    resetRow: {
+        textAlign: 'center',
+    },
 });
 
 const useStyles = makeStyles(styles);
@@ -61,10 +68,17 @@ const SearchForm = props => {
     const users = useSelector(state => state.main.users);
     const dispatch = useDispatch();
     const classes = useStyles(props);
-    const handleChange = useCallback((name, value) => {
-        dispatch(setSearchForm({[name]: value}));
-    });
-    
+
+    const createChangeCB = name => e => dispatch(setSearchForm({[name]: e.target.value}));
+    const changeCBs = {
+        'filter': useCallback(createChangeCB('filter'), []),
+        'user':   useCallback(createChangeCB('user'), []),
+        'month':  useCallback(createChangeCB('month'), []),
+        'year':   useCallback(createChangeCB('year'), []),
+        'order':  useCallback(createChangeCB('order'), []),
+        'limit':  useCallback(createChangeCB('limit'), []),
+    };
+
     return (
         <form role="form" className={classes.root}>
             <input type="hidden" name="latitude" value="" />
@@ -73,7 +87,7 @@ const SearchForm = props => {
             <input type="hidden" name="cities" value=""  />
             <input type="hidden" name="searchPath" value=""  />
             <div>
-                <TextField select label="filter" value={filter} onChange={e => handleChange('filter', e.target.value)} style={{width: '50%'}}>
+                <TextField select label="filter" value={filter} onChange={changeCBs['filter']} className={classes.formInput}>
                     <MenuItem value="">-</MenuItem>
                     <MenuItem value="neighborhood">Neighborhood</MenuItem>
                     <MenuItem value="cities">Cities</MenuItem>
@@ -81,29 +95,29 @@ const SearchForm = props => {
                     <MenuItem value="hausdorff">Hausdorff</MenuItem>
                     <MenuItem value="crossing">Crossing</MenuItem>
                 </TextField>
-                <TextField select label="user" value={user} onChange={e => handleChange('user', e.target.value)} 
-                    style={{width: '50%'}}
+                <TextField select label="user" value={user} onChange={changeCBs['user']} 
+                    className={classes.formInput}
                 >
                     <MenuItem value="">-</MenuItem>
                     {users.map(u => <MenuItem value={u.id} key={u.id}>{u.username}</MenuItem>)}
                 </TextField>
             </div>
             <div>
-                <TextField select label="month" value={parseInt(month) || ''} onChange={e => handleChange('month', e.target.value)} 
-                    style={{width: '50%'}}
+                <TextField select label="month" value={parseInt(month) || ''} onChange={changeCBs['month']} 
+                    className={classes.formInput}
                 >
                     {monthOptions.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
                 </TextField>
-                <TextField select label="year" value={parseInt(year) || ''} onChange={e => handleChange('year', e.target.value)} 
-                    style={{width: '50%'}} 
+                <TextField select label="year" value={parseInt(year) || ''} onChange={changeCBs['year']} 
+                    className={classes.formInput}
                 >
                     <MenuItem value="">-</MenuItem>
                     {years.map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
                 </TextField>
             </div>
             <div>
-                <TextField select label="order" value={order} onChange={e => handleChange('order', e.target.value)} 
-                    style={{width: '50%', verticalAlign: 'bottom'}} 
+                <TextField select label="order" value={order} onChange={changeCBs['order']} 
+                    className={classes.formInput}
                 >
                     {
                         (filter == 'hausdorff' || filter == 'frechet' ? orderOptionsWithNearest : orderOptions).map(option =>
@@ -111,9 +125,9 @@ const SearchForm = props => {
                         )
                     }
                 </TextField>
-                <TextField id="searchForm_limit" label="limit" value={limit} onChange={e => handleChange('limit', e.target.value)} style={{width: '50%'}} />
+                <TextField id="searchForm_limit" label="limit" value={limit} onChange={changeCBs['limit']} className={classes.formInput} />
             </div>
-            <div style={{ textAlign: 'center' }}>
+            <div className={classes.resetRow}>
                 <Button variant="outlined" className={classes.resetButton} color="primary" component={Link} to="/?forceFetch=1" >
                     <RefreshIcon className={classes.leftIcon} /> reset
                 </Button>
