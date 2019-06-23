@@ -11,7 +11,6 @@ import MapContext from './map-context';
 import Fab from '@material-ui/core/Fab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { compareWithMapLoaded } from './utils';
 
 const styles = () => ({
     mapCompact: {
@@ -442,4 +441,4 @@ const Map = props => {
     );
 };
 
-export default memo(Map, compareWithMapLoaded);
+export default Map;

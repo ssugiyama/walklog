@@ -122,4 +122,4 @@ const SearchForm = props => {
     );
 };
 
-export default memo(SearchForm);
+export default SearchForm;

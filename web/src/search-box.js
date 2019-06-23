@@ -160,4 +160,4 @@ const SearchBox = props => {
     );
 };
 
-export default memo(SearchBox);
+export default SearchBox;

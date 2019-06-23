@@ -201,4 +201,4 @@ const NavBar = (props) => {
     );
 };
 
-export default memo(NavBar);
+export default NavBar;

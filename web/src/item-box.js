@@ -171,4 +171,4 @@ const ItemBox = props => {
     );  
 };
 
-export default memo(ItemBox);
+export default ItemBox;

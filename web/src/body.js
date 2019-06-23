@@ -61,4 +61,4 @@ const Body = props => {
     );
 };
 
-export default memo(Body);
+export default Body;

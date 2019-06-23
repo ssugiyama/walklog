@@ -253,4 +253,4 @@ const BottomBar = props => {
     );
 };
 
-export default memo(BottomBar);
+export default BottomBar;

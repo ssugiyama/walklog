@@ -10,7 +10,6 @@ import NavigationArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AvFastForwardIcon from '@material-ui/icons/FastForward';
 import AvFastRewindIcon from '@material-ui/icons/FastRewind';
 import MapContext from './map-context';
-import { compareWithMapLoaded } from './utils';
 import { makeStyles } from '@material-ui/styles';
 import classNames from 'classnames';
 
@@ -189,4 +188,4 @@ const PanoramaBox = props => {
     );  
 };
 
-export default memo(PanoramaBox, compareWithMapLoaded);
+export default PanoramaBox;

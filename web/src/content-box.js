@@ -25,4 +25,4 @@ const ContentBox = props => {
     );
 };
 
-export default memo(ContentBox);
+export default ContentBox;

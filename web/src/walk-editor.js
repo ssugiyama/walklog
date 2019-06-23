@@ -148,4 +148,4 @@ const WalkEditor = () => {
     );  
 };
 
-export default memo(WalkEditor);
+export default WalkEditor;

@@ -28,4 +28,4 @@ const ConfirmModal = props => {
     );
 };
 
-export default memo(ConfirmModal);
+export default ConfirmModal;

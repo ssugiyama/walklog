@@ -2,8 +2,7 @@ import React, { useRef, useEffect, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
-import { useTheme } from '@material-ui/styles';
-import { compareWithMapLoaded } from './utils';
+import { useTheme, makeStyles } from '@material-ui/styles';
 
 const styles = {
     elevationBox: {
@@ -142,4 +141,4 @@ const ElevationBox = () => {
     
 };
 
-export default memo(ElevationBox, compareWithMapLoaded);
+export default ElevationBox;

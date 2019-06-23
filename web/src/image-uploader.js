@@ -76,4 +76,4 @@ const ImageUploader = props => {
     );
 };
 
-export default memo(ImageUploader);
+export default ImageUploader;
