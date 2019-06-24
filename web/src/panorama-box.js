@@ -137,6 +137,10 @@ const PanoramaBox = props => {
     useEffect(() => {
         if (mapLoaded &&  !refs.current.panorama ) {
             refs.current.streetViewService = new google.maps.StreetViewService();
+            bodyRef.current.addEventListener('touchmove', e =>{
+                e.stopPropagation();
+                return true;
+            }, true);
             refs.current.panorama = new google.maps.StreetViewPanorama(bodyRef.current, {
                 addressControl: true,
                 navigationControl: true,
