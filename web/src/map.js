@@ -4,7 +4,7 @@ import { setSearchForm, setSelectedPath, setCenter, setZoom, toggleView, setMapL
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import classNames from 'classnames';
-import {APPEND_PATH_CONFIRM_INFO} from './constants';
+import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './map-context';

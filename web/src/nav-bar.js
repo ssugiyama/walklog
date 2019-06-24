@@ -21,7 +21,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { makeStyles } from '@material-ui/styles';
 import ConfirmModal from './confirm-modal';
-import {APPEND_PATH_CONFIRM_INFO} from './constants';
+import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import MapContext from './map-context';
 
 const styles = {
