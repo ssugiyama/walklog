@@ -40,18 +40,21 @@ const orderOptionsWithNearest = [
 ];
 
 const styles = theme => ({
-    resetButton: {
-        margin: 10
+    root: {
+        margin: theme.spacing(1),
     },
     leftIcon: {
         marginRight: theme.spacing(1),
     },
     formInput: {
         width: '50%',
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
         verticalAlign: 'center',
     },
     resetRow: {
-        textAlign: 'center',
+        marginTop: theme.spacing(1),
+        textAlign: 'right',
     },
 });
 
@@ -128,7 +131,7 @@ const SearchForm = props => {
                 <TextField id="searchForm_limit" label="limit" value={limit} onChange={changeCBs['limit']} className={classes.formInput} />
             </div>
             <div className={classes.resetRow}>
-                <Button variant="outlined" className={classes.resetButton} color="primary" component={Link} to="/?forceFetch=1" >
+                <Button variant="outlined" color="primary" component={Link} to="/?forceFetch=1" >
                     <RefreshIcon className={classes.leftIcon} /> reset
                 </Button>
             </div>

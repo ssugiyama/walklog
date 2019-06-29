@@ -15,17 +15,17 @@ import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/styles';
 import NoSsr from '@material-ui/core/NoSsr';
 import TweetIcon from './tweet-icon';
 import SwipeableViews from 'react-swipeable-views';
 import config from 'react-global-configuration';
 
-const styles = () => ({
+const styles = theme => ({
     itemBoxContent: {
-        padding: '8px 12px 12px',
+        padding: theme.spacing(1),
         flexDirection: 'column',
-        margin: '4px 0',
     },
     tabs: {
         margin: '4px 0',
@@ -56,8 +56,7 @@ const styles = () => ({
     itemBoxControl: {
         width: '100%',
         textAlign: 'center',
-        padding: '8px 12px 12px',
-        margin: '4px 0',
+        padding: theme.spacing(1),
     },
     backButton: {
         float: 'left',
@@ -125,7 +124,7 @@ const ItemBox = props => {
             '/?select=1&offset=' + offset + 
                 (lastQuery ? '&' + lastQuery : '') : null;
     return  (
-        <div>
+        <Box>
             <Paper className={classes.itemBoxControl}>
                 <Fab className={classes.backButton} size="small" color="primary" component={Link} to={upUrl}><ListIcon /></Fab>
                 <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBackIcon /></IconButton>
@@ -169,7 +168,7 @@ const ItemBox = props => {
                     </Paper>
                 </SwipeableViews>
             }
-        </div>
+        </Box>
     );  
 };
 

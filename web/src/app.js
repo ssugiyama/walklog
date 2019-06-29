@@ -7,6 +7,7 @@ import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem,  setAdjacentItemIds, setLastQuery, toggleView } from './actions';
 import SearchBox from './search-box';
+import Box from '@material-ui/core/Box';
 import ItemBox from './item-box';
 import { renderRoutes } from 'react-router-config';
 import { createMuiTheme } from '@material-ui/core/styles';
@@ -381,19 +382,13 @@ export function configureStore(state, history) {
     }
 }
 
-const styles = {
-    padding: '8px 16px',
-    paddingLeft: 'env(safe-area-inset-left)',
-    paddingRight: 'env(safe-area-inset-right)',
-    maxWidth: 800,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-};
-
 const SideRoot = ({ route }) => (
-    <div style={styles}>
+    <Box 
+        maxWidth={800}
+        mx="auto"
+    >
         {renderRoutes(route.routes)}
-    </div>
+    </Box>
 );
 
 export const routes = [

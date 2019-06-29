@@ -18,10 +18,15 @@ import { makeStyles } from '@material-ui/styles';
 import MapContext from './map-context';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
+import Divider from '@material-ui/core/Divider';
+import Box from '@material-ui/core/Box';
 
 const styles = theme => ({
     root: {
-        padding: 16,
+        padding: theme.spacing(1),
+    },
+    divider: {
+        margin: theme.spacing(2),
     },
     table: {
         cursor: 'pointer',
@@ -32,7 +37,7 @@ const styles = theme => ({
         },
     },
     cell: {
-        padding: '4px 2px 4px 2px',
+        padding: theme.spacing(1),
         '&:nth-of-type(1)': {
             width: 40,
             whiteSpace: 'nowrap',
@@ -52,7 +57,7 @@ const styles = theme => ({
     },
     moreButton: {
         width: 'calc(100% - 20px)',
-        margin: 10,
+        margin: theme.spacing(1),
     },
     leftIcon: {
         marginRight: theme.spacing(1),
@@ -97,7 +102,8 @@ const SearchBox = props => {
     return (
         <Paper className={classes.root}>
             <SearchForm />
-            <div>
+            <Divider className={classes.divider} />
+            <Box display="flex" m={1}>
                 <Typography variant="body1" color={error ? 'error' : 'initial'} className={classes.inlineBlock}>
                     {
                         ( () => {
@@ -122,9 +128,10 @@ const SearchBox = props => {
                         })()
                     }
                 </Typography> :
+                <Box flexGrow={1} />
                 { rows.length > 0 && 
                     (<Button variant="outlined" onClick={ handleShowAll } color="secondary"><ShowChartIcon className={classes.leftIcon} />draw</Button>) }
-            </div>
+            </Box>
             <Table className={classes.table}>
                 <TableHead>
                     <TableRow>

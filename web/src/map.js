@@ -1,44 +1,15 @@
-import React, { useRef, useEffect, useState, useContext, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, toggleView, setMapLoaded, setEditingPath } from './actions';
+import { setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath } from './actions';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import classNames from 'classnames';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './map-context';
-import Fab from '@material-ui/core/Fab';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import Box from '@material-ui/core/Box';
 
 const styles = () => ({
-    mapCompact: {
-        color: 'black',
-        margin: '0 0 4px 0',
-        height: '40vh',
-        marginLeft: 'env(safe-area-inset-left)',
-        marginRight: 'env(safe-area-inset-right)',
-    },
-    mapExpand: {
-        color: 'black',
-        flexGrow: 1,
-        margin: '0 0 4px 0',
-        marginLeft: 'env(safe-area-inset-left)',
-        marginRight: 'env(safe-area-inset-right)',
-    },
-    fabButton: {
-        position: 'absolute',
-        zIndex: 10,
-        left: 'calc(50% - 20px)',
-        margin: '0 auto',
-    },
-    fabButtonCompact: {
-        top: 'calc(40vh + 48px)',
-    },
-    fabButtonExpand: {
-        bottom: 50,
-    },
     hidden: {
         display: 'none',
     },
@@ -80,7 +51,6 @@ const Map = props => {
     const infoWindow = useSelector(state => state.main.infoWindow);
     const geoMarker = useSelector(state => state.main.geoMarker);
     const zoom = useSelector(state => state.main.zoom);
-    const view = useSelector(state => state.main.view);
     const mapLoaded = useSelector(state => state.main.mapLoaded);
     const refs = useRef({});
     const rc = refs.current;
@@ -422,21 +392,14 @@ const Map = props => {
             }
         };
     };
-    const toggleViewCB = useCallback(() => dispatch(toggleView()));
+    
     return (
         <React.Fragment>
-            <div ref={mapElemRef} className={classNames({
-                [classes.mapCompact]: view == 'content',
-                [classes.mapExpand]: view == 'map',
-            })}></div>
-            <Fab size="small" aria-label="toggle view"
-                color="secondary"
-                className={classNames(classes.fabButton, {
-                    [classes.fabButtonExpand]: view == 'map', 
-                    [classes.fabButtonCompact]: view == 'content'})}
-                onClick={toggleViewCB} >
-                {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
-            </Fab>
+            <Box ref={mapElemRef} 
+                my={1}
+                color="black"
+                {... props}
+            ></Box>
             <a ref={downloadRef} className={classes.hidden} download='walklog.json'></a>
             <input ref={uploadRef} type="file" className={classes.hidden} />
             <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />

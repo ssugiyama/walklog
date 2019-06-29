@@ -28,7 +28,7 @@ import NavigateNext from '@material-ui/icons/NavigateNext';
 const styles = theme => ({
     root: {
         width: '100%',
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.paper,
     },
     bottomBarGroup: {
         width: '100%',
@@ -270,7 +270,7 @@ const BottomBar = props => {
     const prevButtonClickCB = useCallback(createNnextButtonClickCB(-1));
     const indexChangeCB = useCallback(index => setGroupIndex(index));
     return (
-        <Toolbar className={classes.root}>
+        <Toolbar className={classes.root} variant="dense">
             {
                 groupCount > 1 && (<IconButton onClick={prevButtonClickCB}> <NavigateBefore /></IconButton>)
             }
