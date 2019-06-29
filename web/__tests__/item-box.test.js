@@ -7,6 +7,7 @@ import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import config from 'react-global-configuration';
 import {ThemeProvider} from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core';
 
 Enzyme.configure({ adapter: new Adapter() });
 

@@ -54,7 +54,6 @@ describe('<BodyContainer />', () => {
             years: [2000],
             months: [1],
         }); 
-        console.log(wrapper.debug())
         expect(wrapper.exists('[display="none"] BottomBar')).toBeTruthy();
         expect(wrapper.exists('[display="flex"] ContentBox')).toBeTruthy();
     });
