@@ -38,7 +38,7 @@ describe('<BodyContainer />', () => {
     afterEach(() => {
         wrapper.unmount();
     });
-    it('should have <BottomBar /> when path is not /:id', () => {
+    it('should have invisible <BottomBar /> and vivible <ContentBox /> when view == content', () => {
         wrapper = setup('/', {
             view: 'content',
             users: [{
@@ -54,9 +54,11 @@ describe('<BodyContainer />', () => {
             years: [2000],
             months: [1],
         }); 
-        expect(wrapper.find('BottomBar').length).toBe(0);
+        console.log(wrapper.debug())
+        expect(wrapper.exists('[display="none"] BottomBar')).toBeTruthy();
+        expect(wrapper.exists('[display="flex"] ContentBox')).toBeTruthy();
     });
-    it('should have <BottomBar /> when path is /:id', () => {
+    it('should have visible <BottomBar /> and invivible <ContentBox /> when view == map', () => {
         wrapper = setup('/1', {
             view: 'map',
             users: [{
@@ -70,6 +72,7 @@ describe('<BodyContainer />', () => {
                 rows: [],
             },
         }); 
-        expect(wrapper.find('BottomBar').length).toBe(1);
+        expect(wrapper.exists('[display="block"] BottomBar')).toBeTruthy();
+        expect(wrapper.exists('[display="none"] ContentBox')).toBeTruthy();
     });
 });

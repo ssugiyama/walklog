@@ -33,42 +33,6 @@ describe('<ContentBox />', () => {
     afterEach(() => {
         wrapper.unmount();
     });
-    it('should be visible when view == content', () => {
-        wrapper = setup('/', {
-            view: 'content', 
-            result: {
-                rows: []
-            },
-            users: [{
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
-            }],
-            years: [],
-            months: [],
-            searchForm: {},
-        });
-        const target = wrapper.find('ContentBox');
-        expect(target.children().prop('className')).toMatch(/^makeStyles-root-.+$/);
-    });
-    it('should be invisible when view == map', () => {
-        wrapper = setup('/', {
-            view: 'map', 
-            result: {
-                rows: []
-            },
-            users: [{
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
-            }],
-            years: [],
-            months: [],
-            searchForm: {},
-        }); 
-        const target = wrapper.find('ContentBox');
-        expect(target.children().prop('className')).toMatch(/^makeStyles-hidden-.+$/);
-    });
     it('should have SearchBox when path is not /:id', () => {
         wrapper = setup('/', {
             view: 'map', 

@@ -2,10 +2,11 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Enzyme, { mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import ItemBoxContainer from '../src/item-box';
+import ItemBox from '../src/item-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import config from 'react-global-configuration';
+import {ThemeProvider} from '@material-ui/styles';
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -18,12 +19,15 @@ function setup(path, props, router) {
         main: props,
         router
     };
+    const theme = createMuiTheme({});
     const store = configureStore()(state);
     return mount(
         <Provider store={store}>
-            <MemoryRouter initialEntries={[path]}>
-                <ItemBoxContainer />
-            </MemoryRouter>
+            <ThemeProvider theme={theme}>
+                <MemoryRouter initialEntries={[path]}>
+                    <ItemBox />
+                </MemoryRouter>
+            </ThemeProvider>
         </Provider>
     );
 }
