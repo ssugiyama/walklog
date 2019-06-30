@@ -2,25 +2,16 @@ import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setInfoWindow } from './actions';
 import { Chart } from 'chart.js';
-import { useTheme, makeStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/styles';
+import Box from '@material-ui/core/Box';
 
-const styles = {
-    elevationBox: {
-        width: '100%',
-        height: '20vh',
-    },
-};
-
-const useStyles = makeStyles(styles);
-
-const ElevationBox = props => {
+const ElevationBox = () => {
     const rootRef = useRef();
     const refs = useRef({});
     const highlightedPath = useSelector(state => state.main.highlightedPath);
     const mapLoaded       = useSelector(state => state.main.mapLoaded);
     const dispatch        = useDispatch();
     const theme           = useTheme();
-    const classes         = useStyles(props);
     // test code for local
     // const interpolatePoints = (pt1, pt2, r) => {
     //     return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
@@ -76,6 +67,8 @@ const ElevationBox = props => {
                     },
                     options: {
                         legend: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         tooltips: {
                             enabled: false
                         },
@@ -137,7 +130,9 @@ const ElevationBox = props => {
 
     if (highlightedPath)
         return (
-            <canvas className={classes.elevationBox} ref={rootRef}></canvas>
+            <Box width="100%" height="20vh">
+                <canvas ref={rootRef}></canvas>
+            </Box>
         );
     else
         return null;
