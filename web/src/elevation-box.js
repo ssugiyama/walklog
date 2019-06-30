@@ -13,32 +13,34 @@ const ElevationBox = () => {
     const dispatch        = useDispatch();
     const theme           = useTheme();
     // test code for local
-    // const interpolatePoints = (pt1, pt2, r) => {
-    //     return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
-    // };
-    // const getElevationPointsAndElevation = (highlightedPath) => {
-    //     if (!highlightedPath) return null;
-    //     const pp = [];
-    //     const path = highlightedPath;
-    //     const count = path.length;
-    //     let way = 0;
-    //     let dsum = 0;
-    //     let pt2;
-    //     for (let i= 0; i < count-1; i++) {
-    //         let pt1 = path[i];
-    //         pt2 = path[i+1];
-    //         const d = google.maps.geometry.spherical.computeDistanceBetween(pt1, pt2);
+    if (process.env.NODE_ENV == 'local') {
+        var interpolatePoints = (pt1, pt2, r) => {
+            return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
+        };
+        var getElevationPointsAndElevation = (highlightedPath) => {
+            if (!highlightedPath) return null;
+            const pp = [];
+            const path = highlightedPath;
+            const count = path.length;
+            let way = 0;
+            let dsum = 0;
+            let pt2;
+            for (let i= 0; i < count-1; i++) {
+                let pt1 = path[i];
+                pt2 = path[i+1];
+                const d = google.maps.geometry.spherical.computeDistanceBetween(pt1, pt2);
 
-    //         while(way < dsum+d ) {
-    //             const pt = interpolatePoints(pt1, pt2, (way - dsum)/d);
-    //             const h = Math.random()* 50 + 10;
-    //             pp.push({elevation: h, location: pt});
-    //             way += 50;
-    //         }
-    //         dsum += d;
-    //     }
-    //     return pp;
-    // };
+                while(way < dsum+d ) {
+                    const pt = interpolatePoints(pt1, pt2, (way - dsum)/d);
+                    const h = Math.random()* 50 + 10;
+                    pp.push({elevation: h, location: pt});
+                    way += 50;
+                }
+                dsum += d;
+            }
+            return pp;
+        };
+    }
 
     const requestElevation = () =>  {
         if (!highlightedPath) return;
@@ -48,11 +50,15 @@ const ElevationBox = () => {
             'path': path,
             'samples': 256
         };
-        refs.current.elevator.getElevationAlongPath(pathRequest, (results, status) => {
-            plotElevation(results, status);
-        });
-        // const results = getElevationPointsAndElevation(path);
-        // plotElevation(results, google.maps.ElevationStatus.OK)
+        if (process.env.NODE_ENV == 'local') {
+            const results = getElevationPointsAndElevation(path);
+            plotElevation(results, google.maps.ElevationStatus.OK);
+        }
+        else {
+            refs.current.elevator.getElevationAlongPath(pathRequest, (results, status) => {
+                plotElevation(results, status);
+            });
+        } 
     };
     const plotElevation = (results, status) => {
         if (status == google.maps.ElevationStatus.OK) {
