@@ -112,7 +112,7 @@ const WalkEditor = () => {
     const dateChangeCB       = useCallback(e => handleChange('date', e.target.value));
     const titleChangeCB      = useCallback(e => handleChange('title', e.target.value));
     const commentChangeCB    = useCallback(e => handleChange('comment', e.target.value));
-    const imageChangeCB      = useCallback(e => handleChange('date', e));
+    const imageChangeCB      = useCallback(e => handleChange('image', e));
     const updatePathChangeCB = useCallback((e, checked) => handleChange('updatePath', checked));
 
     useEffect(() => {
