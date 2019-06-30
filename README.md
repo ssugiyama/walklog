@@ -70,6 +70,7 @@ THEME_TYPE=
 
 ### 3. setup and start api server
     % cd ../web
+    % export NODE_ENV=xxx
     % yarn install && yarn run build-cli && yarn run build-svr
     % cp -a assets/* public
     % yarn run start-with-dotenv
