@@ -125,7 +125,7 @@ const BottomBar = props => {
         '+10': useCallback(createPanoramaIndexButtonClickCB(10), [panoramaIndex]),
     };
     const overlayButtonClickCB = useCallback(() => dispatch(setOverlay(false)), []);
-    const OverlayControls = (<div>
+    const OverlayControls = (<div key="overlay">
         <div className={classes.bottomBarGroup}>
             <Typography variant="caption">StreetView</Typography>
             <div className={classes.bottomBarGroupBody}>
@@ -154,7 +154,7 @@ const BottomBar = props => {
         'radius': useCallback(e =>  dispatch(setSearchForm({radius: e.target.value})), []),
         'cities': useCallback(() => dispatch(setSearchForm({cities: ''})), []),
     };
-    const FilterControls = (<div>
+    const FilterControls = (<div key="filter">
         <div className={classes.bottomBarGroup}>
             <Typography variant="caption">Filter</Typography>
             <div className={classes.bottomBarGroupBody}>
@@ -189,7 +189,7 @@ const BottomBar = props => {
     const clearButtonClickCB = useCallback(() => clearPaths(), [mapLoaded]);
     const downloadButtonClickCB = useCallback(() => downloadPath(), [mapLoaded]);
     const uploadButtonClickCB = useCallback(() => uploadPath(), [mapLoaded]);
-    const PathControls = (<div>
+    const PathControls = (<div key="path">
         <div className={classes.bottomBarGroup}>
             <Typography variant="caption">Path</Typography>
             <div className={classes.bottomBarGroupBody}>
@@ -227,7 +227,7 @@ const BottomBar = props => {
         });
     }, [location]);
 
-    const SearchControls = (<div>
+    const SearchControls = (<div key="search">
         <div className={classes.bottomBarGroup}>
             <Typography variant="caption">Search</Typography>
             <div className={classes.bottomBarGroupBody}>
