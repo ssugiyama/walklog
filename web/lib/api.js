@@ -298,7 +298,7 @@ api.get('/destroy/:id', async (req, res) => {
         return;
     }
     try {
-        const walk = await Walk.findByPk(req.body.id);
+        const walk = await Walk.findByPk(req.params.id);
         if (walk.user_id != req.user.id) {
             res.status(403);
             return;
