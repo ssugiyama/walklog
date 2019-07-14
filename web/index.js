@@ -32,6 +32,7 @@ const sitemap    = require('sitemap');
 const session    = require('express-session');
 const auth       = require('./lib/auth');
 const FileStore  = require('session-file-store')(session);
+const Op         = require('sequelize').Op;
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -64,9 +65,9 @@ app.use('/auth', auth.router);
 app.use('/sitemap.xml',  async (req, res) => {
     const sm = sitemap.createSitemap({});
     const results = await Walk.findAll({
-        attributes: ['d'],
+        attributes: ['id'],
         where: {
-            comment : {$ne: null}
+            comment : {[Op.ne]: null}
         }
     });
     results.forEach(function (row) {
