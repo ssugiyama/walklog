@@ -116,7 +116,7 @@ const BottomBar = props => {
             refs.current.geocoder = new google.maps.Geocoder();
         }
     }, [mapLoaded]);
-    
+
     const createPanoramaIndexButtonClickCB = d => () => dispatch(setPanoramaIndex(panoramaIndex + d));
     const panoramaIndexButtonClickCBs = {
         '-10': useCallback(createPanoramaIndexButtonClickCB(-10), [panoramaIndex]),
@@ -213,10 +213,10 @@ const BottomBar = props => {
     const locationChangeCB = useCallback(e => setLocation(e.target.value));
     const submitLocationCB = useCallback(e => {
         if (!location) return;
-        if (e instanceof KeyboardEvent && e.charCode != 13) return;
+        if (e.charCode && e.charCode != 13) return;
         refs.current.geocoder.geocode( { 'address': location}, (results, status) =>  {
             if (status == google.maps.GeocoderStatus.OK) {
-                dispatch(setGeoMarker({ 
+                dispatch(setGeoMarker({
                     lat: results[0].geometry.location.lat(),
                     lng: results[0].geometry.location.lng(),
                     show: true
