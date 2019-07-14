@@ -49,12 +49,12 @@ const WalkEditor = () => {
         }
     }
     const keys = useRef([]);
-   
+
     const handleClose = useCallback(() => {
         dispatch(openWalkEditor(false));
         setState(state => Object.assign({}, state, {initialized: false}));
     });
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
         setState(state => Object.assign({}, state, {processing: true}));
         if (! state.id || state.updatePath) {
             keys.current.add('path');
@@ -70,39 +70,39 @@ const WalkEditor = () => {
         for (const key of keys.current) {
             formData.append(key, state[key]);
         }
-        fetch('/api/save', {
-            method: 'POST',
-            credentials: 'include',
-            body: formData
-        }).then(response => {
+        try {
+            const response = await fetch('/api/save', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
             if (!response.ok) {
                 throw Error(response.statusText);
             }
-            return response;
-        }).then(
-            response => response.json()
-        ).then(json => {
+            const json = await response.json();
             dispatch(push({pathname: '/' + json[0].id, search: 'forceFetch=1' }));
             handleClose();
-        })
-            .catch(ex => alert(ex));
+        } catch (error) {
+            alert(error);
+        }
     }, [state]);
-    const handleDelete = useCallback((e) => {
+    const handleDelete = useCallback(async e => {
         setState(state => Object.assign({}, state, {processing: true}));
         e.preventDefault();
         if (confirm('Are you sure to delete?')) {
-            fetch('/api/destroy/' + state.id, {
-                credentials: 'include',
-            }).then(response => {
+            try {
+                const response = await fetch('/api/destroy/' + state.id, {
+                    credentials: 'include',
+                });
                 if (!response.ok) {
                     throw Error(response.statusText);
                 }
-                return response;
-            }).then(() => {
                 dispatch(setSelectedItem(null));
                 dispatch(push({pathname: '/' + state.id, query: {forceFetch: 1} }));
                 handleClose();
-            }).catch(ex => alert(ex));
+            } catch (error) {
+                alert(error);
+            }
         }
     });
     const handleChange = (name, value)=> {
@@ -146,11 +146,11 @@ const WalkEditor = () => {
             <DialogActions>
                 <Button onClick={handleClose}>cancel</Button>
                 <Button disabled={state.processing} onClick={handleSubmit} color="primary">{ walkEditorMode || 'create' }</Button>
-                {walkEditorMode == 'update' && 
+                {walkEditorMode == 'update' &&
                     <Button disabled={state.processing} onClick={handleDelete} color="secondary">delete</Button>}
             </DialogActions>
         </Dialog>
-    );  
+    );
 };
 
 export default WalkEditor;

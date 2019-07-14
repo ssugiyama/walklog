@@ -25,37 +25,36 @@ function searchResult(data, append) {
 
 export function search(props, prefix = '/', select, lastQuery) {
     const offset = Number(props['offset']);
-    return dispatch => {
+    return async dispatch => {
         if (!select && !offset) {
             dispatch(searchStart());
         }
         const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
-        return fetch(prefix + 'api/search?' + params)
-            .then(response => response.json())
-            .then(data => {
-                dispatch(searchResult(data, offset > 0));
-                if (select) {
-                    dispatch(push('/' + data.rows[0].id));
-                }
-                else if (offset > 0) {
-                    dispatch(replace({pathname: '/', search: lastQuery}));
-                }
-            })
-            .catch(ex => { dispatch(searchResult({error: ex, rows: []}, false)); });
+        try {
+            const response = await fetch(prefix + 'api/search?' + params);
+            const data = await response.json();
+            dispatch(searchResult(data, offset > 0));
+            if (select) {
+                dispatch(push('/' + data.rows[0].id));
+            }
+            else if (offset > 0) {
+                dispatch(replace({pathname: '/', search: lastQuery}));
+            }
+        } catch(error) {
+            dispatch(searchResult({error, rows: []}, false));
+        }
     };
 }
 
 export function getItem(id, prefix = '/') {
-    return dispatch => {
-        return fetch(prefix + 'api/get/' + id)
-            .then(response => response.json())
-            .then(data => {
-                dispatch(setAdjacentItemIds(data.nextId, data.prevId));
-                if (!data.error && data.rows.length > 0) {
-                    dispatch(setSelectedItem(data.rows[0], 0));
-                }
-            });
+    return async dispatch => {
+        const response = await fetch(prefix + 'api/get/' + id);
+        const data = await response.json();
+        dispatch(setAdjacentItemIds(data.nextId, data.prevId));
+        if (!data.error && data.rows.length > 0) {
+            dispatch(setSelectedItem(data.rows[0], 0));
+        }
     };
 }
 

@@ -50,8 +50,8 @@ const NavBar = (props) => {
     const { addPoint } = context.state;
     const dispatch = useDispatch();
     const selectedPath  = useSelector(state => state.main.selectedPath);
-    const currentUser   = useSelector(state => state.main.currentUser); 
-    const externalLinks = useSelector(state => state.main.externalLinks); 
+    const currentUser   = useSelector(state => state.main.currentUser);
+    const externalLinks = useSelector(state => state.main.externalLinks);
     const classes = useStyles(props);
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
@@ -61,7 +61,7 @@ const NavBar = (props) => {
     };
     const getCurrentPosition = (onSuccess, onFailure) => {
         navigator.geolocation.getCurrentPosition( pos => {
-            onSuccess(pos);    
+            onSuccess(pos);
         }, () => {
             if (onFailure) onFailure();
         });
@@ -78,7 +78,7 @@ const NavBar = (props) => {
     const mainMenuOpenCB = useCallback(handleMenuOpen(setTopAnchorEl));
     const accountMenuOpenCB = useCallback(handleMenuOpen(setAccountAnchorEl));
     const handleMenuClose = (setter) => {
-        return event => { 
+        return event => {
             event.stopPropagation();
             setter(null);
         };
@@ -91,7 +91,7 @@ const NavBar = (props) => {
             encodeURIComponent(window.location.href);
     });
     const handleLogout = useCallback(() => {
-        window.location.href = '/auth/logout?redirect=' +  
+        window.location.href = '/auth/logout?redirect=' +
             encodeURIComponent(window.location.href);
     });
     const ignoreClick = useCallback(event => {
@@ -112,17 +112,18 @@ const NavBar = (props) => {
     }, [autoGeolocation]);
     const handleAutoGeolocationChange = useCallback((event, value) => {
         if (value && navigator.geolocation) {
-            getCurrentPosition(pos => {
+            getCurrentPosition(async pos => {
                 setAutoGeolocation(true);
                 dispatch(openSnackbar('start following your location'));
-                new Promise((resolve) => {
+                const append = await new Promise((resolve) => {
                     if (selectedPath) {
                         setConfirmInfo({open: true, resolve});
                     }
                     else {
                         resolve(false);
                     }
-                }).then(append => addCurrentPosition(pos, append));
+                });
+                addCurrentPosition(pos, append);
             }, () => {
                 alert('Unable to retrieve your location');
             });
@@ -179,7 +180,7 @@ const NavBar = (props) => {
                 onClose={mainMenuCloseCB}
             >
                 {
-                    externalLinks.map(link => 
+                    externalLinks.map(link =>
                         <EndMenuItem component="a" href={link[1]} target="_blank" key={link[0]} >{link[0]}</EndMenuItem>
                     )
                 }
@@ -196,7 +197,7 @@ const NavBar = (props) => {
                         (<EndMenuItem key="new walk" onClick={handleNewWalk} disabled={selectedPath == null}>new walk...</EndMenuItem>),
                         (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>)
                     ] : [<EndMenuItem key="login" onClick={handleLogin}>login with twitter</EndMenuItem>]
-                }                        
+                }
             </Menu>
             <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
         </AppBar>

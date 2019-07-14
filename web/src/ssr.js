@@ -56,79 +56,82 @@ const Wrapper = props => (
         </body>
     </html>);
 
-export default function handleSSR(req, res) {
+export default async function handleSSR(req, res) {
     global.navigator = {
         userAgent: req.headers['user-agent']
     };
     const prefix = `http://localhost:${req.app.get('port')}/`;
     const branch = matchRoutes(routes, req.path);
-    
+
     // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
     const history = createMemoryHistory({initialEntries: [req.url]});
     const store = configureStore(null, history);
 
     const lastBranch = branch[branch.length - 1];
     const match = lastBranch.match;
-    handleRoute(match.params.id, req.query, false, prefix, [], true, store.dispatch)
-        .then(() =>{
-            if (req.session.messages && req.session.messages.length > 0) {
-                const msg = req.session.messages.pop() || '';
-                store.dispatch(openSnackbar(msg, false));
-            }
-        }).then(() => store.dispatch(setCurrentUser(req.user)))
-        .then(() => Users.findAll().then(users => store.dispatch(setUsers(users))))
-        .then(() => {
-            let context = {};
-            const sheets = new ServerStyleSheets();
-            const markup = renderToString(
-                sheets.collect(
-                    <Provider store={store}>
-                        <ThemeProvider theme={getTheme()}>
-                            <StaticRouter location={req.url} context={context}>
-                                <Body />
-                            </StaticRouter>
-                        </ThemeProvider>
-                    </Provider>
-                )
-            );
-            const css = sheets.toString();
-            const state = store.getState();
-            state.main.externalLinks = config.get('externalLinks');
-            let title = config.get('siteName');
-            let description = config.get('siteDescription');
-            const siteName =config.get('siteName');
-            const baseUrl = config.get('baseUrl');
-            let image;
-            const twitterSite = config.get('twitterSite');
-            let canonical = baseUrl + '/';
-            if (state.main.selectedItem) {
-                const data = state.main.selectedItem;
-                title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
-                description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
-                canonical = baseUrl + '/' + data.id;
-                image = data.image;
-            }
-            if (! image) image = baseUrl + '/walklog.png';
-            const props = {
-                markup,
-                css,
-                title,
-                image,
-                description,
-                canonical,
-                siteName,
-                baseUrl,
-                twitterSite,
-                preloadedState: state
-            };
-            if(context.status === 404) {
-                res.status(404);
-            }
-            res.set('Content-Type', 'text/html');
-            res.write('<!DOCTYPE html>');
-            ReactDOMServer.renderToStaticNodeStream(
-                <Wrapper {...props}>
-                </Wrapper>
-            ).pipe(res);
-        }).catch(ex => console.error(ex));
+    try {
+        await handleRoute(match.params.id, req.query, false, prefix, [], true, store.dispatch);
+        if (req.session.messages && req.session.messages.length > 0) {
+            const msg = req.session.messages.pop() || '';
+            store.dispatch(openSnackbar(msg, false));
+        }
+        store.dispatch(setCurrentUser(req.user));
+        const users = await Users.findAll();
+        store.dispatch(setUsers(users));
+
+        let context = {};
+        const sheets = new ServerStyleSheets();
+        const markup = renderToString(
+            sheets.collect(
+                <Provider store={store}>
+                    <ThemeProvider theme={getTheme()}>
+                        <StaticRouter location={req.url} context={context}>
+                            <Body />
+                        </StaticRouter>
+                    </ThemeProvider>
+                </Provider>
+            )
+        );
+        const css = sheets.toString();
+        const state = store.getState();
+        state.main.externalLinks = config.get('externalLinks');
+        let title = config.get('siteName');
+        let description = config.get('siteDescription');
+        const siteName =config.get('siteName');
+        const baseUrl = config.get('baseUrl');
+        let image;
+        const twitterSite = config.get('twitterSite');
+        let canonical = baseUrl + '/';
+        if (state.main.selectedItem) {
+            const data = state.main.selectedItem;
+            title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
+            description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
+            canonical = baseUrl + '/' + data.id;
+            image = data.image;
+        }
+        if (! image) image = baseUrl + '/walklog.png';
+        const props = {
+            markup,
+            css,
+            title,
+            image,
+            description,
+            canonical,
+            siteName,
+            baseUrl,
+            twitterSite,
+            preloadedState: state
+        };
+        if(context.status === 404) {
+            res.status(404);
+        }
+        res.set('Content-Type', 'text/html');
+        res.write('<!DOCTYPE html>');
+        ReactDOMServer.renderToStaticNodeStream(
+            <Wrapper {...props}>
+            </Wrapper>
+        ).pipe(res);
+    } catch (error) {
+        console.error(error);
+    }
 }

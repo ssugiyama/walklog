@@ -61,24 +61,23 @@ app.use('/api', api);
 
 app.use('/auth', auth.router);
 
-app.use('/sitemap.xml', function(req, res) {
+app.use('/sitemap.xml',  async (req, res) => {
     const sm = sitemap.createSitemap({});
-    Walk.findAll({
+    const results = await Walk.findAll({
         attributes: ['d'],
         where: {
             comment : {$ne: null}
         }
-    }).then(function (results) {
-        results.forEach(function (row) {
-            sm.add({ url: req.protocol + '://' + (req.get('X-Forwarded-Host') || req.get('Host')) + '/' + row.id });
-        });
-        sm.toXML( function (err, xml) {
-            if (err) {
-                return res.status(500).end();
-            }
-            res.header('Content-Type', 'application/xml');
-            res.send( xml );
-        });
+    });
+    results.forEach(function (row) {
+        sm.add({ url: req.protocol + '://' + (req.get('X-Forwarded-Host') || req.get('Host')) + '/' + row.id });
+    });
+    sm.toXML( function (err, xml) {
+        if (err) {
+            return res.status(500).end();
+        }
+        res.header('Content-Type', 'application/xml');
+        res.send( xml );
     });
 });
 

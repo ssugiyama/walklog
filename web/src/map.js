@@ -62,11 +62,11 @@ const Map = props => {
     const downloadRef = useRef();
     const uploadRef = useRef();
     const [confirmInfo, setConfirmInfo] = useState({open: false});
-    
+
     const context = useContext(MapContext);
     const dispatch = useDispatch();
     const classes = useStyles(props);
-        
+
     const initMap = () => {
         if (window.localStorage.center) {
             dispatch(setCenter(JSON.parse(window.localStorage.center)));
@@ -83,9 +83,9 @@ const Map = props => {
             streetViewControl: true,
             mapTypeControlOptions: {
                 position: google.maps.ControlPosition.TOP_RIGHT,
-                mapTypeIds: [ google.maps.MapTypeId.ROADMAP, 
-                    google.maps.MapTypeId.SATELLITE, 
-                    google.maps.MapTypeId.TERRAIN, 
+                mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                    google.maps.MapTypeId.SATELLITE,
+                    google.maps.MapTypeId.TERRAIN,
                     'gsi' ],
                 style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             }
@@ -94,16 +94,19 @@ const Map = props => {
             event.preventDefault();
         });
         rc.map = new google.maps.Map(mapElemRef.current, options);
-        google.maps.event.addListener(rc.map, 'click', event => {
+        google.maps.event.addListener(rc.map, 'click', async event => {
             if (rc.filter == 'neighborhood'){
                 rc.distanceWidget.setCenter(event.latLng.toJSON());
             }
             else if (rc.filter == 'cities') {
                 const params = `latitude=${event.latLng.lat()}&longitude=${event.latLng.lng()}`;
-                fetch('/api/cities?' + params)
-                    .then(response => response.json())
-                    .then(json => addCity(json[0].jcode))
-                    .catch(ex => alert(ex));
+                try {
+                    const response = await fetch('/api/cities?' + params);
+                    const json = await response.json();
+                    addCity(json[0].jcode);
+                } catch (error) {
+                    alert(error);
+                }
             }
         });
         google.maps.event.addListener(rc.map, 'center_changed', () => {
@@ -112,7 +115,7 @@ const Map = props => {
                     dispatch(setCenter(rc.map.getCenter().toJSON()));
                     rc.centerIntervalID = null;
                 }, CENTER_INTERVAL);
-            } 
+            }
         });
         google.maps.event.addListener(rc.map, 'zoom_changed', () => {
             dispatch(setZoom(rc.map.getZoom()));
@@ -132,18 +135,17 @@ const Map = props => {
                 dispatch(setEditingPath(false));
             }
         });
-        google.maps.event.addListener(rc.pathManager, 'polylinecomplete',  polyline => {
-            new Promise((resolve) => {
+        google.maps.event.addListener(rc.pathManager, 'polylinecomplete',  async polyline => {
+            const append = await new Promise((resolve) => {
                 if (rc.selectedPath) {
                     setConfirmInfo({open: true, resolve});
                 }
                 else {
                     resolve(false);
                 }
-            }).then(append => {
-                setConfirmInfo({open: false});
-                rc.pathManager.applyPath(polyline.getPath().getArray(), append);
             });
+            setConfirmInfo({open: false});
+            rc.pathManager.applyPath(polyline.getPath().getArray(), append);
         });
         const circleOpts = Object.assign({}, mapStyles.circle, {
             center: rc.center,
@@ -211,12 +213,12 @@ const Map = props => {
         });
         dispatch(setMapLoaded());
     };
-    
+
     useEffect(() => {
         window.initMap = initMap;
         loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.get('googleApiKey'));
     }, []);
-    
+
     const citiesChanges = () => {
         const a = new Set(rc.cities.split(/,/));
         const b = new Set(Object.keys(rc.cityHash || {}));
@@ -287,45 +289,44 @@ const Map = props => {
             rc.distanceWidget.setMap(null);
         }
     }, [rc.filter, radius, latitude, longitude, mapLoaded]);
-    
+
     useEffect(() => {
-        if (rc.filter == 'cities' && citiesChanges() && ! rc.fetching) {
-            if (rc.cityHash) {
-                for (let id of Object.keys(rc.cityHash)) {
-                    const pg = rc.cityHash[id];
-                    pg.setMap(null);
+        (async () => {
+            if (rc.filter == 'cities' && citiesChanges() && ! rc.fetching) {
+                if (rc.cityHash) {
+                    for (let id of Object.keys(rc.cityHash)) {
+                        const pg = rc.cityHash[id];
+                        pg.setMap(null);
+                    }
                 }
-            }
-            rc.cityHash = {};
-            if (rc.cities) {
-                rc.fetching = true;
-                fetch('/api/cities?jcodes=' + rc.cities)
-                    .then(response => response.json())
-                    .then(cities => {
+                rc.cityHash = {};
+                if (rc.cities) {
+                    rc.fetching = true;
+                    try {
+                        const response =  await fetch('/api/cities?jcodes=' + rc.cities);
+                        const cities = await response.json();
                         cities.forEach(city => {
                             const pg = toPolygon(city.jcode, city.theGeom);
                             pg.setMap(rc.map);
                         });
-                    })
-                    .catch(ex => {
-                        alert(ex);
-                    })
-                    .then(() => {
-                        rc.fetching = false;
-                    });
-            }
-        }
-        if (rc.cityHash) {
-            for (let id of Object.keys(rc.cityHash)) {
-                const geom = rc.cityHash[id];
-                if (rc.filter == 'cities') {
-                    geom.setMap(rc.map);
-                }
-                else {
-                    geom.setMap(null);
+                    } catch (error) {
+                        alert(error);
+                    }
+                    rc.fetching = false;
                 }
             }
-        }
+            if (rc.cityHash) {
+                for (let id of Object.keys(rc.cityHash)) {
+                    const geom = rc.cityHash[id];
+                    if (rc.filter == 'cities') {
+                        geom.setMap(rc.map);
+                    }
+                    else {
+                        geom.setMap(null);
+                    }
+                }
+            }
+        })();
     }, [rc.filter, rc.cities, mapLoaded]);
 
     // console.log('render map');
@@ -374,7 +375,7 @@ const Map = props => {
         const tileType = 'std';
         const tileExtension = 'png';
         const zoomMax = 18;
-        const zoomMin = 5;        
+        const zoomMin = 5;
         return {
             name: '地理院地図',
             tileSize: new google.maps.Size(256, 256),
@@ -392,10 +393,10 @@ const Map = props => {
             }
         };
     };
-    
+
     return (
         <React.Fragment>
-            <Box ref={mapElemRef} 
+            <Box ref={mapElemRef}
                 my={1}
                 color="black"
                 {... props}
