@@ -98,20 +98,20 @@ const SearchForm = props => {
                     <MenuItem value="hausdorff">Hausdorff</MenuItem>
                     <MenuItem value="crossing">Crossing</MenuItem>
                 </TextField>
-                <TextField select label="user" value={user} onChange={changeCBs['user']} 
+                <TextField select label="user" value={user} onChange={changeCBs['user']}
                     className={classes.formInput}
                 >
                     <MenuItem value="">-</MenuItem>
-                    {users.map(u => <MenuItem value={u.id} key={u.id}>{u.username}</MenuItem>)}
+                    {users.map(u => <MenuItem value={u.uid} key={u.uid}>{u.displayName}</MenuItem>)}
                 </TextField>
             </div>
             <div>
-                <TextField select label="month" value={parseInt(month) || ''} onChange={changeCBs['month']} 
+                <TextField select label="month" value={parseInt(month) || ''} onChange={changeCBs['month']}
                     className={classes.formInput}
                 >
                     {monthOptions.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
                 </TextField>
-                <TextField select label="year" value={parseInt(year) || ''} onChange={changeCBs['year']} 
+                <TextField select label="year" value={parseInt(year) || ''} onChange={changeCBs['year']}
                     className={classes.formInput}
                 >
                     <MenuItem value="">-</MenuItem>
@@ -119,7 +119,7 @@ const SearchForm = props => {
                 </TextField>
             </div>
             <div>
-                <TextField select label="order" value={order} onChange={changeCBs['order']} 
+                <TextField select label="order" value={order} onChange={changeCBs['order']}
                     className={classes.formInput}
                 >
                     {

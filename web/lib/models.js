@@ -21,20 +21,6 @@ const sequelize = new Sequelize(dbUrl, {
 
 exports.sequelize = sequelize;
 
-const Users = sequelize.define('users', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true
-    },
-    strategy: Sequelize.TEXT,
-    passport_id: Sequelize.INTEGER,
-    username:   Sequelize.STRING,
-    photo:      Sequelize.STRING,
-    profile:    Sequelize.TEXT,
-}, {
-    underscored: true,
-});
-
 const Walks = sequelize.define('walks', {
     id: {
         type: Sequelize.INTEGER,
@@ -53,8 +39,8 @@ const Walks = sequelize.define('walks', {
     path: {
         type : Sequelize.TEXT,
     },
-    user_id: {
-        type: Sequelize.INTEGER,
+    uid: {
+        type: Sequelize.STRING,
     }
 }, {
     underscored: true,
@@ -106,11 +92,9 @@ Walks.prototype.asObject =  function (includePath) {
         createdAt:  this.created_at,
         updatedAt:  this.updated_at,
         distance:   this.distance,
-        userId:     this.user_id,   
+        uid:        this.uid,
     };
 };
-
-Walks.belongsTo(Users);
 
 const Areas = sequelize.define('areas', {
     jcode:      {

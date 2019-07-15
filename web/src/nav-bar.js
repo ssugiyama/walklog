@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     openWalkEditor,
     setGeoMarker,
     openSnackbar,
+    setCurrentUser,
 } from './actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -23,6 +24,9 @@ import { makeStyles } from '@material-ui/styles';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import MapContext from './map-context';
+import * as firebase from 'firebase/app';
+import config from 'react-global-configuration';
+import 'firebase/auth';
 
 const styles = {
     root: {
@@ -42,6 +46,7 @@ const useStyles = makeStyles(styles);
 const AUTO_GEOLOCATION_INTERVAL = 30000;
 
 const NavBar = (props) => {
+    const provider = useRef();
     const [topAnchorEl, setTopAnchorEl] = useState(null);
     const [accountAnchorEl, setAccountAnchorEl] = useState(null);
     const [autoGeolocation, setAutoGeolocation] = useState(false);
@@ -87,13 +92,24 @@ const NavBar = (props) => {
     const accountMenuCloseCB = useCallback(handleMenuClose(setAccountAnchorEl));
 
     const handleLogin = useCallback(() => {
-        window.location.href = '/auth/twitter?redirect=' +
-            encodeURIComponent(window.location.href);
+        firebase.auth().signInWithPopup(provider.current).catch(error => {
+            dispatch(openSnackbar(error.message));
+        });
     });
     const handleLogout = useCallback(() => {
-        window.location.href = '/auth/logout?redirect=' +
-            encodeURIComponent(window.location.href);
+        firebase.auth().signOut().catch(error => {
+            dispatch(openSnackbar(error.message));
+        });
     });
+    useEffect(() =>{
+        if (firebase.apps.length == 0) {
+            firebase.initializeApp(config.get('firebaseConfig'));
+        }
+        provider.current = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().onAuthStateChanged(user => {
+            dispatch(setCurrentUser(user));
+        });
+    }, []);
     const ignoreClick = useCallback(event => {
         event.stopPropagation();
         return false;
@@ -171,7 +187,7 @@ const NavBar = (props) => {
                     value="autoGeolocation"
                 />
                 <IconButton onClick={accountMenuOpenCB} color="inherit">
-                    { currentUser ? <img className={classes.userPhoto} src={currentUser.photo} /> : <AccountCircleIcon /> }
+                    { currentUser ? <img className={classes.userPhoto} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
             </Toolbar>
             <Menu
@@ -192,11 +208,11 @@ const NavBar = (props) => {
             >
                 {
                     currentUser ? [
-                        (<MenuItem key="label" disabled={true}>Logged in as {currentUser.username}</MenuItem>),
+                        (<MenuItem key="label" disabled={true}>Logged in as {currentUser.displayName}</MenuItem>),
                         (<Divider key="divider" />),
                         (<EndMenuItem key="new walk" onClick={handleNewWalk} disabled={selectedPath == null}>new walk...</EndMenuItem>),
                         (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>)
-                    ] : [<EndMenuItem key="login" onClick={handleLogin}>login with twitter</EndMenuItem>]
+                    ] : [<EndMenuItem key="login" onClick={handleLogin}>login with Google</EndMenuItem>]
                 }
             </Menu>
             <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />

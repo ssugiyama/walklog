@@ -2,16 +2,15 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import {configureStore, routes, handleRoute, getTheme}  from './app';
-import {setCurrentUser, setUsers, openSnackbar} from './actions';
+import { setUsers } from './actions';
 import { matchRoutes } from 'react-router-config';
 import { ServerStyleSheets, ThemeProvider } from '@material-ui/styles';
 import Body from './body';
 import { StaticRouter } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
 import config from 'react-global-configuration';
-import models from '../lib/models';
+import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
-const Users = models.sequelize.models.users;
 
 const raw = content => ({ __html: content });
 
@@ -71,13 +70,8 @@ export default async function handleSSR(req, res) {
     const match = lastBranch.match;
     try {
         await handleRoute(match.params.id, req.query, false, prefix, [], true, store.dispatch);
-        if (req.session.messages && req.session.messages.length > 0) {
-            const msg = req.session.messages.pop() || '';
-            store.dispatch(openSnackbar(msg, false));
-        }
-        store.dispatch(setCurrentUser(req.user));
-        const users = await Users.findAll();
-        store.dispatch(setUsers(users));
+        const userResult =  await admin.auth().listUsers(1000);
+        store.dispatch(setUsers(userResult.users));
 
         let context = {};
         const sheets = new ServerStyleSheets();

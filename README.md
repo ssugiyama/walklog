@@ -3,21 +3,31 @@
 walklog is a management tool of walking paths.
 
 ## prerequisite
-    % git clone https://github.com/ssugiyama/walklog.git
-    % cd walklog
 
-visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip and extract files in some work directory. alternatively you can download data from  National Land Numerical Information (http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-N03.html) and convert into shp format.
-
-    % cp web/.env.sample web/.env
-
-and edit web/.env 
+### clone repository
 
 ```
-SESSION_SECRET=keyboard cat
-SESSION_MAX_AGE=604800000
-TWITTER_CONSUMER_KEY=
-TWITTER_CONSUMER_SECRET=
-TWITTER_ALLOWED_USERS=user1,user2
+% git clone https://github.com/ssugiyama/walklog.git
+% cd walklog
+```
+
+### import shp files
+visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip and extract files in some work directory. alternatively you can download data from  National Land Numerical Information (http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-N03.html) and convert into shp format.
+
+
+### firebase configuration
+
+Firebase is required for authentication and storage. So you should create firebase project and web app in https://console.firebase.google.com , then enable Google login and create service account for firebase admin. And put firebase config json and service account json in **web/firebase** dir.
+
+### setup envriment variables
+
+```
+% cp web/.env.sample web/.env
+```
+
+and edit web/.env
+
+```
 DB_URL=postgres://postgres@db/postgres
 PORT=3000
 SITE_NAME=walklog
@@ -29,14 +39,33 @@ EXTERNAL_LINKS=example=http://example.com;example2=http://example2.com
 THEME_PRIMARY=bluegrey
 THEME_SECONDARY=orange
 THEME_TYPE=
+FIREBASE_CONFIG=./firebase/firebase-config.json
+GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
+ONLY_ADMIN_CAN_CREATE=
+＃ NODE_ENV＝production
 ```
 
 - GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
-- TWITTER_CONSUMER_KEY and TWITTER_CONSUMER_SECRET: needed for twitter authentication. get at https://apps.twtter.com
-- TWITTER_ALLOWED_USERS: specify screennames concatenated with ',' if restrict the users who can login
 - EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
 - THEME_TYPE: if blank, reflects browser's color scheme(a.k.a 'dark mode')
-'
+- FIREBASE_CONFIG: firebase config json file path
+- GOOGLE_APPLICATION_CREDENTIALS: firebase service account json file path
+- ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
+
+### namage admin users
+
+```
+% cd web
+% ./set-admin.js add firebase-uid
+```
+
+or
+
+```
+% cd web
+% ./set-admin.js rm firebase-uid
+```
+
 ## with docker
     % mkdir data public
     % docker-compose up -d
@@ -48,14 +77,14 @@ THEME_TYPE=
 
     % docker-compose run -v *work_dir*:/tmp --rm db manage-areas.sh -h db *shp_file*
 
-## without docker 
+## without docker
 
 ### 0. requirement
 
 - postgresql
 - postgis 2.4 or higher
 - node.js
-- yarn 
+- yarn
 
 ### 1. create database and install postgis functions.
     % cd db
@@ -66,7 +95,7 @@ THEME_TYPE=
 
 ### 2. setup areas table
     % cd *work_dir*
-    % $(project_root)/db/manage-areas.sh *shp_file* 
+    % $(project_root)/db/manage-areas.sh *shp_file*
 
 ### 3. setup and start api server
     % cd ../web
@@ -75,6 +104,6 @@ THEME_TYPE=
     % cp -a assets/* public
     % yarn run start-with-dotenv
 
-You may access http://localhost:3000 . 
+You may access http://localhost:3000 .
 
  demo: http://walk.asharpminor.com/

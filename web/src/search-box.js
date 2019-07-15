@@ -79,7 +79,7 @@ const SearchBox = props => {
     const searching = useSelector(state => state.main.result.searching);
     const dispatch = useDispatch();
 
-    const [showDistance, setShowDistance] = useState(true); 
+    const [showDistance, setShowDistance] = useState(true);
     const context = useContext(MapContext);
     const classes = useStyles(props);
     const handleShowAll = useCallback(() => {
@@ -97,7 +97,7 @@ const SearchBox = props => {
     const moreUrl = `/?offset=${offset}` + (lastQuery && `&${lastQuery}`);
     const userObjs = {};
     for (const u of users) {
-        userObjs[u.id] = u;
+        userObjs[u.uid] = u;
     }
     return (
         <Paper className={classes.root}>
@@ -129,7 +129,7 @@ const SearchBox = props => {
                     }
                 </Typography> :
                 <Box flexGrow={1} />
-                { rows.length > 0 && 
+                { rows.length > 0 &&
                     (<Button variant="outlined" onClick={ handleShowAll } color="secondary"><ShowChartIcon className={classes.leftIcon} />draw</Button>) }
             </Box>
             <Table className={classes.table}>
@@ -149,11 +149,11 @@ const SearchBox = props => {
                 </TableHead>
                 <TableBody>
                     { rows.map( (item, index) => {
-                        const u = userObjs[item.userId];
+                        const u = userObjs[item.uid];
                         return (
                             <TableRow className={classes.row} key={index} onClick={() => handleSelect(index)}>
                                 <TableCell classes={{ root: classes.cell}}>
-                                    { u && <img className={classes.userPhoto} src={u.photo} alt={u.username} title={u.username} />}
+                                    { u && <img className={classes.userPhoto} src={u.photoURL} alt={u.displayName} title={u.displayName} />}
                                 </TableCell>
                                 <TableCell classes={{ root: classes.cell}}>{item.date}</TableCell>
                                 <TableCell classes={{ root: classes.cell}}>{item.title}</TableCell>
@@ -162,7 +162,7 @@ const SearchBox = props => {
                     })}
                 </TableBody>
             </Table>
-            { offset > 0 && 
+            { offset > 0 &&
                 <Button variant="outlined" className={classes.moreButton} color="primary" component={Link} to={moreUrl}>
                     <ExpandMoreIcon className={classes.leftIcon}/> more
                 </Button>  }

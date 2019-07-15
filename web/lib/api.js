@@ -3,6 +3,8 @@ const express = require('express'),
     nanoid    = require('nanoid'),
     models    = require('./models'),
     fs        = require('fs'),
+    config    = require('react-global-configuration'),
+    admin     = require('firebase-admin'),
     util      = require('util'),
     Sequelize = require('sequelize'),
     sequelize = models.sequelize,
@@ -44,7 +46,7 @@ const searchFunc = async params => {
     };
     const where = [];
     const order = orderHash[params.order || 'newest_first'];
-    const attributes = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'user_id'];
+    const attributes = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid'];
     if (params.id) {
         where.push({id: params.id});
     }
@@ -53,7 +55,7 @@ const searchFunc = async params => {
     }
     else {
         if (params.user) {
-            where.push({user_id: params.user});
+            where.push({uid: params.user});
         }
         if (params.year) {
             where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(params.year)));
@@ -259,9 +261,22 @@ api.get('/cities', async (req, res) => {
     }
 });
 
+const authorize = async (req) => {
+    const authorization = req.get('Authorization');
+    if (! authorization) return null;
+    const parts = authorization.split(/ +/);
+    if (parts.length != 2 || parts[0] != 'Bearer') return null;
+    const idToken = parts[1];
+    const claim = await admin.auth().verifyIdToken(idToken).catch(() => {
+        return null;
+    });
+    return claim;
+};
+
 api.post('/save', upload.single('image'), async (req, res) => {
-    if (! req.user) {
-        res.status(403);
+    const claim = await authorize(req);
+    if (! claim) {
+        res.status(401);
         return;
     }
     if (req.body.path) {
@@ -274,7 +289,7 @@ api.post('/save', upload.single('image'), async (req, res) => {
     try {
         if (req.body.id) {
             const walk = await Walk.findByPk(req.body.id);
-            if (walk.user_id != req.user.id) {
+            if (walk.uid != claim.uid && ! claim.admin) {
                 res.status(403);
                 return;
             }
@@ -282,10 +297,13 @@ api.post('/save', upload.single('image'), async (req, res) => {
             await walk.update(req.body);
             await walk.reload();
             res.json([walk.asObject(true)]);
-        } else {
-            req.body.user_id = req.user.id;
+        } else if (! config.get('onlyAdminCanCreate') || claim.admin ) {
+            req.body.uid = claim.uid;
             const walk = await Walk.create(req.body);
             res.json([walk.asObject(true)]);
+        } else {
+            const error = 'only admin can create walks';
+            res.status(403).json({error});
         }
     } catch (error) {
         res.status(500).json({error});
@@ -293,13 +311,14 @@ api.post('/save', upload.single('image'), async (req, res) => {
 });
 
 api.get('/destroy/:id', async (req, res) => {
-    if (! req.user) {
-        res.status(403);
+    const claim = await authorize(req);
+    if (! claim) {
+        res.status(401);
         return;
     }
     try {
         const walk = await Walk.findByPk(req.params.id);
-        if (walk.user_id != req.user.id) {
+        if (walk.uid != claim.uid && !claim.admin) {
             res.status(403);
             return;
         }

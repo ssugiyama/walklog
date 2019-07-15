@@ -38,7 +38,7 @@ const styles = theme => ({
     },
     itemBoxAuthorPhoto: {
         width: '16px',
-    },        
+    },
     itemBoxText: {
         textIndent: '1.2em',
         lineHeight: '1.65',
@@ -101,27 +101,27 @@ const ItemBox = props => {
         const href = config.get('baseUrl') + '/' + data.id;
         const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
         return `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`;
-    }, [selectedItem]); 
-   
+    }, [selectedItem]);
+
     const data = selectedItem;
-    
+
     let title, createMarkup, dataUser, image;
     if (data) {
         title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
         createMarkup = () => { return { __html: marked(data.comment || '') }; };
         image = data.image;
-        for (let u of users) {
-            if (u.id == data.userId) dataUser = u;
+        for (const u of users) {
+            if (u.uid == data.uid) dataUser = u;
         }
     }
     const upUrl = location && location.search == '?forceFetch=1'
         ? '/' + location.search
         : lastQuery ? '/?' + lastQuery : '/';
     const nextUrl = nextId && '/' + nextId;
-    const prevUrl = prevId ? 
-        '/' + prevId : 
-        offset > 0 ? 
-            '/?select=1&offset=' + offset + 
+    const prevUrl = prevId ?
+        '/' + prevId :
+        offset > 0 ?
+            '/?select=1&offset=' + offset +
                 (lastQuery ? '&' + lastQuery : '') : null;
     return  (
         <Box>
@@ -130,15 +130,15 @@ const ItemBox = props => {
                 <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBackIcon /></IconButton>
                 <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForwardIcon /></IconButton>
                 {
-                    data && currentUser && data.userId && currentUser.id == data.userId ? (<IconButton onClick={handleEdit} ><EditorModeEditIcon /></IconButton>) : null
+                    data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleEdit} ><EditorModeEditIcon /></IconButton>) : null
                 }
                 <IconButton component="a" href={tweetUrl}><TweetIcon /></IconButton>
                 <Typography variant="h6" color={title ? 'initial' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
                 {
-                    dataUser ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={dataUser.photo} /><span>{dataUser.username}</span></Typography>) : null
+                    dataUser ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={dataUser.photoURL} /><span>{dataUser.displayName}</span></Typography>) : null
                 }
             </Paper>
-            { data && 
+            { data &&
                 <Paper>
                     <Tabs value={tabValue}
                         onChange={tabChangeCB}
@@ -149,9 +149,9 @@ const ItemBox = props => {
                         <Tab label="Elevation" className={classes.tab} />
                         <Tab label="StreetView" className={classes.tab}/>
                     </Tabs>
-                </Paper> 
+                </Paper>
             }
-            { data && 
+            { data &&
                 <SwipeableViews index={tabValue} onChangeIndex={indexCHangeCB} disableLazyLoading>
                     <Paper className={classes.itemBoxContent}>
                         {image && <img src={image} className={classes.itemBoxImage} />}
@@ -169,7 +169,7 @@ const ItemBox = props => {
                 </SwipeableViews>
             }
         </Box>
-    );  
+    );
 };
 
 export default ItemBox;

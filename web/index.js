@@ -14,6 +14,8 @@ const configuration = {
     themePrimary :   process.env.THEME_PRIMARY,
     themeSecondary : process.env.THEME_SECONDARY,
     themeType :      process.env.THEME_TYPE,
+    firebaseConfig:  require(process.env.FIREBASE_CONFIG),
+    onlyAdminCanCreate: process.env.ONLY_ADMIN_CAN_CREATE,
 };
 
 config.set(configuration);
@@ -29,10 +31,12 @@ const handleSSR  = require('./dist/ssr').default;
 const models     = require('./lib/models');
 const Walk       = models.sequelize.models.walks;
 const sitemap    = require('sitemap');
-const session    = require('express-session');
-const auth       = require('./lib/auth');
-const FileStore  = require('session-file-store')(session);
 const Op         = require('sequelize').Op;
+const admin      = require('firebase-admin');
+
+admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+});
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -47,20 +51,7 @@ if ('development' == app.get('env')) {
     app.use(errorhandler());
 }
 
-const sess = {
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: new FileStore({ttl: process.env.SESSION_MAX_AGE}),
-};
-
-app.use(session(sess));
-app.use(auth.passport.initialize());
-app.use(auth.passport.session());
-
 app.use('/api', api);
-
-app.use('/auth', auth.router);
 
 app.use('/sitemap.xml',  async (req, res) => {
     const sm = sitemap.createSitemap({});

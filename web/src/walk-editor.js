@@ -13,6 +13,7 @@ import TextField from '@material-ui/core/TextField';
 import Switch from '@material-ui/core/Switch';
 import moment from 'moment';
 import ImageUploader from './image-uploader';
+import * as firebase from 'firebase/app';
 
 const WalkEditor = () => {
     const [state, setState] = useState({
@@ -71,9 +72,12 @@ const WalkEditor = () => {
             formData.append(key, state[key]);
         }
         try {
+            const idToken  = await firebase.auth().currentUser.getIdToken(true);
             const response = await fetch('/api/save', {
                 method: 'POST',
-                credentials: 'include',
+                headers: {
+                    'Authorization': 'Bearer ' + idToken
+                },
                 body: formData
             });
             if (!response.ok) {
@@ -91,8 +95,11 @@ const WalkEditor = () => {
         e.preventDefault();
         if (confirm('Are you sure to delete?')) {
             try {
+                const idToken  = await firebase.auth().currentUser.getIdToken(true);
                 const response = await fetch('/api/destroy/' + state.id, {
-                    credentials: 'include',
+                    headers: {
+                        'Authorization': 'Bearer ' + idToken
+                    },
                 });
                 if (!response.ok) {
                     throw Error(response.statusText);
