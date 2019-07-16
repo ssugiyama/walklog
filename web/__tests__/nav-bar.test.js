@@ -4,8 +4,17 @@ import Adapter from 'enzyme-adapter-react-16';
 import NavBar from '../src/nav-bar';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
+import * as firebase from 'firebase/app';
+import config from 'react-global-configuration';
+
+config.set({
+    firebaseConfig: {},
+});
+
+firebase.initializeApp = jest.fn();
 
 Enzyme.configure({ adapter: new Adapter() });
+
 
 function setup(props) {
     const state = {
@@ -19,7 +28,7 @@ function setup(props) {
         </Provider>
     );
 }
-  
+
 describe('<NavBar />', () => {
     let wrapper;
 
@@ -31,16 +40,16 @@ describe('<NavBar />', () => {
         wrapper = setup({
             externalLinks: []
         });
-        
+
         expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(3);
         expect(wrapper.find('ForwardRef(IconButton)').at(2).find('ForwardRef(SvgIcon)').exists()).toBeTruthy();
     });
     it('should have img with avatar when login', () => {
         wrapper = setup({
             currentUser: {
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
+                uid: 'uid',
+                displayName: 'Alice',
+                photoURL: 'http://exmaple.com/photo',
             },
             externalLinks: []
         });

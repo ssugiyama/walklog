@@ -105,10 +105,12 @@ const NavBar = (props) => {
         if (firebase.apps.length == 0) {
             firebase.initializeApp(config.get('firebaseConfig'));
         }
-        provider.current = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().onAuthStateChanged(user => {
-            dispatch(setCurrentUser(user));
-        });
+        if (firebase.apps.length > 0) {
+            provider.current = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().onAuthStateChanged(user => {
+                dispatch(setCurrentUser(user));
+            });
+        }
     }, []);
     const ignoreClick = useCallback(event => {
         event.stopPropagation();

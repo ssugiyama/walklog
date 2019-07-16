@@ -32,7 +32,7 @@ function setup(path, props, router) {
         </Provider>
     );
 }
-  
+
 describe('<ItemBoxContainer />', () => {
     let wrapper;
     afterEach(() => {
@@ -47,13 +47,13 @@ describe('<ItemBoxContainer />', () => {
                 date: '2018-05-30',
                 length: 14.58,
                 comment: 'paragraph',
-                userId: 1,
+                uid: 'uid',
             },
             selectedIndex: 1,
             users: [{
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
+                uid: 'uid',
+                displayName: 'Alice',
+                photoURL: 'http://exmaple.com/photo',
             }],
             result: {
                 rows: [],
@@ -82,14 +82,14 @@ describe('<ItemBoxContainer />', () => {
                 date: '2018-05-30',
                 length: 14.58,
                 comment: 'paragraph',
-                userId: 1,
+                uid: 'uid',
             },
             selectedIndex: 1,
-            currentUser: {id : 1},
+            currentUser: {uid : 'uid'},
             users: [{
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
+                uid: 'uid',
+                displayName: 'Alice',
+                photoURL: 'http://exmaple.com/photo',
             }],
             result: {
                 rows: [],
@@ -126,12 +126,12 @@ describe('<ItemBoxContainer />', () => {
                 date: '2018-05-30',
                 length: 14.58,
                 comment: 'paragraph',
-                userId: 1,
+                uid: 'uid',
             },
             users: [{
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
+                uid: 'uid',
+                displayName: 'Alice',
+                photoURL: 'http://exmaple.com/photo',
             }],
             selectedIndex: 0,
         };
@@ -152,12 +152,12 @@ describe('<ItemBoxContainer />', () => {
                 date: '2018-05-30',
                 length: 14.58,
                 comment: 'paragraph',
-                userId: 1,
+                uid: 'uid',
             },
             users: [{
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
+                uid: 'uid',
+                displayName: 'Alice',
+                photoURL: 'http://exmaple.com/photo',
             }],
             selectedIndex: 0,
         };
@@ -178,12 +178,12 @@ describe('<ItemBoxContainer />', () => {
                 date: '2018-05-30',
                 length: 14.58,
                 comment: 'paragraph',
-                userId: 1,
+                uid: 'uid',
             },
             users: [{
-                id: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
+                uid: 'uid',
+                displayName: 'Alice',
+                photoURL: 'http://exmaple.com/photo',
             }],
             selectedIndex: 0,
         };

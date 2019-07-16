@@ -8,10 +8,14 @@ import { Provider } from 'react-redux';
 import {ThemeProvider} from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core';
 import config from 'react-global-configuration';
+import * as firebase from 'firebase/app';
 
 config.set({
-    googleApiKey: ''
+    googleApiKey: '',
+    firebaseConfig: {},
 });
+
+firebase.initializeApp = jest.fn();
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -32,7 +36,7 @@ function setup(path, props) {
         </Provider>
     );
 }
-  
+
 describe('<BodyContainer />', () => {
     let wrapper;
     afterEach(() => {
@@ -53,7 +57,7 @@ describe('<BodyContainer />', () => {
             },
             years: [2000],
             months: [1],
-        }); 
+        });
         expect(wrapper.exists('[display="none"] BottomBar')).toBeTruthy();
         expect(wrapper.exists('[display="flex"] ContentBox')).toBeTruthy();
     });
@@ -70,7 +74,7 @@ describe('<BodyContainer />', () => {
             result: {
                 rows: [],
             },
-        }); 
+        });
         expect(wrapper.exists('[display="block"] BottomBar')).toBeTruthy();
         expect(wrapper.exists('[display="none"] ContentBox')).toBeTruthy();
     });
