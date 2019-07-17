@@ -284,7 +284,7 @@ api.post('/save', upload.single('image'), async (req, res) => {
         req.body.length = sequelize.literal(`ST_LENGTH('${req.body.path}', true)/1000`);
     }
     if (req.file && req.file.filename) {
-        req.body.image = req.file.filename;
+        req.body.image = process.env.BASE_URL + '/uploads/' + req.file.filename;
     }
     try {
         if (req.body.id) {

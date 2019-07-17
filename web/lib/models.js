@@ -86,7 +86,7 @@ Walks.prototype.asObject =  function (includePath) {
         date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
         title:      this.title,
         comment:    this.comment,
-        image:      this.image && (process.env.BASE_URL + '/uploads/' + this.image),
+        image:      this.image,
         length :    this.length,
         path :      (includePath && this.path) ? this.encodedPath() : null,
         createdAt:  this.created_at,
