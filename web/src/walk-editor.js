@@ -63,13 +63,11 @@ const WalkEditor = () => {
         if (state.id) {
             keys.current.add('id');
         }
-        else {
-            keys.current.add('date');
-        }
         // const params = keys.map(key => `${key}=${encodeURIComponent(this.state[key])}`).join('&');
         const formData = new FormData();
+        formData.append('date', state['date']); // put date field at the first
         for (const key of keys.current) {
-            formData.append(key, state[key]);
+            if (key != 'date') formData.append(key, state[key]);
         }
         try {
             const idToken  = await firebase.auth().currentUser.getIdToken(true);

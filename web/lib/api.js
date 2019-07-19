@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         const match = file.originalname.match(/\.\w+$/);
         const ext = match ? match[0] : '';
-        const basename = nanoid();
+        const basename = `${req.body.date}-${nanoid(4)}`;
         cb(null, match ? basename + ext : basename);
     }
 });
