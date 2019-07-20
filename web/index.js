@@ -8,6 +8,7 @@ const configuration = {
     siteName:        process.env.SITE_NAME,
     siteDescription: process.env.SITE_DESCRIPTION,
     baseUrl:         process.env.BASE_URL,
+    imagePrefix:     process.env.IMAGE_PREFIX,
     googleApiKey:    process.env.GOOGLE_API_KEY,
     twitterSite:     process.env.TWITTER_SITE,
     externalLinks :  process.env.EXTERNAL_LINKS && process.env.EXTERNAL_LINKS.split(/;/).map(item => item.split(/=/, 2)),
