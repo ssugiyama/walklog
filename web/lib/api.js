@@ -3,6 +3,9 @@ const express = require('express'),
     nanoid    = require('nanoid'),
     models    = require('./models'),
     fs        = require('fs'),
+    path      = require('path'),
+    url       = require('url'),
+    config    = require('react-global-configuration'),
     util      = require('util'),
     Sequelize = require('sequelize'),
     sequelize = models.sequelize,
@@ -18,7 +21,7 @@ const readFile = util.promisify(fs.readFile).bind(fs);
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/uploads');
+        cb(null, path.join('./public', config.get('imagePrefix')));
     },
     filename: (req, file, cb) => {
         const match = file.originalname.match(/\.\w+$/);
@@ -269,7 +272,7 @@ api.post('/save', upload.single('image'), async (req, res) => {
         req.body.length = sequelize.literal(`ST_LENGTH('${req.body.path}', true)/1000`);
     }
     if (req.file && req.file.filename) {
-        req.body.image = process.env.BASE_URL + '/uploads/' + req.file.filename;
+        req.body.image = url.resolve(config.get('baseUrl'), path.join(config.get('imagePrefix'), req.file.filename));
     }
     try {
         if (req.body.id) {
