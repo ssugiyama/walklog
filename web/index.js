@@ -17,6 +17,7 @@ const configuration = {
     themeType :      process.env.THEME_TYPE,
     firebaseConfig:  require(process.env.FIREBASE_CONFIG),
     onlyAdminCanCreate: process.env.ONLY_ADMIN_CAN_CREATE,
+    useFirebaseStorage: process.env.USE_FIREBASE_STORAGE,
 };
 
 config.set(configuration);
@@ -35,9 +36,9 @@ const sitemap    = require('sitemap');
 const Op         = require('sequelize').Op;
 const admin      = require('firebase-admin');
 
-admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-});
+const firebaseConfig = Object.assign({}, config.get('firebaseConfig'),
+    { credential: admin.credential.applicationDefault() });
+admin.initializeApp(firebaseConfig);
 
 // all environments
 app.set('port', process.env.PORT || 3000);

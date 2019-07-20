@@ -20,7 +20,7 @@ module.exports = api;
 
 const readFile = util.promisify(fs.readFile).bind(fs);
 
-const storage = multer.diskStorage({
+const diskStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join('./public', config.get('imagePrefix')));
     },
@@ -31,8 +31,7 @@ const storage = multer.diskStorage({
         cb(null, match ? basename + ext : basename);
     }
 });
-
-const upload = multer({ storage: storage });
+const useFirebaseStoarge = config.get('useFirebaseStorage');
 
 const searchFunc = async params => {
     const orderHash = {
@@ -275,6 +274,20 @@ const authorize = async (req) => {
     return claim;
 };
 
+const getFilename = (req, file) => {
+    const match = file.originalname.match(/\.\w+$/);
+    const ext = match ? match[0] : '';
+    const basename = `${req.body.date}-${nanoid(4)}`;
+    return match ? basename + ext : basename;
+};
+
+const upload = multer({
+    storage: useFirebaseStoarge ? multer.memoryStorage() : diskStorage,
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    }
+});
+
 api.post('/save', upload.single('image'), async (req, res) => {
     const claim = await authorize(req);
     if (! claim) {
@@ -285,10 +298,37 @@ api.post('/save', upload.single('image'), async (req, res) => {
         req.body.path = Walk.decodePath(req.body.path);
         req.body.length = sequelize.literal(`ST_LENGTH('${req.body.path}', true)/1000`);
     }
-    if (req.file && req.file.filename) {
-        req.body.image = url.resolve(config.get('baseUrl'), path.join(config.get('imagePrefix'), req.file.filename));
-    }
     try {
+        req.body.image = await new Promise((resolve, reject) => {
+            if (req.file) {
+                if (useFirebaseStoarge) {
+                    const prefix = config.get('imagePrefix');
+                    const bucket = admin.storage().bucket();
+                    const blob = bucket.file(path.join(prefix, getFilename(req, req.file)));
+                    blob.setMetadata({ contentType: req.file.mimetype });
+
+                    const blobStream = blob.createWriteStream();
+
+                    blobStream.on('error', (err) => {
+                        reject(err);
+                    });
+
+                    blobStream.on('finish', () => {
+                        blob.setMetadata({
+                            contentType: req.file.mimetype,
+                        });
+                        resolve(url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name)));
+                    });
+
+                    blobStream.end(req.file.buffer);
+                }
+                else {
+                    resolve(url.resolve(config.get('baseUrl'), path.join(config.get('imagePrefix'), req.file.filename)));
+                }
+            } else {
+                resolve(undefined);
+            }
+        }).catch(err => { throw err; });
         if (req.body.id) {
             const walk = await Walk.findByPk(req.body.id);
             if (walk.uid != claim.uid && ! claim.admin) {
