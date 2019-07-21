@@ -42,6 +42,7 @@ THEME_TYPE=
 FIREBASE_CONFIG=./firebase/firebase-config.json
 GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
 ONLY_ADMIN_CAN_CREATE=
+USE_FIREBASE_STORAGE=true
 ＃ NODE_ENV＝production
 ```
 
@@ -51,6 +52,7 @@ ONLY_ADMIN_CAN_CREATE=
 - FIREBASE_CONFIG: firebase config json file path
 - GOOGLE_APPLICATION_CREDENTIALS: firebase service account json file path
 - ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
+- USE_FIREBASE_STORAGE: if true, use firebase storage as image store
 
 ### namage admin users
 
