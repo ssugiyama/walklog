@@ -33,6 +33,7 @@ PORT=3000
 SITE_NAME=walklog
 DESCRIPTION=webapp for walk logging
 BASE_URL=http://localhost:3000
+IMAGE_PREFIX=uploads/
 GOOGLE_API_KEY=
 TWITTER_SITE=@chez_sugi
 EXTERNAL_LINKS=example=http://example.com;example2=http://example2.com
@@ -52,9 +53,10 @@ USE_FIREBASE_STORAGE=true
 - FIREBASE_CONFIG: firebase config json file path
 - GOOGLE_APPLICATION_CREDENTIALS: firebase service account json file path
 - ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
+- IMAGE_PREFIX: image store prefix
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store
 
-### namage admin users
+### manage admin users
 
 ```
 % cd web
