@@ -299,8 +299,8 @@ api.post('/save', upload.single('image'), async (req, res) => {
         req.body.length = sequelize.literal(`ST_LENGTH('${req.body.path}', true)/1000`);
     }
     try {
-        req.body.image = await new Promise((resolve, reject) => {
-            if (req.file) {
+        if (req.file) {
+            req.body.image = await new Promise((resolve, reject) => {
                 if (useFirebaseStoarge) {
                     const prefix = config.get('imagePrefix');
                     const bucket = admin.storage().bucket();
@@ -325,10 +325,8 @@ api.post('/save', upload.single('image'), async (req, res) => {
                 else {
                     resolve(url.resolve(config.get('baseUrl'), path.join(config.get('imagePrefix'), req.file.filename)));
                 }
-            } else {
-                resolve(undefined);
-            }
-        }).catch(err => { throw err; });
+            }).catch(err => { throw err; });
+        }
         if (req.body.id) {
             const walk = await Walk.findByPk(req.body.id);
             if (walk.uid != claim.uid && ! claim.admin) {
