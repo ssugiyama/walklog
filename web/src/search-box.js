@@ -122,7 +122,7 @@ const SearchBox = props => {
                                 case 1:
                                     return <span>1 / 1 item</span>;
                                 default:
-                                    return <span>{rows.length}  / {count}  items</span>;
+                                    return <span>{rows.length}  / {count} walks</span>;
                                 }
                             }
                         })()
