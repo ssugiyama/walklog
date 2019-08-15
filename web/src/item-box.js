@@ -24,7 +24,7 @@ import config from 'react-global-configuration';
 
 const styles = theme => ({
     itemBoxContent: {
-        padding: theme.spacing(1),
+        padding: theme.spacing(2),
         flexDirection: 'column',
     },
     tabs: {
@@ -51,12 +51,14 @@ const styles = theme => ({
     itemBoxImage: {
         float: 'left',
         width: 320,
-        margin: '0 20px 20px 0'
+        margin: 0,
+        marginBottom: theme.spacing(2),
+        marginRight: theme.spacing(2),
     },
     itemBoxControl: {
         width: '100%',
         textAlign: 'center',
-        padding: theme.spacing(1),
+        padding: theme.spacing(2),
     },
     backButton: {
         float: 'left',
