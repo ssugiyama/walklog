@@ -2,6 +2,7 @@
 import * as ActionTypes from './action-types';
 require('isomorphic-fetch');
 import { push, replace } from 'connected-react-router';
+import config from 'react-global-configuration';
 
 export function setSearchForm(payload) {
     return {
@@ -36,7 +37,7 @@ export function search(props, prefix = '/', select, lastQuery) {
             const data = await response.json();
             dispatch(searchResult(data, offset > 0));
             if (select) {
-                dispatch(push('/' + data.rows[0].id));
+                dispatch(push(config.get('itemPrefix') + data.rows[0].id));
             }
             else if (offset > 0) {
                 dispatch(replace({pathname: '/', search: lastQuery}));

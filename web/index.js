@@ -18,6 +18,7 @@ const configuration = {
     firebaseConfig:  require(process.env.FIREBASE_CONFIG),
     onlyAdminCanCreate: process.env.ONLY_ADMIN_CAN_CREATE,
     useFirebaseStorage: process.env.USE_FIREBASE_STORAGE,
+    itemPrefix:      process.env.ITEM_PREFIX || '/',
 };
 
 config.set(configuration);
@@ -64,7 +65,7 @@ app.use('/sitemap.xml',  async (req, res) => {
         }
     });
     results.forEach(function (row) {
-        sm.add({ url: req.protocol + '://' + (req.get('X-Forwarded-Host') || req.get('Host')) + '/' + row.id });
+        sm.add({ url: req.protocol + '://' + (req.get('X-Forwarded-Host') || req.get('Host')) + config.get('itemPrefix') + row.id });
     });
     sm.toXML( function (err, xml) {
         if (err) {

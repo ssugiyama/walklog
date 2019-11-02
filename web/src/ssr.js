@@ -60,7 +60,7 @@ export default async function handleSSR(req, res) {
         userAgent: req.headers['user-agent']
     };
     const prefix = `http://localhost:${req.app.get('port')}/`;
-    const branch = matchRoutes(routes, req.path);
+    const branch = matchRoutes(routes(), req.path);
 
     // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
     const history = createMemoryHistory({initialEntries: [req.url]});
@@ -100,7 +100,7 @@ export default async function handleSSR(req, res) {
             const data = state.main.selectedItem;
             title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
             description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
-            canonical = baseUrl + '/' + data.id;
+            canonical = baseUrl + config.get('itemPrefix') + data.id;
             image = data.image;
         }
         if (! image) image = baseUrl + '/walklog.png';

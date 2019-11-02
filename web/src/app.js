@@ -94,7 +94,7 @@ const mainReducer = function(state = initialState, action) {
     }
     case ActionTypes.SEARCH_RESULT:
     {
-        const result = { 
+        const result = {
             count: action.data.count,
             offset: action.data.offset,
             error: action.data.error,
@@ -210,7 +210,7 @@ const mainReducer = function(state = initialState, action) {
         return Object.assign({}, state, {message});
     }
     case ActionTypes.SET_LAST_QUERY:
-    {   
+    {
         const lastQuery = action.lastQuery;
         return Object.assign({}, state, {lastQuery});
     }
@@ -318,14 +318,14 @@ const formWatchMiddleware = store => next => action => {
                 }
             }
             else {
-                if ( !payload.filter && ! (currentFilter == 'cities' && ! query.cities) && 
+                if ( !payload.filter && ! (currentFilter == 'cities' && ! query.cities) &&
                     ! (['crossing', 'hausdorff', 'frechet'].includes(currentFilter) && ! query.searchPath)) {
                     next(toggleView());
                 }
             }
         }
     }
-    
+
     return next(action);
 };
 
@@ -340,7 +340,7 @@ const dataFetchMiddleware = store => next => {
                 query[p[0]] = p[1];
             }
             if (!isFirstLocation) {
-                const branch = matchRoutes(routes, action.payload.location.pathname);
+                const branch = matchRoutes(routes(), action.payload.location.pathname);
                 const lastBranch = branch[branch.length - 1];
                 const match = lastBranch.match;
                 const state = store.getState();
@@ -365,15 +365,15 @@ export function configureStore(state, history) {
         dataFetchMiddleware,
         thunkMiddleware,
     ];
-    
+
     if (process.env.NODE_ENV != 'production') {
         middlewares.push(logger);
     }
-    
+
     const createStoreWithMiddleware = applyMiddleware(
         ...middlewares
     )(createStore);
-    
+
     if (state) {
         return createStoreWithMiddleware(reducers, state);
     }
@@ -383,7 +383,7 @@ export function configureStore(state, history) {
 }
 
 const SideRoot = ({ route }) => (
-    <Box 
+    <Box
         maxWidth={800}
         mx="auto"
     >
@@ -391,12 +391,12 @@ const SideRoot = ({ route }) => (
     </Box>
 );
 
-export const routes = [
+export const routes = () => [
     {
         component: SideRoot,
         routes: [
             {
-                path: '/:id',
+                path: config.get('itemPrefix') + ':id',
                 component: ItemBox,
             },
             {

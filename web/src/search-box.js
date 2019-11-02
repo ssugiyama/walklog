@@ -20,6 +20,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ShowChartIcon from '@material-ui/icons/ShowChart';
 import Divider from '@material-ui/core/Divider';
 import Box from '@material-ui/core/Box';
+import config from 'react-global-configuration';
 
 const styles = theme => ({
     root: {
@@ -89,7 +90,7 @@ const SearchBox = props => {
 
     const handleSelect = (index) => {
         const item = rows[index];
-        dispatch(push( '/' + item.id ));
+        dispatch(push( config.get('itemPrefix') + item.id ));
     };
     const handleShowDistance = useCallback(e => {
         setShowDistance(e.target.value);

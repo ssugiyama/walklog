@@ -100,7 +100,7 @@ const ItemBox = props => {
     const tweetUrl = useMemo(() => {
         const data = selectedItem;
         if (! data) return null;
-        const href = config.get('baseUrl') + '/' + data.id;
+        const href = config.get('baseUrl') + config.get('itemPrefix') + data.id;
         const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
         return `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`;
     }, [selectedItem]);
@@ -119,9 +119,9 @@ const ItemBox = props => {
     const upUrl = location && location.search == '?forceFetch=1'
         ? '/' + location.search
         : lastQuery ? '/?' + lastQuery : '/';
-    const nextUrl = nextId && '/' + nextId;
+    const nextUrl = nextId && config.get('itemPrefix') + nextId;
     const prevUrl = prevId ?
-        '/' + prevId :
+        config.get('itemPrefix') + prevId :
         offset > 0 ?
             '/?select=1&offset=' + offset +
                 (lastQuery ? '&' + lastQuery : '') : null;

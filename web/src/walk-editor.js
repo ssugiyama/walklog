@@ -14,6 +14,7 @@ import Switch from '@material-ui/core/Switch';
 import moment from 'moment';
 import ImageUploader from './image-uploader';
 import * as firebase from 'firebase/app';
+import config from 'react-global-configuration';
 
 const WalkEditor = () => {
     const [state, setState] = useState({
@@ -82,7 +83,7 @@ const WalkEditor = () => {
                 throw Error(response.statusText);
             }
             const json = await response.json();
-            dispatch(push({pathname: '/' + json[0].id, search: 'forceFetch=1' }));
+            dispatch(push({pathname: config.get('itemPrefix') + json[0].id, search: 'forceFetch=1' }));
             handleClose();
         } catch (error) {
             alert(error);
@@ -103,7 +104,7 @@ const WalkEditor = () => {
                     throw Error(response.statusText);
                 }
                 dispatch(setSelectedItem(null));
-                dispatch(push({pathname: '/' + state.id, query: {forceFetch: 1} }));
+                dispatch(push({pathname: config.get('itemPrefix') + state.id, query: {forceFetch: 1} }));
                 handleClose();
             } catch (error) {
                 alert(error);

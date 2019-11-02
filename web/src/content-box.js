@@ -9,7 +9,7 @@ const ContentBox = props => {
             m={1}
             {...props}
         >
-            { renderRoutes(routes) }
+            { renderRoutes(routes()) }
         </Box>
     );
 };
