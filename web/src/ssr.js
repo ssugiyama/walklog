@@ -71,6 +71,7 @@ export default async function handleSSR(req, res) {
     if (match.url == '/' && !match.isExact) {
         res.status(404);
         res.send('Not Found');
+        return;
     }
     try {
         await handleRoute(match.params.id, req.query, false, prefix, [], true, store.dispatch);
