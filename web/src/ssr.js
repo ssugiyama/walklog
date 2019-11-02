@@ -49,7 +49,7 @@ const Wrapper = props => (
             <div id="body" dangerouslySetInnerHTML={{ __html: props.markup }} style={{ height: '100%' }}></div>
             <script dangerouslySetInnerHTML={definePreloadedStateAndConfig(props.preloadedState)}>
             </script>
-            <script src="./bundle.js"></script>
+            <script src="/bundle.js"></script>
             <script type="text/javascript" async defer src="https://platform.twitter.com/widgets.js"></script>
             <script src="/register-sw.js"></script>
         </body>
