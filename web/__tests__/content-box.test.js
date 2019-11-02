@@ -7,8 +7,13 @@ import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import {ThemeProvider} from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core';
+import config from 'react-global-configuration';
 
 Enzyme.configure({ adapter: new Adapter() });
+
+config.set({
+    itemPrefix: '/',
+});
 
 function setup(path, props) {
     const state = {
@@ -35,7 +40,7 @@ describe('<ContentBox />', () => {
     });
     it('should have SearchBox when path is not /:id', () => {
         wrapper = setup('/', {
-            view: 'map', 
+            view: 'map',
             result: {
                 rows: []
             },
@@ -47,13 +52,13 @@ describe('<ContentBox />', () => {
             years: [],
             months: [],
             searchForm: {},
-        }); 
+        });
         expect(wrapper.find('SearchBox').length).toBe(1);
         expect(wrapper.find('ItemBox').length).toBe(0);
     });
     it('should have ItemBox when path is /:id', () => {
         wrapper = setup('/1', {
-            view: 'map', 
+            view: 'map',
             result: {
                 rows: []
             },
@@ -65,7 +70,7 @@ describe('<ContentBox />', () => {
             years: [],
             months: [],
             searchForm: {},
-        }); 
+        });
         expect(wrapper.find('SearchBox').length).toBe(0);
         expect(wrapper.find('ItemBox').length).toBe(1);
     });

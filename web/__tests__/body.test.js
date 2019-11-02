@@ -13,6 +13,7 @@ import * as firebase from 'firebase/app';
 config.set({
     googleApiKey: '',
     firebaseConfig: {},
+    itemPrefix: '/',
 });
 
 firebase.initializeApp = jest.fn();

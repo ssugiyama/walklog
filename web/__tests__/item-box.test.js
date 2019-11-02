@@ -12,7 +12,8 @@ import { createMuiTheme } from '@material-ui/core';
 Enzyme.configure({ adapter: new Adapter() });
 
 config.set({
-    baseUrl: 'http://localhost:3000'
+    baseUrl: 'http://localhost:3000',
+    itemPrefix: '/',
 });
 
 function setup(path, props, router) {
