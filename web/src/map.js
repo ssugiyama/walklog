@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath } from './actions';
+import { toggleView, setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath } from './actions';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
@@ -8,6 +8,8 @@ import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './map-context';
 import Box from '@material-ui/core/Box';
+import { push } from 'connected-react-router';
+import Link from '@material-ui/core/Link';
 
 const styles = () => ({
     hidden: {
@@ -46,9 +48,9 @@ const Map = props => {
     const latitude = useSelector(state => state.main.searchForm.latitude);
     const longitude = useSelector(state => state.main.searchForm.longitude);
     const radius = useSelector(state => state.main.searchForm.radius);
-    const highlightedPath = useSelector(state => state.main.highlightedPath);
+    const selectedItem = useSelector(state => state.main.selectedItem);
     const pathEditable = useSelector(state => state.main.pathEditable);
-    const infoWindow = useSelector(state => state.main.infoWindow);
+    const elevationInfoWindow = useSelector(state => state.main.elevationInfoWindow);
     const geoMarker = useSelector(state => state.main.geoMarker);
     const zoom = useSelector(state => state.main.zoom);
     const mapLoaded = useSelector(state => state.main.mapLoaded);
@@ -58,6 +60,7 @@ const Map = props => {
     rc.filter = useSelector(state => state.main.searchForm.filter);
     rc.cities = useSelector(state => state.main.searchForm.cities);
     rc.selectedPath = useSelector(state => state.main.selectedPath);
+    rc.view = useSelector(state => state.main.view);
     const mapElemRef = useRef();
     const downloadRef = useRef();
     const uploadRef = useRef();
@@ -66,6 +69,14 @@ const Map = props => {
     const context = useContext(MapContext);
     const dispatch = useDispatch();
     const classes = useStyles(props);
+
+    const handleLinkClick = (url) => {
+        dispatch(push(url));
+        rc.pathInfoWindow.close();
+        if (rc.view != 'content') {
+            dispatch(toggleView());
+        }
+    };
 
     const initMap = () => {
         if (window.localStorage.center) {
@@ -122,10 +133,38 @@ const Map = props => {
         });
         const PathManager = require('./path-manager').default;
         rc.pathManager = new PathManager({map: rc.map});
+        rc.pathInfoWindow = new google.maps.InfoWindow();
+        google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {
+            const item = rc.clickedItem;
+            const url = config.get('itemPrefix') + item.id;
+            const link = <Link href="#" onClick={ () => { handleLinkClick(url); }}>{item.date}: {item.title}</Link>;
+            ReactDOM.render(link, document.getElementById('path-info-window-content'));
+        });
         const pathChanged = () => {
             const nextPath = rc.pathManager.getEncodedSelection();
             if (rc.selectedPath != nextPath) {
-                dispatch(setSelectedPath(nextPath));
+                if (nextPath) {
+                    const pair = rc.pathManager.searchPolyline(nextPath);
+                    const item = pair[1];
+                    dispatch(setSelectedPath(nextPath));
+                    if (item) {
+                        rc.clickedItem = item;
+
+                        const content =  '<span id="path-info-window-content">foo</span>';
+                        // google.maps.event.clearInstanceListeners(rc.pathInfoWindow);
+
+                        rc.pathInfoWindow.setContent(content);
+                        rc.pathInfoWindow.open(rc.map);
+                        rc.pathInfoWindow.setPosition(rc.pathManager.lastClickLatLng);
+                        // rc.pathInfoWindow.setPosition(path.getPath().getAt(0));
+                    }
+                    else {
+                        rc.pathInfoWindow.close();
+                    }
+                }
+                else {
+                    rc.pathInfoWindow.close();
+                }
             }
         };
         google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged);
@@ -176,7 +215,7 @@ const Map = props => {
             }
         });
         rc.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
-        rc.infoWindow = new google.maps.InfoWindow();
+        rc.elevationInfoWindow = new google.maps.InfoWindow();
         rc.marker = new google.maps.Marker(mapStyles.marker);
         if (window.localStorage.selectedPath) {
             dispatch(setSelectedPath(window.localStorage.selectedPath));
@@ -205,9 +244,9 @@ const Map = props => {
             clearPaths: () => {
                 rc.pathManager.deleteAll();
             },
-            addPaths: (paths) => {
-                for (let path of paths) {
-                    rc.pathManager.showPath(path, false, false);
+            addPaths: (items) => {
+                for (const item of items) {
+                    rc.pathManager.showPath(item.path, false, false, item);
                 }
             },
         });
@@ -238,15 +277,15 @@ const Map = props => {
     };
     useEffect(() =>{
         if (! rc.map) return;
-        if (infoWindow.open) {
-            rc.infoWindow.open(rc.map);
-            rc.infoWindow.setPosition(infoWindow.position);
-            rc.infoWindow.setContent(infoWindow.message);
+        if (elevationInfoWindow.open) {
+            rc.elevationInfoWindow.open(rc.map);
+            rc.elevationInfoWindow.setPosition(elevationInfoWindow.position);
+            rc.elevationInfoWindow.setContent(elevationInfoWindow.message);
         }
         else {
-            rc.infoWindow.close();
+            rc.elevationInfoWindow.close();
         }
-    }, [infoWindow]);
+    }, [elevationInfoWindow]);
     useEffect(() => {
         if (! rc.map) return;
         const c =  rc.map.getCenter().toJSON();
@@ -265,11 +304,11 @@ const Map = props => {
     }, [rc.selectedPath, mapLoaded]);
     useEffect(() => {
         if (! rc.pathManager) return;
-        if (highlightedPath && highlightedPath != rc.pathManager.getEncodedHighlight())
-            rc.pathManager.showPath(highlightedPath, false, true);
-        else if (! highlightedPath)
+        if (selectedItem && selectedItem.path != rc.pathManager.getEncodedHighlight())
+            rc.pathManager.showPath(selectedItem.path, false, true, selectedItem);
+        else if (! selectedItem)
             rc.pathManager.set('highlight', null);
-    }, [highlightedPath, mapLoaded]);
+    }, [selectedItem, mapLoaded]);
     useEffect(() => {
         if (! rc.pathManager) return;
         if (pathEditable) {

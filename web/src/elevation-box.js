@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setInfoWindow } from './actions';
+import { setElevationInfoWindow } from './actions';
 import { Chart } from 'chart.js';
 import { useTheme } from '@material-ui/styles';
 import Box from '@material-ui/core/Box';
@@ -8,7 +8,7 @@ import Box from '@material-ui/core/Box';
 const ElevationBox = () => {
     const rootRef = useRef();
     const refs = useRef({});
-    const highlightedPath = useSelector(state => state.main.highlightedPath);
+    const selectedItem = useSelector(state => state.main.selectedItem);
     const mapLoaded       = useSelector(state => state.main.mapLoaded);
     const dispatch        = useDispatch();
     const theme           = useTheme();
@@ -17,10 +17,10 @@ const ElevationBox = () => {
         var interpolatePoints = (pt1, pt2, r) => {
             return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
         };
-        var getElevationPointsAndElevation = (highlightedPath) => {
-            if (!highlightedPath) return null;
+        var getElevationPointsAndElevation = (selectedItem) => {
+            if (!selectedItem) return null;
             const pp = [];
-            const path = highlightedPath;
+            const path = selectedItem.path;
             const count = path.length;
             let way = 0;
             let dsum = 0;
@@ -43,8 +43,8 @@ const ElevationBox = () => {
     }
 
     const requestElevation = () =>  {
-        if (!highlightedPath) return;
-        const path = google.maps.geometry.encoding.decodePath(highlightedPath);
+        if (!selectedItem) return;
+        const path = google.maps.geometry.encoding.decodePath(selectedItem.path);
 
         const pathRequest = {
             'path': path,
@@ -58,7 +58,7 @@ const ElevationBox = () => {
             refs.current.elevator.getElevationAlongPath(pathRequest, (results, status) => {
                 plotElevation(results, status);
             });
-        } 
+        }
     };
     const plotElevation = (results, status) => {
         if (status == google.maps.ElevationStatus.OK) {
@@ -114,13 +114,13 @@ const ElevationBox = () => {
     };
     const handleHover = (ev, elms) => {
         if (elms.length == 0) {
-            dispatch(setInfoWindow({open: false}));
+            dispatch(setElevationInfoWindow({open: false}));
         }
         else {
             const elevation = refs.current.elevationResults[elms[0]._index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
-            dispatch(setInfoWindow({ open: true, message: y + 'm', position: elevation.location}));
+            dispatch(setElevationInfoWindow({ open: true, message: y + 'm', position: elevation.location}));
         }
     };
     const updateChart = () => {
@@ -134,7 +134,7 @@ const ElevationBox = () => {
         updateChart();
     });
 
-    if (highlightedPath)
+    if (selectedItem)
         return (
             <Box width="100%" height="20vh">
                 <canvas ref={rootRef}></canvas>
@@ -142,7 +142,7 @@ const ElevationBox = () => {
         );
     else
         return null;
-    
+
 };
 
 export default ElevationBox;

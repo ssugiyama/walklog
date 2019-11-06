@@ -29,6 +29,7 @@ export default class PathManager extends google.maps.MVCObject {
             google.maps.event.trigger(this, 'polylinecomplete', polyline);
             this.drawingManager.setDrawingMode(null);
         });
+        this.lastClickLatLng = null;
     }
     applyPath(path, append) {
         if (this.selection && append) {
@@ -80,7 +81,7 @@ export default class PathManager extends google.maps.MVCObject {
         const highlightKey = this.pathToHash(this.getEncodedHighlight());
         for (var key in this.polylines) {
             if (key == highlightKey) continue;
-            var pl = this.polylines[key];
+            var pl = this.polylines[key][0];
             pl.setMap(null);
             delete this.polylines[key];
         }
@@ -91,8 +92,9 @@ export default class PathManager extends google.maps.MVCObject {
         return this.polylines[key];
     }
 
-    showPath(path, select, highlight) {
-        var pl = this.searchPolyline(path);
+    showPath(path, select, highlight, item) {
+        const pair = this.searchPolyline(path);
+        let pl = pair && pair[0];
         if (typeof(path) == 'string') {
             path = google.maps.geometry.encoding.decodePath(path);
         }
@@ -100,7 +102,10 @@ export default class PathManager extends google.maps.MVCObject {
         if (!pl) {
             pl = new google.maps.Polyline({});
             pl.setPath(path);
-            this.addPolyline(pl);
+            this.addPolyline(pl, item);
+        }
+        else {
+            pair[1] = item;
         }
         if((select || highlight) && path.length > 0) {
             if (select) {
@@ -127,12 +132,13 @@ export default class PathManager extends google.maps.MVCObject {
         }
     }
 
-    addPolyline(pl){
+    addPolyline(pl, item){
         pl.setOptions(this.generalStyle);
         pl.setMap(this.map);
         const key = this.pathToHash(pl.getPath());
-        this.polylines[key] = pl;
-        google.maps.event.addListener(pl, 'click', () => {
+        this.polylines[key] = [pl, item];
+        google.maps.event.addListener(pl, 'click', event => {
+            this.lastClickLatLng = event.latLng;
             if (pl.getEditable()) {
                 pl.setEditable(false);
             } else {

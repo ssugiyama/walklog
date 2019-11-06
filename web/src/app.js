@@ -52,12 +52,11 @@ const initialState = {
     selectedItem: null,
     selectedPath: null,
     selectedIndex: -1,
-    highlightedPath: null,
     pathEditable: false,
     view: 'content',
     walkEditorOpened: false,
     mapLoaded: false,
-    infoWindow: {
+    elevationiInfoWindow: {
         open: false,
         message: null,
         position: null
@@ -109,8 +108,7 @@ const mainReducer = function(state = initialState, action) {
     {
         const selectedItem = action.item;
         const selectedIndex = action.index;
-        const highlightedPath = selectedItem ? selectedItem.path : null;
-        return Object.assign({}, state, {selectedIndex, selectedItem, highlightedPath});
+        return Object.assign({}, state, {selectedIndex, selectedItem});
     }
     case ActionTypes.SET_SELECTED_PATH:
     {
@@ -140,10 +138,10 @@ const mainReducer = function(state = initialState, action) {
         const pathEditable = action.pathEditable;
         return Object.assign({}, state, {pathEditable});
     }
-    case ActionTypes.SET_INFO_WINDOW:
+    case ActionTypes.SET_ELEVATION_INFO_WINDOW:
     {
-        const infoWindow = action.payload;
-        return Object.assign({}, state, {infoWindow});
+        const elevationInfoWindow = action.payload;
+        return Object.assign({}, state, {elevationInfoWindow});
     }
     case ActionTypes.SET_CENTER:
     {

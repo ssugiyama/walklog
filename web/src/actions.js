@@ -102,9 +102,9 @@ export function setStreetView(panorama) {
     };
 }
 
-export function setInfoWindow(payload) {
+export function setElevationInfoWindow(payload) {
     return {
-        type: ActionTypes.SET_INFO_WINDOW,
+        type: ActionTypes.SET_ELEVATION_INFO_WINDOW,
         payload
     };
 }

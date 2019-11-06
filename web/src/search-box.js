@@ -84,7 +84,7 @@ const SearchBox = props => {
     const context = useContext(MapContext);
     const classes = useStyles(props);
     const handleShowAll = useCallback(() => {
-        context.state.addPaths(rows.map(row => row.path));
+        context.state.addPaths(rows);
         dispatch(toggleView());
     });
 
