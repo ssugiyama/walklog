@@ -6,10 +6,11 @@ export default class PathManager extends google.maps.MVCObject {
         const options = optOptions || {};
         this.setValues(options);
         this.polylines = new Object();
-        this.generalStyle = {strokeColor: '#0000ff', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
+        this.temporaryStyle = {strokeColor: '#32a852', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
+        this.generalStyle = {strokeColor: '#3252a8', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
         this.selectedStyle = {strokeOpacity: 0.8, strokeWeight: 4, zIndex: 29};
-        this.highlightedStyle = {strokeColor: '#ff0000', strokeOpacity: 0.8, zIndex: 28};
-        const drawingStyle = Object.assign({}, this.generalStyle, this.selectedStyle);
+        this.highlightedStyle = {strokeColor: '#a83252', strokeOpacity: 0.8, zIndex: 28};
+        const drawingStyle = Object.assign({}, this.temporaryStyle, this.selectedStyle);
         this.drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.POLYLINE,
             drawingControl: true,
@@ -133,7 +134,7 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     addPolyline(pl, item){
-        pl.setOptions(this.generalStyle);
+        pl.setOptions(item ? this.generalStyle : this.temporaryStyle);
         pl.setMap(this.map);
         const key = this.pathToHash(pl.getPath());
         this.polylines[key] = [pl, item];
@@ -162,25 +163,29 @@ export default class PathManager extends google.maps.MVCObject {
         google.maps.event.addListener(pl.getPath(), 'set_at', pathCallback);
     }
 
+    getPolylineStyle(pl) {
+        const pair = this.searchPolyline(google.maps.geometry.encoding.encodePath(pl.getPath()));
+        let style = Object.assign({}, pair && pair[1] ? this.generalStyle : this.temporaryStyle);
+        if ( pl == this.highlight ) {
+            style = Object.assign(style, this.highlightedStyle);
+        }
+        if ( pl == this.selection ) {
+            style = Object.assign(style, this.selectedStyle);
+        }
+        return style;
+    }
+
     selection_changed(){
         const prevSelection = this.get('prevSelection');
         if (prevSelection){
-            let style = Object.assign({}, this.generalStyle);
-            if ( this.prevSelection == this.highlight ) {
-                style = Object.assign(style, this.highlightedStyle);
-            }
-            prevSelection.setOptions(style);
+            prevSelection.setOptions(this.getPolylineStyle(prevSelection));
             prevSelection.setEditable(false);
         }
         const selection = this.get('selection');
         this.set('prevSelection', selection);
 
         if (selection) {
-            let style = Object.assign({}, this.generalStyle, this.selectedStyle);
-            if ( selection == this.highlight ) {
-                style = Object.assign(style, this.highlightedStyle);
-            }
-            selection.setOptions(style);
+            selection.setOptions(this.getPolylineStyle(selection));
         }
         this.updateLength();
         this.unbind('editable');
@@ -212,21 +217,13 @@ export default class PathManager extends google.maps.MVCObject {
     highlight_changed(){
         const prevHighlight = this.get('prevHighlight');
         if (prevHighlight){
-            let style = Object.assign({}, this.generalStyle);
-            if ( this.prevHighlight == this.selection ) {
-                style = Object.assign(style, this.selectedStyle);
-            }
-            prevHighlight.setOptions(style);
+            prevHighlight.setOptions(this.getPolylineStyle(prevHighlight));
         }
         const highlight = this.get('highlight');
         this.set('prevHighlight', highlight);
 
         if (highlight) {
-            let style = Object.assign({}, this.generalStyle, this.highlightedStyle);
-            if ( this.selection == this.highlight ) {
-                style = Object.assign(style, this.selectedStyle);
-            }
-            highlight.setOptions(style);
+            highlight.setOptions(this.getPolylineStyle(highlight));
         }
     }
 
