@@ -7,9 +7,9 @@ export default class PathManager extends google.maps.MVCObject {
         this.setValues(options);
         this.polylines = new Object();
         this.temporaryStyle = {strokeColor: '#32a852', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
-        this.generalStyle = {strokeColor: '#3252a8', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
+        this.generalStyle = {strokeColor: '#4040ff', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
         this.selectedStyle = {strokeOpacity: 0.8, strokeWeight: 4, zIndex: 29};
-        this.highlightedStyle = {strokeColor: '#a83252', strokeOpacity: 0.8, zIndex: 28};
+        this.highlightedStyle = {strokeColor: '#ff4040', strokeOpacity: 0.8, zIndex: 28};
         const drawingStyle = Object.assign({}, this.temporaryStyle, this.selectedStyle);
         this.drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.POLYLINE,
