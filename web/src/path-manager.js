@@ -76,13 +76,14 @@ export default class PathManager extends google.maps.MVCObject {
         delete this.polylines[key];
     }
 
-    deleteAll() {
+    deleteAll(retainTemporary) {
         this.set('selection', null);
         // retain highlight
         const highlightKey = this.pathToHash(this.getEncodedHighlight());
         for (var key in this.polylines) {
             if (key == highlightKey) continue;
-            var pl = this.polylines[key][0];
+            const [pl, item] = this.polylines[key];
+            if (retainTemporary && !item ) continue;
             pl.setMap(null);
             delete this.polylines[key];
         }

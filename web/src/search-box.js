@@ -1,9 +1,8 @@
-import React, { useState, useContext, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import SearchForm from './search-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { toggleView } from './actions';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
@@ -15,9 +14,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/styles';
-import MapContext from './map-context';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ShowChartIcon from '@material-ui/icons/ShowChart';
 import Divider from '@material-ui/core/Divider';
 import Box from '@material-ui/core/Box';
 import config from 'react-global-configuration';
@@ -81,12 +78,7 @@ const SearchBox = props => {
     const dispatch = useDispatch();
 
     const [showDistance, setShowDistance] = useState(true);
-    const context = useContext(MapContext);
     const classes = useStyles(props);
-    const handleShowAll = useCallback(() => {
-        context.state.addPaths(rows);
-        dispatch(toggleView());
-    });
 
     const handleSelect = (index) => {
         const item = rows[index];
@@ -128,10 +120,7 @@ const SearchBox = props => {
                             }
                         })()
                     }
-                </Typography> :
-                <Box flexGrow={1} />
-                { rows.length > 0 &&
-                    (<Button variant="outlined" onClick={ handleShowAll } color="secondary"><ShowChartIcon className={classes.leftIcon} />draw</Button>) }
+                </Typography>
             </Box>
             <Table className={classes.table}>
                 <TableHead>

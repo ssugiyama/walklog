@@ -54,6 +54,7 @@ const Map = props => {
     const geoMarker = useSelector(state => state.main.geoMarker);
     const zoom = useSelector(state => state.main.zoom);
     const mapLoaded = useSelector(state => state.main.mapLoaded);
+    const rows = useSelector(state => state.main.result.rows);
     const refs = useRef({});
     const rc = refs.current;
     rc.center = useSelector(state => state.main.center);
@@ -75,6 +76,30 @@ const Map = props => {
         rc.pathInfoWindow.close();
         if (rc.view != 'content') {
             dispatch(toggleView());
+        }
+    };
+
+    const addPoint = (lat, lng, append) => {
+        const pt = new google.maps.LatLng(lat, lng);
+        rc.pathManager.applyPath([pt], append);
+    };
+    const uploadPath =  () =>  {
+        const elem = ReactDOM.findDOMNode(uploadRef.current);
+        setTimeout(() => elem.click(), 0);
+    };
+    const downloadPath = () =>  {
+        const content = rc.pathManager.selectionAsGeoJSON();
+        const blob = new Blob([ content ], { 'type' : 'application/json' });
+        const elem = ReactDOM.findDOMNode(downloadRef.current);
+        elem.href = window.URL.createObjectURL(blob);
+        setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
+    };
+    const clearPaths  = (retainTemporary) => {
+        rc.pathManager.deleteAll(retainTemporary);
+    };
+    const addPaths = (items) => {
+        for (const item of items) {
+            rc.pathManager.showPath(item.path, false, false, item);
         }
     };
 
@@ -224,31 +249,14 @@ const Map = props => {
         uploadRef.current.addEventListener('change', e => {
             processUpload(e);
         });
+
         context.setState({
             map: rc.map,
-            addPoint: (lat, lng, append) => {
-                const pt = new google.maps.LatLng(lat, lng);
-                rc.pathManager.applyPath([pt], append);
-            },
-            uploadPath: () =>  {
-                const elem = ReactDOM.findDOMNode(uploadRef.current);
-                setTimeout(() => elem.click(), 0);
-            },
-            downloadPath: () =>  {
-                const content = rc.pathManager.selectionAsGeoJSON();
-                const blob = new Blob([ content ], { 'type' : 'application/json' });
-                const elem = ReactDOM.findDOMNode(downloadRef.current);
-                elem.href = window.URL.createObjectURL(blob);
-                setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
-            },
-            clearPaths: () => {
-                rc.pathManager.deleteAll();
-            },
-            addPaths: (items) => {
-                for (const item of items) {
-                    rc.pathManager.showPath(item.path, false, false, item);
-                }
-            },
+            addPoint,
+            uploadPath,
+            downloadPath,
+            clearPaths,
+            addPaths,
         });
         dispatch(setMapLoaded());
     };
@@ -257,6 +265,19 @@ const Map = props => {
         window.initMap = initMap;
         loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.get('googleApiKey'));
     }, []);
+
+    const redrawPaths = (rows) => {
+        if (!rc.pathManager) {
+            setTimeout(() => { redrawPaths(rows); }, 100);
+            return;
+        }
+        clearPaths(true);
+        addPaths(rows);
+    };
+
+    useEffect(() => {
+        redrawPaths(rows);
+    }, [rows]);
 
     const citiesChanges = () => {
         const a = new Set(rc.cities.split(/,/));
