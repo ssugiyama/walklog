@@ -76,14 +76,17 @@ export default class PathManager extends google.maps.MVCObject {
         delete this.polylines[key];
     }
 
-    deleteAll(retainTemporary) {
-        this.set('selection', null);
+    deleteAll(retainTemporaryAndSelection) {
+        if ( !retainTemporaryAndSelection ) {
+            this.set('selection', null);
+        }
         // retain highlight
         const highlightKey = this.pathToHash(this.getEncodedHighlight());
         for (var key in this.polylines) {
             if (key == highlightKey) continue;
             const [pl, item] = this.polylines[key];
-            if (retainTemporary && !item ) continue;
+            if (retainTemporaryAndSelection && !item ) continue;
+            if (retainTemporaryAndSelection &&  pl == this.selection) continue;
             pl.setMap(null);
             delete this.polylines[key];
         }
@@ -106,8 +109,9 @@ export default class PathManager extends google.maps.MVCObject {
             pl.setPath(path);
             this.addPolyline(pl, item);
         }
-        else {
+        else if (item) {
             pair[1] = item;
+            pl.setOptions(this.getPolylineStyle(pl));
         }
         if((select || highlight) && path.length > 0) {
             if (select) {

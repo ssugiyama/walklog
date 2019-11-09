@@ -94,8 +94,8 @@ const Map = props => {
         elem.href = window.URL.createObjectURL(blob);
         setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href); }, 0);
     };
-    const clearPaths  = (retainTemporary) => {
-        rc.pathManager.deleteAll(retainTemporary);
+    const clearPaths  = (retainTemporaryAndSelection) => {
+        rc.pathManager.deleteAll(retainTemporaryAndSelection);
     };
     const addPaths = (items) => {
         for (const item of items) {
@@ -266,19 +266,6 @@ const Map = props => {
         loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.get('googleApiKey'));
     }, []);
 
-    const redrawPaths = (rows) => {
-        if (!rc.pathManager) {
-            setTimeout(() => { redrawPaths(rows); }, 100);
-            return;
-        }
-        clearPaths(true);
-        addPaths(rows);
-    };
-
-    useEffect(() => {
-        redrawPaths(rows);
-    }, [rows]);
-
     const citiesChanges = () => {
         const a = new Set(rc.cities.split(/,/));
         const b = new Set(Object.keys(rc.cityHash || {}));
@@ -323,6 +310,11 @@ const Map = props => {
         if (rc.selectedPath && rc.selectedPath != rc.pathManager.getEncodedSelection())
             rc.pathManager.showPath(rc.selectedPath, true);
     }, [rc.selectedPath, mapLoaded]);
+    useEffect(() => {
+        if (! rc.pathManager) return;
+        clearPaths(true);
+        addPaths(rows);
+    }, [rows, mapLoaded]);
     useEffect(() => {
         if (! rc.pathManager) return;
         if (selectedItem && selectedItem.path != rc.pathManager.getEncodedHighlight())
