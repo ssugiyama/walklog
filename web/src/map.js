@@ -170,7 +170,7 @@ const Map = props => {
             if (rc.selectedPath != nextPath) {
                 if (nextPath) {
                     const pair = rc.pathManager.searchPolyline(nextPath);
-                    const item = pair[1];
+                    const item = pair && pair[1];
                     dispatch(setSelectedPath(nextPath));
                     if (item) {
                         rc.clickedItem = item;
