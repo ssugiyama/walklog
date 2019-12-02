@@ -16,6 +16,7 @@ jobs:
     - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
     - run: docker push $DOCKER_USER/walklog_db
     - run: docker push $DOCKER_USER/walklog_web
+    - run: npm install -g yarn
     - run: cd web; yarn install; ./setup.sh
     - run: rsync -av web/public/ ${SYNC_PATH}
   test:
