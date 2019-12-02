@@ -10,7 +10,7 @@ jobs:
     - run:
         name: Start ssh-keyscan
         command: |
-          ssh-keyscan ${HOST_NAME} >> ~/.ssh/known_hosts
+          ssh-keyscan ${HOST_NAME} > ~/.ssh/known_hosts
     - checkout
     - setup_remote_docker
     - run: docker build -t $DOCKER_USER/walklog_db db
