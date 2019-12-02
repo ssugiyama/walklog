@@ -14,6 +14,7 @@ jobs:
           ssh-keyscan ${HOST_NAME} > ~/.ssh/known_hosts
     - checkout
     - setup_remote_docker
+    - run: sudo apt install rsync
     - run: docker build -t $DOCKER_USER/walklog_db db
     - run: docker build -t $DOCKER_USER/walklog_web web
     - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
