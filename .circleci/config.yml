@@ -5,12 +5,12 @@ jobs:
     - image: circleci/node:current
     steps:
     - add_ssh_keys:
-      fingerprints:
-        - "c7:19:f8:c6:5d:3c:57:b0:90:61:9c:08:6c:42:55:04"
+        fingerprints:
+          - "c7:19:f8:c6:5d:3c:57:b0:90:61:9c:08:6c:42:55:04"
     - run:
-      name: Start ssh-keyscan
-      command: |
-        ssh-keyscan ${HOST_NAME} >> ~/.ssh/known_hosts
+        name: Start ssh-keyscan
+        command: |
+          ssh-keyscan ${HOST_NAME} >> ~/.ssh/known_hosts
     - checkout
     - setup_remote_docker:
       docker_layer_caching: true
