@@ -168,10 +168,10 @@ const Map = props => {
         const pathChanged = () => {
             const nextPath = rc.pathManager.getEncodedSelection();
             if (rc.selectedPath != nextPath) {
+                dispatch(setSelectedPath(nextPath));
                 if (nextPath) {
                     const pair = rc.pathManager.searchPolyline(nextPath);
                     const item = pair && pair[1];
-                    dispatch(setSelectedPath(nextPath));
                     if (item) {
                         rc.clickedItem = item;
 
