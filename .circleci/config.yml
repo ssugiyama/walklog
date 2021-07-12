@@ -24,7 +24,7 @@ jobs:
     - run: rsync -av web/public/ ${SYNC_PATH}
   test:
     docker:
-    - image: circleci/node:current
+    - image: circleci/node:14.17.3
     steps:
     - checkout
     - run: cd web; yarn install; yarn test
