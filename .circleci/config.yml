@@ -13,7 +13,7 @@ jobs:
         command: |
           ssh-keyscan ${HOST_NAME} > ~/.ssh/known_hosts
     - checkout
-    - setup_remote_docker
+    - setup_remote_docker:
         version: 19.03.13
     - run: sudo apt install rsync
     - run: docker build -t $DOCKER_USER/walklog_db db
