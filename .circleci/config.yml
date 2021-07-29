@@ -22,7 +22,7 @@ jobs:
     - run: docker push $DOCKER_USER/walklog_db
     - run: docker push $DOCKER_USER/walklog_web
     - run: cd web; yarn install; ./setup.sh
-    - run: rsync -av web/public/ ${SYNC_PATH}
+    - run: rsync -rlOtcv web/public/ ${SYNC_PATH}
   test:
     docker:
     - image: circleci/node:14.17.3
