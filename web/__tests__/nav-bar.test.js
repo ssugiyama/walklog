@@ -4,7 +4,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import NavBar from '../src/nav-bar';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
 import config from 'react-global-configuration';
 
 config.set({

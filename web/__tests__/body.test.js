@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import {ThemeProvider} from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core';
 import config from 'react-global-configuration';
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
 
 config.set({
     googleApiKey: '',

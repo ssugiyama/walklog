@@ -13,7 +13,7 @@ import TextField from '@material-ui/core/TextField';
 import Switch from '@material-ui/core/Switch';
 import moment from 'moment';
 import ImageUploader from './image-uploader';
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
 import config from 'react-global-configuration';
 
 const WalkEditor = () => {

@@ -24,7 +24,7 @@ import { makeStyles } from '@material-ui/styles';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import MapContext from './map-context';
-import * as firebase from 'firebase/app';
+import firebase from "firebase/app"
 import config from 'react-global-configuration';
 import 'firebase/auth';
 
