@@ -28,6 +28,7 @@
     "firebase": "^8.8.0",
     "firebase-admin": "^9.11.0",
     "history": "^4.7.2",
+    "isomorphic-fetch": "^3.0.0",
     "jssha": "^2.2.0",
     "marked": "^0.3.5",
     "morgan": "*",
