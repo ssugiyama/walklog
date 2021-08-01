@@ -3,7 +3,7 @@
  * Module dependencies.
  */
 
-const config     = require('react-global-configuration');
+const config     = require('react-global-configuration').default;
 const configuration = {
     siteName:        process.env.SITE_NAME,
     siteDescription: process.env.SITE_DESCRIPTION,
