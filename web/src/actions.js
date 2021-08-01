@@ -1,5 +1,6 @@
 // actions
 import * as ActionTypes from './action-types';
+require('isomorphic-fetch');
 import { push, replace } from 'connected-react-router';
 import config from 'react-global-configuration';
 
