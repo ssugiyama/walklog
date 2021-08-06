@@ -200,16 +200,10 @@ const searchFunc = async params => {
 };
 
 api.get('/version', async (req, res) => {
-    try {
-        const data = await readFile('package.json');
-        const json = JSON.parse(data);
-        res.json({
-            appVersion: json.version,
-            appEnv: process.env.NODE_ENV || 'development',
-        });
-    } catch(error) {
-        res.status(500).json(error);
-    }
+    res.json({
+        appVersion: process.env.npm_package_version,
+        appEnv: process.env.NODE_ENV || 'development',
+    });
 });
 
 api.get('/search', async (req, res) => {

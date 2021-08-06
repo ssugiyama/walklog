@@ -17,14 +17,14 @@ import Typography from '@material-ui/core/Typography';
 // import ListItemText from '@material-ui/core/ListItemText';
 // import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import MenuIcon from '@material-ui/icons/Menu';
+import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { makeStyles } from '@material-ui/styles';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import MapContext from './map-context';
-import firebase from "firebase/app"
+import firebase from 'firebase/app'
 import config from 'react-global-configuration';
 import 'firebase/auth';
 
@@ -56,7 +56,7 @@ const NavBar = (props) => {
     const dispatch = useDispatch();
     const selectedPath  = useSelector(state => state.main.selectedPath);
     const currentUser   = useSelector(state => state.main.currentUser);
-    const externalLinks = useSelector(state => state.main.externalLinks);
+    const appVersion = config.get('appVersion');
     const classes = useStyles(props);
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
@@ -80,7 +80,6 @@ const NavBar = (props) => {
             setter(event.currentTarget);
         };
     };
-    const mainMenuOpenCB = useCallback(handleMenuOpen(setTopAnchorEl));
     const accountMenuOpenCB = useCallback(handleMenuOpen(setAccountAnchorEl));
     const handleMenuClose = (setter) => {
         return event => {
@@ -88,7 +87,6 @@ const NavBar = (props) => {
             setter(null);
         };
     };
-    const mainMenuCloseCB = useCallback(handleMenuClose(setTopAnchorEl));
     const accountMenuCloseCB = useCallback(handleMenuClose(setAccountAnchorEl));
 
     const handleLogin = useCallback(() => {
@@ -178,7 +176,6 @@ const NavBar = (props) => {
     return (
         <AppBar position="static" className={classes.root}>
             <Toolbar>
-                <IconButton onClick={mainMenuOpenCB} color="inherit"><MenuIcon /></IconButton>
                 <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
                 <Checkbox
                     icon={<MyLocationIcon />}
@@ -191,18 +188,8 @@ const NavBar = (props) => {
                 <IconButton onClick={accountMenuOpenCB} color="inherit">
                     { currentUser ? <img className={classes.userPhoto} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
+                <Button component="a" href="https://github.com/ssugiyama/walklog" target="_blank" color="inherit">{appVersion}</Button>
             </Toolbar>
-            <Menu
-                anchorEl={topAnchorEl}
-                open={Boolean(topAnchorEl)}
-                onClose={mainMenuCloseCB}
-            >
-                {
-                    externalLinks.map(link =>
-                        <EndMenuItem component="a" href={link[1]} target="_blank" key={link[0]} >{link[0]}</EndMenuItem>
-                    )
-                }
-            </Menu>
             <Menu
                 anchorEl={accountAnchorEl}
                 open={Boolean(accountAnchorEl)}
