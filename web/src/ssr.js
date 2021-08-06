@@ -93,7 +93,6 @@ export default async function handleSSR(req, res) {
         );
         const css = sheets.toString();
         const state = store.getState();
-        state.main.externalLinks = config.get('externalLinks');
         let title = config.get('siteName');
         let description = config.get('siteDescription');
         const siteName =config.get('siteName');

@@ -75,7 +75,6 @@ const initialState = {
     message: null,
     users: [],
     currentUser: null,
-    externalLinks: [],
     lastQuery: null,
 };
 
