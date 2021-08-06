@@ -51,7 +51,6 @@ describe('<BodyContainer />', () => {
                 username: 'Alice',
                 photo: 'http://exmaple.com/photo',
             }],
-            externalLinks: [],
             searchForm: {},
             result: {
                 rows: [],
@@ -70,7 +69,6 @@ describe('<BodyContainer />', () => {
                 username: 'Alice',
                 photo: 'http://exmaple.com/photo',
             }],
-            externalLinks: [],
             searchForm: {},
             result: {
                 rows: [],

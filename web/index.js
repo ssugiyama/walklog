@@ -11,7 +11,7 @@ const configuration = {
     imagePrefix:     process.env.IMAGE_PREFIX,
     googleApiKey:    process.env.GOOGLE_API_KEY,
     twitterSite:     process.env.TWITTER_SITE,
-    externalLinks :  process.env.EXTERNAL_LINKS && process.env.EXTERNAL_LINKS.split(/;/).map(item => item.split(/=/, 2)),
+    appVersion:      process.env.npm_package_version,
     themePrimary :   process.env.THEME_PRIMARY,
     themeSecondary : process.env.THEME_SECONDARY,
     themeType :      process.env.THEME_TYPE,
