@@ -15,7 +15,6 @@ import {
 } from 'chart.js';
 
 Chart.register(
-    Chart,
     LineElement,
     LineController,
     LinearScale,
