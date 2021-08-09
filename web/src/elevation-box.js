@@ -65,7 +65,8 @@ const ElevationBox = () => {
             refs.current.elevationResults = results;
             const data = results.map(result => result.elevation);
             const labels = results.map(() => '');
-            if (! refs.current.chart) {
+            refs.current.chart = Chart.getChart(rootRef.current.getContext('2d'));
+            if (! refs.current.chart ) {
                 refs.current.chart = new Chart(rootRef.current.getContext('2d'), {
                     type: 'line',
                     data: {
