@@ -4,6 +4,7 @@ import { setElevationInfoWindow } from './actions';
 import {
     Chart,
     LineElement,
+    PointElement,
     LineController,
     LinearScale,
     CategoryScale,
@@ -17,6 +18,7 @@ import {
 
 Chart.register(
     LineElement,
+    PointElement,
     LineController,
     LinearScale,
     CategoryScale,
