@@ -1,7 +1,32 @@
 import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setElevationInfoWindow } from './actions';
-import { Chart } from 'chart.js';
+import {
+    Chart,
+    LineElement,
+    LineController,
+    LinearScale,
+    Decimation,
+    Filler,
+    Legend,
+    Title,
+    Tooltip,
+    SubTitle,
+} from 'chart.js';
+
+Chart.register(
+    Chart,
+    LineElement,
+    LineController,
+    LinearScale,
+    Decimation,
+    Filler,
+    Legend,
+    Title,
+    Tooltip,
+    SubTitle,
+);
+
 import { useTheme } from '@material-ui/styles';
 import Box from '@material-ui/core/Box';
 
