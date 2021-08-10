@@ -41,14 +41,13 @@ const ElevationBox = () => {
     const dispatch        = useDispatch();
     const theme           = useTheme();
     // test code for local
-    if (process.env.NODE_ENV == 'local') {
+    if (process.env.TEST_ELEVATION) {
         var interpolatePoints = (pt1, pt2, r) => {
-            return {lat: r*pt2.lat() + (1-r)*pt1.lat(), lng: r*pt2.lng() + (1-r)*pt1.lng()};
+            return {lat: r*pt2.lat + (1-r)*pt1.lat, lng: r*pt2.lng + (1-r)*pt1.lng};
         };
-        var getElevationPointsAndElevation = (selectedItem) => {
-            if (!selectedItem) return null;
+        var getElevationPointsAndElevation = (path) => {
+            if (!path) return null;
             const pp = [];
-            const path = selectedItem.path;
             const count = path.length;
             let way = 0;
             let dsum = 0;
@@ -57,7 +56,6 @@ const ElevationBox = () => {
                 let pt1 = path[i];
                 pt2 = path[i+1];
                 const d = google.maps.geometry.spherical.computeDistanceBetween(pt1, pt2);
-
                 while(way < dsum+d ) {
                     const pt = interpolatePoints(pt1, pt2, (way - dsum)/d);
                     const h = Math.random()* 50 + 10;
@@ -78,7 +76,7 @@ const ElevationBox = () => {
             'path': path,
             'samples': 256
         };
-        if (process.env.NODE_ENV == 'local') {
+        if (process.env.TEST_ELEVATION) {
             const results = getElevationPointsAndElevation(path);
             plotElevation(results, google.maps.ElevationStatus.OK);
         }
@@ -101,17 +99,21 @@ const ElevationBox = () => {
                         labels,
                     },
                     options: {
-                        legend: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: false
+                            },
+                        },
                         responsive: true,
                         maintainAspectRatio: false,
-                        tooltips: {
-                            enabled: false
-                        },
                         hover: {
                             intersect: false,
                             mode: 'index',
-                            onHover: handleHover
                         },
+                        onHover: handleHover,
                         scales: {
                             yAxes: [{
                                 ticks: {
@@ -154,7 +156,7 @@ const ElevationBox = () => {
     };
     const updateChart = () => {
         if ( !mapLoaded ) return;
-        if (! refs.current.elevator ) {
+        if (!refs.current.elevator && !process.env.TEST_ELEVATION) {
             refs.current.elevator = new google.maps.ElevationService();
         }
         requestElevation();
