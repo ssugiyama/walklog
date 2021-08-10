@@ -39,6 +39,9 @@ const styles = {
         width: 24,
         borderRadius: '50%',
     },
+    appVersion: {
+        textTransform: 'none',
+    },
 };
 
 const useStyles = makeStyles(styles);
@@ -47,7 +50,6 @@ const AUTO_GEOLOCATION_INTERVAL = 30000;
 
 const NavBar = (props) => {
     const provider = useRef();
-    const [topAnchorEl, setTopAnchorEl] = useState(null);
     const [accountAnchorEl, setAccountAnchorEl] = useState(null);
     const [autoGeolocation, setAutoGeolocation] = useState(false);
     const [confirmInfo, setConfirmInfo] = useState({open: false});
@@ -56,7 +58,7 @@ const NavBar = (props) => {
     const dispatch = useDispatch();
     const selectedPath  = useSelector(state => state.main.selectedPath);
     const currentUser   = useSelector(state => state.main.currentUser);
-    const appVersion = config.get('appVersion');
+    const appVersion = 'v' + config.get('appVersion');
     const classes = useStyles(props);
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
@@ -188,7 +190,7 @@ const NavBar = (props) => {
                 <IconButton onClick={accountMenuOpenCB} color="inherit">
                     { currentUser ? <img className={classes.userPhoto} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
-                <Button component="a" href="https://github.com/ssugiyama/walklog" target="_blank" color="inherit">{appVersion}</Button>
+                <Button component="a" href="https://github.com/ssugiyama/walklog" target="_blank" color="inherit" className={classes.appVersion}>{appVersion}</Button>
             </Toolbar>
             <Menu
                 anchorEl={accountAnchorEl}
