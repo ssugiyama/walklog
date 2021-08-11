@@ -148,7 +148,7 @@ const ElevationBox = () => {
             dispatch(setElevationInfoWindow({open: false}));
         }
         else {
-            const elevation = refs.current.elevationResults[elms[0]._index];
+            const elevation = refs.current.elevationResults[elms[0].index];
             if (!elevation) return;
             var y = Math.round(elevation.elevation);
             dispatch(setElevationInfoWindow({ open: true, message: y + 'm', position: elevation.location}));
