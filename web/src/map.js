@@ -417,7 +417,7 @@ const Map = props => {
         reader.addEventListener('loadend', e => {
             const obj = JSON.parse(e.target.result);
             const coordinates = obj.coordinates;
-            const pts = coordinates.map(item => ({ lat: item[1], lng: item[0] }));
+            const pts = coordinates.map(item => (new google.maps.LatLng(item[1], item[0])));
             const path = google.maps.geometry.encoding.encodePath(new google.maps.MVCArray(pts));
             dispatch(setSelectedPath(path));
         });
