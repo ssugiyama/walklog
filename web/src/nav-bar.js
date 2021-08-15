@@ -153,7 +153,6 @@ const NavBar = (props) => {
         }
     });
     const closeAllMenus = () => {
-        setTopAnchorEl(null);
         setAccountAnchorEl(null);
     };
     const EndMenuItem = props => {
