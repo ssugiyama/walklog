@@ -19,21 +19,6 @@ const styles = () => ({
 
 const useStyles = makeStyles(styles);
 
-const mapStyles = {
-    polygon: {
-        zIndex: 20,
-    },
-    marker: {
-        zIndex: 10,
-    },
-    circle: {
-        strokeWeight: 2,
-        editable: true,
-        color: '#000',
-        zIndex: 20,
-    },
-};
-
 function loadJS(src) {
     const ref = window.document.getElementsByTagName('script')[0];
     const script = window.document.createElement('script');
@@ -103,7 +88,10 @@ const Map = props => {
         }
     };
 
-    const initMap = () => {
+    const initMap = async () => {
+        const response = await fetch(config.get('mapStyleConfig') || '/default-map-styles.json');
+        rc.mapStyles = await response.json();
+
         if (window.localStorage.center) {
             dispatch(setCenter(JSON.parse(window.localStorage.center)));
         }
@@ -111,6 +99,7 @@ const Map = props => {
             setZoom(parseInt(window.localStorage.zoom));
         }
         const options = {
+            styles: rc.mapStyles.map,
             zoom: zoom,
             center: rc.center,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -157,7 +146,7 @@ const Map = props => {
             dispatch(setZoom(rc.map.getZoom()));
         });
         const PathManager = require('./path-manager').default;
-        rc.pathManager = new PathManager({map: rc.map});
+        rc.pathManager = new PathManager({map: rc.map, styles: rc.mapStyles.polylines});
         rc.pathInfoWindow = new google.maps.InfoWindow();
         google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {
             const item = rc.clickedItem;
@@ -211,7 +200,7 @@ const Map = props => {
             setConfirmInfo({open: false});
             rc.pathManager.applyPath(polyline.getPath().getArray(), append);
         });
-        const circleOpts = Object.assign({}, mapStyles.circle, {
+        const circleOpts = Object.assign({}, rc.mapStyles.circle, {
             center: rc.center,
             radius: parseFloat(radius)
         });
@@ -241,7 +230,7 @@ const Map = props => {
         });
         rc.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
         rc.elevationInfoWindow = new google.maps.InfoWindow();
-        rc.marker = new google.maps.Marker(mapStyles.marker);
+        rc.marker = new google.maps.Marker(rc.mapStyles.marker);
         if (window.localStorage.selectedPath) {
             dispatch(setSelectedPath(window.localStorage.selectedPath));
         }
@@ -263,7 +252,7 @@ const Map = props => {
 
     useEffect(() => {
         window.initMap = initMap;
-        loadJS('https://maps.googleapis.com/maps/api/js?&libraries=geometry,drawing&callback=initMap&key=' + config.get('googleApiKey'));
+        loadJS('https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&callback=initMap&key=' + config.get('googleApiKey'));
     }, []);
 
     const citiesChanges = () => {
@@ -317,10 +306,10 @@ const Map = props => {
     }, [rows, mapLoaded]);
     useEffect(() => {
         if (! rc.pathManager) return;
-        if (selectedItem && selectedItem.path != rc.pathManager.getEncodedHighlight())
+        if (selectedItem && selectedItem.path != rc.pathManager.getEncodedCurrent())
             rc.pathManager.showPath(selectedItem.path, false, true, selectedItem);
         else if (! selectedItem)
-            rc.pathManager.set('highlight', null);
+            rc.pathManager.set('current', null);
     }, [selectedItem, mapLoaded]);
     useEffect(() => {
         if (! rc.pathManager) return;
@@ -386,7 +375,7 @@ const Map = props => {
         const paths = str.split(' ').map(element => google.maps.geometry.encoding.decodePath(element));
         const pg =  new google.maps.Polygon({});
         pg.setPaths(paths);
-        pg.setOptions(mapStyles.polygon);
+        pg.setOptions(rc.mapStyles.polygon);
         rc.cityHash[id] = pg;
         google.maps.event.addListener(pg, 'click',  () => {
             removeCity(id, pg);
