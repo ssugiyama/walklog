@@ -89,7 +89,7 @@ const Map = props => {
     };
 
     const initMap = async () => {
-        const response = await fetch(config.get('mapStyleConfig') || '/default_map_styles.json');
+        const response = await fetch(config.get('mapStyleConfig') || '/default-map-styles.json');
         rc.mapStyles = await response.json();
 
         if (window.localStorage.center) {
