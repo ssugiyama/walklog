@@ -1,0 +1,40 @@
+{
+    "polygon": {
+        "zIndex": 20
+    },
+    "marker": {
+        "zIndex": 10
+    },
+    "circle": {
+        "strokeWeight": 2,
+        "editable": true,
+        "color": "#000",
+        "zIndex": 20
+    },
+    "polylines": {
+        "normal": {
+            "strokeColor": "#4040ff",
+            "strokeOpacity": 0.5,
+            "strokeWeight": 2,
+            "zIndex": 30
+        },
+        "new": {
+            "strokeColor": "#32a852",
+            "strokeOpacity": 0.5,
+            "strokeWeight": 2,
+            "zIndex": 30
+        },
+        "current": {
+            "strokeColor": "#ff4040",
+            "strokeOpacity": 0.8,
+            "zIndex": 28
+        },
+        "selected": {
+            "strokeOpacity": 0.8,
+            "strokeWeight": 4,
+            "zIndex": 29
+        }
+    },
+    "map": [
+    ]
+}
