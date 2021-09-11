@@ -56,7 +56,7 @@ MAP_STYLE_CONFIG=
 - ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
 - IMAGE_PREFIX: image store prefix
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store
-- MAP_STYLE_CONFIG: url of config json of map styles. default is '/default_map_styles.json'
+- MAP_STYLE_CONFIG: url of config json of map styles. default is '/default-map-styles.json'
 
 ### manage admin users
 
