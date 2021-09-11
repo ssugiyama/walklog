@@ -44,6 +44,7 @@ FIREBASE_CONFIG=./firebase/firebase-config.json
 GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
 ONLY_ADMIN_CAN_CREATE=
 USE_FIREBASE_STORAGE=true
+MAP_STYLE_CONFIG=
 ＃ NODE_ENV＝production
 ```
 
@@ -55,6 +56,7 @@ USE_FIREBASE_STORAGE=true
 - ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
 - IMAGE_PREFIX: image store prefix
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store
+- MAP_STYLE_CONFIG: url of config json of map styles. default is '/default_map_styles.json'
 
 ### manage admin users
 
@@ -104,8 +106,8 @@ or
 ### 3. setup and start api server
     % cd ../web
     % export NODE_ENV=xxx
-    % yarn install && yarn run build-cli && yarn run build-svr
-    % cp -a assets/* public
+    % yarn install && yarn run build-svr
+    % ./setup.sh
     % yarn run start-with-dotenv
 
 You may access http://localhost:3000 .
