@@ -77,7 +77,7 @@ export default class PathManager extends google.maps.MVCObject {
             this.set('selection', null);
         }
         // retain current
-        const currentKey = this.pathToHash(this.getEncodedcurrent());
+        const currentKey = this.pathToHash(this.getEncodedCurrent());
         for (var key in this.polylines) {
             if (key == currentKey) continue;
             const [pl, item] = this.polylines[key];
