@@ -6,11 +6,7 @@ export default class PathManager extends google.maps.MVCObject {
         const options = optOptions || {};
         this.setValues(options);
         this.polylines = new Object();
-        this.temporaryStyle = {strokeColor: '#32a852', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
-        this.generalStyle = {strokeColor: '#4040ff', strokeOpacity: 0.5, strokeWeight: 2, zIndex: 30};
-        this.selectedStyle = {strokeOpacity: 0.8, strokeWeight: 4, zIndex: 29};
-        this.highlightedStyle = {strokeColor: '#ff4040', strokeOpacity: 0.8, zIndex: 28};
-        const drawingStyle = Object.assign({}, this.temporaryStyle, this.selectedStyle);
+        const drawingStyle = Object.assign({}, this.styles.new, this.styles.selected);
         this.drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.POLYLINE,
             drawingControl: true,
@@ -24,7 +20,7 @@ export default class PathManager extends google.maps.MVCObject {
         this.drawingManager.setMap(this.map);
         this.set('length', 0);
         this.set('prevSelection', null);
-        this.set('prevHighlight', null);
+        this.set('prevCurrent', null);
         google.maps.event.addListener(this.drawingManager, 'polylinecomplete', polyline => {
             polyline.setMap(null);
             google.maps.event.trigger(this, 'polylinecomplete', polyline);
@@ -34,7 +30,7 @@ export default class PathManager extends google.maps.MVCObject {
     }
     applyPath(path, append) {
         if (this.selection && append) {
-            if (this.highlight == this.selection) {
+            if (this.current == this.selection) {
                 const pl = new google.maps.Polyline({});
                 const newpath = Object.assign([], this.selection.getPath().getArray());
                 newpath.push(...path);
@@ -68,7 +64,7 @@ export default class PathManager extends google.maps.MVCObject {
         if (pl == this.selection) {
             this.set('selection', null);
         }
-        if ( pl == this.highlight) {
+        if ( pl == this.current) {
             return;
         }
         const key = this.pathToHash(pl.getPath());
@@ -80,10 +76,10 @@ export default class PathManager extends google.maps.MVCObject {
         if ( !retainTemporaryAndSelection ) {
             this.set('selection', null);
         }
-        // retain highlight
-        const highlightKey = this.pathToHash(this.getEncodedHighlight());
+        // retain current
+        const currentKey = this.pathToHash(this.getEncodedcurrent());
         for (var key in this.polylines) {
-            if (key == highlightKey) continue;
+            if (key == currentKey) continue;
             const [pl, item] = this.polylines[key];
             if (retainTemporaryAndSelection && !item ) continue;
             if (retainTemporaryAndSelection &&  pl == this.selection) continue;
@@ -97,7 +93,7 @@ export default class PathManager extends google.maps.MVCObject {
         return this.polylines[key];
     }
 
-    showPath(path, select, highlight, item) {
+    showPath(path, select, current, item) {
         const pair = this.searchPolyline(path);
         let pl = pair && pair[0];
         if (typeof(path) == 'string') {
@@ -113,11 +109,11 @@ export default class PathManager extends google.maps.MVCObject {
             pair[1] = item;
             pl.setOptions(this.getPolylineStyle(pl));
         }
-        if((select || highlight) && path.length > 0) {
+        if((select || current) && path.length > 0) {
             if (select) {
                 this.set('selection', pl);
-            } else if (highlight) {
-                this.set('highlight', pl);
+            } else if (current) {
+                this.set('current', pl);
             }
             let xmin, xmax, ymin, ymax;
             for (let i = 0; i < path.length; i++ ) {
@@ -139,7 +135,7 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     addPolyline(pl, item){
-        pl.setOptions(item ? this.generalStyle : this.temporaryStyle);
+        pl.setOptions(item ? this.styles.normal : this.styles.new);
         pl.setMap(this.map);
         const key = this.pathToHash(pl.getPath());
         this.polylines[key] = [pl, item];
@@ -170,12 +166,12 @@ export default class PathManager extends google.maps.MVCObject {
 
     getPolylineStyle(pl) {
         const pair = this.searchPolyline(google.maps.geometry.encoding.encodePath(pl.getPath()));
-        let style = Object.assign({}, pair && pair[1] ? this.generalStyle : this.temporaryStyle);
-        if ( pl == this.highlight ) {
-            style = Object.assign(style, this.highlightedStyle);
+        let style = Object.assign({}, pair && pair[1] ? this.styles.normal : this.styles.new);
+        if ( pl == this.current ) {
+            style = Object.assign(style, this.styles.current);
         }
         if ( pl == this.selection ) {
-            style = Object.assign(style, this.selectedStyle);
+            style = Object.assign(style, this.styles.selected);
         }
         return style;
     }
@@ -210,25 +206,25 @@ export default class PathManager extends google.maps.MVCObject {
         }
     }
 
-    getEncodedHighlight() {
-        if (this.highlight) {
-            return google.maps.geometry.encoding.encodePath(this.highlight.getPath());
+    getEncodedCurrent() {
+        if (this.current) {
+            return google.maps.geometry.encoding.encodePath(this.current.getPath());
         }
         else {
             return null;
         }
     }
 
-    highlight_changed(){
-        const prevHighlight = this.get('prevHighlight');
-        if (prevHighlight){
-            prevHighlight.setOptions(this.getPolylineStyle(prevHighlight));
+    current_changed(){
+        const prevCurrent = this.get('prevCurrent');
+        if (prevCurrent){
+            prevCurrent.setOptions(this.getPolylineStyle(prevCurrent));
         }
-        const highlight = this.get('highlight');
-        this.set('prevHighlight', highlight);
+        const current = this.get('current');
+        this.set('prevCurrent', current);
 
-        if (highlight) {
-            highlight.setOptions(this.getPolylineStyle(highlight));
+        if (current) {
+            current.setOptions(this.getPolylineStyle(current));
         }
     }
 
