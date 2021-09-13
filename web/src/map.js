@@ -295,31 +295,31 @@ const Map = props => {
         rc.marker.setMap(geoMarker.show ? rc.map : null);
     }, [geoMarker]);
     useEffect(() => {
-        if (! rc.pathManager) return;
+        if (!mapLoaded) return;
         if (rc.selectedPath && rc.selectedPath != rc.pathManager.getEncodedSelection())
             rc.pathManager.showPath(rc.selectedPath, true);
     }, [rc.selectedPath, mapLoaded]);
     useEffect(() => {
-        if (! rc.pathManager) return;
+        if (!mapLoaded) return;
         clearPaths(true);
         addPaths(rows);
     }, [rows, mapLoaded]);
     useEffect(() => {
-        if (! rc.pathManager) return;
+        if (!mapLoaded) return;
         if (selectedItem && selectedItem.path != rc.pathManager.getEncodedCurrent())
             rc.pathManager.showPath(selectedItem.path, false, true, selectedItem);
         else if (! selectedItem)
             rc.pathManager.set('current', null);
     }, [selectedItem, mapLoaded]);
     useEffect(() => {
-        if (! rc.pathManager) return;
+        if (!mapLoaded) return;
         if (pathEditable) {
             rc.pathManager.set('editable', true);
         }
     }, [pathEditable, rc.selectedPath]);
 
     useEffect(() => {
-        if (! rc.distanceWidget) return;
+        if (!mapLoaded) return;
         if (rc.filter == 'neighborhood') {
             rc.distanceWidget.setMap(rc.map);
             rc.distanceWidget.set('radius', parseFloat(radius));
@@ -332,6 +332,7 @@ const Map = props => {
     }, [rc.filter, radius, latitude, longitude, mapLoaded]);
 
     useEffect(() => {
+        if (!mapLoaded) return;
         (async () => {
             if (rc.filter == 'cities' && citiesChanges() && ! rc.fetching) {
                 if (rc.cityHash) {
