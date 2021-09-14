@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { setSelectedItem, openWalkEditor } from './actions';
@@ -15,6 +15,7 @@ import moment from 'moment';
 import ImageUploader from './image-uploader';
 import firebase from 'firebase/app';
 import config from 'react-global-configuration';
+import MapContext from './map-context';
 
 const WalkEditor = () => {
     const [state, setState] = useState({
@@ -25,7 +26,8 @@ const WalkEditor = () => {
     const walkEditorOpened = useSelector(state => state.main.walkEditorOpened);
     const walkEditorMode = useSelector(state => state.main.walkEditorMode);
     const dispatch = useDispatch();
-
+    const context = useContext(MapContext);
+    const { deleteSelectedPath } = context.state;
     if (walkEditorOpened && ! state.initialized) {
         const path = selectedPath;
         let item, updatePath, date;
@@ -58,8 +60,10 @@ const WalkEditor = () => {
     });
     const handleSubmit = useCallback(async () => {
         setState(state => Object.assign({}, state, {processing: true}));
+        let willDeletePath = false;
         if (! state.id || state.updatePath) {
             keys.current.add('path');
+            willDeletePath = true;
         }
         if (state.id) {
             keys.current.add('id');
@@ -81,6 +85,9 @@ const WalkEditor = () => {
             });
             if (!response.ok) {
                 throw Error(response.statusText);
+            }
+            if (willDeletePath) {
+                deleteSelectedPath();
             }
             const json = await response.json();
             dispatch(push({pathname: config.get('itemPrefix') + json[0].id, search: 'forceFetch=1' }));
