@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { toggleView, setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath } from './actions';
+import { toggleView, setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath, clearDeletingPsths } from './actions';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
@@ -81,6 +81,9 @@ const Map = props => {
     };
     const clearPaths  = (retainTemporaryAndSelection) => {
         rc.pathManager.deleteAll(retainTemporaryAndSelection);
+    };
+    const deleteSelectedPath = () => {
+        rc.pathManager.deleteSelection();
     };
     const addPaths = (items) => {
         for (const item of items) {
@@ -246,6 +249,7 @@ const Map = props => {
             downloadPath,
             clearPaths,
             addPaths,
+            deleteSelectedPath,
         });
         dispatch(setMapLoaded());
     };

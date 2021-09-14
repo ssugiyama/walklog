@@ -72,6 +72,15 @@ export default class PathManager extends google.maps.MVCObject {
         delete this.polylines[key];
     }
 
+    deleteSelection() {
+        if(this.selection != null){
+            const key = this.pathToHash(this.getEncodedSelection());
+            this.selection.setMap(null);
+            this.set('selection', null);
+            delete this.polylines[key];
+        }
+    }
+
     deleteAll(retainTemporaryAndSelection) {
         if ( !retainTemporaryAndSelection ) {
             this.set('selection', null);
