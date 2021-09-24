@@ -1,6 +1,6 @@
 import React, { useRef, useContext, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPanoramaCount, setPanoramaIndex, setOverlay } from './actions';
+import { setPanoramaCount, setPanoramaIndex, setOverlay } from '../actions';
 import IconButton from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from '@material-ui/core/Typography';
@@ -9,7 +9,7 @@ import NavigationArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import NavigationArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AvFastForwardIcon from '@material-ui/icons/FastForward';
 import AvFastRewindIcon from '@material-ui/icons/FastRewind';
-import MapContext from './map-context';
+import MapContext from './utils/map-context';
 import { makeStyles } from '@material-ui/styles';
 import classNames from 'classnames';
 

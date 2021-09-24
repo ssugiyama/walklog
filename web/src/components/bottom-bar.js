@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo, useContext, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPanoramaIndex, setOverlay, setGeoMarker, setEditingPath, setSearchForm  } from './actions';
+import { setPanoramaIndex, setOverlay, setGeoMarker, setEditingPath, setSearchForm  } from '../actions';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
@@ -20,7 +20,7 @@ import { makeStyles } from '@material-ui/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import InputBase from '@material-ui/core/InputBase';
-import MapContext from './map-context';
+import MapContext from './utils/map-context';
 import SwipeableViews from 'react-swipeable-views';
 import NavigateBefore from '@material-ui/icons/NavigateBefore';
 import NavigateNext from '@material-ui/icons/NavigateNext';

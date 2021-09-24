@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Enzyme, { mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import ItemBox from '../src/item-box';
+import ItemBox from '../src/components/item-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import config from 'react-global-configuration';

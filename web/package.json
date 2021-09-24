@@ -3,11 +3,11 @@
   "version": "v0.2.1",
   "description": "",
   "scripts": {
-    "build-cli": "parcel build -d public -o bundle src/client-root.js",
+    "build-cli": "parcel build -d public -o bundle src/components/client-root.js",
     "build-svr": "babel src -d ./dist",
     "start": "node index.js",
     "start-with-dotenv": "node -r dotenv/config index.js",
-    "watch": "parcel watch -d public -o bundle src/client-root.js",
+    "watch": "parcel watch -d public -o bundle src/components/client-root.js",
     "test": "jest"
   },
   "keywords": [],

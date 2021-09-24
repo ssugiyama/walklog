@@ -6,14 +6,14 @@ import BottomBar from './bottom-bar';
 import WalkEditor from './walk-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import ContentBox from './content-box';
-import { openSnackbar, toggleView } from './actions';
+import { openSnackbar, toggleView } from '../actions';
 import Snackbar from '@material-ui/core/Snackbar';
-import MapContext from './map-context';
+import MapContext from './utils/map-context';
 import Box from '@material-ui/core/Box';
 import Fab from '@material-ui/core/Fab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-                    
+
 const Body = () => {
     const message  = useSelector(state => state.main.message);
     const view     = useSelector(state => state.main.view);
@@ -24,7 +24,7 @@ const Body = () => {
         dispatch(openSnackbar(null));
     });
     const toggleViewCB = useCallback(() => dispatch(toggleView()));
-  
+
     const fabButtonStyles = useMemo(() => ({
         position: 'absolute',
         left: 'calc(50% - 20px)',
@@ -34,7 +34,7 @@ const Body = () => {
         bottom: view == 'map' ? 54 : 'auto',
     }), [view]);
     return (
-        <Box 
+        <Box
             height="100%"
             flexDirection="column"
             display={ view == 'map' ? 'flex' : 'block'  }>
@@ -54,7 +54,7 @@ const Body = () => {
                         <Map />
                     </Box>
                     <Box
-                        display={view == 'map' ? 'none' : 'block'} 
+                        display={view == 'map' ? 'none' : 'block'}
                         clone>
                         <ContentBox />
                     </Box>
