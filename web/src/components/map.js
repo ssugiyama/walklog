@@ -1,12 +1,12 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { toggleView, setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath, clearDeletingPsths } from './actions';
+import { toggleView, setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath, clearDeletingPsths } from '../actions';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
-import MapContext from './map-context';
+import MapContext from './utils/map-context';
 import Box from '@material-ui/core/Box';
 import { push } from 'connected-react-router';
 import Link from '@material-ui/core/Link';
@@ -148,7 +148,7 @@ const Map = props => {
         google.maps.event.addListener(rc.map, 'zoom_changed', () => {
             dispatch(setZoom(rc.map.getZoom()));
         });
-        const PathManager = require('./path-manager').default;
+        const PathManager = require('./utils/path-manager').default;
         rc.pathManager = new PathManager({map: rc.map, styles: rc.mapStyles.polylines});
         rc.pathInfoWindow = new google.maps.InfoWindow();
         google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {

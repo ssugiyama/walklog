@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { openWalkEditor } from './actions';
+import { openWalkEditor } from '../actions';
 import marked from 'marked';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';

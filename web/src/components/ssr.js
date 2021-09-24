@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import {configureStore, routes, handleRoute, getTheme}  from './app';
-import { setUsers } from './actions';
+import {configureStore, routes, handleRoute, getTheme}  from '../app';
+import { setUsers } from '../actions';
 import { matchRoutes } from 'react-router-config';
 import { ServerStyleSheets, ThemeProvider } from '@material-ui/styles';
 import Body from './body';
