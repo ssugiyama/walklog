@@ -58,7 +58,7 @@ MAP_TYPE_IDS=
 - IMAGE_PREFIX: image store prefix
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store
 - MAP_STYLE_CONFIG: url of config json of map styles. default is '/default-map-styles.json'
-- MAP_TYPE_IDS: selectable map types. default is 'roadmap,hybrid,satelite,terrain'. you can add 'gsi' to use tha map by GSI(The Geospatial Information Authority of Japan).
+- MAP_TYPE_IDS: selectable map types. default is 'roadmap,hybrid,satellite,terrain'. you can add 'gsi' to use tha map by GSI(The Geospatial Information Authority of Japan).
 
 ### manage admin users
 

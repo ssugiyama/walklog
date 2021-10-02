@@ -132,7 +132,7 @@ const Map = props => {
         });
         rc.map = new google.maps.Map(mapElemRef.current, options);
         if (mapTypeIds.includes(GSI_MAP_TYPE)) {
-            new GsiMapType(GSI_MAP_TYPE, rc.map)
+            new GsiMapType(GSI_MAP_TYPE, rc.map);
         }
         google.maps.event.addListener(rc.map, 'click', async event => {
             if (rc.filter == 'neighborhood'){
