@@ -1,6 +1,6 @@
 {
   "name": "walklog-web",
-  "version": "v0.2.1",
+  "version": "v0.2.2",
   "description": "",
   "scripts": {
     "build-cli": "parcel build -d public -o bundle src/components/client-root.js",
