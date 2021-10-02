@@ -20,6 +20,7 @@ const configuration = {
     useFirebaseStorage: process.env.USE_FIREBASE_STORAGE,
     itemPrefix:      process.env.ITEM_PREFIX || '/',
     mapStyleConfig:  process.env.MAP_STYLE_CONFIG,
+    mapTypeIds:      process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satelite,terrain'
 };
 
 config.set(configuration);
@@ -31,7 +32,7 @@ const http       = require('http');
 const path       = require('path');
 const morgan     = require('morgan');
 const app        = express();
-const handleSSR  = require('./dist/ssr').default;
+const handleSSR  = require('./dist/components/ssr').default;
 const models     = require('./lib/models');
 const Walk       = models.sequelize.models.walks;
 const sitemap    = require('sitemap');
