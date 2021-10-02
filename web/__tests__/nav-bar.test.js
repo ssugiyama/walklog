@@ -1,7 +1,7 @@
 import React from 'react';
 import Enzyme, { mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import NavBar from '../src/nav-bar';
+import NavBar from '../src/components/nav-bar';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import firebase from 'firebase/app';

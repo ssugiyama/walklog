@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'connected-react-router';
-import { configureStore, getTheme } from './app';
+import { configureStore, getTheme } from '../app';
 import { ThemeProvider  } from '@material-ui/styles';
 import Body from './body';
 import { createBrowserHistory } from 'history';
@@ -20,7 +20,7 @@ const ClientRoot = () => {
             jssStyles.parentNode.removeChild(jssStyles);
         }
     }, []);
-    return <ConnectedRouter history={history}><Body /></ConnectedRouter>;  
+    return <ConnectedRouter history={history}><Body /></ConnectedRouter>;
 };
 
 ReactDOM.hydrate(

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { setSelectedItem, openWalkEditor } from './actions';
+import { setSelectedItem, openWalkEditor } from '../actions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -15,7 +15,7 @@ import moment from 'moment';
 import ImageUploader from './image-uploader';
 import firebase from 'firebase/app';
 import config from 'react-global-configuration';
-import MapContext from './map-context';
+import MapContext from './utils/map-context';
 
 const WalkEditor = () => {
     const [state, setState] = useState({

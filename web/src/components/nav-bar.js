@@ -5,7 +5,7 @@ import {
     setGeoMarker,
     openSnackbar,
     setCurrentUser,
-} from './actions';
+} from '../actions';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -23,7 +23,7 @@ import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { makeStyles } from '@material-ui/styles';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
-import MapContext from './map-context';
+import MapContext from './utils/map-context';
 import firebase from 'firebase/app'
 import config from 'react-global-configuration';
 import 'firebase/auth';

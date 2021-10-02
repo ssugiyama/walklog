@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Enzyme, { mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import BodyContainer from '../src/body';
+import BodyContainer from '../src/components/body';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import {ThemeProvider} from '@material-ui/styles';
