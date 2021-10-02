@@ -10,7 +10,6 @@ import MapContext from './utils/map-context';
 import Box from '@material-ui/core/Box';
 import { push } from 'connected-react-router';
 import Link from '@material-ui/core/Link';
-import defaultMapStyles from './default-map-styles.json';
 import GsiMapType from './utils/gsi-map-type';
 
 const styles = () => ({
@@ -96,6 +95,7 @@ const Map = props => {
 
     const initMap = async () => {
         const mapStyleConfig = config.get('mapStyleConfig');
+        const defaultMapStyles = require('./default-map-styles.json');
         rc.mapStyles = defaultMapStyles;
         if (mapStyleConfig) {
             try {
