@@ -4,9 +4,8 @@ export default class PathManager extends google.maps.MVCObject {
     constructor(optOptions) {
         super();
         const options = optOptions || {};
-        this.setValues(options);
         this.polylines = new Object();
-        const drawingStyle = Object.assign({}, this.styles.new, this.styles.selected);
+
         this.drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: google.maps.drawing.OverlayType.POLYLINE,
             drawingControl: true,
@@ -14,8 +13,8 @@ export default class PathManager extends google.maps.MVCObject {
                 position: google.maps.ControlPosition.TOP_CENTER,
                 drawingModes: [google.maps.drawing.OverlayType.POLYLINE]
             },
-            polylineOptions: drawingStyle
         });
+        this.setValues(options);
         this.drawingManager.setDrawingMode(null);
         this.drawingManager.setMap(this.map);
         this.set('length', 0);
@@ -27,6 +26,14 @@ export default class PathManager extends google.maps.MVCObject {
             this.drawingManager.setDrawingMode(null);
         });
         this.lastClickLatLng = null;
+    }
+    styles_changed() {
+        const drawingStyle = Object.assign({}, this.styles.new, this.styles.selected);
+        this.drawingManager.setOptions({polylineOptions: drawingStyle});
+        for (const key in this.polylines) {
+            const [pl] = this.polylines[key];
+            pl.setOptions(this.getPolylineStyle(pl));
+        }
     }
     applyPath(path, append) {
         if (this.selection && append) {
@@ -87,7 +94,7 @@ export default class PathManager extends google.maps.MVCObject {
         }
         // retain current
         const currentKey = this.pathToHash(this.getEncodedCurrent());
-        for (var key in this.polylines) {
+        for (const key in this.polylines) {
             if (key == currentKey) continue;
             const [pl, item] = this.polylines[key];
             if (retainTemporaryAndSelection && !item ) continue;
@@ -98,7 +105,7 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     searchPolyline(path) {
-        var key = this.pathToHash(path);
+        const key = this.pathToHash(path);
         return this.polylines[key];
     }
 
@@ -156,7 +163,7 @@ export default class PathManager extends google.maps.MVCObject {
                 this.set('selection', pl == this.selection ? null : pl);
             }
         });
-        var deleteNode = mev => {
+        const deleteNode = mev => {
             if (mev.vertex != null) {
                 pl.getPath().removeAt(mev.vertex);
             }
@@ -165,7 +172,7 @@ export default class PathManager extends google.maps.MVCObject {
             }
         };
         google.maps.event.addListener(pl, 'rightclick', deleteNode);
-        var pathCallback = () => {
+        const pathCallback = () => {
             this.updateLength();
         };
         google.maps.event.addListener(pl.getPath(), 'insert_at', pathCallback);

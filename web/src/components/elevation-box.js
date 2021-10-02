@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setElevationInfoWindow } from './actions';
+import { setElevationInfoWindow } from '../actions';
 import {
     Chart,
     LineElement,
