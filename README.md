@@ -45,6 +45,7 @@ GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
 ONLY_ADMIN_CAN_CREATE=
 USE_FIREBASE_STORAGE=true
 MAP_STYLE_CONFIG=
+MAP_TYPE_IDS=
 ＃ NODE_ENV＝production
 ```
 
@@ -57,6 +58,7 @@ MAP_STYLE_CONFIG=
 - IMAGE_PREFIX: image store prefix
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store
 - MAP_STYLE_CONFIG: url of config json of map styles. default is '/default-map-styles.json'
+- MAP_TYPE_IDS: selectable map types. default is 'roadmap,hybrid,satelite,terrain'. you can add 'gsi' to use tha map by GSI(The Geospatial Information Authority of Japan).
 
 ### manage admin users
 

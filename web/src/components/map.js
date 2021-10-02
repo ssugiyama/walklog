@@ -10,6 +10,8 @@ import MapContext from './utils/map-context';
 import Box from '@material-ui/core/Box';
 import { push } from 'connected-react-router';
 import Link from '@material-ui/core/Link';
+import defaultMapStyles from './default-map-styles.json';
+import GsiMapType from './utils/gsi-map-type';
 
 const styles = () => ({
     hidden: {
@@ -28,6 +30,7 @@ function loadJS(src) {
 }
 const CENTER_INTERVAL = 30000;
 const RESIZE_INTERVAL = 500;
+const GSI_MAP_TYPE    = 'gsi';
 
 const Map = props => {
     const latitude = useSelector(state => state.main.searchForm.latitude);
@@ -92,15 +95,24 @@ const Map = props => {
     };
 
     const initMap = async () => {
-        const response = await fetch(config.get('mapStyleConfig') || '/default-map-styles.json');
-        rc.mapStyles = await response.json();
-
+        const mapStyleConfig = config.get('mapStyleConfig');
+        rc.mapStyles = defaultMapStyles;
+        if (mapStyleConfig) {
+            try {
+                const response = await fetch(mapStyleConfig);
+                rc.mapStyles = await response.json();
+            } catch(e) {
+                console.log(e);
+            }
+        }
         if (window.localStorage.center) {
             dispatch(setCenter(JSON.parse(window.localStorage.center)));
         }
         if (window.localStorage.zoom) {
             setZoom(parseInt(window.localStorage.zoom));
         }
+        const mapTypeIds = config.get('mapTypeIds').split(/,/);
+
         const options = {
             styles: rc.mapStyles.map,
             zoom: zoom,
@@ -111,10 +123,7 @@ const Map = props => {
             streetViewControl: true,
             mapTypeControlOptions: {
                 position: google.maps.ControlPosition.TOP_RIGHT,
-                mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
-                    google.maps.MapTypeId.SATELLITE,
-                    google.maps.MapTypeId.TERRAIN,
-                    'gsi' ],
+                mapTypeIds: mapTypeIds,
                 style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             }
         };
@@ -122,6 +131,9 @@ const Map = props => {
             event.preventDefault();
         });
         rc.map = new google.maps.Map(mapElemRef.current, options);
+        if (mapTypeIds.includes(GSI_MAP_TYPE)) {
+            new GsiMapType(GSI_MAP_TYPE, rc.map)
+        }
         google.maps.event.addListener(rc.map, 'click', async event => {
             if (rc.filter == 'neighborhood'){
                 rc.distanceWidget.setCenter(event.latLng.toJSON());
@@ -150,6 +162,8 @@ const Map = props => {
         });
         const PathManager = require('./utils/path-manager').default;
         rc.pathManager = new PathManager({map: rc.map, styles: rc.mapStyles.polylines});
+        const PolygonManage = require('./utils/polygon-manager').default;
+        rc.polygonManager = new PolygonManage({map: rc.map, styles: rc.mapStyles.polygons});
         rc.pathInfoWindow = new google.maps.InfoWindow();
         google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {
             const item = rc.clickedItem;
@@ -203,6 +217,15 @@ const Map = props => {
             setConfirmInfo({open: false});
             rc.pathManager.applyPath(polyline.getPath().getArray(), append);
         });
+        google.maps.event.addListener(rc.polygonManager, 'polygon_deleted', id => {
+            const citiesArray = rc.cities.split(/,/);
+            const index = citiesArray.indexOf(id);
+            if (index >= 0){
+                citiesArray.splice(index, 1);
+                const newCities = citiesArray.join(',');
+                dispatch(setSearchForm({cities: newCities}));
+            }
+        });
         const circleOpts = Object.assign({}, rc.mapStyles.circle, {
             center: rc.center,
             radius: parseFloat(radius)
@@ -219,19 +242,6 @@ const Map = props => {
                 radius: rc.distanceWidget.getRadius()
             }));
         });
-        rc.map.mapTypes.set('gsi', gsiMapOption());
-        const gsiLogo = document.createElement('div');
-        gsiLogo.innerHTML = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" >地理院タイル</a>';
-        gsiLogo.style.display = 'none';
-        google.maps.event.addListener( rc.map, 'maptypeid_changed', () => {
-            const currentMapTypeID = rc.map.getMapTypeId();
-            if ( currentMapTypeID == 'gsi' ) {
-                gsiLogo.style.display = 'inline';
-            } else {
-                gsiLogo.style.display = 'none';
-            }
-        });
-        rc.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(gsiLogo);
         rc.elevationInfoWindow = new google.maps.InfoWindow();
         rc.marker = new google.maps.Marker(rc.mapStyles.marker);
         if (window.localStorage.selectedPath) {
@@ -261,9 +271,9 @@ const Map = props => {
 
     const citiesChanges = () => {
         const a = new Set(rc.cities.split(/,/));
-        const b = new Set(Object.keys(rc.cityHash || {}));
+        const b = rc.polygonManager.idSet();
         if (a.length !== b.length) return true;
-        for (let j of a) {
+        for (const j of a) {
             if (!b.has(j)) return true;
         }
         return false;
@@ -339,21 +349,14 @@ const Map = props => {
         if (!mapLoaded) return;
         (async () => {
             if (rc.filter == 'cities' && citiesChanges() && ! rc.fetching) {
-                if (rc.cityHash) {
-                    for (let id of Object.keys(rc.cityHash)) {
-                        const pg = rc.cityHash[id];
-                        pg.setMap(null);
-                    }
-                }
-                rc.cityHash = {};
+                rc.polygonManager.deleteAll();
                 if (rc.cities) {
                     rc.fetching = true;
                     try {
                         const response =  await fetch('/api/cities?jcodes=' + rc.cities);
                         const cities = await response.json();
                         cities.forEach(city => {
-                            const pg = toPolygon(city.jcode, city.theGeom);
-                            pg.setMap(rc.map);
+                            rc.polygonManager.addPolygon(city.jcode, city.theGeom);
                         });
                     } catch (error) {
                         alert(error);
@@ -361,50 +364,20 @@ const Map = props => {
                     rc.fetching = false;
                 }
             }
-            if (rc.cityHash) {
-                for (let id of Object.keys(rc.cityHash)) {
-                    const geom = rc.cityHash[id];
-                    if (rc.filter == 'cities') {
-                        geom.setMap(rc.map);
-                    }
-                    else {
-                        geom.setMap(null);
-                    }
-                }
+            if (rc.filter == 'cities') {
+                rc.polygonManager.showAll();
+            }
+            else {
+                rc.polygonManager.hideAll();
             }
         })();
     }, [rc.filter, rc.cities, mapLoaded]);
 
-    // console.log('render map');
-    const toPolygon = (id, str) => {
-        const paths = str.split(' ').map(element => google.maps.geometry.encoding.decodePath(element));
-        const pg =  new google.maps.Polygon({});
-        pg.setPaths(paths);
-        pg.setOptions(rc.mapStyles.polygon);
-        rc.cityHash[id] = pg;
-        google.maps.event.addListener(pg, 'click',  () => {
-            removeCity(id, pg);
-        });
-        return pg;
-    };
     const addCity = (id) => {
-        if (rc.cityHash === undefined) rc.cityHash = {};
-        if (rc.cityHash[id]) return;
-        const newCities = rc.cities.split(/,/).filter(elm => elm).concat(id).join(',');
+        const newCities = Array.from(new Set(rc.cities.split(/,/).filter(elm => elm).concat(id))).join(',');
         dispatch(setSearchForm({cities: newCities}));
     };
-    const removeCity = (id, pg) => {
-        const citiesArray = rc.cities.split(/,/);
-        const index = citiesArray.indexOf(id);
-        if (index >= 0){
-            citiesArray.splice(index, 1);
-            const newCities = citiesArray.join(',');
-            dispatch(setSearchForm({cities: newCities}));
-        }
-        pg.setMap(null);
-        pg = null;
-        delete rc.cityHash[id];
-    };
+
     const processUpload = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
@@ -416,28 +389,6 @@ const Map = props => {
             dispatch(setSelectedPath(path));
         });
         reader.readAsText(file);
-    };
-    const gsiMapOption = () => {
-        const tileType = 'std';
-        const tileExtension = 'png';
-        const zoomMax = 18;
-        const zoomMin = 5;
-        return {
-            name: '地理院地図',
-            tileSize: new google.maps.Size(256, 256),
-            minZoom: zoomMin,
-            maxZoom: zoomMax,
-            getTile: (tileCoord, zoom, ownerDocument) => {
-                const img = ownerDocument.createElement('img');
-                img.id = 'gsi-map-layer-image';
-                img.style.width = '256px';
-                img.style.height = '256px';
-                const x = (tileCoord.x % Math.pow(2, zoom)).toString();
-                const y = tileCoord.y.toString();
-                img.src = `http://cyberjapandata.gsi.go.jp/xyz/${tileType}/${zoom}/${x}/${y}.${tileExtension}`;
-                return img;
-            }
-        };
     };
 
     return (
