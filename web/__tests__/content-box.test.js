@@ -1,7 +1,8 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Enzyme, { mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+// import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import ContentBoxContainer from '../src/components/content-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';

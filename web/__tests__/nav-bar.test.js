@@ -1,6 +1,7 @@
 import React from 'react';
 import Enzyme, { mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+// import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import NavBar from '../src/components/nav-bar';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
@@ -14,7 +15,6 @@ config.set({
 firebase.initializeApp = jest.fn();
 
 Enzyme.configure({ adapter: new Adapter() });
-
 
 function setup(props) {
     const state = {
