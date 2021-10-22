@@ -1,13 +1,14 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Enzyme, { mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+// import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import ItemBox from '../src/components/item-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import config from 'react-global-configuration';
-import {ThemeProvider} from '@material-ui/styles';
-import { createMuiTheme } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material/styles';
+import { createTheme } from '@mui/material';
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -21,7 +22,7 @@ function setup(path, props, router) {
         main: props,
         router
     };
-    const theme = createMuiTheme({});
+    const theme = createTheme();
     const store = configureStore()(state);
     return mount(
         <Provider store={store}>
@@ -64,13 +65,13 @@ describe('<ItemBoxContainer />', () => {
         }, {
         });
         // console.log(wrapper.debug())
-        expect(wrapper.find('ForwardRef(IconButton)').length).toBe(8);
+        expect(wrapper.find('ForwardRef(IconButton)').length).toBe(7);
         expect(wrapper.find('ForwardRef(IconButton)').at(0).props().to).toBe('/18');
         expect(wrapper.find('ForwardRef(Fab)').at(0).props().to).toBe('/');
         expect(wrapper.find('ForwardRef(IconButton)').at(1).props().to).toBe('/16');
         expect(wrapper.find('ForwardRef(Typography)[variant="h6"]').text()).toBe('2018-05-30 : start - end (14.6 km)');
         expect(wrapper.find('ForwardRef(Typography)[variant="body2"] img').prop('src')).toBe('http://exmaple.com/photo');
-        expect(wrapper.find('ForwardRef(Typography)[variant="body2"] img + span').text()).toBe('Alice');
+        expect(wrapper.find('ForwardRef(Typography)[variant="body2"] ForwardRef(Box) + span').text()).toBe('Alice');
         expect(wrapper.find('div[className="react-swipeable-view-container"] div div div').first().props().dangerouslySetInnerHTML.__html)
             .toEqual(expect.stringContaining('<p>paragraph</p>'));
     });
@@ -101,7 +102,7 @@ describe('<ItemBoxContainer />', () => {
         wrapper = setup('/17', mainProps, {
         });
         // console.log(wrapper.debug());
-        expect(wrapper.find('ForwardRef(IconButton)').length).toBe(9);
+        expect(wrapper.find('ForwardRef(IconButton)').length).toBe(8);
     });
     it('selected item is null', () => {
         const mainProps = {

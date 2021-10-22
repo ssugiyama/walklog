@@ -7,11 +7,12 @@ import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem,  setAdjacentItemIds, setLastQuery, toggleView } from './actions';
 import SearchBox from './components/search-box';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import ItemBox from './components/item-box';
 import { renderRoutes } from 'react-router-config';
-import { createMuiTheme } from '@material-ui/core/styles';
-import * as colors from '@material-ui/core/colors';
+import { createTheme } from '@mui/material/styles';
+import createCache from '@emotion/cache';
+import * as colors from '@mui/material/colors';
 import config from 'react-global-configuration';
 
 // const injectTapEventPlugin = require('react-tap-event-plugin');
@@ -405,19 +406,14 @@ export const routes = () => [
     }
 ];
 
-export const getTheme = () => {
-    let themeType = config.get('themeType');
-    if (typeof matchMedia === 'function' && ! ['dark', 'light'].includes(themeType))
-    {
-        themeType =  matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    } else if (! ['dark', 'light'].includes(themeType)) {
-        themeType = 'light';
-    }
-    return createMuiTheme({
+export const createMuiTheme = (mode = 'light') => {
+    return createTheme({
         palette: {
-            primary: colors[config.get('themePrimary') || 'indigo'],
+            primary:  colors[config.get('themePrimary') || 'indigo'],
             secondary: colors[config.get('themeSecondary') || 'pink'],
-            type: themeType,
+            mode,
         }
     });
 };
+
+export const createEmotionCache = () => createCache({ key: 'css' });

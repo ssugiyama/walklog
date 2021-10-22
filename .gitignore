@@ -1,5 +1,5 @@
 data
-web/.cache
+web/.parcel-cache
 web/npm-debug.log
 web/node_modules
 web/public

@@ -1,10 +1,12 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import {configureStore, routes, handleRoute, getTheme}  from '../app';
+import {configureStore, routes, handleRoute, createEmotionCache, createMuiTheme }  from '../app';
+import { CacheProvider } from '@emotion/react';
+import createEmotionServer from '@emotion/server/create-instance';
 import { setUsers } from '../actions';
 import { matchRoutes } from 'react-router-config';
-import { ServerStyleSheets, ThemeProvider } from '@material-ui/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
 import { StaticRouter } from 'react-router-dom';
 import ReactDOMServer from 'react-dom/server';
@@ -43,13 +45,13 @@ const Wrapper = props => (
             <meta name="theme-color" content="#ffffff" />
             <link rel="canonical" href={props.canonical} />
             <title>{props.title}</title>
-            <style id="jss-server-side" dangerouslySetInnerHTML={raw(props.css)}></style>
+            <style data-emotion="{props.key} {props.ids.join(' ')} ">{props.css}</style>
         </head>
         <body style={{ margin: 0, height: '100%' }}>
-            <div id="body" dangerouslySetInnerHTML={{ __html: props.markup }} style={{ height: '100%' }}></div>
+            <div id="body" dangerouslySetInnerHTML={{ __html: props.html }} style={{ height: '100%' }}></div>
             <script dangerouslySetInnerHTML={definePreloadedStateAndConfig(props.preloadedState)}>
             </script>
-            <script src="/bundle.js"></script>
+            <script type="module" src="/client-root.js"></script>
             <script type="text/javascript" async defer src="https://platform.twitter.com/widgets.js"></script>
             <script src="/register-sw.js"></script>
         </body>
@@ -77,25 +79,29 @@ export default async function handleSSR(req, res) {
         await handleRoute(match.params.id, req.query, false, prefix, [], true, store.dispatch);
         const userResult =  await admin.auth().listUsers(1000);
         store.dispatch(setUsers(userResult.users));
+        const cache = createEmotionCache();
 
         let context = {};
-        const sheets = new ServerStyleSheets();
         const markup = renderToString(
-            sheets.collect(
-                <Provider store={store}>
-                    <ThemeProvider theme={getTheme()}>
+            <Provider store={store}>
+                <CacheProvider value={cache}>
+                    <ThemeProvider theme={createMuiTheme()}>
                         <StaticRouter location={req.url} context={context}>
                             <Body />
                         </StaticRouter>
                     </ThemeProvider>
-                </Provider>
-            )
+                </CacheProvider>
+            </Provider>
         );
-        const css = sheets.toString();
+
+        // Grab the CSS from emotion
+        const { extractCritical } = createEmotionServer(cache);
+        const { html, css, ids } = extractCritical(markup);
+
         const state = store.getState();
         let title = config.get('siteName');
         let description = config.get('siteDescription');
-        const siteName =config.get('siteName');
+        const siteName = config.get('siteName');
         const baseUrl = config.get('baseUrl');
         let image;
         const twitterSite = config.get('twitterSite');
@@ -109,8 +115,10 @@ export default async function handleSSR(req, res) {
         }
         if (! image) image = baseUrl + '/walklog.png';
         const props = {
-            markup,
+            html,
             css,
+            ids,
+            key: cache.key,
             title,
             image,
             description,
