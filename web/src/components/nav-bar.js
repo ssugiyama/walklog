@@ -6,45 +6,26 @@ import {
     openSnackbar,
     setCurrentUser,
 } from '../actions';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
-// import ListItemIcon from '@material-ui/core/ListItemIcon';
-// import ListItemText from '@material-ui/core/ListItemText';
-// import ArrowDownIcon from '@material-ui/icons/ArrowDropDown';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-import MyLocationIcon from '@material-ui/icons/MyLocation';
-import { makeStyles } from '@material-ui/styles';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+// import ListItemIcon from '@mui/material/ListItemIcon';
+// import ListItemText from '@mui/material/ListItemText';
+// import ArrowDownIcon from '@mui/icons-material/ArrowDropDown';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import MapContext from './utils/map-context';
 import firebase from 'firebase/app'
 import config from 'react-global-configuration';
 import 'firebase/auth';
-
-const styles = {
-    root: {
-        paddingTop: 'env(safe-area-inset-top)',
-    },
-    title: {
-        flex: 1,
-    },
-    userPhoto: {
-        width: 24,
-        borderRadius: '50%',
-    },
-    appVersion: {
-        textTransform: 'none',
-    },
-};
-
-const useStyles = makeStyles(styles);
 
 const AUTO_GEOLOCATION_INTERVAL = 30000;
 
@@ -59,7 +40,6 @@ const NavBar = (props) => {
     const selectedPath  = useSelector(state => state.main.selectedPath);
     const currentUser   = useSelector(state => state.main.currentUser);
     const appVersion = 'v' + config.get('appVersion');
-    const classes = useStyles(props);
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
         const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
@@ -175,9 +155,9 @@ const NavBar = (props) => {
     //     </MenuItem>;
     // } ;
     return (
-        <AppBar position="static" className={classes.root}>
+        <AppBar position="static" enableColorOnDark={true} sx={{pt: 'env(safe-area-inset-top)'}}>
             <Toolbar>
-                <Typography variant="h5" color="inherit" className={classes.title}>Walklog</Typography>
+                <Typography variant="h5" color="inherit" sx={{flex: 1}}>Walklog</Typography>
                 <Checkbox
                     icon={<MyLocationIcon />}
                     checkedIcon={<MyLocationIcon />}
@@ -186,10 +166,10 @@ const NavBar = (props) => {
                     onClick={ignoreClick}
                     value="autoGeolocation"
                 />
-                <IconButton onClick={accountMenuOpenCB} color="inherit">
-                    { currentUser ? <img className={classes.userPhoto} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
+                <IconButton onClick={accountMenuOpenCB} color="inherit" size="large">
+                    { currentUser ? <img style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
-                <Button component="a" href="https://github.com/ssugiyama/walklog" target="_blank" color="inherit" className={classes.appVersion}>{appVersion}</Button>
+                <Button component="a" href="https://github.com/ssugiyama/walklog" target="_blank" color="inherit" sx={{textTransform: 'none',}}>{appVersion}</Button>
             </Toolbar>
             <Menu
                 anchorEl={accountAnchorEl}

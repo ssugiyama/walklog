@@ -2,15 +2,15 @@ import React, { useState, useEffect, useRef, useCallback, useContext } from 'rea
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { setSelectedItem, openWalkEditor } from '../actions';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import TextField from '@material-ui/core/TextField';
-import Switch from '@material-ui/core/Switch';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import TextField from '@mui/material/TextField';
+import Switch from '@mui/material/Switch';
 import moment from 'moment';
 import ImageUploader from './image-uploader';
 import firebase from 'firebase/app';
@@ -143,10 +143,10 @@ const WalkEditor = () => {
             <DialogTitle>{ walkEditorMode == 'update' ? 'Update Walk' : 'New Walk' }</DialogTitle>
             <DialogContent>
                 <FormGroup row>
-                    <TextField type="date" value={state.date} onChange={dateChangeCB} container="inline" mode="landscape" label='date' fullWidth={true} />
-                    <TextField defaultValue={state.title} onChange={titleChangeCB} label="title" fullWidth={true} />
+                    <TextField type="date" value={state.date} onChange={dateChangeCB} container="inline" variant="standard" mode="landscape" label='date' fullWidth={true} />
+                    <TextField defaultValue={state.title} onChange={titleChangeCB} label="title" variant="standard" fullWidth={true} />
                     <ImageUploader label="image" value={state.image} onChange={imageChangeCB} ></ImageUploader>
-                    <TextField multiline rows={4} rowsMax={20}
+                    <TextField multiline rows={4} maxRows={20} variant="standard"
                         defaultValue={state.comment} onChange={commentChangeCB} label="comment" fullWidth={true} />
                     {
                         walkEditorMode == 'update' &&

@@ -1,47 +1,16 @@
 import React, { useRef, useContext, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPanoramaCount, setPanoramaIndex, setOverlay } from '../actions';
-import IconButton from '@material-ui/core/IconButton';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Typography from '@material-ui/core/Typography';
-import Switch from '@material-ui/core/Switch';
-import NavigationArrowForwardIcon from '@material-ui/icons/ArrowForward';
-import NavigationArrowBackIcon from '@material-ui/icons/ArrowBack';
-import AvFastForwardIcon from '@material-ui/icons/FastForward';
-import AvFastRewindIcon from '@material-ui/icons/FastRewind';
+import IconButton from '@mui/material/IconButton';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Typography from '@mui/material/Typography';
+import Switch from '@mui/material/Switch';
+import NavigationArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import NavigationArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AvFastForwardIcon from '@mui/icons-material/FastForward';
+import AvFastRewindIcon from '@mui/icons-material/FastRewind';
 import MapContext from './utils/map-context';
-import { makeStyles } from '@material-ui/styles';
-import classNames from 'classnames';
-
-const styles = {
-    panoramaBoxBody: {
-        width: '100%',
-        height: '30vh'
-    },
-    panoramaBoxControl: {
-        display: 'flex',
-        flextDirection: 'row',
-        width: '100%',
-        textAlign: 'center',
-        height: 36
-    },
-    panoramaBoxTitle: {
-        float: 'left'
-    },
-    panoramaBoxOverlayToggle: {
-        width: 120,
-        float: 'right',
-        marginTop: 40,
-    },
-    panoramaHidden: {
-        display: 'none',
-    },
-    grow: {
-        flexGrow: 1,
-    },
-};
-
-const useStyles = makeStyles(styles);
+import Box from '@mui/material/Box';
 
 const PANORAMA_INTERVAL = 50;
 
@@ -53,7 +22,6 @@ const PanoramaBox = props => {
     const mapLoaded = useSelector(state => state.main.mapLoaded);
     const dispatch = useDispatch();
     const bodyRef = useRef({});
-    const classes = useStyles(props);
     const refs = useRef({});
     const handleOverlayChange = (e, toggled) => {
         dispatch(setOverlay(toggled));
@@ -187,16 +155,20 @@ const PanoramaBox = props => {
                     label="overlay">
                 </FormControlLabel>
             </div>
-            <div className={classNames(classes.panoramaBoxBody, {
-                [classes.panoramaHidden]: overlay,
-            })} ref={bodyRef}></div>
-            <div className={classes.panoramaBoxControl}>
-                <IconButton onClick={panoramaIndexButtonClickCBs['-10']}><AvFastRewindIcon /></IconButton>
-                <IconButton onClick={panoramaIndexButtonClickCBs['-1']}><NavigationArrowBackIcon /></IconButton>
-                <Typography variant="body2" className={classes.grow}><span>{ panoramaIndex+1 } </span> / <span>{ panoramaCount } </span></Typography>
-                <IconButton onClick={panoramaIndexButtonClickCBs['+1']}><NavigationArrowForwardIcon /></IconButton>
-                <IconButton onClick={panoramaIndexButtonClickCBs['+10']}><AvFastForwardIcon /></IconButton>
-            </div>
+            { <Box sx={{ width: '100%', height: '30vh', display: overlay ? 'none' : 'block' }} ref={bodyRef}></Box>}
+            <Box sx={{
+                display: 'flex',
+                flextDirection: 'row',
+                width: '100%',
+                textAlign: 'center',
+                height: 36,
+            }}>
+                <IconButton onClick={panoramaIndexButtonClickCBs['-10']} size="large"><AvFastRewindIcon /></IconButton>
+                <IconButton onClick={panoramaIndexButtonClickCBs['-1']} size="large"><NavigationArrowBackIcon /></IconButton>
+                <Typography variant="body2" style={{ flexGrow: 1, }}><span>{ panoramaIndex+1 } </span> / <span>{ panoramaCount } </span></Typography>
+                <IconButton onClick={panoramaIndexButtonClickCBs['+1']} size="large"><NavigationArrowForwardIcon /></IconButton>
+                <IconButton onClick={panoramaIndexButtonClickCBs['+10']} size="large"><AvFastForwardIcon /></IconButton>
+            </Box>
         </div>
     );
 };
