@@ -1,30 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { FormControl, FormLabel, Button } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
-
-const styles = {
-    imageBox: {
-        width: 150,
-        height: 150,
-        borderWidth: 1,
-        borderStyle: 'solid',
-        backgroundSize: 'contain',
-    },
-    fileInput: {
-        display: 'none'
-    },
-    hbox: {
-        display: 'flex',
-        flexDirection: 'row'
-    },
-    vbox: {
-        display: 'flex',
-        flexDirection: 'column'
-    }
-};
-
-const useStyles = makeStyles(styles);
+import { FormControl, FormLabel, Button } from '@mui/material';
+import Box from '@mui/material/Box';
 
 const ImageUploader = props => {
     const [imageUrl, setImageUrl] = useState(props.value);
@@ -56,22 +33,21 @@ const ImageUploader = props => {
         if (onChange && typeof onChange === 'function') onChange('');
     });
 
-    const classes = useStyles(props);
     return (
         <FormControl>
             <FormLabel>{props.label}</FormLabel>
-            <div className={classes.hbox}>
-                <div className={classes.imageBox} style={
+            <Box sx={{ display: 'flex', flexDirection: 'row'}}>
+                <Box sx={{ width: 150, height: 150, borderWidth: 1, borderStyle: 'solid', backgroundSize: 'contain',}} style={
                     imageUrl ? {
                         backgroundImage: `url(${imageUrl})`
                     } : {}
-                }></div>
-                <div className={classes.vbox}>
+                }></Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Button onClick={handleSelect}>select...</Button>
                     <Button onClick={handleClear}>clear</Button>
-                </div>
-            </div>
-            <input type="file" ref={fileInputRef} className={classes.fileInput} />
+                </Box>
+            </Box>
+            <input type="file" ref={fileInputRef} style={{ display: 'none' }} />
         </FormControl>
     );
 };

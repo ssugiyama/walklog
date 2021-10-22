@@ -2,23 +2,14 @@ import React, { useRef, useEffect, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { toggleView, setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath, clearDeletingPsths } from '../actions';
 import { useSelector, useDispatch } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './utils/map-context';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import { push } from 'connected-react-router';
-import Link from '@material-ui/core/Link';
+import Link from '@mui/material/Link';
 import GsiMapType from './utils/gsi-map-type';
-
-const styles = () => ({
-    hidden: {
-        display: 'none',
-    },
-});
-
-const useStyles = makeStyles(styles);
 
 function loadJS(src) {
     const ref = window.document.getElementsByTagName('script')[0];
@@ -56,7 +47,6 @@ const Map = props => {
 
     const context = useContext(MapContext);
     const dispatch = useDispatch();
-    const classes = useStyles(props);
 
     const handleLinkClick = (url) => {
         dispatch(push(url));
@@ -394,12 +384,14 @@ const Map = props => {
     return (
         <React.Fragment>
             <Box ref={mapElemRef}
-                my={1}
-                color="black"
+                sx={{
+                    my: 1,
+                    color: '#fff',
+                }}
                 {... props}
             ></Box>
-            <a ref={downloadRef} className={classes.hidden} download='walklog.json'></a>
-            <input ref={uploadRef} type="file" className={classes.hidden} />
+            <a ref={downloadRef} style={{display: 'none'}} download='walklog.json'></a>
+            <input ref={uploadRef} type="file" style={{display: 'none'}} />
             <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
         </React.Fragment>
     );

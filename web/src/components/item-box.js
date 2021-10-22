@@ -3,78 +3,23 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { openWalkEditor } from '../actions';
 import marked from 'marked';
-import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
-import Fab from '@material-ui/core/Fab';
-import NavigationArrowForwardIcon from '@material-ui/icons/ArrowForward';
-import NavigationArrowBackIcon from '@material-ui/icons/ArrowBack';
-import ListIcon from '@material-ui/icons/List';
-import EditorModeEditIcon from '@material-ui/icons/Edit';
-import Typography from '@material-ui/core/Typography';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import Fab from '@mui/material/Fab';
+import NavigationArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import NavigationArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ListIcon from '@mui/icons-material/List';
+import EditorModeEditIcon from '@mui/icons-material/Edit';
+import Typography from '@mui/material/Typography';
 import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Box from '@material-ui/core/Box';
-import { makeStyles } from '@material-ui/styles';
-import NoSsr from '@material-ui/core/NoSsr';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import NoSsr from '@mui/material/NoSsr';
 import TweetIcon from './tweet-icon';
 import SwipeableViews from 'react-swipeable-views';
 import config from 'react-global-configuration';
-
-const styles = theme => ({
-    itemBoxContent: {
-        padding: theme.spacing(2),
-        flexDirection: 'column',
-    },
-    tabs: {
-        margin: '4px 0',
-    },
-    tab: {
-        textTransform: 'none',
-    },
-    itemBoxTitle: {
-        fontSize: '100%'
-    },
-    itemBoxAuthorPhoto: {
-        width: '16px',
-    },
-    itemBoxText: {
-        textIndent: '1.2em',
-        lineHeight: '1.65',
-        letterSpacing: '.1em',
-        textAlign: 'justify',
-        '& a': {
-            color: 'inherit'
-        }
-    },
-    itemBoxImage: {
-        float: 'left',
-        width: 320,
-        margin: 0,
-        marginBottom: theme.spacing(2),
-        marginRight: theme.spacing(2),
-    },
-    itemBoxControl: {
-        width: '100%',
-        textAlign: 'center',
-        padding: theme.spacing(2),
-    },
-    backButton: {
-        float: 'left',
-        marginLeft: 10,
-        marginTop: 10,
-    },
-    '@media (max-width:600px)': {
-        itemBoxImage: {
-            float: 'none',
-            margin: '0 auto 0 auto',
-            display: 'inherit'
-        },
-    }
-});
-
-const useStyles = makeStyles(styles);
 
 const ItemBox = props => {
     const [tabValue, setTabValue] = useState(0);
@@ -87,7 +32,6 @@ const ItemBox = props => {
     const lastQuery = useSelector(state => state.main.lastQuery);
     const location =  useSelector(state => state.router.location);
     const dispatch = useDispatch();
-    const classes = useStyles(props);
     const handleEdit = () => {
         dispatch(openWalkEditor(true, 'update'));
     };
@@ -125,47 +69,68 @@ const ItemBox = props => {
         offset > 0 ?
             '/?select=1&offset=' + offset +
                 (lastQuery ? '&' + lastQuery : '') : null;
-    return  (
+
+    const sxImageBox = {
+        float: ['none', 'left'],
+        width: 320,
+        mu: 0,
+        mr: ['auto', 2],
+        md: [0, 2],
+        ml: ['auto', 0],
+        display: ['inherit', 'block'],
+    };
+    return (
         <Box>
-            <Paper className={classes.itemBoxControl}>
-                <Fab className={classes.backButton} size="small" color="primary" component={Link} to={upUrl}><ListIcon /></Fab>
-                <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''}><NavigationArrowBackIcon /></IconButton>
-                <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''}><NavigationArrowForwardIcon /></IconButton>
+            <Paper sx={{ width: '100%', textAlign: 'center', padding: 2, }}>
+                <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1, }} size="small" color="primary" component={Link} to={upUrl}><ListIcon /></Fab>
+                <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''} size="large"><NavigationArrowBackIcon /></IconButton>
+                <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''} size="large"><NavigationArrowForwardIcon /></IconButton>
                 {
-                    data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleEdit} ><EditorModeEditIcon /></IconButton>) : null
+                    data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleEdit} size="large"><EditorModeEditIcon /></IconButton>) : null
                 }
-                <IconButton component="a" href={tweetUrl}><TweetIcon /></IconButton>
-                <Typography variant="h6" color={title ? 'initial' : 'error'} className={classes.itemBoxTitle}>{ title || 'not found'}</Typography>
+                <IconButton component="a" href={tweetUrl} size="large"><TweetIcon /></IconButton>
+                <Typography variant="h6" sx={{ fontSize: '100%' }}>{ title || 'not found'}</Typography>
                 {
-                    dataUser ? (<Typography variant="body2" align="right"><img className={classes.itemBoxAuthorPhoto} src={dataUser.photoURL} /><span>{dataUser.displayName}</span></Typography>) : null
+                    dataUser ? (<Typography variant="body2" align="right"><Box component="img" sx={{ width: 16,}} src={dataUser.photoURL} /><span>{dataUser.displayName}</span></Typography>) : null
                 }
             </Paper>
             { data &&
                 <Paper>
                     <Tabs value={tabValue}
                         onChange={tabChangeCB}
-                        className={classes.tabs}
+                        sx={{ margin: '4px 0' }}
                         textColor="secondary"
                         variant="fullWidth" >
-                        <Tab label="Comment"  className={classes.tab} />
-                        <Tab label="Elevation" className={classes.tab} />
-                        <Tab label="StreetView" className={classes.tab}/>
+                        <Tab label="Comment"  sx={{ textTransform: 'none', }} />
+                        <Tab label="Elevation" sx={{ textTransform: 'none', }}/>
+                        <Tab label="StreetView" sx={{ textTransform: 'none', }}/>
                     </Tabs>
                 </Paper>
             }
             { data &&
                 <SwipeableViews index={tabValue} onChangeIndex={indexCHangeCB} disableLazyLoading>
-                    <Paper className={classes.itemBoxContent}>
-                        {image && <img src={image} className={classes.itemBoxImage} />}
-                        <Typography variant="body2" component="div" className={classes.itemBoxText} dangerouslySetInnerHTML={createMarkup()}>
+                    <Paper sx={{ flexDirection: 'column', padding: 2, }}>
+                        {image &&
+                            <Box sx={sxImageBox} component="img" src={image} />}
+                        <Typography variant="body2" component="div"
+                            sx={{
+                                textIndent: '1.2em',
+                                lineHeight: '1.65',
+                                letterSpacing: '.1em',
+                                textAlign: 'justify',
+                                '& a': {
+                                    color: 'inherit'
+                                }
+                            }}
+                            dangerouslySetInnerHTML={createMarkup()}>
                         </Typography>
                     </Paper>
-                    <Paper className={classes.itemBoxContent}>
+                    <Paper sx={{ flexDirection: 'column', padding: 2, padding: 2, }}>
                         <NoSsr>
                             <ElevationBox />
                         </NoSsr>
                     </Paper>
-                    <Paper className={classes.itemBoxContent}>
+                    <Paper sx={{ flexDirection: 'column', padding: 2, }}>
                         <PanoramaBox />
                     </Paper>
                 </SwipeableViews>

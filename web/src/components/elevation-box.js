@@ -30,8 +30,8 @@ Chart.register(
     SubTitle,
 );
 
-import { useTheme } from '@material-ui/styles';
-import Box from '@material-ui/core/Box';
+import { useTheme } from '@mui/styles';
+import Box from '@mui/material/Box';
 
 const ElevationBox = () => {
     const rootRef = useRef();

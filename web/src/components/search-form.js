@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchForm  } from '../actions';
-import Button from '@material-ui/core/Button';
-import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
-import { makeStyles } from '@material-ui/styles';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
 import { Link } from 'react-router-dom';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import Box from '@mui/material/Box';
 
 const monthOptions = [
     { label: '-', value: '' },
@@ -39,27 +39,6 @@ const orderOptionsWithNearest = [
     { label: 'nearest first', value: 'nearest_first' },
 ];
 
-const styles = theme => ({
-    root: {
-        margin: theme.spacing(1),
-    },
-    leftIcon: {
-        marginRight: theme.spacing(1),
-    },
-    formInput: {
-        width: '50%',
-        paddingLeft: theme.spacing(1),
-        paddingRight: theme.spacing(1),
-        verticalAlign: 'center',
-    },
-    resetRow: {
-        marginTop: theme.spacing(1),
-        textAlign: 'right',
-    },
-});
-
-const useStyles = makeStyles(styles);
-
 const SearchForm = props => {
     const filter = useSelector(state => state.main.searchForm.filter);
     const month = useSelector(state => state.main.searchForm.month);
@@ -70,7 +49,6 @@ const SearchForm = props => {
     const years = useSelector(state => state.main.years);
     const users = useSelector(state => state.main.users);
     const dispatch = useDispatch();
-    const classes = useStyles(props);
 
     const createChangeCB = name => e => dispatch(setSearchForm({[name]: e.target.value}));
     const changeCBs = {
@@ -81,16 +59,21 @@ const SearchForm = props => {
         'order':  useCallback(createChangeCB('order'), []),
         'limit':  useCallback(createChangeCB('limit'), []),
     };
-
+    const sxFormInput = {
+        width: '50%',
+        paddingLeft: 1,
+        paddingRight: 1,
+        verticalAlign: 'center',
+    };
     return (
-        <form role="form" className={classes.root}>
+        <Box role="form" component="form" sx={{ margin: 1 }}>
             <input type="hidden" name="latitude" value="" />
             <input type="hidden" name="longitude" value="" />
             <input type="hidden" name="radius" value="" />
             <input type="hidden" name="cities" value=""  />
             <input type="hidden" name="searchPath" value=""  />
             <div>
-                <TextField select label="filter" value={filter} onChange={changeCBs['filter']} className={classes.formInput}>
+                <TextField select label="filter" value={filter} onChange={changeCBs['filter']} sx={sxFormInput} variant="standard">
                     <MenuItem value="">-</MenuItem>
                     <MenuItem value="neighborhood">Neighborhood</MenuItem>
                     <MenuItem value="cities">Cities</MenuItem>
@@ -99,7 +82,7 @@ const SearchForm = props => {
                     <MenuItem value="crossing">Crossing</MenuItem>
                 </TextField>
                 <TextField select label="user" value={user} onChange={changeCBs['user']}
-                    className={classes.formInput}
+                    sx={sxFormInput} variant="standard"
                 >
                     <MenuItem value="">-</MenuItem>
                     {users.map(u => <MenuItem value={u.uid} key={u.uid}>{u.displayName}</MenuItem>)}
@@ -107,12 +90,12 @@ const SearchForm = props => {
             </div>
             <div>
                 <TextField select label="month" value={parseInt(month) || ''} onChange={changeCBs['month']}
-                    className={classes.formInput}
+                    sx={sxFormInput} variant="standard"
                 >
                     {monthOptions.map(option => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)}
                 </TextField>
                 <TextField select label="year" value={parseInt(year) || ''} onChange={changeCBs['year']}
-                    className={classes.formInput}
+                    sx={sxFormInput} variant="standard"
                 >
                     <MenuItem value="">-</MenuItem>
                     {years.map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
@@ -120,7 +103,7 @@ const SearchForm = props => {
             </div>
             <div>
                 <TextField select label="order" value={order} onChange={changeCBs['order']}
-                    className={classes.formInput}
+                    sx={sxFormInput} variant="standard"
                 >
                     {
                         (filter == 'hausdorff' || filter == 'frechet' ? orderOptionsWithNearest : orderOptions).map(option =>
@@ -128,14 +111,14 @@ const SearchForm = props => {
                         )
                     }
                 </TextField>
-                <TextField id="searchForm_limit" label="limit" value={limit} onChange={changeCBs['limit']} className={classes.formInput} />
+                <TextField id="searchForm_limit" label="limit" value={limit} onChange={changeCBs['limit']} sx={sxFormInput} variant="standard" />
             </div>
-            <div className={classes.resetRow}>
+            <Box sx={{marginTop: 1, textAlign: 'right',}}>
                 <Button variant="outlined" color="primary" component={Link} to="/?forceFetch=1" >
-                    <RefreshIcon className={classes.leftIcon} /> reset
+                    <RefreshIcon sx={{marginRight: 1,}} /> reset
                 </Button>
-            </div>
-        </form>
+            </Box>
+        </Box>
     );
 };
 
