@@ -59,7 +59,7 @@ describe('<BodyContainer />', () => {
             years: [2000],
             months: [1],
         });
-        expect(wrapper.find('BottomBar').prop('sx').display).toBe('none');
+        expect(wrapper.find({sx: {display: 'none'}}).exists('BottomBar')).toBeTruthy();
         expect(wrapper.find('ContentBox').prop('sx').display).toBe('block');
     });
     it('should have visible <BottomBar /> and invivible <ContentBox /> when view == map', () => {
@@ -75,7 +75,7 @@ describe('<BodyContainer />', () => {
                 rows: [],
             },
         });
-        expect(wrapper.find('BottomBar').prop('sx').display).toBe('block');
+        expect(wrapper.find({sx: {display: 'block'}}).exists('BottomBar')).toBeTruthy();
         expect(wrapper.find('ContentBox').prop('sx').display).toBe('none');
     });
 });

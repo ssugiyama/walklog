@@ -68,9 +68,11 @@ const Body = () => {
                     style={fabButtonStyles}>
                     {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
                 </Fab>
-                <BottomBar sx={{
+                <Box sx={{
                     display: view == 'content' ? 'none' : 'block',
-                }}/>
+                }}>
+                    <BottomBar />
+                </Box>
                 <WalkEditor />
                 <Snackbar
                     open={message != null}
