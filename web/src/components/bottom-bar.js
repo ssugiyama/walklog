@@ -1,91 +1,29 @@
 import React, { useEffect, useRef, useState, useMemo, useContext, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPanoramaIndex, setOverlay, setGeoMarker, setEditingPath, setSearchForm  } from '../actions';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import EditorModeEdit from '@material-ui/icons/Edit';
-import NavigationRefresh from '@material-ui/icons/Block';
-import NavigationCancel from '@material-ui/icons/Cancel';
-import NavigationArrowForward from '@material-ui/icons/ArrowForward';
-import NavigationArrowBack from '@material-ui/icons/ArrowBack';
-import AvFastForward from '@material-ui/icons/FastForward';
-import AvFastRewind from '@material-ui/icons/FastRewind';
-import FileDownload from '@material-ui/icons/GetApp';
-import FileUpload from '@material-ui/icons/Publish';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/styles';
-import SearchIcon from '@material-ui/icons/Search';
-import { fade } from '@material-ui/core/styles/colorManipulator';
-import InputBase from '@material-ui/core/InputBase';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import EditorModeEdit from '@mui/icons-material/Edit';
+import NavigationRefresh from '@mui/icons-material/Block';
+import NavigationCancel from '@mui/icons-material/Cancel';
+import NavigationArrowForward from '@mui/icons-material/ArrowForward';
+import NavigationArrowBack from '@mui/icons-material/ArrowBack';
+import AvFastForward from '@mui/icons-material/FastForward';
+import AvFastRewind from '@mui/icons-material/FastRewind';
+import FileDownload from '@mui/icons-material/GetApp';
+import FileUpload from '@mui/icons-material/Publish';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import SearchIcon from '@mui/icons-material/Search';
+import { alpha } from '@mui/material/styles';
+import InputBase from '@mui/material/InputBase';
+import Box from '@mui/material/Box';
 import MapContext from './utils/map-context';
 import SwipeableViews from 'react-swipeable-views';
-import NavigateBefore from '@material-ui/icons/NavigateBefore';
-import NavigateNext from '@material-ui/icons/NavigateNext';
-
-const styles = theme => ({
-    root: {
-        width: '100%',
-        backgroundColor: theme.palette.background.paper,
-    },
-    bottomBarGroup: {
-        width: '100%',
-        margin: 'auto',
-    },
-    bottomBarGroupBody: {
-        width: 'fit-content',
-        margin: 'auto',
-    },
-    search: {
-        position: 'relative',
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: fade(theme.palette.common.white, 0.15),
-        '&:hover': {
-            backgroundColor: fade(theme.palette.common.white, 0.25),
-        },
-        marginRight: theme.spacing(2),
-        marginLeft: 0,
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-            marginLeft: theme.spacing(3),
-            width: 'auto',
-        },
-    },
-    searchIcon: {
-        width: theme.spacing(9),
-        height: '100%',
-        position: 'absolute',
-        pointerEvents: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: theme.palette.getContrastText(theme.palette.background.default),
-    },
-    inputRoot: {
-        width: '100%',
-    },
-    inputInput: {
-        paddingTop: theme.spacing(1),
-        paddingRight: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
-        paddingLeft: theme.spacing(10),
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        [theme.breakpoints.up('md')]: {
-            width: 200,
-        },
-    },
-    swipeableViews: {
-        width: '100%',
-    },
-    inline: {
-        display: 'inline',
-    },
-});
-
-const useStyles = makeStyles(styles);
+import NavigateBefore from '@mui/icons-material/NavigateBefore';
+import NavigateNext from '@mui/icons-material/NavigateNext';
 
 const BottomBar = props => {
     const filter        = useSelector(state => state.main.searchForm.filter);
@@ -98,7 +36,6 @@ const BottomBar = props => {
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
-    const classes = useStyles(props);
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
     const refs = useRef({});
@@ -125,28 +62,36 @@ const BottomBar = props => {
         '+10': useCallback(createPanoramaIndexButtonClickCB(10), [panoramaIndex]),
     };
     const overlayButtonClickCB = useCallback(() => dispatch(setOverlay(false)), []);
+    const sxBottomBarGroup = {
+        width: '100%',
+        margin: 'auto',
+    };
+    const sxBottomBarGroupBody = {
+        width: 'fit-content',
+        margin: 'auto',
+    };
     const OverlayControls = (<div key="overlay">
-        <div className={classes.bottomBarGroup}>
+        <Box sx={sxBottomBarGroup}>
             <Typography variant="caption">StreetView</Typography>
-            <div className={classes.bottomBarGroupBody}>
+            <Box sx={sxBottomBarGroupBody}>
                 <Tooltip title="back to map" position="top-center">
-                    <IconButton onClick={overlayButtonClickCB}><NavigationCancel /></IconButton>
+                    <IconButton onClick={overlayButtonClickCB} size="large"><NavigationCancel /></IconButton>
                 </Tooltip>
                 <Tooltip title="-10" position="top-center">
-                    <IconButton onClick={panoramaIndexButtonClickCBs['-10'] }><AvFastRewind /></IconButton>
+                    <IconButton onClick={panoramaIndexButtonClickCBs['-10'] } size="large"><AvFastRewind /></IconButton>
                 </Tooltip>
                 <Tooltip title="-1" position="top-center">
-                    <IconButton onClick={panoramaIndexButtonClickCBs['-1']}><NavigationArrowBack /></IconButton>
+                    <IconButton onClick={panoramaIndexButtonClickCBs['-1']} size="large"><NavigationArrowBack /></IconButton>
                 </Tooltip>
-                <Typography variant="body1" className={classes.inline}>{ panoramaIndex+1 } / { panoramaCount } </Typography>
+                <Typography variant="body1" sx={{display: 'inline'}}>{ panoramaIndex+1 } / { panoramaCount } </Typography>
                 <Tooltip title="+1" position="top-center">
-                    <IconButton onClick={panoramaIndexButtonClickCBs['+1']}><NavigationArrowForward /></IconButton>
+                    <IconButton onClick={panoramaIndexButtonClickCBs['+1']} size="large"><NavigationArrowForward /></IconButton>
                 </Tooltip>
                 <Tooltip title="+10" position="top-center">
-                    <IconButton onClick={panoramaIndexButtonClickCBs['+10']}><AvFastForward /></IconButton>
+                    <IconButton onClick={panoramaIndexButtonClickCBs['+10']} size="large"><AvFastForward /></IconButton>
                 </Tooltip>
-            </div>
-        </div>
+            </Box>
+        </Box>
     </div>);
 
     const searchFormChangeCBs = {
@@ -155,10 +100,10 @@ const BottomBar = props => {
         'cities': useCallback(() => dispatch(setSearchForm({cities: ''})), []),
     };
     const FilterControls = (<div key="filter">
-        <div className={classes.bottomBarGroup}>
+        <Box sx={sxBottomBarGroup}>
             <Typography variant="caption">Filter</Typography>
-            <div className={classes.bottomBarGroupBody}>
-                <Select value={filter} onChange={searchFormChangeCBs['filter']}>
+            <Box sx={sxBottomBarGroupBody}>
+                <Select value={filter} onChange={searchFormChangeCBs['filter']} variant="standard">
                     <MenuItem value="">-</MenuItem>
                     <MenuItem value="neighborhood">Neighborhood</MenuItem>
                     <MenuItem value="cities">Cities</MenuItem>
@@ -167,7 +112,7 @@ const BottomBar = props => {
                     <MenuItem value="crossing">Crossing</MenuItem>
                 </Select>
                 { filter == 'neighborhood' &&
-                <Select value={radius} onChange={searchFormChangeCBs['radius']}>
+                <Select value={radius} onChange={searchFormChangeCBs['radius']} variant="standard">
                     <MenuItem value={1000}>1km</MenuItem>
                     <MenuItem value={500}>500m</MenuItem>
                     <MenuItem value={250}>250m</MenuItem>
@@ -179,10 +124,10 @@ const BottomBar = props => {
                 </Select>}
                 { filter == 'cities' &&
                 <Tooltip title="clear" position="top-center">
-                    <IconButton onClick={searchFormChangeCBs['cities']}><NavigationRefresh /></IconButton>
+                    <IconButton onClick={searchFormChangeCBs['cities']} size="large"><NavigationRefresh /></IconButton>
                 </Tooltip>}
-            </div>
-        </div>
+            </Box>
+        </Box>
     </div>);
 
     const editButtonClickCB = useCallback(() => dispatch(setEditingPath(true)));
@@ -190,24 +135,24 @@ const BottomBar = props => {
     const downloadButtonClickCB = useCallback(() => downloadPath(), [mapLoaded]);
     const uploadButtonClickCB = useCallback(() => uploadPath(), [mapLoaded]);
     const PathControls = (<div key="path">
-        <div className={classes.bottomBarGroup}>
+        <Box sx={sxBottomBarGroup}>
             <Typography variant="caption">Path</Typography>
-            <div className={classes.bottomBarGroupBody}>
+            <Box sx={sxBottomBarGroupBody}>
                 <Tooltip title="edit" position="top-center">
-                    <IconButton onClick={editButtonClickCB} disabled={! selectedPath} ><EditorModeEdit /></IconButton>
+                    <IconButton onClick={editButtonClickCB} disabled={! selectedPath} size="large"><EditorModeEdit /></IconButton>
                 </Tooltip>
                 <Tooltip title="clear all" position="top-center">
-                    <IconButton onClick={clearButtonClickCB}><NavigationRefresh /></IconButton>
+                    <IconButton onClick={clearButtonClickCB} size="large"><NavigationRefresh /></IconButton>
                 </Tooltip>
                 <Tooltip title="download" position="top-center">
-                    <IconButton onClick={downloadButtonClickCB}  disabled={! selectedPath}><FileDownload /></IconButton>
+                    <IconButton onClick={downloadButtonClickCB} disabled={! selectedPath} size="large"><FileDownload /></IconButton>
                 </Tooltip>
                 <Tooltip title="upload" position="top-center">
-                    <IconButton onClick={uploadButtonClickCB}><FileUpload /></IconButton>
+                    <IconButton onClick={uploadButtonClickCB} size="large"><FileUpload /></IconButton>
                 </Tooltip>
-                <Typography variant="body1" className={classes.inline}>{`${length.toFixed(1)}km`}</Typography>
-            </div>
-        </div>
+                <Typography variant="body1" sx={{display: 'inline'}}>{`${length.toFixed(1)}km`}</Typography>
+            </Box>
+        </Box>
     </div>);
 
     const locationChangeCB = useCallback(e => setLocation(e.target.value));
@@ -226,28 +171,58 @@ const BottomBar = props => {
             }
         });
     }, [location]);
+    const sxSearchIcon = {
+        width: theme => theme.spacing(9),
+        height: '100%',
+        position: 'absolute',
+        pointerEvents: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: theme => theme.palette.getContrastText(theme.palette.background.default),
+    };
+    const sxSearchBox = {
+        position: 'relative',
+        borderRadius: 2,
+        backgroundColor: theme => alpha(theme.palette.common.white, 0.15),
+        '&:hover': {
+            backgroundColor: theme => alpha(theme.palette.common.white, 0.25),
+        },
+        marginRight: 2,
+        marginLeft: [0, 1],
+        width: ['100%', 'auto'],
+    };
+
+    const sxInputBase = {
+        width: '100%',
+        '& .MuiInputBase-input': {
+            paddingTop: 1,
+            paddingRight: 1,
+            paddingBottom: 1,
+            paddingLeft: 10,
+            transition: theme => theme.transitions.create('width'),
+            width: ['100%', '100%', 200],
+        },
+    };
 
     const SearchControls = (<div key="search">
-        <div className={classes.bottomBarGroup}>
+        <Box sx={sxBottomBarGroup}>
             <Typography variant="caption">Search</Typography>
-            <div className={classes.bottomBarGroupBody}>
-                <div className={classes.search}>
-                    <div className={classes.searchIcon}>
+            <Box sx={sxBottomBarGroupBody}>
+                <Box sx={sxSearchBox}>
+                    <Box sx={sxSearchIcon}>
                         <SearchIcon />
-                    </div>
+                    </Box>
                     <InputBase
+                        sx={sxInputBase}
                         placeholder="location..."
-                        classes={{
-                            root: classes.inputRoot,
-                            input: classes.inputInput,
-                        }}
                         onChange={locationChangeCB}
                         onKeyPress={submitLocationCB}
                         onBlur={submitLocationCB}
                     />
-                </div>
-            </div>
-        </div>
+                </Box>
+            </Box>
+        </Box>
     </div>);
 
     const controls = [];
@@ -270,15 +245,15 @@ const BottomBar = props => {
     const prevButtonClickCB = useCallback(createNnextButtonClickCB(-1));
     const indexChangeCB = useCallback(index => setGroupIndex(index));
     return (
-        <Toolbar className={classes.root} variant="dense">
+        <Toolbar sx={{width: '100%', backgroundColor: 'background.paper',}} variant="dense">
             {
-                groupCount > 1 && (<IconButton onClick={prevButtonClickCB}> <NavigateBefore /></IconButton>)
+                groupCount > 1 && (<IconButton onClick={prevButtonClickCB} size="large"> <NavigateBefore /></IconButton>)
             }
-            <SwipeableViews className={classes.swipeableViews} index={groupIndex} onChangeIndex={indexChangeCB} disableLazyLoading enableMouseEvents>
+            <SwipeableViews style={{width: '100%'}} index={groupIndex} onChangeIndex={indexChangeCB} disableLazyLoading enableMouseEvents>
                 {controls}
             </SwipeableViews>
             {
-                groupCount > 1 && (<IconButton onClick={nextButtonClickCB}><NavigateNext /></IconButton>)
+                groupCount > 1 && (<IconButton onClick={nextButtonClickCB} size="large"><NavigateNext /></IconButton>)
             }
         </Toolbar>
     );

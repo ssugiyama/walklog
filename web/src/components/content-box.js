@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderRoutes } from 'react-router-config';
 import { routes } from '../app';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 
 const ContentBox = props => {
     return (

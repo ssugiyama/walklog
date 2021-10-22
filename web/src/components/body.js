@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import CssBaseline from '@mui/material/CssBaseline';
 import NavBar from './nav-bar';
 import Map from './map';
 import BottomBar from './bottom-bar';
@@ -7,12 +7,12 @@ import WalkEditor from './walk-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import ContentBox from './content-box';
 import { openSnackbar, toggleView } from '../actions';
-import Snackbar from '@material-ui/core/Snackbar';
+import Snackbar from '@mui/material/Snackbar';
 import MapContext from './utils/map-context';
-import Box from '@material-ui/core/Box';
-import Fab from '@material-ui/core/Fab';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import Box from '@mui/material/Box';
+import Fab from '@mui/material/Fab';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 const Body = () => {
     const message  = useSelector(state => state.main.message);
@@ -35,29 +35,32 @@ const Body = () => {
     }), [view]);
     return (
         <Box
-            height="100%"
-            flexDirection="column"
-            display={ view == 'map' ? 'flex' : 'block'  }>
+            sx={{
+                height: '100%',
+                flexDirection: 'column',
+                display: view == 'map' ? 'flex' : 'block' ,
+            }}>
+            <CssBaseline />
             <MapContext.Provider value={{state, setState}}>
-                <CssBaseline />
                 <NavBar />
                 <Box
-                    pl="env(safe-area-inset-left)"
-                    pr="env(safe-area-inset-right)"
-                    display="flex"
-                    flexDirection="column"
-                    flexGrow={1}>
-                    <Box
-                        height={view == 'map' ? '100%' : '40vh'}
-                        flexGrow={view == 'map' ? 1 : 0}
-                        clone>
-                        <Map />
-                    </Box>
-                    <Box
-                        display={view == 'map' ? 'none' : 'block'}
-                        clone>
-                        <ContentBox />
-                    </Box>
+                    sx={{
+                        pl: 'env(safe-area-inset-left)',
+                        pr: 'env(safe-area-inset-right)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flexGrow: 1,
+                    }}>
+
+                    <Map
+                        sx={{
+                            height: view == 'map' ? '100%' : '40vh',
+                            flexGrow: view == 'map' ? 1 : 0,
+                        }} />
+                    <ContentBox sx={{
+                        display: view == 'map' ? 'none' : 'block',
+                    }}/>
+
                 </Box>
                 <Fab size="small" aria-label="toggle view"
                     color="secondary"
@@ -65,10 +68,9 @@ const Body = () => {
                     style={fabButtonStyles}>
                     {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
                 </Fab>
-                <Box
-                    display={view == 'content' ? 'none' : 'block'} >
-                    <BottomBar />
-                </Box>
+                <BottomBar sx={{
+                    display: view == 'content' ? 'none' : 'block',
+                }}/>
                 <WalkEditor />
                 <Snackbar
                     open={message != null}

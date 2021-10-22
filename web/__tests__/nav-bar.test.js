@@ -39,9 +39,8 @@ describe('<NavBar />', () => {
     it('should hace IconButton with SvgIcon when logoff', () => {
         wrapper = setup({
         });
-
-        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(2);
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).find('ForwardRef(SvgIcon)').exists()).toBeTruthy();
+        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(1);
+        expect(wrapper.find('ForwardRef(IconButton)').at(0).find('ForwardRef(SvgIcon)').exists()).toBeTruthy();
     });
     it('should have img with avatar when login', () => {
         wrapper = setup({
@@ -51,7 +50,7 @@ describe('<NavBar />', () => {
                 photoURL: 'http://exmaple.com/photo',
             },
         });
-        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(2);
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).find('img').props().src).toBe('http://exmaple.com/photo');
+        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(1);
+        expect(wrapper.find('ForwardRef(IconButton)').at(0).find('img').props().src).toBe('http://exmaple.com/photo');
     });
 });

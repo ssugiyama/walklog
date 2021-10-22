@@ -6,8 +6,8 @@ import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import BodyContainer from '../src/components/body';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
-import {ThemeProvider} from '@material-ui/styles';
-import { createMuiTheme } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material/styles';
+import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
 import firebase from 'firebase/app';
 
@@ -27,7 +27,7 @@ function setup(path, props) {
         router: {},
     };
     const store = configureStore()(state);
-    const theme = createMuiTheme({});
+    const theme = createTheme();
     return mount(
         <Provider store={store}>
             <ThemeProvider theme={theme}>
@@ -59,8 +59,8 @@ describe('<BodyContainer />', () => {
             years: [2000],
             months: [1],
         });
-        expect(wrapper.exists('[display="none"] BottomBar')).toBeTruthy();
-        expect(wrapper.exists('[display="flex"] ContentBox')).toBeTruthy();
+        expect(wrapper.find('BottomBar').prop('sx').display).toBe('none');
+        expect(wrapper.find('ContentBox').prop('sx').display).toBe('block');
     });
     it('should have visible <BottomBar /> and invivible <ContentBox /> when view == map', () => {
         wrapper = setup('/1', {
@@ -75,7 +75,7 @@ describe('<BodyContainer />', () => {
                 rows: [],
             },
         });
-        expect(wrapper.exists('[display="block"] BottomBar')).toBeTruthy();
-        expect(wrapper.exists('[display="none"] ContentBox')).toBeTruthy();
+        expect(wrapper.find('BottomBar').prop('sx').display).toBe('block');
+        expect(wrapper.find('ContentBox').prop('sx').display).toBe('none');
     });
 });
