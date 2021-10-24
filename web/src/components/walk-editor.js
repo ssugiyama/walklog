@@ -146,7 +146,7 @@ const WalkEditor = () => {
                     <TextField type="date" value={state.date} onChange={dateChangeCB} container="inline" variant="standard" mode="landscape" label='date' fullWidth={true} />
                     <TextField defaultValue={state.title} onChange={titleChangeCB} label="title" variant="standard" fullWidth={true} />
                     <ImageUploader label="image" value={state.image} onChange={imageChangeCB} ></ImageUploader>
-                    <TextField multiline rows={4} maxRows={20} variant="standard"
+                    <TextField multiline minRows={4} maxRows={20} variant="standard"
                         defaultValue={state.comment} onChange={commentChangeCB} label="comment" fullWidth={true} />
                     {
                         walkEditorMode == 'update' &&
