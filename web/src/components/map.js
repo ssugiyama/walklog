@@ -9,6 +9,8 @@ import MapContext from './utils/map-context';
 import Box from '@mui/material/Box';
 import { push } from 'connected-react-router';
 import Link from '@mui/material/Link';
+import Checkbox from '@mui/material/Checkbox';
+import { FormControlLabel } from '@mui/material';
 import GsiMapType from './utils/gsi-map-type';
 
 function loadJS(src) {
@@ -34,6 +36,8 @@ const Map = props => {
     const mapLoaded = useSelector(state => state.main.mapLoaded);
     const rows = useSelector(state => state.main.result.rows);
     const refs = useRef({});
+    const [defaultStyle, setDefaultStyle] = useState(false);
+    const [defaultStyleBoxShown, setDefaultStyleBoxShown] = useState();
     const rc = refs.current;
     rc.center = useSelector(state => state.main.center);
     rc.filter = useSelector(state => state.main.searchForm.filter);
@@ -41,6 +45,7 @@ const Map = props => {
     rc.selectedPath = useSelector(state => state.main.selectedPath);
     rc.view = useSelector(state => state.main.view);
     const mapElemRef = useRef();
+    const defaultStyleBoxRef = useRef();
     const downloadRef = useRef();
     const uploadRef = useRef();
     const [confirmInfo, setConfirmInfo] = useState({open: false});
@@ -112,7 +117,7 @@ const Map = props => {
             scaleControl: true,
             streetViewControl: true,
             mapTypeControlOptions: {
-                position: google.maps.ControlPosition.TOP_RIGHT,
+                position: google.maps.ControlPosition.TOP_LEFT,
                 mapTypeIds: mapTypeIds,
                 style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             }
@@ -150,6 +155,17 @@ const Map = props => {
         google.maps.event.addListener(rc.map, 'zoom_changed', () => {
             dispatch(setZoom(rc.map.getZoom()));
         });
+        const showDefaultStyleBox = () => {
+            const currentMapTypeID = rc.map.getMapTypeId();
+            setDefaultStyleBoxShown([google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN, google.maps.MapTypeId.HYBRID].includes(currentMapTypeID));
+        };
+        google.maps.event.addListener(rc.map, 'maptypeid_changed', () => showDefaultStyleBox());
+        google.maps.event.addListener(rc.map, 'tilesloaded', () => {
+            showDefaultStyleBox();
+            google.maps.event.clearListeners(rc.map, 'tilesloaded');
+        });
+        rc.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(defaultStyleBoxRef.current);
+
         const PathManager = require('./utils/path-manager').default;
         rc.pathManager = new PathManager({map: rc.map, styles: rc.mapStyles.polylines});
         const PolygonManage = require('./utils/polygon-manager').default;
@@ -380,9 +396,21 @@ const Map = props => {
         });
         reader.readAsText(file);
     };
-
+    const handleDefaultStyleChange = (e, value) => {
+        setDefaultStyle(value);
+        rc.map.setOptions({ styles: value ? [] : rc.mapStyles.map });
+    };
     return (
         <React.Fragment>
+            <Box sx={{ display: defaultStyleBoxShown ? 'block' : 'none', backgroundColor: 'background.default', m: 1, pl: 1}} ref={defaultStyleBoxRef}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={defaultStyle} onChange={handleDefaultStyleChange} />}
+                    label="default style"
+                >
+                </FormControlLabel>
+            </Box>
             <Box ref={mapElemRef}
                 sx={{
                     my: 1,
