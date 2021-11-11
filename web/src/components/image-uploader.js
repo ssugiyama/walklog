@@ -43,7 +43,7 @@ const ImageUploader = props => {
                     } : {}
                 }></Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Button onClick={handleSelect}>select...</Button>
+                    <Button onClick={handleSelect} color="secondary">select...</Button>
                     <Button onClick={handleClear}>clear</Button>
                 </Box>
             </Box>
