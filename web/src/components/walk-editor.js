@@ -157,10 +157,10 @@ const WalkEditor = () => {
                 </FormGroup>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClose}>cancel</Button>
-                <Button disabled={state.processing} onClick={handleSubmit} color="primary">{ walkEditorMode || 'create' }</Button>
+                <Button onClick={handleClose} color="primary">cancel</Button>
+                <Button disabled={state.processing} onClick={handleSubmit} color="secondary">{ walkEditorMode || 'create' }</Button>
                 {walkEditorMode == 'update' &&
-                    <Button disabled={state.processing} onClick={handleDelete} color="secondary">delete</Button>}
+                    <Button disabled={state.processing} onClick={handleDelete} color="error">delete</Button>}
             </DialogActions>
         </Dialog>
     );
