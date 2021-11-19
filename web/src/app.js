@@ -407,13 +407,21 @@ export const routes = () => [
 ];
 
 export const createMuiTheme = (mode = 'light') => {
-    return createTheme({
+    const makeColorObject = color => colors[color] ||  {main: color};
+    const themeProps = {
         palette: {
-            primary:  colors[config.get('themePrimary') || 'indigo'],
-            secondary: colors[config.get('themeSecondary') || 'pink'],
             mode,
         }
-    });
+    };
+    const themePrimary = config.get('themePrimary');
+    const themeSecondary = config.get('themeSecondary');
+    if (themePrimary) {
+        themeProps.palette.primary = makeColorObject(themePrimary);
+    }
+    if (themeSecondary) {
+        themeProps.palette.secondary = makeColorObject(themeSecondary);
+    }
+    return createTheme(themeProps);
 };
 
 export const createEmotionCache = () => createCache({ key: 'css' });

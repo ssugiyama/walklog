@@ -272,7 +272,13 @@ const Map = props => {
 
     useEffect(() => {
         window.initMap = initMap;
-        loadJS('https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&callback=initMap&key=' + config.get('googleApiKey'));
+        const params = {
+            libraries: 'geometry,drawing',
+            v:          config.get('googleApiVersion'),
+            key:        config.get('googleApiKey'),
+            callback:   'initMap',
+        };
+        loadJS('https://maps.googleapis.com/maps/api/js?' + Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&'));
     }, []);
 
     const citiesChanges = () => {
