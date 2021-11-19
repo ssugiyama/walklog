@@ -35,11 +35,11 @@ DESCRIPTION=webapp for walk logging
 BASE_URL=http://localhost:3000
 IMAGE_PREFIX=uploads/
 GOOGLE_API_KEY=
+GOOGLE_API_VERSION=
 TWITTER_SITE=@chez_sugi
 EXTERNAL_LINKS=example=http://example.com;example2=http://example2.com
 THEME_PRIMARY=bluegrey
 THEME_SECONDARY=orange
-THEME_TYPE=
 FIREBASE_CONFIG=./firebase/firebase-config.json
 GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
 ONLY_ADMIN_CAN_CREATE=
@@ -50,8 +50,8 @@ MAP_TYPE_IDS=
 ```
 
 - GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
+- GOOGLE_API_VERSION: see https://developers.google.com/maps/documentation/javascript/versions
 - EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
-- THEME_TYPE: if blank, reflects browser's color scheme(a.k.a 'dark mode')
 - FIREBASE_CONFIG: firebase config json file path
 - GOOGLE_APPLICATION_CREDENTIALS: firebase service account json file path
 - ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
