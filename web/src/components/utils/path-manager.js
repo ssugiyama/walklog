@@ -61,6 +61,7 @@ export default class PathManager extends google.maps.MVCObject {
     }
 
     pathToHash(path) {
+        if (!path) return null;
         const key = typeof(path) === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
         const obj = new jsSHA('SHA-1', 'TEXT');
         obj.update(key);
