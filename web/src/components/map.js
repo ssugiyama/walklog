@@ -36,8 +36,8 @@ const Map = props => {
     const mapLoaded = useSelector(state => state.main.mapLoaded);
     const rows = useSelector(state => state.main.result.rows);
     const refs = useRef({});
-    const [defaultStyle, setDefaultStyle] = useState(false);
-    const [defaultStyleBoxShown, setDefaultStyleBoxShown] = useState();
+    const [customStyle, setCustomStyle] = useState(false);
+    const [CustomStyleBoxShown, setCustomStyleBoxShown] = useState();
     const rc = refs.current;
     rc.center = useSelector(state => state.main.center);
     rc.filter = useSelector(state => state.main.searchForm.filter);
@@ -45,7 +45,7 @@ const Map = props => {
     rc.selectedPath = useSelector(state => state.main.selectedPath);
     rc.view = useSelector(state => state.main.view);
     const mapElemRef = useRef();
-    const defaultStyleBoxRef = useRef();
+    const CustomStyleBoxRef = useRef();
     const downloadRef = useRef();
     const uploadRef = useRef();
     const [confirmInfo, setConfirmInfo] = useState({open: false});
@@ -89,17 +89,7 @@ const Map = props => {
     };
 
     const initMap = async () => {
-        const mapStyleConfig = config.get('mapStyleConfig');
-        const defaultMapStyles = require('./default-map-styles.json');
-        rc.mapStyles = defaultMapStyles;
-        if (mapStyleConfig) {
-            try {
-                const response = await fetch(mapStyleConfig);
-                rc.mapStyles = await response.json();
-            } catch(e) {
-                console.log(e);
-            }
-        }
+        rc.mapStyles = config.get('mapStyleConfig');
         if (window.localStorage.center) {
             dispatch(setCenter(JSON.parse(window.localStorage.center)));
         }
@@ -109,7 +99,6 @@ const Map = props => {
         const mapTypeIds = config.get('mapTypeIds').split(/,/);
 
         const options = {
-            styles: rc.mapStyles.map,
             zoom: zoom,
             center: rc.center,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -155,16 +144,17 @@ const Map = props => {
         google.maps.event.addListener(rc.map, 'zoom_changed', () => {
             dispatch(setZoom(rc.map.getZoom()));
         });
-        const showDefaultStyleBox = () => {
+        const showCustomStyleBox = () => {
             const currentMapTypeID = rc.map.getMapTypeId();
-            setDefaultStyleBoxShown([google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN, google.maps.MapTypeId.HYBRID].includes(currentMapTypeID));
+            setCustomStyleBoxShown(rc.mapStyles.map.length > 0 &&
+                [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN, google.maps.MapTypeId.HYBRID].includes(currentMapTypeID));
         };
-        google.maps.event.addListener(rc.map, 'maptypeid_changed', () => showDefaultStyleBox());
+        google.maps.event.addListener(rc.map, 'maptypeid_changed', () => showCustomStyleBox());
         google.maps.event.addListener(rc.map, 'tilesloaded', () => {
-            showDefaultStyleBox();
+            showCustomStyleBox();
             google.maps.event.clearListeners(rc.map, 'tilesloaded');
         });
-        rc.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(defaultStyleBoxRef.current);
+        rc.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(CustomStyleBoxRef.current);
 
         const PathManager = require('./utils/path-manager').default;
         rc.pathManager = new PathManager({map: rc.map, styles: rc.mapStyles.polylines});
@@ -402,18 +392,18 @@ const Map = props => {
         });
         reader.readAsText(file);
     };
-    const handleDefaultStyleChange = (e, value) => {
-        setDefaultStyle(value);
-        rc.map.setOptions({ styles: value ? [] : rc.mapStyles.map });
+    const handleCustomStyleChange = (e, value) => {
+        setCustomStyle(value);
+        rc.map.setOptions({ styles: value ? rc.mapStyles.map : [] });
     };
     return (
         <React.Fragment>
-            <Box sx={{ display: defaultStyleBoxShown ? 'block' : 'none', backgroundColor: 'background.default', m: 1, pl: 1}} ref={defaultStyleBoxRef}>
+            <Box sx={{ display: CustomStyleBoxShown ? 'block' : 'none', backgroundColor: 'background.default', m: 1, pl: 1}} ref={CustomStyleBoxRef}>
                 <FormControlLabel
                     control={
                         <Checkbox
-                            checked={defaultStyle} onChange={handleDefaultStyleChange} />}
-                    label="default style"
+                            checked={customStyle} onChange={handleCustomStyleChange} />}
+                    label="custom style"
                 >
                 </FormControlLabel>
             </Box>
