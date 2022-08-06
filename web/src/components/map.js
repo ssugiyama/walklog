@@ -89,17 +89,7 @@ const Map = props => {
     };
 
     const initMap = async () => {
-        const mapStyleConfig = config.get('mapStyleConfig');
-        const defaultMapStyles = require('./default-map-styles.json');
-        rc.mapStyles = defaultMapStyles;
-        if (mapStyleConfig) {
-            try {
-                const response = await fetch(mapStyleConfig);
-                rc.mapStyles = await response.json();
-            } catch(e) {
-                console.log(e);
-            }
-        }
+        rc.mapStyles = config.get('mapStyleConfig');
         if (window.localStorage.center) {
             dispatch(setCenter(JSON.parse(window.localStorage.center)));
         }
