@@ -19,7 +19,7 @@ const configuration = {
     onlyAdminCanCreate: process.env.ONLY_ADMIN_CAN_CREATE,
     useFirebaseStorage: process.env.USE_FIREBASE_STORAGE,
     itemPrefix:      process.env.ITEM_PREFIX || '/',
-    mapStyleConfig:  process.env.MAP_STYLE_CONFIG,
+    mapStyleConfig:  require(process.env.MAP_STYLE_CONFIG || './default-map-styles.js'),
     mapTypeIds:      process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain'
 };
 
