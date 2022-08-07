@@ -410,7 +410,6 @@ const Map = props => {
             <Box ref={mapElemRef}
                 sx={{
                     my: 1,
-                    color: '#000',
                 }}
                 {... props}
             ></Box>
