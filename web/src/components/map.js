@@ -398,7 +398,7 @@ const Map = props => {
     };
     return (
         <React.Fragment>
-            <Box sx={{ display: CustomStyleBoxShown ? 'block' : 'none', backgroundColor: 'background.default', m: 1, pl: 1}} ref={CustomStyleBoxRef}>
+            <Box sx={{ display: CustomStyleBoxShown ? 'block' : 'none', m: 1, pl: 1}} ref={CustomStyleBoxRef}>
                 <FormControlLabel
                     control={
                         <Checkbox
