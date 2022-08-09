@@ -60,6 +60,7 @@ const Body = () => {
                             sx={{
                                 height: view == 'map' ? '100%' : '40vh',
                                 flexGrow: view == 'map' ? 1 : 0,
+                                color: '#000',
                             }} />
                     </ThemeProvider>
                     <ContentBox sx={{
