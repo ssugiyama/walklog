@@ -13,6 +13,8 @@ import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { ThemeProvider } from '@mui/material/styles';
+import { createMuiTheme } from '../app';
 
 const Body = () => {
     const message  = useSelector(state => state.main.message);
@@ -33,6 +35,8 @@ const Body = () => {
         top: view == 'map' ? 'auto' : 'calc(40vh + 48px)',
         bottom: view == 'map' ? 54 : 'auto',
     }), [view]);
+    const theme = React.useMemo(() => createMuiTheme('light'));
+
     return (
         <Box
             sx={{
@@ -51,13 +55,13 @@ const Body = () => {
                         flexDirection: 'column',
                         flexGrow: 1,
                     }}>
-
-                    <Map
-                        sx={{
-                            height: view == 'map' ? '100%' : '40vh',
-                            flexGrow: view == 'map' ? 1 : 0,
-                            color: '#000',
-                        }} />
+                    <ThemeProvider theme={theme}>
+                        <Map
+                            sx={{
+                                height: view == 'map' ? '100%' : '40vh',
+                                flexGrow: view == 'map' ? 1 : 0,
+                            }} />
+                    </ThemeProvider>
                     <ContentBox sx={{
                         display: view == 'map' ? 'none' : 'block',
                     }}/>
