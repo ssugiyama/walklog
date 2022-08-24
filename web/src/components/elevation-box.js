@@ -167,7 +167,7 @@ const ElevationBox = () => {
 
     if (selectedItem)
         return (
-            <Box width="100%" height="20vh">
+            <Box width="100%" height="20vh">
                 <canvas ref={rootRef}></canvas>
             </Box>
         );
