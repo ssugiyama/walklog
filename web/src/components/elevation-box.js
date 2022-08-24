@@ -1,36 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setElevationInfoWindow } from '../actions';
-import {
-    Chart,
-    LineElement,
-    PointElement,
-    LineController,
-    LinearScale,
-    CategoryScale,
-    Decimation,
-    Filler,
-    Legend,
-    Title,
-    Tooltip,
-    SubTitle,
-} from 'chart.js';
-
-Chart.register(
-    LineElement,
-    PointElement,
-    LineController,
-    LinearScale,
-    CategoryScale,
-    Decimation,
-    Filler,
-    Legend,
-    Title,
-    Tooltip,
-    SubTitle,
-);
-
-import { useTheme } from '@mui/styles';
+import config from 'react-global-configuration';
+import bb, { line } from 'billboard.js';
+import 'billboard.js/dist/billboard.css';
+import './billboard.dark.css';
 import Box from '@mui/material/Box';
 
 const ElevationBox = () => {
@@ -39,7 +13,6 @@ const ElevationBox = () => {
     const selectedItem = useSelector(state => state.main.selectedItem);
     const mapLoaded       = useSelector(state => state.main.mapLoaded);
     const dispatch        = useDispatch();
-    const theme           = useTheme();
     // test code for local
     if (process.env.TEST_ELEVATION) {
         var interpolatePoints = (pt1, pt2, r) => {
@@ -90,67 +63,57 @@ const ElevationBox = () => {
         if (status == google.maps.ElevationStatus.OK) {
             refs.current.elevationResults = results;
             const data = results.map(result => result.elevation);
-            const labels = results.map(() => '');
-            refs.current.chart = Chart.getChart(rootRef.current.getContext('2d'));
             if (! refs.current.chart ) {
-                refs.current.chart = new Chart(rootRef.current.getContext('2d'), {
-                    type: 'line',
+                const mapStyles = config.get('mapStyleConfig');
+                refs.current.chart = bb.generate({
+                    bindto: rootRef.current,
                     data: {
-                        labels,
+                        columns: [['elevation', 0]],
+                        type: line(),
+                        onover: function(d) {
+                            handleHover(d);
+                        },
+                        colors: {elevation: mapStyles.polylines.current.strokeColor},
                     },
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false
+                    legend: {
+                        show: false,
+                    },
+                    tooltip: {
+                        show: false,
+                    },
+                    axis: {
+                        x: {
+                            show: false,
+                        },
+                        y: {
+                            tick: {
+                                culling: true,
                             },
-                            tooltip: {
-                                enabled: false
-                            },
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        hover: {
-                            intersect: false,
-                            mode: 'index',
-                        },
-                        onHover: handleHover,
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    fontColor: theme.palette.text.primary,
-                                },
-                                gridLines: {
-                                    color: theme.palette.divider,
-                                }
-                            }],
-                            xAxes: [{
-                                gridLines: {
-                                    display: false,
-                                }
-                            }]
-                        },
+                        }
+                    },
+                    line: {
+                        zerobased: true,
+                    },
+                    point: {
+                        r: 1.5,
                     }
                 });
             }
-            refs.current.chart.data.datasets = [{
-                data,
-                borderWidth: 1,
-                borderColor: '#ff0000',
-                backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                pointStyle: 'dot',
-                radius: 1
-            }];
-            refs.current.chart.update();
+            refs.current.chart.load({
+                columns: [
+                    ['elevation'].concat(data),
+                ]
+            });
         }
     };
-    const handleHover = (ev, elms) => {
-        if (elms.length == 0) {
+    const handleHover = (d) => {
+        if (!d) {
             dispatch(setElevationInfoWindow({open: false}));
         }
         else {
-            const elevation = refs.current.elevationResults[elms[0].index];
+            const elevation = refs.current.elevationResults[d.index];
             if (!elevation) return;
-            var y = Math.round(elevation.elevation);
+            const y = Math.round(d.value);
             dispatch(setElevationInfoWindow({ open: true, message: y + 'm', position: elevation.location}));
         }
     };
@@ -167,13 +130,10 @@ const ElevationBox = () => {
 
     if (selectedItem)
         return (
-            <Box width="100%" height="20vh">
-                <canvas ref={rootRef}></canvas>
-            </Box>
+            <Box width="100%" height="20vh" ref={rootRef} />
         );
     else
         return null;
-
 };
 
 export default ElevationBox;
