@@ -9,7 +9,7 @@ import { matchRoutes } from 'react-router-config';
 import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
 import { StaticRouter } from 'react-router-dom';
-import ReactDOMServer from 'react-dom/server';
+import { renderToPipeableStream } from 'react-dom/server';
 import config from 'react-global-configuration';
 import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
@@ -134,7 +134,7 @@ export default async function handleSSR(req, res) {
         }
         res.set('Content-Type', 'text/html');
         res.write('<!DOCTYPE html>');
-        ReactDOMServer.renderToStaticNodeStream(
+        renderToPipeableStream(
             <Wrapper {...props}>
             </Wrapper>
         ).pipe(res);
