@@ -1,12 +1,11 @@
 import React from 'react';
-import Enzyme, { mount } from 'enzyme';
-// import Adapter from 'enzyme-adapter-react-16';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { render, screen } from '@testing-library/react';
 import NavBar from '../src/components/nav-bar';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import firebase from 'firebase/app';
 import config from 'react-global-configuration';
+import '@testing-library/jest-dom';
 
 config.set({
     firebaseConfig: {},
@@ -14,15 +13,13 @@ config.set({
 
 firebase.initializeApp = jest.fn();
 
-Enzyme.configure({ adapter: new Adapter() });
-
 function setup(props) {
     const state = {
         main: props,
         router: {}
     };
     const store = configureStore()(state);
-    return mount(
+    return render(
         <Provider store={store}>
             <NavBar />
         </Provider>
@@ -30,27 +27,21 @@ function setup(props) {
 }
 
 describe('<NavBar />', () => {
-    let wrapper;
-
-    afterEach(() => {
-        wrapper.unmount();
-    });
-
     it('should hace IconButton with SvgIcon when logoff', () => {
-        wrapper = setup({
-        });
-        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(1);
-        expect(wrapper.find('ForwardRef(IconButton)').at(0).find('ForwardRef(SvgIcon)').exists()).toBeTruthy();
+        setup({});
+        screen.debug();
+        expect(screen.getByTestId('AccountCircleIcon')).toBeInTheDocument();
     });
     it('should have img with avatar when login', () => {
-        wrapper = setup({
+        setup({
             currentUser: {
                 uid: 'uid',
                 displayName: 'Alice',
                 photoURL: 'http://exmaple.com/photo',
             },
         });
-        expect(wrapper.find('ForwardRef(IconButton)')).toHaveLength(1);
-        expect(wrapper.find('ForwardRef(IconButton)').at(0).find('img').props().src).toBe('http://exmaple.com/photo');
+        screen.debug();
+        expect(screen.queryByTestId('AccountCircleIcon')).not.toBeInTheDocument();
+        expect(screen.getByAltText('user profile')).toBeInTheDocument();
     });
 });

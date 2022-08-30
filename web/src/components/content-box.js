@@ -7,6 +7,7 @@ const ContentBox = props => {
     return (
         <Box
             m={1}
+            data-testid="ContentBox"
             {...props}
         >
             { renderRoutes(routes()) }

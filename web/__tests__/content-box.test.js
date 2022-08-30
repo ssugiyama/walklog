@@ -1,16 +1,13 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import Enzyme, { mount } from 'enzyme';
-// import Adapter from 'enzyme-adapter-react-16';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { render, screen } from '@testing-library/react';
 import ContentBoxContainer from '../src/components/content-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
-
-Enzyme.configure({ adapter: new Adapter() });
+import '@testing-library/jest-dom';
 
 config.set({
     itemPrefix: '/',
@@ -23,7 +20,7 @@ function setup(path, props) {
     };
     const store = configureStore()(state);
     const theme = createTheme();
-    return mount(
+    return render(
         <Provider store={store}>
             <ThemeProvider theme={theme}>
                 <MemoryRouter initialEntries={[path]}>
@@ -35,12 +32,8 @@ function setup(path, props) {
 }
 
 describe('<ContentBox />', () => {
-    let wrapper;
-    afterEach(() => {
-        wrapper.unmount();
-    });
     it('should have SearchBox when path is not /:id', () => {
-        wrapper = setup('/', {
+        setup('/', {
             view: 'map',
             result: {
                 rows: []
@@ -54,11 +47,14 @@ describe('<ContentBox />', () => {
             months: [],
             searchForm: {},
         });
-        expect(wrapper.find('SearchBox').length).toBe(1);
-        expect(wrapper.find('ItemBox').length).toBe(0);
+        // screen.debug();
+        expect(screen.queryByTestId('SearchBox')).toBeInTheDocument();
+        expect(screen.queryByTestId('ItemBox')).not.toBeInTheDocument();
+        // expect(wrapper.find('SearchBox').length).toBe(1);
+        // expect(wrapper.find('ItemBox').length).toBe(0);
     });
     it('should have ItemBox when path is /:id', () => {
-        wrapper = setup('/1', {
+        setup('/1', {
             view: 'map',
             result: {
                 rows: []
@@ -72,7 +68,7 @@ describe('<ContentBox />', () => {
             months: [],
             searchForm: {},
         });
-        expect(wrapper.find('SearchBox').length).toBe(0);
-        expect(wrapper.find('ItemBox').length).toBe(1);
+        expect(screen.queryByTestId('SearchBox')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('ItemBox')).toBeInTheDocument();
     });
 });
