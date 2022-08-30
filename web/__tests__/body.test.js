@@ -1,8 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import Enzyme, { mount } from 'enzyme';
-// import Adapter from 'enzyme-adapter-react-16';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { render, screen } from '@testing-library/react';
 import BodyContainer from '../src/components/body';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
@@ -10,6 +8,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
 import firebase from 'firebase/app';
+import '@testing-library/jest-dom';
 
 config.set({
     googleApiKey: '',
@@ -19,8 +18,6 @@ config.set({
 
 firebase.initializeApp = jest.fn();
 
-Enzyme.configure({ adapter: new Adapter() });
-
 function setup(path, props) {
     const state = {
         main: props,
@@ -28,7 +25,7 @@ function setup(path, props) {
     };
     const store = configureStore()(state);
     const theme = createTheme();
-    return mount(
+    return render(
         <Provider store={store}>
             <ThemeProvider theme={theme}>
                 <MemoryRouter initialEntries={[path]}>
@@ -40,12 +37,8 @@ function setup(path, props) {
 }
 
 describe('<BodyContainer />', () => {
-    let wrapper;
-    afterEach(() => {
-        wrapper.unmount();
-    });
     it('should have invisible <BottomBar /> and vivible <ContentBox /> when view == content', () => {
-        wrapper = setup('/', {
+        setup('/', {
             view: 'content',
             users: [{
                 id: 1,
@@ -59,11 +52,11 @@ describe('<BodyContainer />', () => {
             years: [2000],
             months: [1],
         });
-        expect(wrapper.find({sx: {display: 'none'}}).exists('BottomBar')).toBeTruthy();
-        expect(wrapper.find('ContentBox').prop('sx').display).toBe('block');
+        expect(screen.queryByTestId('BottomBar')).not.toBeVisible();
+        expect(screen.queryByTestId('ContentBox')).toBeVisible();
     });
     it('should have visible <BottomBar /> and invivible <ContentBox /> when view == map', () => {
-        wrapper = setup('/1', {
+        setup('/1', {
             view: 'map',
             users: [{
                 id: 1,
@@ -75,7 +68,7 @@ describe('<BodyContainer />', () => {
                 rows: [],
             },
         });
-        expect(wrapper.find({sx: {display: 'block'}}).exists('BottomBar')).toBeTruthy();
-        expect(wrapper.find('ContentBox').prop('sx').display).toBe('none');
+        expect(screen.queryByTestId('BottomBar')).toBeVisible();
+        expect(screen.queryByTestId('ContentBox')).not.toBeVisible();
     });
 });

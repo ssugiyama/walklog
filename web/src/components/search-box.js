@@ -58,7 +58,7 @@ const SearchBox = props => {
         },
     };
     return (
-        <Paper sx={{p: 1,}}>
+        <Paper sx={{p: 1,}} data-testid="SearchBox">
             <SearchForm />
             <Divider sx={{m: theme => theme.spacing(2),}} />
             <Box display="flex" sx={{m: 1}}>
