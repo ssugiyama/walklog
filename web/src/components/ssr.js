@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import {configureStore, routes, handleRoute, createEmotionCache, createMuiTheme }  from '../app';
+import { configureReduxStore, routes, handleRoute, createEmotionCache, createMuiTheme }  from '../app';
 import { CacheProvider } from '@emotion/react';
 import createEmotionServer from '@emotion/server/create-instance';
 import { setUsers } from '../actions';
@@ -67,7 +67,7 @@ export default async function handleSSR(req, res) {
 
     // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
     const history = createMemoryHistory({initialEntries: [req.url]});
-    const store = configureStore(null, history);
+    const store = configureReduxStore(null, history);
     if (!branch) {
         res.status(404);
         res.send('Not Found');
