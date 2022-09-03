@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { openWalkEditor } from '../actions';
-import marked from 'marked';
+import { marked } from 'marked';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import Fab from '@mui/material/Fab';
@@ -54,7 +54,7 @@ const ItemBox = props => {
     let title, createMarkup, dataUser, image;
     if (data) {
         title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
-        createMarkup = () => { return { __html: marked(data.comment || '') }; };
+        createMarkup = () => { return { __html: marked.parse(data.comment || '') }; };
         image = data.image;
         for (const u of users) {
             if (u.uid == data.uid) dataUser = u;
@@ -80,7 +80,7 @@ const ItemBox = props => {
         display: ['inherit', 'block'],
     };
     return (
-        <Box>
+        <Box data-testid="ItemBox">
             <Paper sx={{ width: '100%', textAlign: 'center', padding: 2, }}>
                 <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1, }} size="small" color="primary" component={Link} to={upUrl}><ListIcon /></Fab>
                 <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''} size="large"><NavigationArrowBackIcon /></IconButton>

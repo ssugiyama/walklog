@@ -1,16 +1,13 @@
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Enzyme, { mount } from 'enzyme';
-// import Adapter from 'enzyme-adapter-react-16';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import ItemBox from '../src/components/item-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import config from 'react-global-configuration';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
-
-Enzyme.configure({ adapter: new Adapter() });
+import '@testing-library/jest-dom';
 
 config.set({
     baseUrl: 'http://localhost:3000',
@@ -24,7 +21,7 @@ function setup(path, props, router) {
     };
     const theme = createTheme();
     const store = configureStore()(state);
-    return mount(
+    return render(
         <Provider store={store}>
             <ThemeProvider theme={theme}>
                 <MemoryRouter initialEntries={[path]}>
@@ -36,12 +33,8 @@ function setup(path, props, router) {
 }
 
 describe('<ItemBoxContainer />', () => {
-    let wrapper;
-    afterEach(() => {
-        wrapper.unmount();
-    });
     it('render typically', () => {
-        wrapper = setup('/17', {
+        setup('/17', {
             prevId: 16,
             nextId: 18,
             selectedItem: {
@@ -64,16 +57,15 @@ describe('<ItemBoxContainer />', () => {
             }
         }, {
         });
-        // console.log(wrapper.debug())
-        expect(wrapper.find('ForwardRef(IconButton)').length).toBe(7);
-        expect(wrapper.find('ForwardRef(IconButton)').at(0).props().to).toBe('/18');
-        expect(wrapper.find('ForwardRef(Fab)').at(0).props().to).toBe('/');
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).props().to).toBe('/16');
-        expect(wrapper.find('ForwardRef(Typography)[variant="h6"]').text()).toBe('2018-05-30 : start - end (14.6 km)');
-        expect(wrapper.find('ForwardRef(Typography)[variant="body2"] img').prop('src')).toBe('http://exmaple.com/photo');
-        expect(wrapper.find('ForwardRef(Typography)[variant="body2"] ForwardRef(Box) + span').text()).toBe('Alice');
-        expect(wrapper.find('div[className="react-swipeable-view-container"] div div div').first().props().dangerouslySetInnerHTML.__html)
-            .toEqual(expect.stringContaining('<p>paragraph</p>'));
+        expect(screen.getAllByRole('link')).toHaveLength(4);
+        expect(screen.getAllByRole('link').at(0)).toHaveAttribute('href', '/');
+        expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/18');
+        expect(screen.getAllByRole('link').at(2)).toHaveAttribute('href', '/16');
+        expect(screen.getAllByRole('link').at(3)).toHaveAttribute('href', expect.stringMatching(/twitter\.com/));
+        expect(screen.getByRole('heading')).toHaveTextContent('2018-05-30 : start - end (14.6 km)');
+        expect(screen.getByRole('img')).toHaveAttribute('src', 'http://exmaple.com/photo');
+        expect(screen.getByText('Alice')).toBeInTheDocument();
+        expect(screen.getByText('paragraph')).toBeInTheDocument();
     });
     it('show edit button', () => {
         const mainProps = {
@@ -99,10 +91,8 @@ describe('<ItemBoxContainer />', () => {
                 offset: 0
             }
         };
-        wrapper = setup('/17', mainProps, {
-        });
-        // console.log(wrapper.debug());
-        expect(wrapper.find('ForwardRef(IconButton)').length).toBe(8);
+        setup('/17', mainProps, {});
+        expect(screen.getByTestId('EditIcon')).toBeInTheDocument();
     });
     it('selected item is null', () => {
         const mainProps = {
@@ -112,8 +102,8 @@ describe('<ItemBoxContainer />', () => {
             selectedIndex: null,
             result: {},
         };
-        wrapper = setup('/17', mainProps, {});
-        expect(wrapper.find('ForwardRef(Typography)[variant="h6"]').text()).toBe('not found');
+        setup('/17', mainProps, {});
+        expect(screen.getByRole('heading')).toHaveTextContent('not found');
     });
     it('next url is more url', () => {
         const mainProps = {
@@ -137,9 +127,8 @@ describe('<ItemBoxContainer />', () => {
             }],
             selectedIndex: 0,
         };
-        wrapper = setup('/17', mainProps, {});
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).props().disabled).toBeFalsy();
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).props().to).toBe('/?select=1&offset=20&filter=neighborhood');
+        setup('/17', mainProps, {});
+        expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select=1&offset=20&filter=neighborhood');
     });
     it('next url is more url if last_query is null', () => {
         const mainProps = {
@@ -163,9 +152,8 @@ describe('<ItemBoxContainer />', () => {
             }],
             selectedIndex: 0,
         };
-        wrapper = setup('/17', mainProps, {});
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).props().disabled).toBeFalsy();
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).props().to).toBe('/?select=1&offset=20');
+        setup('/17', mainProps, {});
+        expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select=1&offset=20');
     });
     it('prev button and next button are disabled', () => {
         const mainProps = {
@@ -189,8 +177,8 @@ describe('<ItemBoxContainer />', () => {
             }],
             selectedIndex: 0,
         };
-        wrapper = setup('/17', mainProps, {});
-        expect(wrapper.find('ForwardRef(IconButton)').at(0).props().disabled).toBeTruthy();
-        expect(wrapper.find('ForwardRef(IconButton)').at(1).props().disabled).toBeTruthy();
+        setup('/17', mainProps, {});
+        expect(screen.getAllByRole('button').at(0)).toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getAllByRole('button').at(1)).toHaveAttribute('aria-disabled', 'true');
     });
 });

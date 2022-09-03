@@ -206,7 +206,7 @@ const BottomBar = props => {
     };
 
     const SearchControls = (<div key="search">
-        <Box sx={sxBottomBarGroup}>
+        <Box sx={sxBottomBarGroup} data-testid="BottomBar">
             <Typography variant="caption">Search</Typography>
             <Box sx={sxBottomBarGroupBody}>
                 <Box sx={sxSearchBox}>
