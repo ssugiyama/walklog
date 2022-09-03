@@ -167,7 +167,7 @@ const NavBar = (props) => {
                     value="autoGeolocation"
                 />
                 <IconButton onClick={accountMenuOpenCB} color="inherit" size="large">
-                    { currentUser ? <img style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
+                    { currentUser ? <img alt='user profile' style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
                 <Button component="a" href="https://github.com/ssugiyama/walklog" target="_blank" color="inherit" sx={{textTransform: 'none',}}>{appVersion}</Button>
             </Toolbar>

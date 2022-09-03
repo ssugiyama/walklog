@@ -1,8 +1,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import ReactDOM from 'react-dom';
-import { ConnectedRouter } from 'connected-react-router';
-import { configureStore, createMuiTheme, createEmotionCache } from '../app';
+import { hydrateRoot } from 'react-dom/client';
+import { ReduxRouter } from '@lagunovsky/redux-react-router';
+import { configureReduxStore, createMuiTheme, createEmotionCache } from '../app';
 import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
 import { createBrowserHistory } from 'history';
@@ -12,7 +12,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 config.set(window.__INITIAL_CONFIG__);
 const history = createBrowserHistory();
-const store = configureStore( window.__PRELOADED_STATE__, history);
+const store = configureReduxStore( window.__PRELOADED_STATE__, history);
 const cache = createEmotionCache();
 
 const ClientRoot = () => {
@@ -26,14 +26,14 @@ const ClientRoot = () => {
         <Provider store={store}>
             <CacheProvider value={cache}>
                 <ThemeProvider theme={theme}>
-                    <ConnectedRouter history={history}><Body /></ConnectedRouter>
+                    <ReduxRouter history={history}><Body /></ReduxRouter>
                 </ThemeProvider>
             </CacheProvider>
         </Provider>
     );
 };
 
-ReactDOM.hydrate(
-    <ClientRoot />,
-    document.querySelector('#body')
+hydrateRoot(
+    document.querySelector('#body'),
+    <ClientRoot />
 );

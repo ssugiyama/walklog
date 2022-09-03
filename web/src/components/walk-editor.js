@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import { push } from '@lagunovsky/redux-react-router';
 import { setSelectedItem, openWalkEditor } from '../actions';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';

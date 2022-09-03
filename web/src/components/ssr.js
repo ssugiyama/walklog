@@ -1,15 +1,15 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import {configureStore, routes, handleRoute, createEmotionCache, createMuiTheme }  from '../app';
+import { configureReduxStore, routes, handleRoute, createEmotionCache, createMuiTheme }  from '../app';
 import { CacheProvider } from '@emotion/react';
 import createEmotionServer from '@emotion/server/create-instance';
 import { setUsers } from '../actions';
-import { matchRoutes } from 'react-router-config';
+import { matchRoutes } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
-import { StaticRouter } from 'react-router-dom';
-import ReactDOMServer from 'react-dom/server';
+import { StaticRouter } from 'react-router-dom/server';
+import { renderToPipeableStream } from 'react-dom/server';
 import config from 'react-global-configuration';
 import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
@@ -24,7 +24,7 @@ const definePreloadedStateAndConfig = state => raw(
 const Wrapper = props => (
     <html lang="en" style={{ height: '100%' }}>
         <head>
-            <meta charset="utf-8" />
+            <meta charSet="utf-8" />
             <meta name="description" content={props.description} />
             <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
             <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -67,11 +67,15 @@ export default async function handleSSR(req, res) {
 
     // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
     const history = createMemoryHistory({initialEntries: [req.url]});
-    const store = configureStore(null, history);
+    const store = configureReduxStore(null, history);
+    if (!branch) {
+        res.status(404);
+        res.send('Not Found');
+        return;
+    }
+    const match = branch[branch.length - 1];
 
-    const lastBranch = branch[branch.length - 1];
-    const match = lastBranch.match;
-    if (match.url == '/' && !match.isExact) {
+    if (!match || (match.url == '/' && !match.isExact)) {
         res.status(404);
         res.send('Not Found');
         return;
@@ -134,7 +138,7 @@ export default async function handleSSR(req, res) {
         }
         res.set('Content-Type', 'text/html');
         res.write('<!DOCTYPE html>');
-        ReactDOMServer.renderToStaticNodeStream(
+        renderToPipeableStream(
             <Wrapper {...props}>
             </Wrapper>
         ).pipe(res);
