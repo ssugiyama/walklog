@@ -1,0 +1,8 @@
+@media (prefers-color-scheme: dark) {
+    .bb line, .bb path {
+        stroke: #fff;
+    }
+    .bb text {
+        fill:  #fff;
+    }
+}

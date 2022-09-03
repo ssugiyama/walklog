@@ -44,6 +44,7 @@ const Wrapper = props => (
             <meta name="msapplication-config" content="/icons/browserconfig.xml" />
             <meta name="theme-color" content="#ffffff" />
             <link rel="canonical" href={props.canonical} />
+            <link rel="stylesheet"  href="/client-root.css" />
             <title>{props.title}</title>
             <style data-emotion="{props.key} {props.ids.join(' ')} ">{props.css}</style>
         </head>

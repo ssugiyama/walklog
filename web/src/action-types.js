@@ -23,3 +23,4 @@ export const SET_LAST_QUERY = Symbol('set_lastQuery');
 export const SET_ADJACENT_ITEM_IDS = Symbol('set_adjacent_item_ids');
 export const SET_MAP_LOADED = Symbol('set_mapLoaded');
 export const SET_GEO_MARKER = Symbol('set_geoMarker');
+export const SET_STREET_VIEW = Symbol('set_streetView');
