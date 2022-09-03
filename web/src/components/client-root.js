@@ -2,7 +2,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { ReduxRouter } from '@lagunovsky/redux-react-router';
-import { configureStore, createMuiTheme, createEmotionCache } from '../app';
+import { configureReduxStore, createMuiTheme, createEmotionCache } from '../app';
 import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
 import { createBrowserHistory } from 'history';
@@ -12,7 +12,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 config.set(window.__INITIAL_CONFIG__);
 const history = createBrowserHistory();
-const store = configureStore( window.__PRELOADED_STATE__, history);
+const store = configureReduxStore( window.__PRELOADED_STATE__, history);
 const cache = createEmotionCache();
 
 const ClientRoot = () => {

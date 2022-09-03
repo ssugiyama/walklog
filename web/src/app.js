@@ -2,9 +2,8 @@ import React from 'react';
 import * as ActionTypes from './action-types';
 import { createRouterReducer, ROUTER_ON_LOCATION_CHANGED, createRouterMiddleware, push } from '@lagunovsky/redux-react-router';
 import { matchRoutes } from 'react-router-dom';
+import { configureStore } from '@reduxjs/toolkit';
 import thunkMiddleware from 'redux-thunk';
-import logger from 'redux-logger';
-import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem,  setAdjacentItemIds, setLastQuery, toggleView } from './actions';
 import SearchBox from './components/search-box';
 import ItemBox from './components/item-box';
@@ -349,11 +348,11 @@ const dataFetchMiddleware = store => next => {
     };
 };
 
-export function configureStore(state, history) {
-    const reducers = combineReducers({
+export function configureReduxStore(state, history) {
+    const reducers = {
         main: mainReducer,
         router: createRouterReducer(history)
-    });
+    };
     const middlewares = [
         formWatchMiddleware,
         createRouterMiddleware(history),
@@ -361,20 +360,12 @@ export function configureStore(state, history) {
         thunkMiddleware,
     ];
 
-    if (process.env.NODE_ENV != 'production') {
-        middlewares.push(logger);
-    }
-
-    const createStoreWithMiddleware = applyMiddleware(
-        ...middlewares
-    )(createStore);
-
-    if (state) {
-        return createStoreWithMiddleware(reducers, state);
-    }
-    else {
-        return createStoreWithMiddleware(reducers);
-    }
+    return configureStore({
+        reducer: reducers,
+        middleware: middlewares,
+        devTools: (process.env.NODE_ENV != 'production'),
+        ...(state && { preloadedState: state }),
+    });
 }
 
 export const routes = () => [
