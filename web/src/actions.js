@@ -4,6 +4,11 @@ require('isomorphic-fetch');
 import { push, replace } from '@lagunovsky/redux-react-router';
 import config from 'react-global-configuration';
 
+let searchFunc;
+if (process.title !== 'browser') {
+    searchFunc = require('../lib/search').searchFunc;
+}
+
 export function setSearchForm(payload) {
     return {
         type: ActionTypes.SET_SEARCH_FORM,
@@ -24,7 +29,7 @@ function searchResult(data, append) {
     };
 }
 
-export function search(props, prefix = '/', select, lastQuery) {
+export function search(props, select, lastQuery) {
     const offset = Number(props['offset']);
     return async dispatch => {
         if (!select && !offset) {
@@ -33,8 +38,14 @@ export function search(props, prefix = '/', select, lastQuery) {
         const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
         try {
-            const response = await fetch(prefix + 'api/search?' + params);
-            const data = await response.json();
+            let data;
+            if (searchFunc) {
+                data = await searchFunc(props);
+            }
+            else {
+                const response = await fetch('/api/search?' + params);
+                data = await response.json();
+            }
             dispatch(searchResult(data, offset > 0));
             if (select) {
                 dispatch(push(config.get('itemPrefix') + data.rows[0].id));
@@ -48,10 +59,16 @@ export function search(props, prefix = '/', select, lastQuery) {
     };
 }
 
-export function getItem(id, prefix = '/') {
+export function getItem(id) {
     return async dispatch => {
-        const response = await fetch(prefix + 'api/get/' + id);
-        const data = await response.json();
+        let data;
+        if (searchFunc) {
+            data = await searchFunc({id});
+        }
+        else{
+            const response = await fetch('/api/get/' + id);
+            data = await response.json();
+        }
         dispatch(setAdjacentItemIds(data.nextId, data.prevId));
         if (!data.error && data.rows.length > 0) {
             dispatch(setSelectedItem(data.rows[0], 0));
