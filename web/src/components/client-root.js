@@ -1,7 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom';
-import { ConnectedRouter } from 'connected-react-router';
+import { ReduxRouter } from '@lagunovsky/redux-react-router';
 import { configureStore, createMuiTheme, createEmotionCache } from '../app';
 import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
@@ -26,7 +26,7 @@ const ClientRoot = () => {
         <Provider store={store}>
             <CacheProvider value={cache}>
                 <ThemeProvider theme={theme}>
-                    <ConnectedRouter history={history}><Body /></ConnectedRouter>
+                    <ReduxRouter history={history}><Body /></ReduxRouter>
                 </ThemeProvider>
             </CacheProvider>
         </Provider>

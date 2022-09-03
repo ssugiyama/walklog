@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import SearchForm from './search-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { push } from 'connected-react-router';
+import { push } from '@lagunovsky/redux-react-router';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableHead from '@mui/material/TableHead';
