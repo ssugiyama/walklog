@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import ReactDOM from 'react-dom';
+import { hydrateRoot } from 'react-dom/client';
 import { ReduxRouter } from '@lagunovsky/redux-react-router';
 import { configureReduxStore, createMuiTheme, createEmotionCache } from '../app';
 import { ThemeProvider } from '@mui/material/styles';
@@ -33,7 +33,7 @@ const ClientRoot = () => {
     );
 };
 
-ReactDOM.hydrate(
-    <ClientRoot />,
-    document.querySelector('#body')
+hydrateRoot(
+    document.querySelector('#body'),
+    <ClientRoot />
 );
