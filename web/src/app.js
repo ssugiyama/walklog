@@ -1,15 +1,13 @@
 import React from 'react';
 import * as ActionTypes from './action-types';
-import { connectRouter, LOCATION_CHANGE, routerMiddleware, push } from 'connected-react-router';
-import { matchRoutes } from 'react-router-config';
+import { createRouterReducer, ROUTER_ON_LOCATION_CHANGED, createRouterMiddleware, push } from '@lagunovsky/redux-react-router';
+import { matchRoutes } from 'react-router-dom';
 import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { search, getItem, setSearchForm, setSelectedPath, setSelectedItem,  setAdjacentItemIds, setLastQuery, toggleView } from './actions';
 import SearchBox from './components/search-box';
-import Box from '@mui/material/Box';
 import ItemBox from './components/item-box';
-import { renderRoutes } from 'react-router-config';
 import { createTheme } from '@mui/material/styles';
 import createCache from '@emotion/cache';
 import * as colors from '@mui/material/colors';
@@ -331,7 +329,7 @@ let isFirstLocation = true;
 const dataFetchMiddleware = store => next => {
     return action => {
         // Fetch data on update location
-        if (action.type === LOCATION_CHANGE) {
+        if (action.type === ROUTER_ON_LOCATION_CHANGED) {
             const usp = new URLSearchParams(action.payload.location.search);
             const query = {};
             for(let p of usp) {
@@ -339,8 +337,7 @@ const dataFetchMiddleware = store => next => {
             }
             if (!isFirstLocation) {
                 const branch = matchRoutes(routes(), action.payload.location.pathname);
-                const lastBranch = branch[branch.length - 1];
-                const match = lastBranch.match;
+                const match = branch[branch.length - 1];
                 const state = store.getState();
                 const qsearch = action.payload.location.search &&  action.payload.location.search.slice(1);
                 const queryChanged = qsearch != state.main.lastQuery;
@@ -355,11 +352,11 @@ const dataFetchMiddleware = store => next => {
 export function configureStore(state, history) {
     const reducers = combineReducers({
         main: mainReducer,
-        router: connectRouter(history)
+        router: createRouterReducer(history)
     });
     const middlewares = [
         formWatchMiddleware,
-        routerMiddleware(history),
+        createRouterMiddleware(history),
         dataFetchMiddleware,
         thunkMiddleware,
     ];
@@ -380,29 +377,14 @@ export function configureStore(state, history) {
     }
 }
 
-const SideRoot = ({ route }) => (
-    <Box
-        maxWidth={800}
-        mx="auto"
-    >
-        {renderRoutes(route.routes)}
-    </Box>
-);
-
 export const routes = () => [
     {
-        component: SideRoot,
-        routes: [
-            {
-                path: config.get('itemPrefix') + ':id',
-                component: ItemBox,
-            },
-            {
-                path: '/',
-                component: SearchBox,
-                exact: true,
-            }
-        ]
+        path: config.get('itemPrefix') + ':id',
+        element: <ItemBox />,
+    },
+    {
+        path: '/',
+        element: <SearchBox />,
     }
 ];
 

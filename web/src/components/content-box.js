@@ -1,7 +1,9 @@
 import React from 'react';
-import { renderRoutes } from 'react-router-config';
+import { useRoutes } from 'react-router-dom';
 import { routes } from '../app';
 import Box from '@mui/material/Box';
+
+const Router = () => useRoutes(routes());
 
 const ContentBox = props => {
     return (
@@ -10,7 +12,9 @@ const ContentBox = props => {
             data-testid="ContentBox"
             {...props}
         >
-            { renderRoutes(routes()) }
+            <Box  maxWidth={800} mx="auto">
+                <Router />
+            </Box>
         </Box>
     );
 };

@@ -5,10 +5,10 @@ import {configureStore, routes, handleRoute, createEmotionCache, createMuiTheme 
 import { CacheProvider } from '@emotion/react';
 import createEmotionServer from '@emotion/server/create-instance';
 import { setUsers } from '../actions';
-import { matchRoutes } from 'react-router-config';
+import { matchRoutes } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
-import { StaticRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom/server';
 import { renderToPipeableStream } from 'react-dom/server';
 import config from 'react-global-configuration';
 import * as admin from 'firebase-admin';
@@ -68,10 +68,14 @@ export default async function handleSSR(req, res) {
     // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
     const history = createMemoryHistory({initialEntries: [req.url]});
     const store = configureStore(null, history);
+    if (!branch) {
+        res.status(404);
+        res.send('Not Found');
+        return;
+    }
+    const match = branch[branch.length - 1];
 
-    const lastBranch = branch[branch.length - 1];
-    const match = lastBranch.match;
-    if (match.url == '/' && !match.isExact) {
+    if (!match || (match.url == '/' && !match.isExact)) {
         res.status(404);
         res.send('Not Found');
         return;

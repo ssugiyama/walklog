@@ -7,7 +7,7 @@ import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './utils/map-context';
 import Box from '@mui/material/Box';
-import { push } from 'connected-react-router';
+import { push } from '@lagunovsky/redux-react-router';
 import Link from '@mui/material/Link';
 import Checkbox from '@mui/material/Checkbox';
 import { FormControlLabel } from '@mui/material';
