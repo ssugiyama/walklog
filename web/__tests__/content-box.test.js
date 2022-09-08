@@ -39,19 +39,21 @@ describe('<ContentBox />', () => {
                 rows: []
             },
             users: [{
-                id: 1,
+                uid: 1,
                 username: 'Alice',
                 photo: 'http://exmaple.com/photo',
             }],
             years: [],
             months: [],
-            searchForm: {},
+            searchForm: {
+                filter: '',
+                order: 'newest_first',
+                user: '',
+            },
         });
         // screen.debug();
         expect(screen.queryByTestId('SearchBox')).toBeInTheDocument();
         expect(screen.queryByTestId('ItemBox')).not.toBeInTheDocument();
-        // expect(wrapper.find('SearchBox').length).toBe(1);
-        // expect(wrapper.find('ItemBox').length).toBe(0);
     });
     it('should have ItemBox when path is /:id', () => {
         setup('/1', {
@@ -60,13 +62,17 @@ describe('<ContentBox />', () => {
                 rows: []
             },
             users: [{
-                id: 1,
+                uid: 1,
                 username: 'Alice',
                 photo: 'http://exmaple.com/photo',
             }],
             years: [],
             months: [],
-            searchForm: {},
+            searchForm: {
+                filter: '',
+                order: 'newest_first',
+                user: '',
+            },
         });
         expect(screen.queryByTestId('SearchBox')).not.toBeInTheDocument();
         expect(screen.queryByTestId('ItemBox')).toBeInTheDocument();
