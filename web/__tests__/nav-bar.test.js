@@ -29,7 +29,7 @@ function setup(props) {
 describe('<NavBar />', () => {
     it('should hace IconButton with SvgIcon when logoff', () => {
         setup({});
-        screen.debug();
+        // screen.debug();
         expect(screen.getByTestId('AccountCircleIcon')).toBeInTheDocument();
     });
     it('should have img with avatar when login', () => {
@@ -40,7 +40,7 @@ describe('<NavBar />', () => {
                 photoURL: 'http://exmaple.com/photo',
             },
         });
-        screen.debug();
+        // screen.debug();
         expect(screen.queryByTestId('AccountCircleIcon')).not.toBeInTheDocument();
         expect(screen.getByAltText('user profile')).toBeInTheDocument();
     });
