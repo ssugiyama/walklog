@@ -41,16 +41,21 @@ describe('<BodyContainer />', () => {
         setup('/', {
             view: 'content',
             users: [{
-                id: 1,
+                uid: 1,
                 username: 'Alice',
                 photo: 'http://exmaple.com/photo',
             }],
-            searchForm: {},
+            searchForm: {
+                filter: '',
+                order: 'newest_first',
+                user: '',
+            },
             result: {
                 rows: [],
             },
             years: [2000],
             months: [1],
+            walkEditorOpened: false,
         });
         expect(screen.queryByTestId('BottomBar')).not.toBeVisible();
         expect(screen.queryByTestId('ContentBox')).toBeVisible();
@@ -59,14 +64,19 @@ describe('<BodyContainer />', () => {
         setup('/1', {
             view: 'map',
             users: [{
-                id: 1,
+                uid: 1,
                 username: 'Alice',
                 photo: 'http://exmaple.com/photo',
             }],
-            searchForm: {},
+            searchForm: {
+                filter: '',
+                order: 'newest_first',
+                user: '',
+            },
             result: {
                 rows: [],
             },
+            walkEditorOpened: false,
         });
         expect(screen.queryByTestId('BottomBar')).toBeVisible();
         expect(screen.queryByTestId('ContentBox')).not.toBeVisible();
