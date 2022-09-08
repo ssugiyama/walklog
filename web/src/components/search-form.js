@@ -74,17 +74,17 @@ const SearchForm = props => {
             <input type="hidden" name="searchPath" value=""  />
             <div>
                 <TextField select label="filter" value={filter} onChange={changeCBs['filter']} sx={sxFormInput} variant="standard">
-                    <MenuItem value="">-</MenuItem>
-                    <MenuItem value="neighborhood">Neighborhood</MenuItem>
-                    <MenuItem value="cities">Cities</MenuItem>
-                    <MenuItem value="frechet">Fréchet</MenuItem>
-                    <MenuItem value="hausdorff">Hausdorff</MenuItem>
-                    <MenuItem value="crossing">Crossing</MenuItem>
+                    <MenuItem value="" key="default">-</MenuItem>
+                    <MenuItem value="neighborhood" key="neighborhood">Neighborhood</MenuItem>
+                    <MenuItem value="cities" key="cities">Cities</MenuItem>
+                    <MenuItem value="frechet" key="frechet">Fréchet</MenuItem>
+                    <MenuItem value="hausdorff" key="hausdorff">Hausdorff</MenuItem>
+                    <MenuItem value="crossing" key="crossing">Crossing</MenuItem>
                 </TextField>
                 <TextField select label="user" value={user} onChange={changeCBs['user']}
                     sx={sxFormInput} variant="standard"
                 >
-                    <MenuItem value="">-</MenuItem>
+                    <MenuItem value="" key="default">-</MenuItem>
                     {users.map(u => <MenuItem value={u.uid} key={u.uid}>{u.displayName}</MenuItem>)}
                 </TextField>
             </div>
@@ -97,7 +97,7 @@ const SearchForm = props => {
                 <TextField select label="year" value={parseInt(year) || ''} onChange={changeCBs['year']}
                     sx={sxFormInput} variant="standard"
                 >
-                    <MenuItem value="">-</MenuItem>
+                    <MenuItem value="" key="default">-</MenuItem>
                     {years.map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
                 </TextField>
             </div>
