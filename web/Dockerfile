@@ -2,7 +2,7 @@ FROM node:14.17.3-alpine
 LABEL maintainer="Shinichi SUGIYAMA <shin.sugi@gmail.com>"
 RUN apk add --no-cache git yarn python3 make g++
 RUN mkdir -p /var/www
-ADD package.json setup.sh index.js yarn.lock .babelrc /var/www/
+ADD package.json setup.sh index.js yarn.lock babel.config.js .parcelrc /var/www/
 ADD lib /var/www/lib
 ADD src /var/www/src
 ADD assets /var/www/assets
