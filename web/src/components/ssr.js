@@ -62,7 +62,6 @@ export default async function handleSSR(req, res) {
     global.navigator = {
         userAgent: req.headers['user-agent']
     };
-    const prefix = `http://localhost:${req.app.get('port')}/`;
     const branch = matchRoutes(routes(), req.path);
 
     // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
@@ -81,7 +80,7 @@ export default async function handleSSR(req, res) {
         return;
     }
     try {
-        await handleRoute(match.params.id, req.query, false, prefix, [], true, store.dispatch);
+        await handleRoute(match.params.id, req.query, false, [], true, store.dispatch);
         const userResult =  await admin.auth().listUsers(1000);
         store.dispatch(setUsers(userResult.users));
         const cache = createEmotionCache();

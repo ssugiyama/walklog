@@ -224,7 +224,7 @@ const mainReducer = function(state = initialState, action) {
     }
 };
 
-export function handleRoute(itemId, query, isPathSelected, prefix, rows, queryChanged, next) {
+export function handleRoute(itemId, query, isPathSelected, rows, queryChanged, next) {
     if (itemId) {
         if (!query.forceFetch) {
             const index = rows.findIndex(row => row.id == itemId);
@@ -235,7 +235,7 @@ export function handleRoute(itemId, query, isPathSelected, prefix, rows, queryCh
                 return next(setSelectedItem(rows[index], index));
             }
         }
-        return next(getItem(itemId, prefix));
+        return next(getItem(itemId));
     }
     next(setSelectedItem(null, -1));
     if (! queryChanged) return;
@@ -255,7 +255,7 @@ export function handleRoute(itemId, query, isPathSelected, prefix, rows, queryCh
         next(setSelectedPath(searchForm.searchPath));
     }
     next(setSearchForm(searchForm));
-    return next(search(searchForm, prefix, select, lqs));
+    return next(search(searchForm, select, lqs));
 }
 
 const formWatchMiddleware = store => next => action => {
@@ -340,7 +340,7 @@ const dataFetchMiddleware = store => next => {
                 const state = store.getState();
                 const qsearch = action.payload.location.search &&  action.payload.location.search.slice(1);
                 const queryChanged = qsearch != state.main.lastQuery;
-                handleRoute(match.params.id, query, state.main.selectedPath, '/', state.main.result.rows, queryChanged, next);
+                handleRoute(match.params.id, query, state.main.selectedPath, state.main.result.rows, queryChanged, next);
             }
             isFirstLocation = false;
         }
