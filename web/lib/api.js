@@ -1,7 +1,7 @@
 const
     express    = require('express'),
     multer     = require('multer'),
-    nanoid     = require('nanoid'),
+    { nanoid } = require('nanoid'),
     models     = require('./models'),
     path       = require('path'),
     url        = require('url'),
@@ -162,6 +162,7 @@ api.post('/save', upload.single('image'), async (req, res) => {
             res.status(403).json({error});
         }
     } catch (error) {
+        console.debug(error);
         res.status(500).json({error});
     }
 });
