@@ -20,8 +20,10 @@ firebase.initializeApp = jest.fn();
 
 function setup(path, props) {
     const state = {
-        main: props,
         router: {},
+        map: {},
+        panorama: {},
+        ...props,
     };
     const store = configureStore()(state);
     const theme = createTheme();
@@ -39,44 +41,56 @@ function setup(path, props) {
 describe('<BodyContainer />', () => {
     it('should have invisible <BottomBar /> and vivible <ContentBox /> when view == content', () => {
         setup('/', {
-            view: 'content',
-            users: [{
-                uid: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
-            }],
+            view: {
+                view: 'content',
+                walkEditorOpened: false,
+            },
+            misc: {
+                users: [{
+                    uid: 1,
+                    username: 'Alice',
+                    photo: 'http://exmaple.com/photo',
+                }],
+                years: [2000],
+                months: [1],
+            },
             searchForm: {
                 filter: '',
                 order: 'newest_first',
                 user: '',
             },
-            result: {
-                rows: [],
+            api: {
+                result: {
+                    rows: [],
+                },
             },
-            years: [2000],
-            months: [1],
-            walkEditorOpened: false,
         });
         expect(screen.queryByTestId('BottomBar')).not.toBeVisible();
         expect(screen.queryByTestId('ContentBox')).toBeVisible();
     });
     it('should have visible <BottomBar /> and invivible <ContentBox /> when view == map', () => {
         setup('/1', {
-            view: 'map',
-            users: [{
-                uid: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
-            }],
+            view: {
+                view: 'map',
+                walkEditorOpened: false,
+            },
+            misc: {
+                users: [{
+                    uid: 1,
+                    username: 'Alice',
+                    photo: 'http://exmaple.com/photo',
+                }],
+            },
             searchForm: {
                 filter: '',
                 order: 'newest_first',
                 user: '',
             },
-            result: {
-                rows: [],
+            api: {
+                result: {
+                    rows: [],
+                },
             },
-            walkEditorOpened: false,
         });
         expect(screen.queryByTestId('BottomBar')).toBeVisible();
         expect(screen.queryByTestId('ContentBox')).not.toBeVisible();
