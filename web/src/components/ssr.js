@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { configureReduxStore, routes, handleRoute, createEmotionCache, createMuiTheme }  from '../app';
 import { CacheProvider } from '@emotion/react';
 import createEmotionServer from '@emotion/server/create-instance';
-import { setUsers } from '../actions';
+import { setUsers } from '../features/misc';
 import { matchRoutes } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import Body from './body';
@@ -13,6 +13,7 @@ import { renderToPipeableStream } from 'react-dom/server';
 import config from 'react-global-configuration';
 import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
+import { searchFunc } from '../../lib/search';
 
 const raw = content => ({ __html: content });
 
@@ -80,9 +81,13 @@ export default async function handleSSR(req, res) {
         return;
     }
     try {
-        await handleRoute(match.params.id, req.query, false, [], true, store.dispatch);
+        await handleRoute(match.params.id, req.query, false, [], true, store.dispatch, searchFunc);
         const userResult =  await admin.auth().listUsers(1000);
-        store.dispatch(setUsers(userResult.users));
+        const users = userResult.users.map(user => {
+            const { uid, displayName, photoURL } = user;
+            return { uid, displayName, photoURL };
+        });
+        store.dispatch(setUsers(users));
         const cache = createEmotionCache();
 
         let context = {};
@@ -110,8 +115,8 @@ export default async function handleSSR(req, res) {
         let image;
         const twitterSite = config.get('twitterSite');
         let canonical = baseUrl + '/';
-        if (state.main.selectedItem) {
-            const data = state.main.selectedItem;
+        if (state.api.selectedItem) {
+            const data = state.api.selectedItem;
             title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
             description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
             canonical = baseUrl + config.get('itemPrefix') + data.id;

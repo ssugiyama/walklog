@@ -15,8 +15,10 @@ config.set({
 
 function setup(path, props) {
     const state = {
-        main: props,
         router: {},
+        map: {},
+        panorama: {},
+        ...props,
     };
     const store = configureStore()(state);
     const theme = createTheme();
@@ -34,17 +36,23 @@ function setup(path, props) {
 describe('<ContentBox />', () => {
     it('should have SearchBox when path is not /:id', () => {
         setup('/', {
-            view: 'map',
-            result: {
-                rows: []
+            view: {
+                view: 'map',
             },
-            users: [{
-                uid: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
-            }],
-            years: [],
-            months: [],
+            api: {
+                result: {
+                    rows: []
+                },
+            },
+            misc: {
+                users: [{
+                    uid: 1,
+                    username: 'Alice',
+                    photo: 'http://exmaple.com/photo',
+                }],
+                years: [],
+                months: [],
+            },
             searchForm: {
                 filter: '',
                 order: 'newest_first',
@@ -58,16 +66,20 @@ describe('<ContentBox />', () => {
     it('should have ItemBox when path is /:id', () => {
         setup('/1', {
             view: 'map',
-            result: {
-                rows: []
+            api: {
+                result: {
+                    rows: []
+                },
             },
-            users: [{
-                uid: 1,
-                username: 'Alice',
-                photo: 'http://exmaple.com/photo',
-            }],
-            years: [],
-            months: [],
+            misc: {
+                users: [{
+                    uid: 1,
+                    username: 'Alice',
+                    photo: 'http://exmaple.com/photo',
+                }],
+                years: [],
+                months: [],
+            },
             searchForm: {
                 filter: '',
                 order: 'newest_first',

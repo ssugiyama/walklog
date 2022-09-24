@@ -15,8 +15,10 @@ firebase.initializeApp = jest.fn();
 
 function setup(props) {
     const state = {
-        main: props,
-        router: {}
+        router: {},
+        map: {},
+        panorama: {},
+        ...props,
     };
     const store = configureStore()(state);
     return render(
@@ -28,16 +30,18 @@ function setup(props) {
 
 describe('<NavBar />', () => {
     it('should hace IconButton with SvgIcon when logoff', () => {
-        setup({});
+        setup({misc: {}});
         // screen.debug();
         expect(screen.getByTestId('AccountCircleIcon')).toBeInTheDocument();
     });
     it('should have img with avatar when login', () => {
         setup({
-            currentUser: {
-                uid: 'uid',
-                displayName: 'Alice',
-                photoURL: 'http://exmaple.com/photo',
+            misc: {
+                currentUser: {
+                    uid: 'uid',
+                    displayName: 'Alice',
+                    photoURL: 'http://exmaple.com/photo',
+                },
             },
         });
         // screen.debug();
