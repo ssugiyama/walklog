@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from '@lagunovsky/redux-react-router';
-import { setSelectedItem, openWalkEditor } from '../actions';
+import { setSelectedItem } from '../features/api';
+import { openWalkEditor } from '../features/view';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -21,10 +22,10 @@ const WalkEditor = () => {
     const [state, setState] = useState({
         id: '', date: null, title: '', comment: '', initialized: false, processing: false
     });
-    const selectedPath = useSelector(state => state.main.selectedPath);
-    const selectedItem = useSelector(state => state.main.selectedItem);
-    const walkEditorOpened = useSelector(state => state.main.walkEditorOpened);
-    const walkEditorMode = useSelector(state => state.main.walkEditorMode);
+    const selectedPath = useSelector(state => state.map.selectedPath);
+    const selectedItem = useSelector(state => state.api.selectedItem);
+    const walkEditorOpened = useSelector(state => state.view.walkEditorOpened);
+    const walkEditorMode = useSelector(state => state.view.walkEditorMode);
     const dispatch = useDispatch();
     const context = useContext(MapContext);
     const { deleteSelectedPath } = context.state;
@@ -55,7 +56,7 @@ const WalkEditor = () => {
     const keys = useRef([]);
 
     const handleClose = useCallback(() => {
-        dispatch(openWalkEditor(false));
+        dispatch(openWalkEditor({ open: false }));
         setState(state => Object.assign({}, state, {initialized: false}));
     });
     const handleSubmit = useCallback(async () => {

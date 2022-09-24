@@ -1,6 +1,7 @@
 import React, { useRef, useContext, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPanoramaCount, setPanoramaIndex, setOverlay } from '../actions';
+import { setPanoramaCount, setPanoramaIndex } from '../features/panorama';
+import { setOverlay } from '../features/view';
 import IconButton from '@mui/material/IconButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Typography from '@mui/material/Typography';
@@ -15,11 +16,11 @@ import Box from '@mui/material/Box';
 const PANORAMA_INTERVAL = 50;
 
 const PanoramaBox = props => {
-    const selectedItem = useSelector(state => state.main.selectedItem);
-    const panoramaIndex = useSelector(state => state.main.panoramaIndex);
-    const panoramaCount = useSelector(state => state.main.panoramaCount);
-    const overlay = useSelector(state => state.main.overlay);
-    const mapLoaded = useSelector(state => state.main.mapLoaded);
+    const selectedItem = useSelector(state => state.api.selectedItem);
+    const panoramaIndex = useSelector(state => state.panorama.panoramaIndex);
+    const panoramaCount = useSelector(state => state.panorama.panoramaCount);
+    const overlay = useSelector(state => state.view.overlay);
+    const mapLoaded = useSelector(state => state.map.mapLoaded);
     const dispatch = useDispatch();
     const bodyRef = useRef({});
     const refs = useRef({});

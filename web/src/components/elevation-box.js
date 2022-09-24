@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setElevationInfoWindow } from '../actions';
+import { setElevationInfoWindow } from '../features/map';
 import config from 'react-global-configuration';
 import bb, { line } from 'billboard.js';
 import 'billboard.js/dist/billboard.css';
@@ -10,8 +10,8 @@ import Box from '@mui/material/Box';
 const ElevationBox = () => {
     const rootRef = useRef();
     const refs = useRef({});
-    const selectedItem = useSelector(state => state.main.selectedItem);
-    const mapLoaded       = useSelector(state => state.main.mapLoaded);
+    const selectedItem = useSelector(state => state.api.selectedItem);
+    const mapLoaded       = useSelector(state => state.map.mapLoaded);
     const dispatch        = useDispatch();
     // test code for local
     if (process.env.TEST_ELEVATION) {

@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState, useMemo, useContext, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPanoramaIndex, setOverlay, setGeoMarker, setEditingPath, setSearchForm  } from '../actions';
+import { setSearchForm } from '../features/search-form';
+import { setGeoMarker, setPathEditable } from '../features/map';
+import { setPanoramaIndex } from '../features/panorama';
+import { setOverlay } from '../features/view';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Select from '@mui/material/Select';
@@ -26,13 +29,13 @@ import NavigateBefore from '@mui/icons-material/NavigateBefore';
 import NavigateNext from '@mui/icons-material/NavigateNext';
 
 const BottomBar = props => {
-    const filter        = useSelector(state => state.main.searchForm.filter);
-    const radius        = useSelector(state => state.main.searchForm.radius);
-    const selectedPath  = useSelector(state => state.main.selectedPath);
-    const panoramaIndex = useSelector(state => state.main.panoramaIndex);
-    const panoramaCount = useSelector(state => state.main.panoramaCount);
-    const overlay       = useSelector(state => state.main.overlay);
-    const mapLoaded     = useSelector(state => state.main.mapLoaded);
+    const filter        = useSelector(state => state.searchForm.filter);
+    const radius        = useSelector(state => state.searchForm.radius);
+    const selectedPath  = useSelector(state => state.map.selectedPath);
+    const panoramaIndex = useSelector(state => state.panorama.panoramaIndex);
+    const panoramaCount = useSelector(state => state.panorama.panoramaCount);
+    const overlay       = useSelector(state => state.view.overlay);
+    const mapLoaded     = useSelector(state => state.map.mapLoaded);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
@@ -130,7 +133,7 @@ const BottomBar = props => {
         </Box>
     </div>);
 
-    const editButtonClickCB = useCallback(() => dispatch(setEditingPath(true)));
+    const editButtonClickCB = useCallback(() => dispatch(setPathEditable(true)));
     const clearButtonClickCB = useCallback(() => clearPaths(), [mapLoaded]);
     const downloadButtonClickCB = useCallback(() => downloadPath(), [mapLoaded]);
     const uploadButtonClickCB = useCallback(() => uploadPath(), [mapLoaded]);
@@ -164,8 +167,9 @@ const BottomBar = props => {
                 dispatch(setGeoMarker({
                     lat: results[0].geometry.location.lat(),
                     lng: results[0].geometry.location.lng(),
-                    show: true
-                }, true));
+                    show: true,
+                    updateCenter: true,
+                }));
             } else {
                 alert('Geocode was not successful for the following reason: ' + status);
             }
