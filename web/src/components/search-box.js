@@ -18,14 +18,14 @@ import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
 import config from 'react-global-configuration';
 
-const SearchBox = props => {
-    const lastQuery = useSelector(state => state.main.lastQuery);
-    const users = useSelector(state => state.main.users);
-    const offset = useSelector(state => state.main.result.offset);
-    const count = useSelector(state => state.main.result.count);
-    const error = useSelector(state => state.main.result.error);
-    const rows = useSelector(state => state.main.result.rows);
-    const searching = useSelector(state => state.main.result.searching);
+const SearchBox = () => {
+    const lastQuery = useSelector(state => state.api.lastQuery);
+    const users = useSelector(state => state.misc.users);
+    const offset = useSelector(state => state.api.result.offset);
+    const count = useSelector(state => state.api.result.count);
+    const error = useSelector(state => state.api.result.error);
+    const rows = useSelector(state => state.api.result.rows);
+    const searching = useSelector(state => state.api.result.searching);
     const dispatch = useDispatch();
 
     const [showDistance, setShowDistance] = useState(true);
@@ -37,7 +37,7 @@ const SearchBox = props => {
     const handleShowDistance = useCallback(e => {
         setShowDistance(e.target.value);
     });
-    const moreUrl = `/?offset=${offset}` + (lastQuery && `&${lastQuery}`);
+    const moreUrl = `/?offset=${offset}` + (lastQuery ? `&${lastQuery}` : '' );
     const userObjs = {};
     for (const u of users) {
         userObjs[u.uid] = u;

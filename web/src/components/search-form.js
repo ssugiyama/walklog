@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setSearchForm  } from '../actions';
+import { setSearchForm  } from '../features/search-form';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
@@ -39,15 +39,15 @@ const orderOptionsWithNearest = [
     { label: 'nearest first', value: 'nearest_first' },
 ];
 
-const SearchForm = props => {
-    const filter = useSelector(state => state.main.searchForm.filter);
-    const month = useSelector(state => state.main.searchForm.month);
-    const year = useSelector(state => state.main.searchForm.year);
-    const user = useSelector(state => state.main.searchForm.user);
-    const limit = useSelector(state => state.main.searchForm.limit);
-    const order = useSelector(state => state.main.searchForm.order);
-    const years = useSelector(state => state.main.years);
-    const users = useSelector(state => state.main.users);
+const SearchForm = () => {
+    const filter = useSelector(state => state.searchForm.filter);
+    const month = useSelector(state => state.searchForm.month);
+    const year = useSelector(state => state.searchForm.year);
+    const user = useSelector(state => state.searchForm.user);
+    const limit = useSelector(state => state.searchForm.limit);
+    const order = useSelector(state => state.searchForm.order);
+    const years = useSelector(state => state.misc.years);
+    const users = useSelector(state => state.misc.users);
     const dispatch = useDispatch();
 
     const createChangeCB = name => e => dispatch(setSearchForm({[name]: e.target.value}));
