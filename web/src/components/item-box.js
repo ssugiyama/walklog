@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { openWalkEditor } from '../actions';
+import { openWalkEditor } from '../features/view';
 import { marked } from 'marked';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
@@ -21,19 +21,19 @@ import TweetIcon from './tweet-icon';
 import SwipeableViews from 'react-swipeable-views';
 import config from 'react-global-configuration';
 
-const ItemBox = props => {
+const ItemBox = () => {
     const [tabValue, setTabValue] = useState(0);
-    const selectedItem =  useSelector(state => state.main.selectedItem);
-    const users = useSelector(state => state.main.users);
-    const offset =  useSelector(state => state.main.result.offset);
-    const nextId =  useSelector(state => state.main.nextId);
-    const prevId =  useSelector(state => state.main.prevId);
-    const currentUser = useSelector(state =>  state.main.currentUser);
-    const lastQuery = useSelector(state => state.main.lastQuery);
+    const selectedItem =  useSelector(state => state.api.selectedItem);
+    const users = useSelector(state => state.misc.users);
+    const offset =  useSelector(state => state.api.result.offset);
+    const nextId =  useSelector(state => state.api.nextId);
+    const prevId =  useSelector(state => state.api.prevId);
+    const currentUser = useSelector(state =>  state.misc.currentUser);
+    const lastQuery = useSelector(state => state.api.lastQuery);
     const location =  useSelector(state => state.router.location);
     const dispatch = useDispatch();
     const handleEdit = () => {
-        dispatch(openWalkEditor(true, 'update'));
+        dispatch(openWalkEditor({ open: true, mode: 'update' }));
     };
     const tabChangeCB = useCallback((e, value) => {
         setTabValue(value);

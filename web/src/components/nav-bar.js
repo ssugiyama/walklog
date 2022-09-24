@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { setGeoMarker } from '../features/map';
 import {
     openWalkEditor,
-    setGeoMarker,
     openSnackbar,
-    setCurrentUser,
-} from '../actions';
+} from '../features/view';
+import { setCurrentUser } from '../features/misc';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -29,7 +29,7 @@ import 'firebase/auth';
 
 const AUTO_GEOLOCATION_INTERVAL = 30000;
 
-const NavBar = (props) => {
+const NavBar = () => {
     const provider = useRef();
     const [accountAnchorEl, setAccountAnchorEl] = useState(null);
     const [autoGeolocation, setAutoGeolocation] = useState(false);
@@ -37,13 +37,13 @@ const NavBar = (props) => {
     const context = useContext(MapContext);
     const { addPoint } = context.state;
     const dispatch = useDispatch();
-    const selectedPath  = useSelector(state => state.main.selectedPath);
-    const currentUser   = useSelector(state => state.main.currentUser);
+    const selectedPath  = useSelector(state => state.map.selectedPath);
+    const currentUser   = useSelector(state => state.misc.currentUser);
     const appVersion = 'v' + config.get('appVersion');
     const addCurrentPosition = (pos, append) => {
         setConfirmInfo({open: false});
-        const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true };
-        dispatch(setGeoMarker(geoMarker, !append));
+        const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true, updateCenter: !append };
+        dispatch(setGeoMarker(geoMarker));
         addPoint(pos.coords.latitude, pos.coords.longitude, append);
     };
     const getCurrentPosition = (onSuccess, onFailure) => {
@@ -54,7 +54,7 @@ const NavBar = (props) => {
         });
     };
     const handleNewWalk = useCallback(() => {
-        dispatch(openWalkEditor(true, 'create'));
+        dispatch(openWalkEditor({ open: true, mode: 'create' }));
     });
     const handleMenuOpen = (setter) => {
         return event => {

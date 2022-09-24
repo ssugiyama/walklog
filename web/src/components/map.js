@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { toggleView, setSearchForm, setSelectedPath, setCenter, setZoom, setMapLoaded, setEditingPath, clearDeletingPsths } from '../actions';
+import { setSearchForm } from '../features/search-form';
+import { setSelectedPath, setCenter, setZoom, setMapLoaded, setPathEditable } from '../features/map';
+import { toggleView } from '../features/view';
 import { useSelector, useDispatch } from 'react-redux';
-import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
+import { APPEND_PATH_CONFIRM_INFO } from './confirm-modal';
 import ConfirmModal from './confirm-modal';
 import config from 'react-global-configuration';
 import MapContext from './utils/map-context';
@@ -25,25 +27,25 @@ const RESIZE_INTERVAL = 500;
 const GSI_MAP_TYPE    = 'gsi';
 
 const Map = props => {
-    const latitude = useSelector(state => state.main.searchForm.latitude);
-    const longitude = useSelector(state => state.main.searchForm.longitude);
-    const radius = useSelector(state => state.main.searchForm.radius);
-    const selectedItem = useSelector(state => state.main.selectedItem);
-    const pathEditable = useSelector(state => state.main.pathEditable);
-    const elevationInfoWindow = useSelector(state => state.main.elevationInfoWindow);
-    const geoMarker = useSelector(state => state.main.geoMarker);
-    const zoom = useSelector(state => state.main.zoom);
-    const mapLoaded = useSelector(state => state.main.mapLoaded);
-    const rows = useSelector(state => state.main.result.rows);
+    const latitude = useSelector(state => state.searchForm.latitude);
+    const longitude = useSelector(state => state.searchForm.longitude);
+    const radius = useSelector(state => state.searchForm.radius);
+    const selectedItem = useSelector(state => state.api.selectedItem);
+    const pathEditable = useSelector(state => state.map.pathEditable);
+    const elevationInfoWindow = useSelector(state => state.map.elevationInfoWindow);
+    const geoMarker = useSelector(state => state.map.geoMarker);
+    const zoom = useSelector(state => state.map.zoom);
+    const mapLoaded = useSelector(state => state.map.mapLoaded);
+    const rows = useSelector(state => state.api.result.rows);
     const refs = useRef({});
     const [customStyle, setCustomStyle] = useState(false);
     const [CustomStyleBoxShown, setCustomStyleBoxShown] = useState();
     const rc = refs.current;
-    rc.center = useSelector(state => state.main.center);
-    rc.filter = useSelector(state => state.main.searchForm.filter);
-    rc.cities = useSelector(state => state.main.searchForm.cities);
-    rc.selectedPath = useSelector(state => state.main.selectedPath);
-    rc.view = useSelector(state => state.main.view);
+    rc.center = useSelector(state => state.map.center);
+    rc.filter = useSelector(state => state.searchForm.filter);
+    rc.cities = useSelector(state => state.searchForm.cities);
+    rc.selectedPath = useSelector(state => state.map.selectedPath);
+    rc.view = useSelector(state => state.view.view);
     const mapElemRef = useRef();
     const CustomStyleBoxRef = useRef();
     const downloadRef = useRef();
@@ -198,7 +200,7 @@ const Map = props => {
         google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged);
         google.maps.event.addListener(rc.pathManager, 'editable_changed',  () => {
             if (!rc.pathManager.editable) {
-                dispatch(setEditingPath(false));
+                dispatch(setPathEditable(false));
             }
         });
         google.maps.event.addListener(rc.pathManager, 'polylinecomplete',  async polyline => {

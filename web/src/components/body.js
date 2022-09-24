@@ -6,7 +6,7 @@ import BottomBar from './bottom-bar';
 import WalkEditor from './walk-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import ContentBox from './content-box';
-import { openSnackbar, toggleView } from '../actions';
+import { openSnackbar, toggleView } from '../features/view';
 import Snackbar from '@mui/material/Snackbar';
 import MapContext from './utils/map-context';
 import Box from '@mui/material/Box';
@@ -17,8 +17,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import { createMuiTheme } from '../app';
 
 const Body = () => {
-    const message  = useSelector(state => state.main.message);
-    const view     = useSelector(state => state.main.view);
+    const message  = useSelector(state => state.view.message);
+    const view     = useSelector(state => state.view.view);
     const dispatch = useDispatch();
     const [ state, setState ] = useState({});
 

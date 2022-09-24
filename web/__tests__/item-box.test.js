@@ -16,8 +16,11 @@ config.set({
 
 function setup(path, props, router) {
     const state = {
-        main: props,
-        router
+        router,
+        panorama: {},
+        map: {},
+        view: {},
+        ...props,
     };
     const theme = createTheme();
     const store = configureStore()(state);
@@ -35,28 +38,31 @@ function setup(path, props, router) {
 describe('<ItemBoxContainer />', () => {
     it('render typically', () => {
         setup('/17', {
-            prevId: 16,
-            nextId: 18,
-            selectedItem: {
-                title: 'start - end',
-                date: '2018-05-30',
-                length: 14.58,
-                comment: 'paragraph',
-                uid: 'uid',
+            api: {
+                prevId: 16,
+                nextId: 18,
+                selectedItem: {
+                    title: 'start - end',
+                    date: '2018-05-30',
+                    length: 14.58,
+                    comment: 'paragraph',
+                    uid: 'uid',
+                },
+                selectedIndex: 1,
+                result: {
+                    rows: [],
+                    count: 0,
+                    offset: 0
+                },
             },
-            selectedIndex: 1,
-            users: [{
-                uid: 'uid',
-                displayName: 'Alice',
-                photoURL: 'http://exmaple.com/photo',
-            }],
-            result: {
-                rows: [],
-                count: 0,
-                offset: 0
-            }
-        }, {
-        });
+            misc: {
+                users: [{
+                    uid: 'uid',
+                    displayName: 'Alice',
+                    photoURL: 'http://exmaple.com/photo',
+                }],
+            },
+        }, {});
         expect(screen.getAllByRole('link')).toHaveLength(4);
         expect(screen.getAllByRole('link').at(0)).toHaveAttribute('href', '/');
         expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/18');
@@ -69,113 +75,132 @@ describe('<ItemBoxContainer />', () => {
     });
     it('show edit button', () => {
         const mainProps = {
-            prevId: 16,
-            nextId: 18,
-            selectedItem: {
-                title: 'start - end',
-                date: '2018-05-30',
-                length: 14.58,
-                comment: 'paragraph',
-                uid: 'uid',
+            api:{
+                prevId: 16,
+                nextId: 18,
+                selectedItem: {
+                    title: 'start - end',
+                    date: '2018-05-30',
+                    length: 14.58,
+                    comment: 'paragraph',
+                    uid: 'uid',
+                },
+                selectedIndex: 1,
+                result: {
+                    rows: [],
+                    count: 0,
+                    offset: 0
+                },
             },
-            selectedIndex: 1,
-            currentUser: {uid : 'uid'},
-            users: [{
-                uid: 'uid',
-                displayName: 'Alice',
-                photoURL: 'http://exmaple.com/photo',
-            }],
-            result: {
-                rows: [],
-                count: 0,
-                offset: 0
-            }
+            misc: {
+                currentUser: {uid : 'uid'},
+                users: [{
+                    uid: 'uid',
+                    displayName: 'Alice',
+                    photoURL: 'http://exmaple.com/photo',
+                }],
+            },
         };
         setup('/17', mainProps, {});
         expect(screen.getByTestId('EditIcon')).toBeInTheDocument();
     });
     it('selected item is null', () => {
         const mainProps = {
-            prevId: null,
-            nextId: null,
-            selectedItem: null,
-            selectedIndex: null,
-            result: {},
+            api: {
+                prevId: null,
+                nextId: null,
+                selectedItem: null,
+                selectedIndex: null,
+                result: {},
+            },
+            misc: {},
         };
         setup('/17', mainProps, {});
         expect(screen.getByRole('heading')).toHaveTextContent('not found');
     });
     it('next url is more url', () => {
         const mainProps = {
-            prevId: null,
-            nextId: null,
-            result :{
-                offset: 20,
+            api: {
+                prevId: null,
+                nextId: null,
+                result :{
+                    offset: 20,
+                },
+                lastQuery: 'filter=neighborhood',
+                selectedIndex: 0,
+                selectedItem: {
+                    title: 'start - end',
+                    date: '2018-05-30',
+                    length: 14.58,
+                    comment: 'paragraph',
+                    uid: 'uid',
+                },
             },
-            lastQuery: 'filter=neighborhood',
-            selectedItem: {
-                title: 'start - end',
-                date: '2018-05-30',
-                length: 14.58,
-                comment: 'paragraph',
-                uid: 'uid',
+            misc: {
+                users: [{
+                    uid: 'uid',
+                    displayName: 'Alice',
+                    photoURL: 'http://exmaple.com/photo',
+                }],
             },
-            users: [{
-                uid: 'uid',
-                displayName: 'Alice',
-                photoURL: 'http://exmaple.com/photo',
-            }],
-            selectedIndex: 0,
         };
         setup('/17', mainProps, {});
         expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select=1&offset=20&filter=neighborhood');
     });
     it('next url is more url if last_query is null', () => {
         const mainProps = {
-            prevId: null,
-            nextId: null,
-            result :{
-                offset: 20,
+            api: {
+                prevId: null,
+                nextId: null,
+                result :{
+                    offset: 20,
+                },
+                lastQuery: null,
+                selectedItem: {
+                    title: 'start - end',
+                    date: '2018-05-30',
+                    length: 14.58,
+                    comment: 'paragraph',
+                    uid: 'uid',
+                },
+                selectedIndex: 0,
             },
-            lastQuery: null,
-            selectedItem: {
-                title: 'start - end',
-                date: '2018-05-30',
-                length: 14.58,
-                comment: 'paragraph',
-                uid: 'uid',
+            misc: {
+                users: [{
+                    uid: 'uid',
+                    displayName: 'Alice',
+                    photoURL: 'http://exmaple.com/photo',
+                }],
             },
-            users: [{
-                uid: 'uid',
-                displayName: 'Alice',
-                photoURL: 'http://exmaple.com/photo',
-            }],
-            selectedIndex: 0,
         };
         setup('/17', mainProps, {});
         expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select=1&offset=20');
     });
     it('prev button and next button are disabled', () => {
         const mainProps = {
-            prevId: null,
-            nextId: null,
-            result :{
-                offset: null,
+            api: {
+                prevId: null,
+                nextId: null,
+                result :{
+                    offset: null,
+                },
+                lastQuery: null,
+                selectedItem: {
+                    title: 'start - end',
+                    date: '2018-05-30',
+                    length: 14.58,
+                    comment: 'paragraph',
+                    uid: 'uid',
+                },
+                selectedIndex: 0,
             },
-            lastQuery: null,
-            selectedItem: {
-                title: 'start - end',
-                date: '2018-05-30',
-                length: 14.58,
-                comment: 'paragraph',
-                uid: 'uid',
+            misc: {
+                users: [{
+                    uid: 'uid',
+                    displayName: 'Alice',
+                    photoURL: 'http://exmaple.com/photo',
+                }],
             },
-            users: [{
-                uid: 'uid',
-                displayName: 'Alice',
-                photoURL: 'http://exmaple.com/photo',
-            }],
-            selectedIndex: 0,
         };
         setup('/17', mainProps, {});
         expect(screen.getAllByRole('button').at(0)).toHaveAttribute('aria-disabled', 'true');
