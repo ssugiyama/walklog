@@ -30,7 +30,7 @@ const diskStorage = multer.diskStorage({
     }
 });
 
-const useFirebaseStoarge = config.get('useFirebaseStorage');
+const useFirebaseStorage = config.get('useFirebaseStorage');
 
 api.get('/version', async (req, res) => {
     res.json({
@@ -98,7 +98,7 @@ const getFilename = (req, file) => {
 };
 
 const upload = multer({
-    storage: useFirebaseStoarge ? multer.memoryStorage() : diskStorage,
+    storage: useFirebaseStorage ? multer.memoryStorage() : diskStorage,
     limits: {
         fileSize: 5 * 1024 * 1024
     }
@@ -117,25 +117,20 @@ api.post('/save', upload.single('image'), async (req, res) => {
     try {
         if (req.file) {
             req.body.image = await new Promise((resolve, reject) => {
-                if (useFirebaseStoarge) {
+                if (useFirebaseStorage) {
                     const prefix = config.get('imagePrefix');
                     const bucket = admin.storage().bucket();
                     const blob = bucket.file(path.join(prefix, getFilename(req, req.file)));
-                    blob.setMetadata({ contentType: req.file.mimetype });
-
                     const blobStream = blob.createWriteStream();
-
                     blobStream.on('error', (err) => {
                         reject(err);
                     });
-
                     blobStream.on('finish', () => {
                         blob.setMetadata({
                             contentType: req.file.mimetype,
                         });
                         resolve(url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name)));
                     });
-
                     blobStream.end(req.file.buffer);
                 }
                 else {
