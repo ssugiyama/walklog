@@ -63,11 +63,10 @@ describe('<ItemBoxContainer />', () => {
                 }],
             },
         }, {});
-        expect(screen.getAllByRole('link')).toHaveLength(4);
+        expect(screen.getAllByRole('link')).toHaveLength(3);
         expect(screen.getAllByRole('link').at(0)).toHaveAttribute('href', '/');
         expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/18');
         expect(screen.getAllByRole('link').at(2)).toHaveAttribute('href', '/16');
-        expect(screen.getAllByRole('link').at(3)).toHaveAttribute('href', expect.stringMatching(/twitter\.com/));
         expect(screen.getByRole('heading')).toHaveTextContent('2018-05-30 : start - end (14.6 km)');
         expect(screen.getByRole('img')).toHaveAttribute('src', 'http://exmaple.com/photo');
         expect(screen.getByText('Alice')).toBeInTheDocument();
