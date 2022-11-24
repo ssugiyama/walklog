@@ -17,7 +17,6 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import NoSsr from '@mui/material/NoSsr';
-import TweetIcon from './tweet-icon';
 import SwipeableViews from 'react-swipeable-views';
 import config from 'react-global-configuration';
 
@@ -41,13 +40,6 @@ const ItemBox = () => {
     const indexCHangeCB = useCallback(index => {
         setTabValue(index);
     });
-    const tweetUrl = useMemo(() => {
-        const data = selectedItem;
-        if (! data) return null;
-        const href = config.get('baseUrl') + config.get('itemPrefix') + data.id;
-        const text = encodeURIComponent(data.date + ': ' + data.title + ' (' + data.length.toFixed(1)  + 'km)');
-        return `https://twitter.com/intent/tweet?hashtags=walklog&text=${text}&url=${href}`;
-    }, [selectedItem]);
 
     const data = selectedItem;
 
@@ -88,7 +80,6 @@ const ItemBox = () => {
                 {
                     data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleEdit} size="large"><EditorModeEditIcon /></IconButton>) : null
                 }
-                <IconButton component="a" href={tweetUrl} size="large"><TweetIcon /></IconButton>
                 <Typography variant="h6" sx={{ fontSize: '100%' }}>{ title || 'not found'}</Typography>
                 {
                     dataUser ? (<Typography variant="body2" align="right"><Box component="img" sx={{ width: 16,}} src={dataUser.photoURL} /><span>{dataUser.displayName}</span></Typography>) : null
