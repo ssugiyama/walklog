@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from '@lagunovsky/redux-react-router';
-import { DataArray } from '@mui/icons-material';
+import { getTitle } from '../app';
 const initialState = {
     result: {
         rows: [],
@@ -79,6 +79,9 @@ export const apiSlice = createSlice({
             const { item, index } = action.payload;
             state.selectedItem = item;
             state.selectedIndex = index;
+            if (typeof(document) !== 'undefined') {
+                document.title = getTitle(item);
+            }
         },
         setSearchResult: (state, action) => _setSearchResult(state, action),
         setAdjacentItemIds: (state, action) => {

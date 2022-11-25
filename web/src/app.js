@@ -189,3 +189,13 @@ export const createMuiTheme = (mode = 'light') => {
 };
 
 export const createEmotionCache = () => createCache({ key: 'css' });
+
+export const getTitle = (item) => {
+    const defaultTitle = config.get('siteName');
+    if (item) {
+        return `${item.date} : ${item.title} (${item.length.toFixed(1)} km) - ${defaultTitle}`;
+    }
+    else {
+        return defaultTitle;
+    }
+};
