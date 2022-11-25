@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography';
 // import ListItemText from '@mui/material/ListItemText';
 // import ArrowDownIcon from '@mui/icons-material/ArrowDropDown';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ShareIcon from '@mui/icons-material/Share';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
@@ -80,6 +81,20 @@ const NavBar = () => {
         firebase.auth().signOut().catch(error => {
             dispatch(openSnackbar(error.message));
         });
+    });
+    const shareCB = useCallback(async () => {
+        try {
+            const url = location.href;
+            const title = document.title;
+            if (navigator.share) {
+                await navigator.share({url, title});
+            } else {
+                await navigator.clipboard.writeText(`${title} ${url}`);
+                dispatch(openSnackbar('copied to clipboard'));
+            }
+        } catch(error) {
+            console.log(error);
+        }
     });
     useEffect(() =>{
         if (firebase.apps.length == 0) {
@@ -166,6 +181,9 @@ const NavBar = () => {
                     onClick={ignoreClick}
                     value="autoGeolocation"
                 />
+                <IconButton onClick={shareCB} color="inherit" size="large">
+                    <ShareIcon />
+                </IconButton>
                 <IconButton onClick={accountMenuOpenCB} color="inherit" size="large">
                     { currentUser ? <img alt='user profile' style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
