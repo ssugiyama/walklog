@@ -85,11 +85,11 @@ const NavBar = () => {
     const shareCB = useCallback(async () => {
         try {
             const url = location.href;
-            const title = document.title;
+            const text = document.title;
             if (navigator.share) {
-                await navigator.share({url, title});
+                await navigator.share({url, text});
             } else {
-                await navigator.clipboard.writeText(`${title} ${url}`);
+                await navigator.clipboard.writeText(`${text} ${url}`);
                 dispatch(openSnackbar('copied to clipboard'));
             }
         } catch(error) {
