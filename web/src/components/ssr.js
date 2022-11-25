@@ -14,6 +14,7 @@ import config from 'react-global-configuration';
 import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
 import { searchFunc } from '../../lib/search';
+import { getTitle } from '../app';
 
 const raw = content => ({ __html: content });
 
@@ -108,7 +109,7 @@ export default async function handleSSR(req, res) {
         const { html, css, ids } = extractCritical(markup);
 
         const state = store.getState();
-        let title = config.get('siteName');
+        const title = getTitle(state.api.selectedItem);
         let description = config.get('siteDescription');
         const siteName = config.get('siteName');
         const baseUrl = config.get('baseUrl');
@@ -117,7 +118,6 @@ export default async function handleSSR(req, res) {
         let canonical = baseUrl + '/';
         if (state.api.selectedItem) {
             const data = state.api.selectedItem;
-            title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km) - ` + title;
             description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
             canonical = baseUrl + config.get('itemPrefix') + data.id;
             image = data.image;
