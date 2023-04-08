@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo, useContext, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchForm } from '../features/search-form';
-import { setGeoMarker, setPathEditable } from '../features/map';
+import { setGeoMarker, setPathEditable, setAutoGeolocation } from '../features/map';
 import { setPanoramaIndex } from '../features/panorama';
 import { setOverlay } from '../features/view';
 import Tooltip from '@mui/material/Tooltip';
@@ -23,12 +23,20 @@ import SearchIcon from '@mui/icons-material/Search';
 import { alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import Box from '@mui/material/Box';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
+import Circle from '@mui/icons-material/Circle';
+import StopCircle from '@mui/icons-material/StopCircle';
 import MapContext from './utils/map-context';
 import SwipeableViews from 'react-swipeable-views';
 import NavigateBefore from '@mui/icons-material/NavigateBefore';
 import NavigateNext from '@mui/icons-material/NavigateNext';
+import { openSnackbar } from '../features/view';
+import ConfirmModal from './confirm-modal';
+import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
+import Checkbox from '@mui/material/Checkbox';
+const AUTO_GEOLOCATION_INTERVAL = 60000;
 
-const BottomBar = props => {
+const BottomBar = () => {
     const filter        = useSelector(state => state.searchForm.filter);
     const radius        = useSelector(state => state.searchForm.radius);
     const selectedPath  = useSelector(state => state.map.selectedPath);
@@ -36,6 +44,7 @@ const BottomBar = props => {
     const panoramaCount = useSelector(state => state.panorama.panoramaCount);
     const overlay       = useSelector(state => state.view.overlay);
     const mapLoaded     = useSelector(state => state.map.mapLoaded);
+    const autoGeolocation = useSelector(state => state.map.autoGeolocation);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
@@ -137,6 +146,72 @@ const BottomBar = props => {
     const clearButtonClickCB = useCallback(() => clearPaths(), [mapLoaded]);
     const downloadButtonClickCB = useCallback(() => downloadPath(), [mapLoaded]);
     const uploadButtonClickCB = useCallback(() => uploadPath(), [mapLoaded]);
+    const [confirmInfo, setConfirmInfo] = useState({open: false});
+    const { addPoint } = context.state;
+    const showMarker = (pos, updateCenter) => {
+        const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true, updateCenter };
+        dispatch(setGeoMarker(geoMarker));
+    };
+    const addCurrentPosition = (pos, append) => {
+        setConfirmInfo({open: false});
+        addPoint(pos.coords.latitude, pos.coords.longitude, append);
+    };
+    const getCurrentPosition = (onSuccess, onFailure) => {
+        navigator.geolocation.getCurrentPosition( pos => {
+            onSuccess(pos);
+        }, () => {
+            if (onFailure) onFailure();
+        });
+    };
+    useEffect(() => {
+        if (autoGeolocation) {
+            const intervalId = setInterval(() => {
+                getCurrentPosition(pos => {
+                    addCurrentPosition(pos, true);
+                });
+            }, AUTO_GEOLOCATION_INTERVAL);
+            return () => {
+                clearInterval(intervalId);
+            };
+        }
+    }, [autoGeolocation]);
+    const toggleRecordCB = useCallback((event, value) => {
+        if (value && navigator.geolocation) {
+            getCurrentPosition(async pos => {
+                dispatch(setAutoGeolocation(true));
+                dispatch(openSnackbar('start following your location'));
+                const append = await new Promise((resolve) => {
+                    if (selectedPath) {
+                        setConfirmInfo({open: true, resolve});
+                    }
+                    else {
+                        resolve(false);
+                    }
+                });
+                addCurrentPosition(pos, append);
+            }, () => {
+                alert('Unable to retrieve your location');
+            });
+        } else if (value) {
+            alert('Geolocation is not supported by your browser');
+        } else {
+            dispatch(setAutoGeolocation(false));
+            dispatch(openSnackbar('stop following your location'));
+        }
+    });
+    const currentLocationCB = useCallback(() => {
+        if (navigator.geolocation) {
+            getCurrentPosition(async pos => {
+                showMarker(pos, true);
+            }, () => {
+                alert('Unable to retrieve your location');
+            });
+        }
+    });
+    const ignoreClick = useCallback(event => {
+        event.stopPropagation();
+        return false;
+    });
     const PathControls = (<div key="path">
         <Box sx={sxBottomBarGroup}>
             <Typography variant="caption">Path</Typography>
@@ -152,6 +227,16 @@ const BottomBar = props => {
                 </Tooltip>
                 <Tooltip title="upload" position="top-center">
                     <IconButton onClick={uploadButtonClickCB} size="large"><FileUpload /></IconButton>
+                </Tooltip>
+                <Tooltip title="record" position="top-center">
+                    <Checkbox
+                        icon={<Circle />}
+                        checkedIcon={<StopCircle />}
+                        checked={autoGeolocation}
+                        onChange={toggleRecordCB}
+                        onClick={ignoreClick}
+                        value="autoGeolocation"
+                    />
                 </Tooltip>
                 <Typography variant="body1" sx={{display: 'inline'}}>{`${length.toFixed(1)}km`}</Typography>
             </Box>
@@ -186,6 +271,7 @@ const BottomBar = props => {
         color: theme => theme.palette.getContrastText(theme.palette.background.default),
     };
     const sxSearchBox = {
+        display: 'inline-block',
         position: 'relative',
         borderRadius: 2,
         backgroundColor: theme => alpha(theme.palette.common.white, 0.15),
@@ -194,7 +280,7 @@ const BottomBar = props => {
         },
         marginRight: 2,
         marginLeft: [0, 1],
-        width: ['100%', 'auto'],
+        // width: ['calc(100% - 24px)','auto'],
     };
 
     const sxInputBase = {
@@ -209,9 +295,9 @@ const BottomBar = props => {
         },
     };
 
-    const SearchControls = (<div key="search">
+    const LocationControls = (<div key="location">
         <Box sx={sxBottomBarGroup} data-testid="BottomBar">
-            <Typography variant="caption">Search</Typography>
+            <Typography variant="caption">Location</Typography>
             <Box sx={sxBottomBarGroupBody}>
                 <Box sx={sxSearchBox}>
                     <Box sx={sxSearchIcon}>
@@ -225,6 +311,9 @@ const BottomBar = props => {
                         onBlur={submitLocationCB}
                     />
                 </Box>
+                <Tooltip title="current locatioon" position="top-center">
+                    <IconButton onClick={currentLocationCB} size="large"><MyLocationIcon /></IconButton>
+                </Tooltip>
             </Box>
         </Box>
     </div>);
@@ -236,7 +325,7 @@ const BottomBar = props => {
     else {
         controls.push(FilterControls);
         controls.push(PathControls);
-        controls.push(SearchControls);
+        controls.push(LocationControls);
     }
     const createNnextButtonClickCB = d => () => {
         setGroupIndex(index => {
@@ -259,6 +348,7 @@ const BottomBar = props => {
             {
                 groupCount > 1 && (<IconButton onClick={nextButtonClickCB} size="large"><NavigateNext /></IconButton>)
             }
+            <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
         </Toolbar>
     );
 };
