@@ -13,7 +13,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ShareIcon from '@mui/icons-material/Share';
 import Button from '@mui/material/Button';
 import firebase from 'firebase/app'
 import config from 'react-global-configuration';
@@ -54,20 +53,6 @@ const NavBar = () => {
             dispatch(openSnackbar(error.message));
         });
     });
-    const shareCB = useCallback(async () => {
-        try {
-            const url = location.href;
-            const text = document.title;
-            if (navigator.share) {
-                await navigator.share({url, text});
-            } else {
-                await navigator.clipboard.writeText(`${text} ${url}`);
-                dispatch(openSnackbar('copied to clipboard'));
-            }
-        } catch(error) {
-            console.log(error);
-        }
-    });
     useEffect(() =>{
         if (firebase.apps.length == 0) {
             firebase.initializeApp(config.get('firebaseConfig'));
@@ -96,9 +81,6 @@ const NavBar = () => {
         <AppBar position="static" enableColorOnDark={true} sx={{pt: 'env(safe-area-inset-top)'}}>
             <Toolbar>
                 <Typography variant="h5" color="inherit" sx={{flex: 1}}>Walklog</Typography>
-                <IconButton onClick={shareCB} color="inherit" size="large">
-                    <ShareIcon />
-                </IconButton>
                 <IconButton onClick={accountMenuOpenCB} color="inherit" size="large">
                     { currentUser ? <img alt='user profile' style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
