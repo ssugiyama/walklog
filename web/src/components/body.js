@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ShareIcon from '@mui/icons-material/Share';
 import { ThemeProvider } from '@mui/material/styles';
 import { createMuiTheme } from '../app';
 
@@ -26,7 +27,20 @@ const Body = () => {
         dispatch(openSnackbar(null));
     });
     const toggleViewCB = useCallback(() => dispatch(toggleView()));
-
+    const shareCB = useCallback(async () => {
+        try {
+            const url = location.href;
+            const text = document.title;
+            if (navigator.share) {
+                await navigator.share({url, text});
+            } else {
+                await navigator.clipboard.writeText(`${text} ${url}`);
+                dispatch(openSnackbar('copied to clipboard'));
+            }
+        } catch(error) {
+            console.log(error);
+        }
+    });
     const fabButtonStyles = useMemo(() => ({
         position: 'absolute',
         left: 'calc(50% - 20px)',
@@ -34,6 +48,12 @@ const Body = () => {
         zIndex: 10,
         top: view == 'map' ? 'auto' : 'calc(40vh + 48px)',
         bottom: view == 'map' ? 54 : 'auto',
+    }), [view]);
+    const shareButtonStyles = useMemo(() => ({
+        position: 'fixed',
+        right: 10,
+        bottom: 10,
+        display: view == 'map' ? 'none' : 'inline-flex',
     }), [view]);
     const theme = React.useMemo(() => createMuiTheme('light'));
 
@@ -66,7 +86,6 @@ const Body = () => {
                     <ContentBox sx={{
                         display: view == 'map' ? 'none' : 'block',
                     }}/>
-
                 </Box>
                 <Fab size="small" aria-label="toggle view"
                     color="secondary"
@@ -79,6 +98,12 @@ const Body = () => {
                 }}>
                     <BottomBar />
                 </Box>
+                <Fab size="small" aria-label="share"
+                    color="default"
+                    onClick={shareCB}
+                    style={shareButtonStyles}>
+                    <ShareIcon />
+                </Fab>
                 <WalkEditor />
                 <Snackbar
                     open={message != null}
