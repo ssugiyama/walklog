@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { setSearchForm } from '../features/search-form';
-import { setSelectedPath, setCenter, setZoom, setMapLoaded, setPathEditable } from '../features/map';
+import { setSelectedPath, setCenter, setZoom, setMapLoaded, setPathEditable, setAutoGeolocation } from '../features/map';
 import { toggleView } from '../features/view';
 import { useSelector, useDispatch } from 'react-redux';
 import { APPEND_PATH_CONFIRM_INFO } from './confirm-modal';
@@ -14,6 +14,7 @@ import Link from '@mui/material/Link';
 import Checkbox from '@mui/material/Checkbox';
 import { FormControlLabel } from '@mui/material';
 import GsiMapType from './utils/gsi-map-type';
+import moment from 'moment';
 
 function loadJS(src) {
     const ref = window.document.getElementsByTagName('script')[0];
@@ -46,6 +47,7 @@ const Map = props => {
     rc.cities = useSelector(state => state.searchForm.cities);
     rc.selectedPath = useSelector(state => state.map.selectedPath);
     rc.view = useSelector(state => state.view.view);
+    rc.autoGeolocation = useSelector(state => state.map.autoGeolocation);
     const mapElemRef = useRef();
     const CustomStyleBoxRef = useRef();
     const downloadRef = useRef();
@@ -87,6 +89,34 @@ const Map = props => {
     const addPaths = (items) => {
         for (const item of items) {
             rc.pathManager.showPath(item.path, false, false, item);
+        }
+    };
+
+    const pathChanged = () => {
+        const nextPath = rc.pathManager.getEncodedSelection();
+        if (rc.selectedPath != nextPath) {
+            dispatch(setSelectedPath(nextPath));
+            if (nextPath) {
+                const pair = rc.pathManager.searchPolyline(nextPath);
+                const item = pair && pair[1];
+                if (rc.autoGeolocation || item) {
+                    rc.clickedItem = item;
+                    const content =  '<span id="path-info-window-content">foo</span>';
+                    rc.pathInfoWindow.setContent(content);
+                    rc.pathInfoWindow.open(rc.map);
+                    const pos = rc.autoGeolocation ? rc.pathManager.lastAppendLatLng() : rc.pathManager.lastClickLatLng;
+                    if (pos) rc.pathInfoWindow.setPosition(pos);
+                }
+                else {
+                    rc.pathInfoWindow.close();
+                }
+            }
+            else {
+                rc.pathInfoWindow.close();
+            }
+        }
+        else {
+            rc.pathInfoWindow.close();
         }
     };
 
@@ -164,38 +194,20 @@ const Map = props => {
         rc.polygonManager = new PolygonManage({map: rc.map, styles: rc.mapStyles.polygons});
         rc.pathInfoWindow = new google.maps.InfoWindow();
         google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {
-            const item = rc.clickedItem;
-            const url = config.get('itemPrefix') + item.id;
-            const link = <Link href="#" onClick={ () => { handleLinkClick(url); }}>{item.date}: {item.title}</Link>;
-            ReactDOM.render(link, document.getElementById('path-info-window-content'));
-        });
-        const pathChanged = () => {
-            const nextPath = rc.pathManager.getEncodedSelection();
-            if (rc.selectedPath != nextPath) {
-                dispatch(setSelectedPath(nextPath));
-                if (nextPath) {
-                    const pair = rc.pathManager.searchPolyline(nextPath);
-                    const item = pair && pair[1];
-                    if (item) {
-                        rc.clickedItem = item;
-
-                        const content =  '<span id="path-info-window-content">foo</span>';
-                        // google.maps.event.clearInstanceListeners(rc.pathInfoWindow);
-
-                        rc.pathInfoWindow.setContent(content);
-                        rc.pathInfoWindow.open(rc.map);
-                        rc.pathInfoWindow.setPosition(rc.pathManager.lastClickLatLng);
-                        // rc.pathInfoWindow.setPosition(path.getPath().getAt(0));
-                    }
-                    else {
-                        rc.pathInfoWindow.close();
-                    }
-                }
-                else {
-                    rc.pathInfoWindow.close();
-                }
+            let content;
+            if (rc.autoGeolocation) {
+                content = `geolocation at ${moment().format('HH:mm')}`;
             }
-        };
+            else {
+                const item = rc.clickedItem;
+                const url = config.get('itemPrefix') + item.id;
+                content = <Link href="#" onClick={ () => { handleLinkClick(url); }}>{item.date}: {item.title}</Link>;
+            }
+            ReactDOM.render(content, document.getElementById('path-info-window-content'));
+        });
+        google.maps.event.addListener(rc.pathInfoWindow, 'closeclick', () => {
+            if (rc.autoGeolocation) dispatch(setAutoGeolocation(false));
+        });
         google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged);
         google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged);
         google.maps.event.addListener(rc.pathManager, 'editable_changed',  () => {
@@ -261,6 +273,8 @@ const Map = props => {
         });
         dispatch(setMapLoaded());
     };
+
+    useEffect(() => { if (mapLoaded) pathChanged(); }, [rc.autoGeolocation]);
 
     useEffect(() => {
         window.initMap = initMap;
