@@ -17,6 +17,7 @@ const initialState = {
         message: null,
         position: null
     },
+    autoGeolocation: false,
 };
 
 export const mapSlice = createSlice({
@@ -65,8 +66,11 @@ export const mapSlice = createSlice({
         setElevationInfoWindow: (state, action) => {
             state.elevationInfoWindow = action.payload;
         },
+        setAutoGeolocation: (state, action) => {
+            state.autoGeolocation = action.payload;
+        },
     },
 });
 
-export const { setMapLoaded, setSelectedPath, setCenter, setZoom, setPathEditable, setGeoMarker, setElevationInfoWindow } = mapSlice.actions;
+export const { setMapLoaded, setSelectedPath, setCenter, setZoom, setPathEditable, setGeoMarker, setElevationInfoWindow, setAutoGeolocation } = mapSlice.actions;
 export default mapSlice.reducer;

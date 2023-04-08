@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setGeoMarker } from '../features/map';
 import {
     openWalkEditor,
     openSnackbar,
@@ -13,47 +12,20 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-// import ListItemIcon from '@mui/material/ListItemIcon';
-// import ListItemText from '@mui/material/ListItemText';
-// import ArrowDownIcon from '@mui/icons-material/ArrowDropDown';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShareIcon from '@mui/icons-material/Share';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
-import ConfirmModal from './confirm-modal';
-import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
-import MapContext from './utils/map-context';
 import firebase from 'firebase/app'
 import config from 'react-global-configuration';
 import 'firebase/auth';
 
-const AUTO_GEOLOCATION_INTERVAL = 30000;
-
 const NavBar = () => {
     const provider = useRef();
     const [accountAnchorEl, setAccountAnchorEl] = useState(null);
-    const [autoGeolocation, setAutoGeolocation] = useState(false);
-    const [confirmInfo, setConfirmInfo] = useState({open: false});
-    const context = useContext(MapContext);
-    const { addPoint } = context.state;
     const dispatch = useDispatch();
     const selectedPath  = useSelector(state => state.map.selectedPath);
     const currentUser   = useSelector(state => state.misc.currentUser);
     const appVersion = 'v' + config.get('appVersion');
-    const addCurrentPosition = (pos, append) => {
-        setConfirmInfo({open: false});
-        const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true, updateCenter: !append };
-        dispatch(setGeoMarker(geoMarker));
-        addPoint(pos.coords.latitude, pos.coords.longitude, append);
-    };
-    const getCurrentPosition = (onSuccess, onFailure) => {
-        navigator.geolocation.getCurrentPosition( pos => {
-            onSuccess(pos);
-        }, () => {
-            if (onFailure) onFailure();
-        });
-    };
     const handleNewWalk = useCallback(() => {
         dispatch(openWalkEditor({ open: true, mode: 'create' }));
     });
@@ -107,46 +79,6 @@ const NavBar = () => {
             });
         }
     }, []);
-    const ignoreClick = useCallback(event => {
-        event.stopPropagation();
-        return false;
-    });
-    useEffect(() => {
-        if (autoGeolocation) {
-            const intervalId = setInterval(() => {
-                getCurrentPosition(pos => {
-                    addCurrentPosition(pos, true);
-                });
-            }, AUTO_GEOLOCATION_INTERVAL);
-            return () => {
-                clearInterval(intervalId);
-            };
-        }
-    }, [autoGeolocation]);
-    const handleAutoGeolocationChange = useCallback((event, value) => {
-        if (value && navigator.geolocation) {
-            getCurrentPosition(async pos => {
-                setAutoGeolocation(true);
-                dispatch(openSnackbar('start following your location'));
-                const append = await new Promise((resolve) => {
-                    if (selectedPath) {
-                        setConfirmInfo({open: true, resolve});
-                    }
-                    else {
-                        resolve(false);
-                    }
-                });
-                addCurrentPosition(pos, append);
-            }, () => {
-                alert('Unable to retrieve your location');
-            });
-        } else if (value) {
-            alert('Geolocation is not supported by your browser');
-        } else {
-            setAutoGeolocation(false);
-            dispatch(openSnackbar('stop following your location'));
-        }
-    });
     const closeAllMenus = () => {
         setAccountAnchorEl(null);
     };
@@ -160,27 +92,10 @@ const NavBar = () => {
             return true;
         }} {...cpProps}>{props.children}</MenuItem> ;
     };
-    // const ParentMenuItem = props => {
-    //     const subMenuAnchor = props.subMenuAnchor;
-    //     return <MenuItem key="path" onClick={handleMenuOpen(subMenuAnchor)}>
-    //         <ListItemText>{props.children}</ListItemText>
-    //         <ListItemIcon>
-    //             <ArrowDownIcon />
-    //         </ListItemIcon>
-    //     </MenuItem>;
-    // } ;
     return (
         <AppBar position="static" enableColorOnDark={true} sx={{pt: 'env(safe-area-inset-top)'}}>
             <Toolbar>
                 <Typography variant="h5" color="inherit" sx={{flex: 1}}>Walklog</Typography>
-                <Checkbox
-                    icon={<MyLocationIcon />}
-                    checkedIcon={<MyLocationIcon />}
-                    checked={autoGeolocation}
-                    onChange={handleAutoGeolocationChange}
-                    onClick={ignoreClick}
-                    value="autoGeolocation"
-                />
                 <IconButton onClick={shareCB} color="inherit" size="large">
                     <ShareIcon />
                 </IconButton>
@@ -203,7 +118,6 @@ const NavBar = () => {
                     ] : [<EndMenuItem key="login" onClick={handleLogin}>login with Google</EndMenuItem>]
                 }
             </Menu>
-            <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
         </AppBar>
     );
 };
