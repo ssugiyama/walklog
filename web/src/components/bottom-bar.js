@@ -280,7 +280,7 @@ const BottomBar = () => {
         },
         marginRight: 2,
         marginLeft: [0, 1],
-        // width: ['calc(100% - 24px)','auto'],
+        width: ['calc(100% - 64px)','auto'],
     };
 
     const sxInputBase = {
