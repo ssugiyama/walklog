@@ -262,4 +262,11 @@ export default class PathManager extends google.maps.MVCObject {
         }
         return '';
     }
+    lastAppendLatLng() {
+        if (! this.selection) return null;
+
+        const path = this.selection.getPath();
+        const length = path.getLength();
+        return length > 0 && path.getAt(length - 1);
+    }
 }
