@@ -65,9 +65,9 @@ const ItemBox = () => {
     const sxImageBox = {
         float: ['none', 'left'],
         width: 320,
-        mu: [0, 2],
+        mt: [0, 2],
         mr: ['auto', 2],
-        md: [0, 2],
+        mb: [0, 2],
         ml: ['auto', 0],
         display: ['inherit', 'block'],
     };
@@ -100,7 +100,7 @@ const ItemBox = () => {
             }
             { data &&
                 <SwipeableViews index={tabValue} onChangeIndex={indexCHangeCB} disableLazyLoading>
-                    <Paper sx={{ flexDirection: 'column', padding: 2, }}>
+                    <Paper sx={{ flexDirection: 'column', padding: 2, overflow: 'auto', }}>
                         {image &&
                             <Box sx={sxImageBox} component="img" src={image} />}
                         <Typography variant="body2" component="div"
