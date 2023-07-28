@@ -65,7 +65,7 @@ const ItemBox = () => {
     const sxImageBox = {
         float: ['none', 'left'],
         width: 320,
-        mu: 0,
+        mu: [0, 2],
         mr: ['auto', 2],
         md: [0, 2],
         ml: ['auto', 0],
