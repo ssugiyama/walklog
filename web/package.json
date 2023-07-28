@@ -11,8 +11,8 @@
     "watch": "parcel watch --dist-dir public src/components/client-root.js",
     "test": "jest"
   },
-  "engines" : {
-    "node" : ">=16.0.0"
+  "engines": {
+    "node": ">=16.0.0"
   },
   "keywords": [],
   "author": "Shinichi SUGIYAMA",
