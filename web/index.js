@@ -34,7 +34,7 @@ const morgan     = require('morgan');
 const app        = express();
 const handleSSR  = require('./dist/components/ssr').default;
 const models     = require('./lib/models');
-const Walk       = models.sequelize.models.walks;
+const Walk       = models.Walk;
 const sitemap    = require('sitemap');
 const Op         = require('sequelize').Op;
 const admin      = require('firebase-admin');
@@ -63,7 +63,8 @@ app.use('/sitemap.xml',  async (req, res) => {
     const results = await Walk.findAll({
         attributes: ['id'],
         where: {
-            comment : {[Op.ne]: null}
+            comment : {[Op.ne]: null},
+            draft: false,
         }
     });
     results.forEach(function (row) {

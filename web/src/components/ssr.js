@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
-import { configureReduxStore, routes, handleRoute, createEmotionCache, createMuiTheme }  from '../app';
+import { configureReduxStore, routes, handleRoute, createEmotionCache, createMuiTheme, idToUrl }  from '../app';
 import { CacheProvider } from '@emotion/react';
 import createEmotionServer from '@emotion/server/create-instance';
 import { setUsers } from '../features/misc';
@@ -64,6 +64,9 @@ export default async function handleSSR(req, res) {
     global.navigator = {
         userAgent: req.headers['user-agent']
     };
+    if (req.query.draft == 'true') {
+        return res.redirect('/');
+    }
     const branch = matchRoutes(routes(), req.path);
 
     // const query = Object.keys(req.query).map(key => key + '=' + encodeURIComponent(req.query[key])).join('&');
@@ -119,7 +122,7 @@ export default async function handleSSR(req, res) {
         if (state.api.selectedItem) {
             const data = state.api.selectedItem;
             description = data.comment && (data.comment.replace(/[\n\r]/g, '').substring(0, 140) + '...');
-            canonical = baseUrl + config.get('itemPrefix') + data.id;
+            canonical = baseUrl + idToUrl(data.id);
             image = data.image;
         }
         if (! image) image = baseUrl + '/walklog.png';

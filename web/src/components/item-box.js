@@ -9,16 +9,21 @@ import Fab from '@mui/material/Fab';
 import NavigationArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import NavigationArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ListIcon from '@mui/icons-material/List';
-import EditorModeEditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import ElevationBox from './elevation-box';
 import PanoramaBox from './panorama-box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';
 import NoSsr from '@mui/material/NoSsr';
 import SwipeableViews from 'react-swipeable-views';
-import config from 'react-global-configuration';
+import fetchWithAuth from '../fetch_with_auth';
+import { idToUrl } from '../app';
+import { push } from '@lagunovsky/redux-react-router';
 
 const ItemBox = () => {
     const [tabValue, setTabValue] = useState(0);
@@ -40,6 +45,19 @@ const ItemBox = () => {
     const indexCHangeCB = useCallback(index => {
         setTabValue(index);
     });
+    const handleDelete = useCallback(async e => {
+        if (confirm('Are you sure to delete?')) {
+            try {
+                const response = await fetchWithAuth('/api/destroy/' + selectedItem.id);
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                dispatch(push('/?forceFetch=1'));
+            } catch (error) {
+                alert(error);
+            }
+        }
+    });
 
     const data = selectedItem;
 
@@ -55,9 +73,10 @@ const ItemBox = () => {
     const upUrl = location && location.search == '?forceFetch=1'
         ? '/' + location.search
         : lastQuery ? '/?' + lastQuery : '/';
-    const nextUrl = nextId && config.get('itemPrefix') + nextId;
+    const draft = data && data.draft;
+    const nextUrl = nextId && idToUrl(nextId, draft && {draft});
     const prevUrl = prevId ?
-        config.get('itemPrefix') + prevId :
+        idToUrl(prevId, draft && {draft}) :
         offset > 0 ?
             '/?select=1&offset=' + offset +
                 (lastQuery ? '&' + lastQuery : '') : null;
@@ -78,12 +97,21 @@ const ItemBox = () => {
                 <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''} size="large"><NavigationArrowBackIcon /></IconButton>
                 <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''} size="large"><NavigationArrowForwardIcon /></IconButton>
                 {
-                    data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleEdit} size="large"><EditorModeEditIcon /></IconButton>) : null
+                    data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleEdit} size="large"><EditIcon /></IconButton>) : null
+                }
+                {
+                    data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleDelete} size="large"><DeleteIcon /></IconButton>) : null
                 }
                 <Typography variant="h6" sx={{ fontSize: '100%' }}>{ title || 'not found'}</Typography>
-                {
-                    dataUser ? (<Typography variant="body2" align="right"><Box component="img" sx={{ width: 16,}} src={dataUser.photoURL} /><span>{dataUser.displayName}</span></Typography>) : null
-                }
+                <Box sx={{ textAlign: 'right'}}>{
+                    draft ?
+                        <Chip label="draft" color="warning" align="right" /> : dataUser ?
+                            <Chip
+                                avatar={<Avatar alt={dataUser.displayName} src={dataUser.photoURL} />}
+                                label={dataUser.displayName}
+                                variant="outlined"
+                            /> : null }
+                </Box>
             </Paper>
             { data &&
                 <Paper>
