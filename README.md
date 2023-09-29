@@ -28,7 +28,7 @@ Firebase is required for authentication and storage. So you should create fireba
 and edit web/.env
 
 ```
-DB_URL=postgres://postgres@db/postgres
+DB_URL=postgres://postgres@db/walklog
 PORT=3000
 SITE_NAME=walklog
 DESCRIPTION=webapp for walk logging
@@ -75,41 +75,38 @@ or
 ```
 
 ## with docker
-    % mkdir data public
-    % docker-compose up -d
-    % docker-compose run --rm web /var/www/setup.sh
 
-### setup area table
+### 1. setup area table
 
 *work_dir* is the directory which you put shp files in.
 
     % docker-compose run -v *work_dir*:/tmp --rm db manage-areas.sh -h db *shp_file*
 
+### 2. set up and start servers
+
+```
+% docker-compose run --rm web /var/www/setup.sh
+% docker-compose up -d
+```
+
 ## without docker
 
 ### 0. requirement
 
-- postgresql
-- postgis 2.4 or higher
+- postgresql with postgis 2.4 or higher
+- PosrGIS enabled database
 - node.js
 - yarn
 
-### 1. create database and install postgis functions.
-    % cd db
-    % createdb walklog -E utf8
-    % psql walklog -f $(POSTGIS_DIR)/postgis.sql
-    % psql walklog -f $(POSTGIS_DIR)/spatial_ref_sys.sql
-    % psql walklog -f schema.sql
-
-### 2. setup areas table
+### 1. setup areas table
     % cd *work_dir*
     % $(project_root)/db/manage-areas.sh *shp_file*
 
-### 3. setup and start api server
+### 2. set up and start api server
     % cd ../web
     % export NODE_ENV=xxx
     % yarn install && yarn run build-svr
-    % ./setup.sh
+    % DB_URL=xxx ./setup.sh
     % yarn run start-with-dotenv
 
 You may access http://localhost:3000 .

@@ -1,7 +1,7 @@
 const models  = require('./models'),
     Sequelize = require('sequelize'),
     sequelize = models.sequelize,
-    Walk      = models.sequelize.models.walks;
+    Walk      = models.Walk;
 
 const Op = Sequelize.Op;
 
