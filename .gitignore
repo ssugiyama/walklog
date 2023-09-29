@@ -1,9 +1,11 @@
-data
+data/*
+!data/.keep
 web/.parcel-cache
 web/npm-debug.log
 web/node_modules
 web/public
 web/dist
-public
+public/*
+!public/.keep
 web/config.js
 web/.env
