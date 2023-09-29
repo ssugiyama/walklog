@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
-import config from 'react-global-configuration';
+import { idToUrl } from '../app';
 
 const SearchBox = () => {
     const lastQuery = useSelector(state => state.api.lastQuery);
@@ -32,7 +32,8 @@ const SearchBox = () => {
 
     const handleSelect = (index) => {
         const item = rows[index];
-        dispatch(push( config.get('itemPrefix') + item.id ));
+        const draft = item.draft;
+        dispatch(push(idToUrl(item.id, draft && {draft} )));
     };
     const handleShowDistance = useCallback(e => {
         setShowDistance(e.target.value);

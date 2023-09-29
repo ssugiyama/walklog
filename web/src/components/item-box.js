@@ -16,9 +16,11 @@ import PanoramaBox from './panorama-box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';
 import NoSsr from '@mui/material/NoSsr';
 import SwipeableViews from 'react-swipeable-views';
-import config from 'react-global-configuration';
+import { idToUrl } from '../app';
 
 const ItemBox = () => {
     const [tabValue, setTabValue] = useState(0);
@@ -55,9 +57,10 @@ const ItemBox = () => {
     const upUrl = location && location.search == '?forceFetch=1'
         ? '/' + location.search
         : lastQuery ? '/?' + lastQuery : '/';
-    const nextUrl = nextId && config.get('itemPrefix') + nextId;
+    const draft = data && data.draft;
+    const nextUrl = nextId && idToUrl(nextId, draft && {draft});
     const prevUrl = prevId ?
-        config.get('itemPrefix') + prevId :
+        idToUrl(prevId, draft && {draft}) :
         offset > 0 ?
             '/?select=1&offset=' + offset +
                 (lastQuery ? '&' + lastQuery : '') : null;
@@ -81,9 +84,15 @@ const ItemBox = () => {
                     data && currentUser && data.uid && currentUser.uid == data.uid ? (<IconButton onClick={handleEdit} size="large"><EditorModeEditIcon /></IconButton>) : null
                 }
                 <Typography variant="h6" sx={{ fontSize: '100%' }}>{ title || 'not found'}</Typography>
-                {
-                    dataUser ? (<Typography variant="body2" align="right"><Box component="img" sx={{ width: 16,}} src={dataUser.photoURL} /><span>{dataUser.displayName}</span></Typography>) : null
-                }
+                <Box sx={{ textAlign: 'right'}}>{
+                    draft ?
+                        <Chip label="draft" color="warning" align="right" /> : dataUser ?
+                            <Chip
+                                avatar={<Avatar alt={dataUser.displayName} src={dataUser.photoURL} />}
+                                label={dataUser.displayName}
+                                variant="outlined"
+                            /> : null }
+                </Box>
             </Paper>
             { data &&
                 <Paper>

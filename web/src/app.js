@@ -27,7 +27,7 @@ export async function handleRoute(itemId, query, isPathSelected, rows, queryChan
                 return next(setSelectedItem({ item, index }));
             }
         }
-        return next(getItem({ id: itemId, func: searchFunc }));
+        return next(getItem({ id: itemId, draft: query.draft, func: searchFunc }));
     }
     next(setSelectedItem({ item: null, index: -1 }));
     if (! queryChanged) return;
@@ -59,7 +59,7 @@ const formWatchMiddleware = store => next => action => {
         return next(action);
     }
     const state = store.getState();
-    const keys = ['filter', 'user', 'year', 'month', 'order', 'limit'];
+    const keys = ['filter', 'user', 'year', 'month', 'order', 'limit', 'draft'];
     const currentFilter = payload.filter !== undefined ? payload.filter : state.searchForm.filter;
     switch (currentFilter) {
     case 'neighborhood':
@@ -199,3 +199,6 @@ export const getTitle = (item) => {
         return defaultTitle;
     }
 };
+
+export const idToUrl = (id, params = null) =>
+    `${config.get('itemPrefix')}${id}${params ? '?' + Object.keys(params).map(k => `${k}=${params[k] || ''}`).join('&') : ''}`;

@@ -63,7 +63,8 @@ app.use('/sitemap.xml',  async (req, res) => {
     const results = await Walk.findAll({
         attributes: ['id'],
         where: {
-            comment : {[Op.ne]: null}
+            comment : {[Op.ne]: null},
+            draft: false,
         }
     });
     results.forEach(function (row) {
