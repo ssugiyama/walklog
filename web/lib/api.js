@@ -10,8 +10,8 @@ const
     Sequelize  = require('sequelize'),
     searchFunc = require('./search').searchFunc,
     sequelize  = models.sequelize,
-    Walk       = models.sequelize.models.walks,
-    Area       = models.sequelize.models.areas;
+    Walk       = models.Walk,
+    Area       = models.Area;
 
 const Op = Sequelize.Op;
 
@@ -40,8 +40,10 @@ api.get('/version', async (req, res) => {
 });
 
 api.get('/search', async (req, res) => {
+    const claim = await authorize(req);
     try {
-        const json = await searchFunc(req.query);
+        const uid = claim ? claim.uid : null;
+        const json = await searchFunc(req.query, uid);
         res.json(json);
     }catch(error) {
         res.status(500).json(error);
@@ -50,7 +52,9 @@ api.get('/search', async (req, res) => {
 
 api.get('/get/:id', async (req, res) => {
     try {
-        const json = await searchFunc({id: req.params.id});
+        const claim = await authorize(req);
+        const uid = claim ? claim.uid : null;
+        const json = await searchFunc({id: req.params.id, draft: req.query.draft}, uid);
         res.json(json);
     } catch(error) {
         res.status(500).json(error);
@@ -66,7 +70,7 @@ api.get('/cities', async (req, res) => {
     else{
         latitude  = parseFloat(req.query.latitude);
         longitude = parseFloat(req.query.longitude);
-        where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', longitude, latitude), models.SRID));
+        where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', longitude, latitude), Walk.SRID));
     }
     try {
         const result = await Area.findAll({
@@ -149,6 +153,7 @@ api.post('/save', upload.single('image'), async (req, res) => {
             await walk.reload();
             res.json([walk.asObject(true)]);
         } else if (! config.get('onlyAdminCanCreate') || claim.admin ) {
+            console.log(req.body)
             req.body.uid = claim.uid;
             const walk = await Walk.create(req.body);
             res.json([walk.asObject(true)]);
