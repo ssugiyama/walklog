@@ -10,8 +10,8 @@ const
     Sequelize  = require('sequelize'),
     searchFunc = require('./search').searchFunc,
     sequelize  = models.sequelize,
-    Walk       = models.sequelize.models.walks,
-    Area       = models.sequelize.models.areas;
+    Walk       = models.Walk,
+    Area       = models.Area;
 
 const Op = Sequelize.Op;
 
@@ -66,7 +66,7 @@ api.get('/cities', async (req, res) => {
     else{
         latitude  = parseFloat(req.query.latitude);
         longitude = parseFloat(req.query.longitude);
-        where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', longitude, latitude), models.SRID));
+        where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', longitude, latitude), Walk.SRID));
     }
     try {
         const result = await Area.findAll({
