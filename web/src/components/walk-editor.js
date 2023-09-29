@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from '@lagunovsky/redux-react-router';
-import { setSelectedItem } from '../features/api';
 import { openWalkEditor } from '../features/view';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -14,8 +13,6 @@ import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
 import moment from 'moment';
 import ImageUploader from './image-uploader';
-import firebase from 'firebase/app';
-import config from 'react-global-configuration';
 import MapContext from './utils/map-context';
 import fetchWithAuth from '../fetch_with_auth';
 import { idToUrl } from '../app';
@@ -95,24 +92,6 @@ const WalkEditor = () => {
             alert(error);
         }
     }, [state]);
-    const handleDelete = useCallback(async e => {
-        setState(state => Object.assign({}, state, {processing: true}));
-        e.preventDefault();
-        if (confirm('Are you sure to delete?')) {
-            try {
-                const idToken  = await firebase.auth().currentUser.getIdToken(true);
-                const response = await fetchWithAuth('/api/destroy/' + state.id);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                dispatch(setSelectedItem({ item: null, index: -1 }));
-                dispatch(push('/?forceFetch=1'));
-                handleClose();
-            } catch (error) {
-                alert(error);
-            }
-        }
-    });
     const handleChange = (name, value)=> {
         keys.current.add(name);
         setState(state => Object.assign({}, state, {[name]: value}));
@@ -158,8 +137,6 @@ const WalkEditor = () => {
             <DialogActions>
                 <Button onClick={handleClose} color="primary">cancel</Button>
                 <Button disabled={state.processing} onClick={handleSubmit} color="secondary">{ walkEditorMode || 'create' }</Button>
-                {walkEditorMode == 'update' &&
-                    <Button disabled={state.processing} onClick={handleDelete} color="error">delete</Button>}
             </DialogActions>
         </Dialog>
     );
