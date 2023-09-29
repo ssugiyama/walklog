@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
 import { idToUrl } from '../app';
 
 const SearchBox = () => {
@@ -109,7 +110,9 @@ const SearchBox = () => {
                         return (
                             <TableRow sx={{'&:nth-of-type(odd)': {backgroundColor: 'background.default',}}} key={index} onClick={() => handleSelect(index)}>
                                 <TableCell sx={sxCell}>
-                                    { u && <img style={{width: 20, height:20,}} src={u.photoURL} alt={u.displayName} title={u.displayName} />}
+                                    {
+                                        u && <Avatar alt={u.displayName} src={u.photoURL} sx={{ width: 24, height: 24 }} />
+                                    }
                                 </TableCell>
                                 <TableCell sx={sxCell}>{item.date}</TableCell>
                                 <TableCell sx={sxCell}>{item.title}</TableCell>
