@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from '@lagunovsky/redux-react-router';
 import { getTitle } from '../app';
+import fetchWithAuth from '../fetch_with_auth';
 const initialState = {
     result: {
         rows: [],
@@ -22,14 +23,15 @@ const search = createAsyncThunk(
     async (args, thunkApi) => {
         const { func, props } = args;
         const offset = Number(props['offset']);
-        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset'];
+        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset', 'draft'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
         let data;
         if (func) {
             data = await func(props);
         }
         else {
-            const response =  await fetch('/api/search?' + params);
+            const fetchFunc = props['draft'] ? fetchWithAuth : fetch;
+            const response =  await fetchFunc('/api/search?' + params);
             data = await response.json();
         }
         if (offset > 0) {
@@ -44,12 +46,14 @@ const search = createAsyncThunk(
 const getItem = createAsyncThunk(
     'api/getItem',
     async (args) => {
-        const { id, func } = args;
+        const { id, draft, func } = args;
         let data;
         if (func) {
             data = await func({id});
         } else {
-            const response = await fetch('/api/get/' + id);
+            const fetchFunc = draft ? fetchWithAuth : fetch;
+            const path = `/api/get/${id}${ draft ? '?draft=true' : '' }`;
+            const response = await fetchFunc(path);
             data = await response.json();
         }
         return data;

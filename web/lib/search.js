@@ -5,7 +5,7 @@ const models  = require('./models'),
 
 const Op = Sequelize.Op;
 
-exports.searchFunc = async params => {
+exports.searchFunc = async (params, draftUid = null) => {
     const orderHash = {
         'newest_first'       : ['date', 'desc'],
         'oldest_first'       : 'date',
@@ -19,7 +19,8 @@ exports.searchFunc = async params => {
     };
     const where = [];
     const order = orderHash[params.order || 'newest_first'];
-    const attributes = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid'];
+    const attributes = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid', 'draft'];
+
     if (params.id) {
         where.push({id: params.id});
     }
@@ -134,6 +135,11 @@ exports.searchFunc = async params => {
                 }));
         }
     }
+    if (params.draft) {
+        where.push({draft: true, uid: draftUid});
+    } else {
+        where.push({draft: false});
+    }
 
     const limit  = parseInt(params.limit) || 20;
     const offset = parseInt(params.offset) || 0;
@@ -147,10 +153,10 @@ exports.searchFunc = async params => {
         });
         let prevId, nextId;
         if (params.id) {
-            const  nextIds = await models.sequelize.query('SELECT id FROM walks where id > ? order by id limit 1',
+            const nextIds = await models.sequelize.query('SELECT id FROM walks where id > ? and draft = false order by id limit 1',
                 { replacements: [params.id], type: models.sequelize.QueryTypes.SELECT });
             if (nextIds.length > 0) nextId = nextIds[0].id;
-            const prevIds = await models.sequelize.query('SELECT id FROM walks where id < ? order by id desc limit 1',
+            const prevIds = await models.sequelize.query('SELECT id FROM walks where id < ? and draft = false order by id desc limit 1',
                 { replacements: [params.id], type: models.sequelize.QueryTypes.SELECT });
             if (prevIds.length > 0) prevId = prevIds[0].id;
             return ({

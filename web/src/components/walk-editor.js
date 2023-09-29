@@ -17,10 +17,12 @@ import ImageUploader from './image-uploader';
 import firebase from 'firebase/app';
 import config from 'react-global-configuration';
 import MapContext from './utils/map-context';
+import fetchWithAuth from '../fetch_with_auth';
+import { idToUrl } from '../app';
 
 const WalkEditor = () => {
     const [state, setState] = useState({
-        id: '', date: null, title: '', comment: '', initialized: false, processing: false
+        id: '', date: null, title: '', draft: false, comment: '', initialized: false, processing: false
     });
     const selectedPath = useSelector(state => state.map.selectedPath);
     const selectedItem = useSelector(state => state.api.selectedItem);
@@ -39,7 +41,7 @@ const WalkEditor = () => {
             date = item.date;
         }
         else {
-            item = {id: '', date: '', title: '', image: '', comment: ''};
+            item = {id: '', date: '', title: '', draft: false, image: '', comment: ''};
             date = moment().format('YYYY-MM-DD');
         }
         if (path == null && walkEditorMode == 'create') {
@@ -71,17 +73,13 @@ const WalkEditor = () => {
         }
         // const params = keys.map(key => `${key}=${encodeURIComponent(this.state[key])}`).join('&');
         const formData = new FormData();
-        formData.append('date', state['date']); // put date field at the first
+        formData.append('date', state.date); // put date field at the first
         for (const key of keys.current) {
             if (key != 'date') formData.append(key, state[key]);
         }
         try {
-            const idToken  = await firebase.auth().currentUser.getIdToken(true);
-            const response = await fetch('/api/save', {
+            const response = await fetchWithAuth('/api/save', {
                 method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + idToken
-                },
                 body: formData
             });
             if (!response.ok) {
@@ -91,7 +89,7 @@ const WalkEditor = () => {
                 deleteSelectedPath();
             }
             const json = await response.json();
-            dispatch(push({pathname: config.get('itemPrefix') + json[0].id, search: 'forceFetch=1' }));
+            dispatch(push(idToUrl(json[0].id, {draft: state.draft, forceFetch: 1})));
             handleClose();
         } catch (error) {
             alert(error);
@@ -103,16 +101,12 @@ const WalkEditor = () => {
         if (confirm('Are you sure to delete?')) {
             try {
                 const idToken  = await firebase.auth().currentUser.getIdToken(true);
-                const response = await fetch('/api/destroy/' + state.id, {
-                    headers: {
-                        'Authorization': 'Bearer ' + idToken
-                    },
-                });
+                const response = await fetchWithAuth('/api/destroy/' + state.id);
                 if (!response.ok) {
                     throw Error(response.statusText);
                 }
-                dispatch(setSelectedItem(null));
-                dispatch(push({pathname: config.get('itemPrefix') + state.id, query: {forceFetch: 1} }));
+                dispatch(setSelectedItem({ item: null, index: -1 }));
+                dispatch(push('/?forceFetch=1'));
                 handleClose();
             } catch (error) {
                 alert(error);
@@ -126,6 +120,7 @@ const WalkEditor = () => {
     const dateChangeCB       = useCallback(e => handleChange('date', e.target.value));
     const titleChangeCB      = useCallback(e => handleChange('title', e.target.value));
     const commentChangeCB    = useCallback(e => handleChange('comment', e.target.value));
+    const draftChangeCB      = useCallback((e, checked) => handleChange('draft', checked));
     const imageChangeCB      = useCallback(e => handleChange('image', e));
     const updatePathChangeCB = useCallback((e, checked) => handleChange('updatePath', checked));
 
@@ -149,6 +144,9 @@ const WalkEditor = () => {
                     <ImageUploader label="image" value={state.image} onChange={imageChangeCB} ></ImageUploader>
                     <TextField multiline minRows={4} maxRows={20} variant="standard"
                         defaultValue={state.comment} onChange={commentChangeCB} label="comment" fullWidth={true} />
+                    <FormControlLabel
+                        control={<Switch checked={state.draft} onChange={draftChangeCB} />}
+                        label="draft?" />
                     {
                         walkEditorMode == 'update' &&
                         <FormControlLabel

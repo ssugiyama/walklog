@@ -13,6 +13,7 @@ const initialState = {
     radius: 500,
     cities: '',
     user: '',
+    draft: false,
 };
 
 export const searchFormSlice = createSlice({

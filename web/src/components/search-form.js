@@ -7,6 +7,8 @@ import TextField from '@mui/material/TextField';
 import { Link } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Box from '@mui/material/Box';
+import { FormControlLabel } from '@mui/material';
+import Switch from '@mui/material/Switch';
 
 const monthOptions = [
     { label: '-', value: '' },
@@ -46,11 +48,13 @@ const SearchForm = () => {
     const user = useSelector(state => state.searchForm.user);
     const limit = useSelector(state => state.searchForm.limit);
     const order = useSelector(state => state.searchForm.order);
+    const draft = useSelector(state => state.searchForm.draft);
     const years = useSelector(state => state.misc.years);
     const users = useSelector(state => state.misc.users);
+    const currentUser   = useSelector(state => state.misc.currentUser);
     const dispatch = useDispatch();
 
-    const createChangeCB = name => e => dispatch(setSearchForm({[name]: e.target.value}));
+    const createChangeCB = (name, eventAttr = 'value') => e => dispatch(setSearchForm({[name]: e.target[eventAttr]}));
     const changeCBs = {
         'filter': useCallback(createChangeCB('filter'), []),
         'user':   useCallback(createChangeCB('user'), []),
@@ -58,6 +62,7 @@ const SearchForm = () => {
         'year':   useCallback(createChangeCB('year'), []),
         'order':  useCallback(createChangeCB('order'), []),
         'limit':  useCallback(createChangeCB('limit'), []),
+        'draft':  useCallback(createChangeCB('draft', 'checked'), []),
     };
     const sxFormInput = {
         width: '50%',
@@ -114,6 +119,12 @@ const SearchForm = () => {
                 <TextField id="searchForm_limit" label="limit" value={limit} onChange={changeCBs['limit']} sx={sxFormInput} variant="standard" />
             </div>
             <Box sx={{marginTop: 1, textAlign: 'right',}}>
+                {
+                    currentUser &&
+                        <FormControlLabel
+                            control={<Switch checked={draft} onChange={changeCBs['draft']} />}
+                            label="drafts" />
+                }
                 <Button variant="outlined" color="primary" component={Link} to="/?forceFetch=1" >
                     <RefreshIcon sx={{marginRight: 1,}} /> reset
                 </Button>

@@ -40,8 +40,10 @@ api.get('/version', async (req, res) => {
 });
 
 api.get('/search', async (req, res) => {
+    const claim = await authorize(req);
     try {
-        const json = await searchFunc(req.query);
+        const uid = claim ? claim.uid : null;
+        const json = await searchFunc(req.query, uid);
         res.json(json);
     }catch(error) {
         res.status(500).json(error);
@@ -50,7 +52,9 @@ api.get('/search', async (req, res) => {
 
 api.get('/get/:id', async (req, res) => {
     try {
-        const json = await searchFunc({id: req.params.id});
+        const claim = await authorize(req);
+        const uid = claim ? claim.uid : null;
+        const json = await searchFunc({id: req.params.id, draft: req.query.draft}, uid);
         res.json(json);
     } catch(error) {
         res.status(500).json(error);
@@ -149,6 +153,7 @@ api.post('/save', upload.single('image'), async (req, res) => {
             await walk.reload();
             res.json([walk.asObject(true)]);
         } else if (! config.get('onlyAdminCanCreate') || claim.admin ) {
+            console.log(req.body)
             req.body.uid = claim.uid;
             const walk = await Walk.create(req.body);
             res.json([walk.asObject(true)]);
