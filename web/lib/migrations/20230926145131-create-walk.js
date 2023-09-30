@@ -14,15 +14,15 @@ module.exports = {
                 allowNull: false,
             },
             title: {
-                type: Sequelize.DataTypes.STRING,
+                type: Sequelize.DataTypes.TEXT,
                 allowNull: false,
             },
             comment: {
-                type: Sequelize.DataTypes.STRING,
+                type: Sequelize.DataTypes.TEXT,
                 allowNull: true,
             },
             image: {
-                type: Sequelize.DataTypes.STRING,
+                type: Sequelize.DataTypes.TEXT,
                 allowNull: true,
             },
             length: {
