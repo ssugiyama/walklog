@@ -3071,9 +3071,9 @@
     "@types/node" "*"
 
 "@types/debug@^4.1.8":
-  version "4.1.8"
-  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.8.tgz#cef723a5d0a90990313faec2d1e22aee5eecb317"
-  integrity sha512-/vPO1EPOs306Cvhwv7KfVfYvOJqA/S/AXjaHQiJboCZzcNDb+TIJFN9/2C9DZ//ijSKWioNyUxD792QmDJ+HKQ==
+  version "4.1.9"
+  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.9.tgz#906996938bc672aaf2fb8c0d3733ae1dda05b005"
+  integrity sha512-8Hz50m2eoS56ldRlepxSBa6PWEVCtzUo/92HgLc2qTMnotJNIm7xP+UZhyWoYsyOdd5dxZ+NZLb24rsKyFs2ow==
   dependencies:
     "@types/ms" "*"
 
@@ -3170,14 +3170,14 @@
   integrity sha512-Y4XFY5VJAuw0FgAqPNd6NNoV44jbq9Bz2L7Rh/J6jLTiHBSBJa9fxqQIvkIld4GsoDOcCbvzOUAbLPsSKKg+uA==
 
 "@types/ms@*":
-  version "0.7.31"
-  resolved "https://registry.yarnpkg.com/@types/ms/-/ms-0.7.31.tgz#31b7ca6407128a3d2bbc27fe2d21b345397f6197"
-  integrity sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==
+  version "0.7.32"
+  resolved "https://registry.yarnpkg.com/@types/ms/-/ms-0.7.32.tgz#f6cd08939ae3ad886fcc92ef7f0109dacddf61ab"
+  integrity sha512-xPSg0jm4mqgEkNhowKgZFBNtwoEwF6gJ4Dhww+GFpm3IgtNseHQZ5IqdNwnquZEoANxyDAKDRAdVo4Z72VvD/g==
 
 "@types/node@*":
-  version "20.4.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.5.tgz#9dc0a5cb1ccce4f7a731660935ab70b9c00a5d69"
-  integrity sha512-rt40Nk13II9JwQBdeYqmbn2Q6IVTA5uPhvSO+JVqdXw/6/4glI6oR9ezty/A9Hg5u7JH4OmYmuQ+XvjKm0Datg==
+  version "20.7.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.7.2.tgz#0bdc211f8c2438cfadad26dc8c040a874d478aed"
+  integrity sha512-RcdC3hOBOauLP+r/kRt27NrByYtDjsXyAuSbR87O6xpsvi763WI+5fbSIvYJrXnt9w4RuxhV6eAXfIs7aaf/FQ==
 
 "@types/node@>=12.12.47", "@types/node@>=13.7.0":
   version "18.7.14"
@@ -3275,9 +3275,9 @@
   integrity sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==
 
 "@types/validator@^13.7.17":
-  version "13.7.17"
-  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-13.7.17.tgz#0a6d1510395065171e3378a4afc587a3aefa7cc1"
-  integrity sha512-aqayTNmeWrZcvnG2MG9eGYI6b7S5fl+yKgPs6bAjOTwPS316R5SxBGKvtSExfyoJU7pIeHJfsHI0Ji41RVMkvQ==
+  version "13.11.2"
+  resolved "https://registry.yarnpkg.com/@types/validator/-/validator-13.11.2.tgz#a2502325a3c0bd29f36dbac3b763223edd801e17"
+  integrity sha512-nIKVVQKT6kGKysnNt+xLobr+pFJNssJRi2s034wgWeFBUx01fI8BeHTW2TcRp7VcFu9QCYG8IlChTuovcm0oKQ==
 
 "@types/yargs-parser@*":
   version "21.0.0"
@@ -4687,7 +4687,7 @@ dotenv@^8.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.6.0.tgz#061af664d19f7f4d8fc6e4ff9b584ce237adcb8b"
   integrity sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==
 
-dottie@^2.0.4:
+dottie@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/dottie/-/dottie-2.0.6.tgz#34564ebfc6ec5e5772272d466424ad5b696484d4"
   integrity sha512-iGCHkfUc5kFekGiqhe8B/mdaurD+lakO9txNnTvKtA6PISrw86LgqHvRzWYPyoE2Ph5aMIrCw9/uko6XHTKCwA==
@@ -7670,10 +7670,15 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
-pg-connection-string@^2.5.0, pg-connection-string@^2.6.0:
+pg-connection-string@^2.5.0:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-2.6.1.tgz#78c23c21a35dd116f48e12e23c0965e8d9e2cbfb"
   integrity sha512-w6ZzNu6oMmIzEAYVw+RLK0+nqHPt8K3ZnknKi+g48Ak2pr3dtljJW3o+D/n2zzCG07Zoe9VOX3aiKpj+BN0pjg==
+
+pg-connection-string@^2.6.1:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-2.6.2.tgz#713d82053de4e2bd166fab70cd4f26ad36aab475"
+  integrity sha512-ch6OwaeaPYcova4kKZ15sbJ2hKb/VP48ZD2gE7i1J+L4MspCtBMAx8nMgz7bksc7IojCIIWuEhHibSMFH8m8oA==
 
 pg-hstore@*:
   version "2.3.4"
@@ -8516,7 +8521,7 @@ semver@^6.0.0, semver@^6.1.1, semver@^6.1.2, semver@^6.3.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
 
-semver@^7.3.5, semver@^7.5.1:
+semver@^7.3.5, semver@^7.5.4:
   version "7.5.4"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
   integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
@@ -8548,21 +8553,21 @@ sequelize-pool@^7.1.0:
   integrity sha512-G9c0qlIWQSK29pR/5U2JF5dDQeqqHRragoyahj/Nx4KOOQ3CPPfzxnfqFPCSB7x5UgjOgnZ61nSxz+fjDpRlJg==
 
 sequelize@^6.0.0:
-  version "6.32.1"
-  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-6.32.1.tgz#8e8669a8d6cf711d2d94b33cc721928fad7487f6"
-  integrity sha512-3Iv0jruv57Y0YvcxQW7BE56O7DC1BojcfIrqh6my+IQwde+9u/YnuYHzK+8kmZLhLvaziRT1eWu38nh9yVwn/g==
+  version "6.33.0"
+  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-6.33.0.tgz#45c70d52687f1c7eae3a0496f21f7055d99b46da"
+  integrity sha512-GkeCbqgaIcpyZ1EyXrDNIwktbfMldHAGOVXHGM4x8bxGSRAOql5htDWofPvwpfL/FoZ59CaFmfO3Mosv1lDbQw==
   dependencies:
     "@types/debug" "^4.1.8"
     "@types/validator" "^13.7.17"
     debug "^4.3.4"
-    dottie "^2.0.4"
+    dottie "^2.0.6"
     inflection "^1.13.4"
     lodash "^4.17.21"
     moment "^2.29.4"
     moment-timezone "^0.5.43"
-    pg-connection-string "^2.6.0"
+    pg-connection-string "^2.6.1"
     retry-as-promised "^7.0.4"
-    semver "^7.5.1"
+    semver "^7.5.4"
     sequelize-pool "^7.1.0"
     toposort-class "^1.0.1"
     uuid "^8.3.2"
@@ -9400,9 +9405,9 @@ v8-to-istanbul@^9.0.1:
     convert-source-map "^1.6.0"
 
 validator@^13.9.0:
-  version "13.9.0"
-  resolved "https://registry.yarnpkg.com/validator/-/validator-13.9.0.tgz#33e7b85b604f3bbce9bb1a05d5c3e22e1c2ff855"
-  integrity sha512-B+dGG8U3fdtM0/aNK4/X8CXq/EcxU2WPrPEkJGslb47qyHsxmbggTWK0yEA4qnYVNF+nxNlN88o14hIcPmSIEA==
+  version "13.11.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-13.11.0.tgz#23ab3fd59290c61248364eabf4067f04955fbb1b"
+  integrity sha512-Ii+sehpSfZy+At5nPdnyMhx78fEoPDkR2XW/zimHEL3MyGJQOCQ7WeP20jPYRz7ZCpcKLB21NxuXHF3bxjStBQ==
 
 vary@~1.1.2:
   version "1.1.2"
