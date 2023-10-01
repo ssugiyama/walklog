@@ -125,7 +125,7 @@ const SearchForm = () => {
                             control={<Switch checked={draft} onChange={changeCBs['draft']} />}
                             label="drafts" />
                 }
-                <Button variant="outlined" color="primary" component={Link} to="/?forceFetch=1" >
+                <Button variant="outlined" color="primary" component={Link} to="/?reload=true" >
                     <RefreshIcon sx={{marginRight: 1,}} /> reset
                 </Button>
             </Box>
