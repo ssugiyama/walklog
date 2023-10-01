@@ -17,7 +17,7 @@ import config from 'react-global-configuration';
 
 export async function handleRoute(itemId, query, isPathSelected, rows, queryChanged, next, searchFunc) {
     if (itemId) {
-        if (!query.forceFetch) {
+        if (!query.reload) {
             const index = rows.findIndex(row => row.id == itemId);
             if (index >= 0) {
                 const nextId = index > 0 ? rows[index-1].id : null;
@@ -31,7 +31,7 @@ export async function handleRoute(itemId, query, isPathSelected, rows, queryChan
     }
     next(setSelectedItem({ item: null, index: -1 }));
     if (! queryChanged) return;
-    delete query['forceFetch'];
+    delete query['reload'];
     const lastQuery = Object.assign({}, query);
     delete lastQuery['offset'];
     const lqs = Object.keys(lastQuery).map(key => key + '=' + encodeURIComponent(lastQuery[key])).join('&');

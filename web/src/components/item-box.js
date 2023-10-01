@@ -52,7 +52,7 @@ const ItemBox = () => {
                 if (!response.ok) {
                     throw Error(response.statusText);
                 }
-                dispatch(push('/?forceFetch=1'));
+                dispatch(push('/?reload=true'));
             } catch (error) {
                 alert(error);
             }
@@ -70,7 +70,7 @@ const ItemBox = () => {
             if (u.uid == data.uid) dataUser = u;
         }
     }
-    const upUrl = location && location.search == '?forceFetch=1'
+    const upUrl = location && location.search.search(/[?&]reload=true/) >= 0
         ? '/' + location.search
         : lastQuery ? '/?' + lastQuery : '/';
     const draft = data && data.draft;
