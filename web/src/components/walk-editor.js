@@ -86,7 +86,7 @@ const WalkEditor = () => {
                 deleteSelectedPath();
             }
             const json = await response.json();
-            dispatch(push(idToUrl(json[0].id, {draft: state.draft, forceFetch: 1})));
+            dispatch(push(idToUrl(json[0].id, {draft: state.draft, reload: true})));
             handleClose();
         } catch (error) {
             alert(error);
