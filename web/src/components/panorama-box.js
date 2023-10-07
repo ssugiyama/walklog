@@ -62,7 +62,7 @@ const PanoramaBox = props => {
             if (pnrm) {
                 pnrm.setVisible(false);
             }
-            setStreetView(null);
+            setStreetView(refs.current.panorama);
             return;
         }
         const path = google.maps.geometry.encoding.decodePath(selectedItem.path);
@@ -98,7 +98,7 @@ const PanoramaBox = props => {
     // unmount
     useEffect(() =>{
         return () => {
-            setStreetView(null);
+            setStreetView(refs.current.panorama);
         };
     }, []);
 

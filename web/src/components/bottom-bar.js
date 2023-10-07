@@ -45,6 +45,7 @@ const BottomBar = () => {
     const overlay       = useSelector(state => state.view.overlay);
     const mapLoaded     = useSelector(state => state.map.mapLoaded);
     const autoGeolocation = useSelector(state => state.map.autoGeolocation);
+    const selectedItem =  useSelector(state => state.api.selectedItem);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
@@ -60,6 +61,11 @@ const BottomBar = () => {
         }
     }, [selectedPath]);
     const groupCount = useMemo(() => overlay ? 1 : 3, [overlay]);
+
+    useEffect(() => {
+        setGroupIndex(0);
+    }, [overlay, selectedItem])
+
     useEffect(() => {
         if (mapLoaded) {
             refs.current.geocoder = new google.maps.Geocoder();
