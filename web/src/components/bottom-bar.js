@@ -45,6 +45,7 @@ const BottomBar = () => {
     const overlay       = useSelector(state => state.view.overlay);
     const mapLoaded     = useSelector(state => state.map.mapLoaded);
     const autoGeolocation = useSelector(state => state.map.autoGeolocation);
+    const selectedItem =  useSelector(state => state.api.selectedItem);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
