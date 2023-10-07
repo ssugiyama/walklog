@@ -60,6 +60,11 @@ const BottomBar = () => {
         }
     }, [selectedPath]);
     const groupCount = useMemo(() => overlay ? 1 : 3, [overlay]);
+
+    useEffect(() => {
+        setGroupIndex(0);
+    }, [overlay, selectedItem])
+
     useEffect(() => {
         if (mapLoaded) {
             refs.current.geocoder = new google.maps.Geocoder();
