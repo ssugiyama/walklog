@@ -92,8 +92,9 @@ const BottomBar = () => {
         margin: 'auto',
     };
     const sxBottomBarGroupBody = {
-        width: 'fit-content',
+        width: '100%',
         margin: 'auto',
+        display: 'flex',
     };
     const OverlayControls = (<div key="overlay">
         <Box sx={sxBottomBarGroup}>
@@ -166,11 +167,11 @@ const BottomBar = () => {
     const ItemControls = (<div key="item">
         <Box sx={sxBottomBarGroup}>
             <Typography variant="caption">Walk</Typography>
-            <Box sx={sxBottomBarGroupBody}>
+            <Box sx={sxBottomBarGroupBody} noWrap>
                 <Tooltip title="mext" position="top-center">
                     <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''} size="large"><NavigationArrowBack /></IconButton>
                 </Tooltip>
-                <Typography variant="body1" sx={{display: 'inline'}}>{ title }</Typography>
+                <Typography variant="body1" sx={{display: 'inline', flexShrink: 1}} noWrap>{ title }</Typography>
                 <Tooltip title="prev" position="top-center">
                     <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''} size="large"><NavigationArrowForward /></IconButton>
                 </Tooltip>
