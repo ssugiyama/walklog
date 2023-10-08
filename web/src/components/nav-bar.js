@@ -16,6 +16,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
 import firebase from 'firebase/app'
 import config from 'react-global-configuration';
+import { push } from '@lagunovsky/redux-react-router';
 import 'firebase/auth';
 
 const NavBar = () => {
@@ -80,7 +81,7 @@ const NavBar = () => {
     return (
         <AppBar position="static" enableColorOnDark={true} sx={{pt: 'env(safe-area-inset-top)'}}>
             <Toolbar>
-                <Typography variant="h5" color="inherit" sx={{flex: 1}}>Walklog</Typography>
+                <Typography variant="h5" component="a" color="inherit" sx={{flex: 1, cursor: 'pointer'}} onClick={() => dispatch(push('/'))}>Walklog</Typography>
                 <IconButton onClick={accountMenuOpenCB} color="inherit" size="large">
                     { currentUser ? <img alt='user profile' style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
