@@ -34,6 +34,9 @@ import { openSnackbar } from '../features/view';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import Checkbox from '@mui/material/Checkbox';
+import { Link } from 'react-router-dom';
+import { idToUrl } from '../app';
+
 const AUTO_GEOLOCATION_INTERVAL = 60000;
 
 const BottomBar = () => {
@@ -144,6 +147,32 @@ const BottomBar = () => {
                 <Tooltip title="clear" position="top-center">
                     <IconButton onClick={searchFormChangeCBs['cities']} size="large"><NavigationRefresh /></IconButton>
                 </Tooltip>}
+            </Box>
+        </Box>
+    </div>);
+
+    const draft = selectedItem && selectedItem.draft;
+    const offset = useSelector(state => state.api.result.offset);
+    const nextId = useSelector(state => state.api.nextId);
+    const prevId = useSelector(state => state.api.prevId);
+    const title = selectedItem && `${selectedItem.date} : ${selectedItem.title} (${selectedItem.length.toFixed(1)} km)`;
+    const nextUrl = nextId && idToUrl(nextId, draft && {draft});
+    const prevUrl = prevId ?
+        idToUrl(prevId, draft && {draft}) :
+        offset > 0 ?
+            '/?select=1&offset=' + offset +
+                (lastQuery ? '&' + lastQuery : '') : null;
+    const ItemControls = (<div key="item">
+        <Box sx={sxBottomBarGroup}>
+            <Typography variant="caption">Walk</Typography>
+            <Box sx={sxBottomBarGroupBody}>
+                <Tooltip title="mext" position="top-center">
+                    <IconButton disabled={!nextUrl} component={Link} to={nextUrl || ''} size="large"><NavigationArrowBack /></IconButton>
+                </Tooltip>
+                <Typography variant="body1" sx={{display: 'inline'}}>{ title }</Typography>
+                <Tooltip title="prev" position="top-center">
+                    <IconButton disabled={!prevUrl} component={Link} to={prevUrl || ''} size="large"><NavigationArrowForward /></IconButton>
+                </Tooltip>
             </Box>
         </Box>
     </div>);
@@ -329,7 +358,7 @@ const BottomBar = () => {
         controls.push(OverlayControls);
     }
     else {
-        controls.push(FilterControls);
+        controls.push(selectedItem ? ItemControls : FilterControls);
         controls.push(PathControls);
         controls.push(LocationControls);
     }
