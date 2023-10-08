@@ -49,6 +49,10 @@ const BottomBar = () => {
     const mapLoaded     = useSelector(state => state.map.mapLoaded);
     const autoGeolocation = useSelector(state => state.map.autoGeolocation);
     const selectedItem =  useSelector(state => state.api.selectedItem);
+    const lastQuery = useSelector(state => state.api.lastQuery);
+    const offset = useSelector(state => state.api.result.offset);
+    const nextId = useSelector(state => state.api.nextId);
+    const prevId = useSelector(state => state.api.prevId);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const [groupIndex, setGroupIndex] = useState(0);
@@ -152,9 +156,6 @@ const BottomBar = () => {
     </div>);
 
     const draft = selectedItem && selectedItem.draft;
-    const offset = useSelector(state => state.api.result.offset);
-    const nextId = useSelector(state => state.api.nextId);
-    const prevId = useSelector(state => state.api.prevId);
     const title = selectedItem && `${selectedItem.date} : ${selectedItem.title} (${selectedItem.length.toFixed(1)} km)`;
     const nextUrl = nextId && idToUrl(nextId, draft && {draft});
     const prevUrl = prevId ?
