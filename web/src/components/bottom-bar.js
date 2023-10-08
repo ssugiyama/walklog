@@ -95,6 +95,8 @@ const BottomBar = () => {
         width: '100%',
         margin: 'auto',
         display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     };
     const OverlayControls = (<div key="overlay">
         <Box sx={sxBottomBarGroup}>
