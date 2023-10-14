@@ -43,7 +43,8 @@ const Wrapper = props => (
             <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5" />
             <link rel="shortcut icon" href="/icons/favicon.ico" />
             <meta name="msapplication-config" content="/icons/browserconfig.xml" />
-            <meta name="theme-color" content="#ffffff" />
+            <meta name="theme-color" content={theme.palette.primary.light} media="(prefers-color-scheme: light)" />
+            <meta name="theme-color" content={theme.palette.primary.dark} media="(prefers-color-scheme: dark)" />
             <link rel="canonical" href={props.canonical} />
             <link rel="stylesheet"  href="/client-root.css" />
             <title>{props.title}</title>
