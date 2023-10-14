@@ -30,8 +30,7 @@ const Wrapper = props => (
             <meta name="description" content={props.description} />
             <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
             <meta name="apple-mobile-web-app-capable" content="yes" />
-            <meta name="twitter:card" content="summary" />
-            <meta name="twitter:site" content={props.twitterSite} />
+
             <meta property="og:type" content="blog" />
             <meta property="og:site_name" content={props.siteName} />
             <meta property="og:title" content={props.title} />
