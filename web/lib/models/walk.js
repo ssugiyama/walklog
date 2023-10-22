@@ -9,10 +9,6 @@ const moment  = require('moment');
 const EARTH_RADIUS = 6370986;
 const SRID = 4326;
 
-exports.SRID = SRID;
-exports.EARTH_RADIUS = EARTH_RADIUS;
-exports.SRID_FOR_SIMILAR_SEARCH = 32662;
-
 module.exports = (sequelize, DataTypes) => {
     class Walk extends Model {
         /**
@@ -94,5 +90,8 @@ module.exports = (sequelize, DataTypes) => {
         modelName: 'Walk',
         underscored: true,
     });
+    Walk.SRID = SRID;
+    Walk.EARTH_RADIUS = EARTH_RADIUS;
+    Walk.SRID_FOR_SIMILAR_SEARCH = 32662;
     return Walk;
 };
