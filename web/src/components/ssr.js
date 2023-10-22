@@ -39,8 +39,9 @@ const Wrapper = props => (
             <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
             <link rel="manifest" href="/manifest.json" />
             <link rel="icon" href="/favicon.ico" />
-            <meta name="theme-color" content={theme.palette.primary.light} media="(prefers-color-scheme: light)" />
-            <meta name="theme-color" content={theme.palette.primary.dark} media="(prefers-color-scheme: dark)" />
+            <meta name="theme-color" content={props.theme.palette.primary.main} />
+            <meta name="theme-color" content={props.theme.palette.primary.light} media="(prefers-color-scheme: light)" />
+            <meta name="theme-color" content={props.theme.palette.primary.dark} media="(prefers-color-scheme: dark)" />
             <link rel="canonical" href={props.canonical} />
             <link rel="stylesheet"  href="/client-root.css" />
             <title>{props.title}</title>
@@ -91,10 +92,11 @@ export default async function handleSSR(req, res) {
         const cache = createEmotionCache();
 
         let context = {};
+        const theme = createMuiTheme();
         const markup = renderToString(
             <Provider store={store}>
                 <CacheProvider value={cache}>
-                    <ThemeProvider theme={createMuiTheme()}>
+                    <ThemeProvider theme={theme}>
                         <StaticRouter location={req.url} context={context}>
                             <Body />
                         </StaticRouter>
@@ -134,6 +136,7 @@ export default async function handleSSR(req, res) {
             siteName,
             baseUrl,
             twitterSite,
+            theme,
             preloadedState: state
         };
         if(context.status === 404) {
