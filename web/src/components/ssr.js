@@ -30,8 +30,7 @@ const Wrapper = props => (
             <meta name="description" content={props.description} />
             <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
             <meta name="apple-mobile-web-app-capable" content="yes" />
-            <meta name="twitter:card" content="summary" />
-            <meta name="twitter:site" content={props.twitterSite} />
+
             <meta property="og:type" content="blog" />
             <meta property="og:site_name" content={props.siteName} />
             <meta property="og:title" content={props.title} />
@@ -40,6 +39,8 @@ const Wrapper = props => (
             <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
             <link rel="manifest" href="/manifest.json" />
             <link rel="icon" href="/favicon.ico" />
+            <meta name="theme-color" content={theme.palette.primary.light} media="(prefers-color-scheme: light)" />
+            <meta name="theme-color" content={theme.palette.primary.dark} media="(prefers-color-scheme: dark)" />
             <link rel="canonical" href={props.canonical} />
             <link rel="stylesheet"  href="/client-root.css" />
             <title>{props.title}</title>
