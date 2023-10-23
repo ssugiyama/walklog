@@ -15,6 +15,7 @@ import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
 import { searchFunc } from '../../lib/search';
 import { getTitle } from '../app';
+import * as colors from '@mui/material/colors';
 
 const raw = content => ({ __html: content });
 
@@ -22,6 +23,9 @@ const definePreloadedStateAndConfig = state => raw(
     `window.__PRELOADED_STATE__ =  ${JSON.stringify(state)};
      window.__INITIAL_CONFIG__ = ${config.serialize()}`
 );
+
+const DEFAULT_THEME_COLOR      = '#1976d2';
+const DEFAULT_DARK_THEME_COLOR = '#90caf9';
 
 const Wrapper = props => (
     <html lang="en" style={{ height: '100%' }}>
@@ -39,9 +43,8 @@ const Wrapper = props => (
             <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
             <link rel="manifest" href="/manifest.json" />
             <link rel="icon" href="/favicon.ico" />
-            <meta name="theme-color" content={props.theme.palette.primary.main} />
-            <meta name="theme-color" content={props.theme.palette.primary.light} media="(prefers-color-scheme: light)" />
-            <meta name="theme-color" content={props.theme.palette.primary.dark} media="(prefers-color-scheme: dark)" />
+            <meta name="theme-color" content={props.theme_color} />
+            <meta name="theme-color" content={props.dark_theme_color} media="(prefers-color-scheme: dark)" />
             <link rel="canonical" href={props.canonical} />
             <link rel="stylesheet"  href="/client-root.css" />
             <title>{props.title}</title>
@@ -124,6 +127,9 @@ export default async function handleSSR(req, res) {
             image = data.image;
         }
         if (! image) image = baseUrl + '/walklog.png';
+        const to_color_literal = (exp) => colors[exp] ? colors[exp][500] : exp;
+        const theme_color = to_color_literal(config.get('themePrimary')) || DEFAULT_THEME_COLOR;
+        const dark_theme_color = to_color_literal(config.get('darkThemePrimary') || config.get('themePrimary')) || DEFAULT_DARK_THEME_COLOR;
         const props = {
             html,
             css,
@@ -136,7 +142,8 @@ export default async function handleSSR(req, res) {
             siteName,
             baseUrl,
             twitterSite,
-            theme,
+            theme_color,
+            dark_theme_color,
             preloadedState: state
         };
         if(context.status === 404) {
