@@ -177,8 +177,8 @@ export const createMuiTheme = (mode = 'light') => {
             mode,
         }
     };
-    const themePrimary = config.get('themePrimary');
-    const themeSecondary = config.get('themeSecondary');
+    let themePrimary   = (mode == 'dark' && config.get('darkThemePrimary')) || config.get('themePrimary');
+    let themeSecondary = (mode == 'dark' && config.get('darkThemeSecondary')) || config.get('themeSecondary');
     if (themePrimary) {
         themeProps.palette.primary = makeColorObject(themePrimary);
     }
