@@ -40,6 +40,8 @@ TWITTER_SITE=@chez_sugi
 EXTERNAL_LINKS=example=http://example.com;example2=http://example2.com
 THEME_PRIMARY=bluegrey
 THEME_SECONDARY=orange
+DARK_THEME_PRIMARY=blue
+DARK_THEME_SECONDARY=amber
 FIREBASE_CONFIG=./firebase/firebase-config.json
 GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
 ONLY_ADMIN_CAN_CREATE=
