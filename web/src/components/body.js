@@ -101,10 +101,11 @@ const Body = () => {
                 >
                     {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
                 </Fab>
-                <BottomBar style={{
-                    height: BOTTOM_BAR_HEIGHT,
-                    display: view == 'content' ? 'none' : 'block'
-                }}/>
+                <Box sx={{
+                    display: view == 'content' ? 'none' : 'block',
+                }}>
+                    <BottomBar style={{ height: BOTTOM_BAR_HEIGHT }}/>
+                </Box>
                 <Fab size="small" aria-label="share"
                     color="default"
                     onClick={shareCB}
