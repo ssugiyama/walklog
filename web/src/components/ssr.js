@@ -43,7 +43,7 @@ const Wrapper = props => (
             <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
             <link rel="manifest" href="/manifest.json" />
             <link rel="icon" href="/favicon.ico" />
-            <meta name="theme-color" content={props.theme_color} />
+            <meta name="theme-color" content={props.theme_color} media="(prefers-color-scheme: light)" />
             <meta name="theme-color" content={props.dark_theme_color} media="(prefers-color-scheme: dark)" />
             <link rel="canonical" href={props.canonical} />
             <link rel="stylesheet"  href="/client-root.css" />
