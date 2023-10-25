@@ -51,14 +51,14 @@ const Body = () => {
             margin: '0 auto',
             zIndex: 10,
             transition: 'top 0.3s ease-in-out 0.1s',
-            top: view == 'map' ? `calc(100vh - ${BOTTOM_BAR_HEIGHT + FAB_RADIUS}px)` : `calc(40vh + ${height - FAB_RADIUS}px)`,
+            top: view == 'map' ? `calc(100dvh - ${BOTTOM_BAR_HEIGHT + FAB_RADIUS}px)` : `calc(40dvh + ${height - FAB_RADIUS}px)`,
         };
     }, [view, mainRef.current]);
     const mapStyles = useMemo(() => ({
         display: 'flex',
         flexGrow: 1,
         color: '#000',
-        height: view == 'map' ? '100%' : '40vh',
+        height: view == 'map' ? '100%' : '40dvh',
     }), [view]);
     const shareButtonStyles = useMemo(() => ({
         position: 'fixed',
