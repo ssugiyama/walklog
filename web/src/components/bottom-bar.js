@@ -16,10 +16,8 @@ import AvFastRewind from '@mui/icons-material/FastRewind';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import ConfirmModal from './confirm-modal';
-import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
 import { Link } from 'react-router-dom';
-import { idToUrl } from '../app';
+import { idToUrl, getTitles } from '../app';
 
 const BottomBar = () => {
     const filter        = useSelector(state => state.searchForm.filter);
@@ -116,7 +114,7 @@ const BottomBar = () => {
     </div>);
 
     const draft = selectedItem && selectedItem.draft;
-    const title = selectedItem && `${selectedItem.date} : ${selectedItem.title} (${selectedItem.length.toFixed(1)} km)`;
+    const [title] = getTitles(selectedItem);
     const nextUrl = nextId && idToUrl(nextId, draft && {draft});
     const prevUrl = prevId ?
         idToUrl(prevId, draft && {draft}) :
