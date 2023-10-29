@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import NavBar from './nav-bar';
+import ToolBox from './tool-box';
 import Map from './map';
 import BottomBar from './bottom-bar';
 import WalkEditor from './walk-editor';
@@ -14,16 +15,15 @@ import Fab from '@mui/material/Fab';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ShareIcon from '@mui/icons-material/Share';
-import { ThemeProvider } from '@mui/material/styles';
-import { createMuiTheme } from '../app';
 
 const Body = () => {
     const message  = useSelector(state => state.view.message);
     const view     = useSelector(state => state.view.view);
+    const toolBoxOpened = useSelector(state => state.view.toolBoxOpened);
     const dispatch = useDispatch();
     const [ state, setState ] = useState({});
-    const BOTTOM_BAR_HEIGHT = 72;
-    const FAB_RADIUS = 20;
+    const BOTTOM_BAR_HEIGHT = 48;
+    const TOOL_BOX_WIDTH = 160;
     const handleRequestClose = useCallback(() => {
         dispatch(openSnackbar(null));
     });
@@ -43,17 +43,16 @@ const Body = () => {
         }
     });
     const mainRef = useRef();
-    const fabStyles = useMemo(() => {
-        const height = mainRef.current ? mainRef.current.offsetTop : 64;
-        return {
+    const [headerHeight, setHeaderHeight] = useState(64);
+    const fabStyles = useMemo(() => ({
             position: 'absolute',
-            left: 'calc(50% - 20px)',
+            left: `calc(50% ${toolBoxOpened ? '+ 80px' : ''} - 20px)`,
             margin: '0 auto',
             zIndex: 10,
-            transition: 'top 0.3s ease-in-out 0.1s',
-            top: view == 'map' ? `calc(100dvh - ${BOTTOM_BAR_HEIGHT + FAB_RADIUS}px)` : `calc(40dvh + ${height - FAB_RADIUS}px)`,
-        };
-    }, [view, mainRef.current]);
+            transition: 'top 0.3s, left 0.3s',
+            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            top: view == 'map' ? `calc(100dvh - ${BOTTOM_BAR_HEIGHT + 28}px)` : `calc(40dvh + ${headerHeight - 20}px)`,
+    }), [view, toolBoxOpened, headerHeight]);
     const mapStyles = useMemo(() => ({
         display: 'flex',
         flexGrow: 1,
@@ -62,54 +61,69 @@ const Body = () => {
     }), [view]);
     const shareButtonStyles = useMemo(() => ({
         position: 'fixed',
-        right: 10,
-        bottom: 10,
-        display: view == 'map' ? 'none' : 'inline-flex',
+        right: 2,
+        right: 16,
+        bottom: view == 'map' ? 40 : 16,
+        transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s',
+        display: 'inline-flex',
     }), [view]);
-    const theme = React.useMemo(() => createMuiTheme('light'));
+    const toolBoxStyles = useMemo(() => ({
+        width: TOOL_BOX_WIDTH,
+        [`& .MuiDrawer-paper`]: {
+            width: TOOL_BOX_WIDTH,
+         },
+    }), [mainRef.current]);
+    useEffect(() => {
+        setHeaderHeight(mainRef.current.offsetTop)
+    }, [mainRef.current && mainRef.current.offsetTop]);
     return (
         <Box
             sx={{
                 height: '100%',
-                flexDirection: 'column',
-                display: view == 'map' ? 'flex' : 'block' ,
             }}>
             <CssBaseline />
             <MapContext.Provider value={{state, setState}}>
-                <NavBar />
-                <Box
-                    sx={{
-                        pl: 'env(safe-area-inset-left)',
-                        pr: 'env(safe-area-inset-right)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        flexGrow: 1,
-                    }} ref={mainRef}>
-                    <ThemeProvider theme={theme}>
+                <ToolBox open={toolBoxOpened} sx={toolBoxStyles}></ToolBox>
+                <main style={{
+                    height: '100%',
+                    flexDirection: 'column',
+                    display: view == 'map' ? 'flex' : 'block' ,
+                    marginLeft: toolBoxOpened ? TOOL_BOX_WIDTH : 0,
+                    transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}>
+                    <NavBar />
+                    <Box
+                        sx={{
+                            pl: 'env(safe-area-inset-left)',
+                            pr: 'env(safe-area-inset-right)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            flexGrow: 1,
+                        }} ref={mainRef}>
                         <Map
                             style={mapStyles}
                         />
-                    </ThemeProvider>
-                    <ContentBox sx={{
-                        display: view == 'map' ? 'none' : 'block',
-                    }}/>
-                </Box>
-                <Fab size="small" aria-label="toggle view"
-                    color="secondary"
-                    onClick={toggleViewCB}
-                    style={fabStyles}
-                >
-                    {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
-                </Fab>
-                <Box sx={{
-                    display: view == 'content' ? 'none' : 'block',
-                }}>
-                    <BottomBar style={{ height: BOTTOM_BAR_HEIGHT }}/>
-                </Box>
+                        <ContentBox sx={{
+                            display: view == 'map' ? 'none' : 'block',
+                        }}/>
+                    </Box>
+                    <Fab size="small" aria-label="toggle view"
+                        color="secondary"
+                        onClick={toggleViewCB}
+                        style={fabStyles}
+                    >
+                        {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
+                    </Fab>
+                    <Box sx={{
+                        display: view == 'content' ? 'none' : 'block',
+                    }}>
+                        <BottomBar style={{ height: BOTTOM_BAR_HEIGHT }}/>
+                    </Box>
+                </main>
                 <Fab size="small" aria-label="share"
                     color="default"
                     onClick={shareCB}
-                    style={shareButtonStyles}>
+                    sx={shareButtonStyles}>
                     <ShareIcon />
                 </Fab>
                 <WalkEditor />
