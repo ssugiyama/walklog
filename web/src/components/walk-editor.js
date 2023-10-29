@@ -134,7 +134,7 @@ const WalkEditor = () => {
                     }
                 </FormGroup>
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ pb: 'env(safe-area-inset-bottom)' }}>
                 <Button onClick={handleClose} color="primary">cancel</Button>
                 <Button disabled={state.processing} onClick={handleSubmit} color="secondary">{ walkEditorMode || 'create' }</Button>
             </DialogActions>
