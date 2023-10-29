@@ -117,8 +117,9 @@ const Body = () => {
                     </Fab>
                     <Box sx={{
                         display: view == 'content' ? 'none' : 'block',
+                        pb: 'env(safe-area-inset-bottom)',
                     }}>
-                        <BottomBar sx={{ height: BOTTOM_BAR_HEIGHT, pb: 'env(safe-area-inset-bottom)' }}/>
+                        <BottomBar sx={{ height: BOTTOM_BAR_HEIGHT }}/>
                     </Box>
                 </main>
                 <Fab size="small" aria-label="share"
