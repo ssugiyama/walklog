@@ -51,7 +51,7 @@ const Body = () => {
             zIndex: 10,
             transition: 'top 0.3s, left 0.3s',
             transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-            top: view == 'map' ? `calc(100dvh - ${BOTTOM_BAR_HEIGHT + 28}px)` : `calc(40dvh + ${headerHeight - 20}px)`,
+            top: view == 'map' ? `calc(100dvh - ${BOTTOM_BAR_HEIGHT + 28}px - env(safe-area-inset-bottom))` : `calc(40dvh + ${headerHeight - 20}px)`,
     }), [view, toolBoxOpened, headerHeight]);
     const mapStyles = useMemo(() => ({
         display: 'flex',
@@ -63,7 +63,7 @@ const Body = () => {
         position: 'fixed',
         right: 2,
         right: 16,
-        bottom: view == 'map' ? 40 : 16,
+        bottom: `calc(${view == 'map' ? 40 : 16}px + env(safe-area-inset-bottom))`,
         transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s',
         display: 'inline-flex',
     }), [view]);
@@ -91,7 +91,7 @@ const Body = () => {
                     marginLeft: toolBoxOpened ? TOOL_BOX_WIDTH : 0,
                     transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}>
-                    <NavBar />
+                    <NavBar sx={{pt: 'env(safe-area-inset-top)'}} />
                     <Box
                         sx={{
                             pl: 'env(safe-area-inset-left)',
@@ -117,7 +117,7 @@ const Body = () => {
                     <Box sx={{
                         display: view == 'content' ? 'none' : 'block',
                     }}>
-                        <BottomBar style={{ height: BOTTOM_BAR_HEIGHT }}/>
+                        <BottomBar sx={{ height: BOTTOM_BAR_HEIGHT, pb: 'env(safe-area-inset-bottom)' }}/>
                     </Box>
                 </main>
                 <Fab size="small" aria-label="share"
@@ -126,7 +126,7 @@ const Body = () => {
                     sx={shareButtonStyles}>
                     <ShareIcon />
                 </Fab>
-                <WalkEditor />
+                <WalkEditor sx={{ pb: 'env(safe-area-inset-bottom)' }} />
                 <Snackbar
                     open={message != null}
                     message={message}
