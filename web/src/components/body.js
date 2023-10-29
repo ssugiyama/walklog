@@ -63,9 +63,8 @@ const Body = () => {
     }), [view]);
     const shareButtonStyles = useMemo(() => ({
         position: 'fixed',
-        right: 2,
         right: 16,
-        bottom: `calc(${view == 'map' ? 40 : 16}px + env(safe-area-inset-bottom))`,
+        bottom: view == 'map' ? 'calc(40px + env(safe-area-inset-bottom))' : 16,
         transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s',
         display: 'inline-flex',
     }), [view]);
@@ -128,7 +127,7 @@ const Body = () => {
                     sx={shareButtonStyles}>
                     <ShareIcon />
                 </Fab>
-                <WalkEditor sx={{ pb: 'env(safe-area-inset-bottom)' }} />
+                <WalkEditor />
                 <Snackbar
                     open={message != null}
                     message={message}
