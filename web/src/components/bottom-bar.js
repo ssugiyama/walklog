@@ -136,7 +136,7 @@ const BottomBar = () => {
     </div>);
     const control = overlay ? OverlayControls : selectedItem ? ItemControls : FilterControls
     return (
-        <Toolbar sx={{width: '100%', backgroundColor: 'background.paper'}} variant="dense">
+        <Toolbar sx={{width: '100%', backgroundColor: 'background.paper'}} variant="dense" data-testid="BottomBar">
             <Box sx={sxBottomBarGroup}>
                 { control }
             </Box>

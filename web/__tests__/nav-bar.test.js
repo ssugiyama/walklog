@@ -18,6 +18,7 @@ function setup(props) {
         router: {},
         map: {},
         panorama: {},
+        view: {},
         ...props,
     };
     const store = configureStore()(state);
