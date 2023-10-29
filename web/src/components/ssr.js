@@ -14,7 +14,7 @@ import config from 'react-global-configuration';
 import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
 import { searchFunc } from '../../lib/search';
-import { getTitle } from '../app';
+import { getTitles } from '../app';
 import * as colors from '@mui/material/colors';
 
 const raw = content => ({ __html: content });
@@ -113,7 +113,7 @@ export default async function handleSSR(req, res) {
         const { html, css, ids } = extractCritical(markup);
 
         const state = store.getState();
-        const title = getTitle(state.api.selectedItem);
+        const title = getTitles(state.api.selectedItem).join(' - ');
         let description = config.get('siteDescription');
         const siteName = config.get('siteName');
         const baseUrl = config.get('baseUrl');
