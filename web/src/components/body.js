@@ -15,11 +15,13 @@ import Fab from '@mui/material/Fab';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ShareIcon from '@mui/icons-material/Share';
+import { getTitles } from '../app';
 
 const Body = () => {
     const message  = useSelector(state => state.view.message);
     const view     = useSelector(state => state.view.view);
     const toolBoxOpened = useSelector(state => state.view.toolBoxOpened);
+    const selectedItem =  useSelector(state => state.api.selectedItem);
     const dispatch = useDispatch();
     const [ state, setState ] = useState({});
     const BOTTOM_BAR_HEIGHT = 48;
@@ -31,7 +33,7 @@ const Body = () => {
     const shareCB = useCallback(async () => {
         try {
             const url = location.href;
-            const text = document.title;
+            const text = getTitles(selectedItem).join(' - ');
             if (navigator.share) {
                 await navigator.share({url, text});
             } else {
