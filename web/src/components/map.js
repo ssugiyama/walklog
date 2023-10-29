@@ -11,8 +11,6 @@ import MapContext from './utils/map-context';
 import Box from '@mui/material/Box';
 import { push } from '@lagunovsky/redux-react-router';
 import Link from '@mui/material/Link';
-import Checkbox from '@mui/material/Checkbox';
-import { FormControlLabel } from '@mui/material';
 import GsiMapType from './utils/gsi-map-type';
 import moment from 'moment';
 
@@ -38,9 +36,8 @@ const Map = props => {
     const zoom = useSelector(state => state.map.zoom);
     const mapLoaded = useSelector(state => state.map.mapLoaded);
     const rows = useSelector(state => state.api.result.rows);
+    const customStyle = useSelector(state => state.map.customStyle);
     const refs = useRef({});
-    const [customStyle, setCustomStyle] = useState(false);
-    const [CustomStyleBoxShown, setCustomStyleBoxShown] = useState();
     const rc = refs.current;
     rc.center = useSelector(state => state.map.center);
     rc.filter = useSelector(state => state.searchForm.filter);
@@ -49,7 +46,6 @@ const Map = props => {
     rc.view = useSelector(state => state.view.view);
     rc.autoGeolocation = useSelector(state => state.map.autoGeolocation);
     const mapElemRef = useRef();
-    const CustomStyleBoxRef = useRef();
     const downloadRef = useRef();
     const uploadRef = useRef();
     const [confirmInfo, setConfirmInfo] = useState({open: false});
@@ -176,17 +172,9 @@ const Map = props => {
         google.maps.event.addListener(rc.map, 'zoom_changed', () => {
             dispatch(setZoom(rc.map.getZoom()));
         });
-        const showCustomStyleBox = () => {
-            const currentMapTypeID = rc.map.getMapTypeId();
-            setCustomStyleBoxShown(rc.mapStyles.map.length > 0 &&
-                [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN, google.maps.MapTypeId.HYBRID].includes(currentMapTypeID));
-        };
-        google.maps.event.addListener(rc.map, 'maptypeid_changed', () => showCustomStyleBox());
         google.maps.event.addListener(rc.map, 'tilesloaded', () => {
-            showCustomStyleBox();
             google.maps.event.clearListeners(rc.map, 'tilesloaded');
         });
-        rc.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(CustomStyleBoxRef.current);
 
         const PathManager = require('./utils/path-manager').default;
         rc.pathManager = new PathManager({map: rc.map, styles: rc.mapStyles.polylines});
@@ -364,6 +352,11 @@ const Map = props => {
     }, [rc.filter, radius, latitude, longitude, mapLoaded]);
 
     useEffect(() => {
+        if (!rc.map) return;
+        rc.map.setOptions({ styles: customStyle ? rc.mapStyles.map : [] });
+    }, [customStyle]);
+
+    useEffect(() => {
         if (!mapLoaded) return;
         (async () => {
             if (rc.filter == 'cities' && citiesChanges() && ! rc.fetching) {
@@ -408,24 +401,11 @@ const Map = props => {
         });
         reader.readAsText(file);
     };
-    const handleCustomStyleChange = (e, value) => {
-        setCustomStyle(value);
-        rc.map.setOptions({ styles: value ? rc.mapStyles.map : [] });
-    };
     return (
         <React.Fragment>
-            <Box sx={{ display: CustomStyleBoxShown ? 'block' : 'none', m: 1, pl: 1}} ref={CustomStyleBoxRef}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={customStyle} onChange={handleCustomStyleChange} />}
-                    label="custom style"
-                >
-                </FormControlLabel>
-            </Box>
             <Box ref={mapElemRef}
                 sx={{
-                    my: 1,
+                    my: 0,
                 }}
                 {... props}
             ></Box>
