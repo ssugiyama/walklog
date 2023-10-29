@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
     openWalkEditor,
     openSnackbar,
+    openToolBox,
 } from '../features/view';
 import { setCurrentUser } from '../features/misc';
 import AppBar from '@mui/material/AppBar';
@@ -14,6 +15,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
+import MenuIcon from '@mui/icons-material/Menu';
 import firebase from 'firebase/app'
 import config from 'react-global-configuration';
 import { push } from '@lagunovsky/redux-react-router';
@@ -25,10 +27,12 @@ const NavBar = () => {
     const dispatch = useDispatch();
     const selectedPath  = useSelector(state => state.map.selectedPath);
     const currentUser   = useSelector(state => state.misc.currentUser);
+    const overlay = useSelector(state => state.view.overlay);
     const appVersion = 'v' + config.get('appVersion');
     const handleNewWalk = useCallback(() => {
         dispatch(openWalkEditor({ open: true, mode: 'create' }));
     });
+    const toolBoxOpened = useSelector(state => state.view.toolBoxOpened);
     const handleMenuOpen = (setter) => {
         return event => {
             event.stopPropagation();
@@ -81,6 +85,17 @@ const NavBar = () => {
     return (
         <AppBar position="static" enableColorOnDark={true} sx={{pt: 'env(safe-area-inset-top)'}}>
             <Toolbar>
+                    <IconButton
+                        onClick={() => dispatch(openToolBox(!toolBoxOpened))}
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="tool box"
+                        sx={{ mr: 2 }}
+                        disabled={overlay}
+                    >
+                    <MenuIcon />
+                </IconButton>
                 <Typography variant="h5" component="a" color="inherit" sx={{flex: 1, cursor: 'pointer'}} onClick={() => dispatch(push('/'))}>Walklog</Typography>
                 <IconButton onClick={accountMenuOpenCB} color="inherit" size="large">
                     { currentUser ? <img alt='user profile' style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }

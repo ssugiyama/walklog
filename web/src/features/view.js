@@ -5,6 +5,7 @@ const initialState = {
     overlay: false,
     walkEditorOpened: false,
     message: null,
+    toolBoxOpened: false,
 };
 
 export const ViewSlice = createSlice({
@@ -28,12 +29,18 @@ export const ViewSlice = createSlice({
             else if (!overlay && state.view == 'map') {
                 state.view = 'content';
             }
+            if (overlay) {
+                state.toolBoxOpened = false;
+            }
         },
         openSnackbar: (state, action) => {
             state.message = action.payload;
         },
+        openToolBox: (state, action) => {
+            state.toolBoxOpened = action.payload;
+        },
     },
 });
 
-export const { toggleView, openWalkEditor, setOverlay, openSnackbar } = ViewSlice.actions;
+export const { toggleView, openWalkEditor, setOverlay, openSnackbar, openToolBox } = ViewSlice.actions;
 export default ViewSlice.reducer;
