@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from '@lagunovsky/redux-react-router';
-import { getTitle } from '../app';
+import { getTitles } from '../app';
 import fetchWithAuth from '../fetch_with_auth';
 const initialState = {
     result: {
@@ -84,7 +84,7 @@ export const apiSlice = createSlice({
             state.selectedItem = item;
             state.selectedIndex = index;
             if (typeof(document) !== 'undefined') {
-                document.title = getTitle(item);
+                document.title = getTitles(item).join(' - ');
             }
         },
         setSearchResult: (state, action) => _setSearchResult(state, action),
