@@ -83,7 +83,7 @@ const NavBar = () => {
         }} {...cpProps}>{props.children}</MenuItem> ;
     };
     return (
-        <AppBar position="static" enableColorOnDark={true} sx={{pt: 'env(safe-area-inset-top)'}}>
+        <AppBar position="static" enableColorOnDark={true}>
             <Toolbar>
                     <IconButton
                         onClick={() => dispatch(openToolBox(!toolBoxOpened))}
