@@ -9,3 +9,4 @@ public/*
 !public/.keep
 web/config.js
 web/.env
+web/firebase/*
