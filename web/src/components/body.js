@@ -24,7 +24,8 @@ const Body = () => {
     const selectedItem =  useSelector(state => state.api.selectedItem);
     const dispatch = useDispatch();
     const [ state, setState ] = useState({});
-    const BOTTOM_BAR_HEIGHT = 48;
+    const headerRef = useRef();
+    const [barHeight, setBarHeight] = useState(64);
     const TOOL_BOX_WIDTH = 160;
     const handleRequestClose = useCallback(() => {
         dispatch(openSnackbar(null));
@@ -44,17 +45,15 @@ const Body = () => {
             console.log(error);
         }
     });
-    const mainRef = useRef();
-    const [headerHeight, setHeaderHeight] = useState(64);
     const fabStyles = useMemo(() => ({
-            position: 'absolute',
-            left: `calc(50% ${toolBoxOpened ? '+ 80px' : ''} - 20px)`,
-            margin: '0 auto',
-            zIndex: 10,
-            transition: 'top 0.3s, left 0.3s',
-            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-            top: view == 'map' ? `calc(100dvh - ${BOTTOM_BAR_HEIGHT + 28}px - env(safe-area-inset-bottom))` : `calc(40dvh + ${headerHeight - 20}px)`,
-    }), [view, toolBoxOpened, headerHeight]);
+        position: 'absolute',
+        left: `calc(50% ${toolBoxOpened ? '+ 80px + env(safe-area-inset-left)/2' : ''} - 20px)`,
+        margin: '0 auto',
+        zIndex: 10,
+        transition: 'top 0.3s, left 0.3s',
+        transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        top: view == 'map' ? `calc(100dvh - ${barHeight + 28}px - env(safe-area-inset-bottom))` : `calc(40dvh + ${barHeight - 20}px)`,
+    }), [view, toolBoxOpened, barHeight]);
     const mapStyles = useMemo(() => ({
         display: 'flex',
         flexGrow: 1,
@@ -64,19 +63,19 @@ const Body = () => {
     const shareButtonStyles = useMemo(() => ({
         position: 'fixed',
         right: 16,
-        bottom: view == 'map' ? 'calc(40px + env(safe-area-inset-bottom))' : 16,
+        bottom: view == 'map' ? 'calc(56px + env(safe-area-inset-bottom))' : 16,
         transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s',
         display: 'inline-flex',
     }), [view]);
     const toolBoxStyles = useMemo(() => ({
-        width: TOOL_BOX_WIDTH,
         [`& .MuiDrawer-paper`]: {
-            width: TOOL_BOX_WIDTH,
+            width: `calc(${TOOL_BOX_WIDTH}px + env(safe-area-inset-left))`,
+            paddingLeft: 'env(safe-area-inset-left)',
          },
-    }), [mainRef.current]);
+    }), []);
     useEffect(() => {
-        setHeaderHeight(mainRef.current.offsetTop)
-    }, [mainRef.current && mainRef.current.offsetTop]);
+        setBarHeight(headerRef.current && headerRef.current.offsetHeight);
+    }, [headerRef.current && headerRef.current.offsetHeight]);
     return (
         <Box
             sx={{
@@ -85,29 +84,22 @@ const Body = () => {
             <CssBaseline />
             <MapContext.Provider value={{state, setState}}>
                 <ToolBox open={toolBoxOpened} sx={toolBoxStyles}></ToolBox>
-                <main style={{
+                <Box component="main" style={{
                     height: '100%',
                     flexDirection: 'column',
                     display: view == 'map' ? 'flex' : 'block' ,
-                    marginLeft: toolBoxOpened ? TOOL_BOX_WIDTH : 0,
+                    marginLeft: toolBoxOpened ? `calc(${TOOL_BOX_WIDTH}px + env(safe-area-inset-left))` : 0,
                     transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}>
-                    <NavBar sx={{pt: 'env(safe-area-inset-top)'}} />
-                    <Box
-                        sx={{
-                            pl: 'env(safe-area-inset-left)',
-                            pr: 'env(safe-area-inset-right)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            flexGrow: 1,
-                        }} ref={mainRef}>
-                        <Map
-                            style={mapStyles}
-                        />
-                        <ContentBox sx={{
-                            display: view == 'map' ? 'none' : 'block',
-                        }}/>
-                    </Box>
+                    <NavBar ref={headerRef} sx={{pt: 'env(safe-area-inset-top)'}} />
+                    <Map
+                        style={mapStyles}
+                    />
+                    <ContentBox style={{
+                        display: view == 'map' ? 'none' : 'block',
+                        paddingLeft: toolBoxOpened ? 8 : 'calc(env(safe-area-inset-left) + 8px)',
+                        paddingRight: 'calc(env(safe-area-inset-right) + 8px)',
+                    }}/>
                     <Fab size="small" aria-label="toggle view"
                         color="secondary"
                         onClick={toggleViewCB}
@@ -115,13 +107,11 @@ const Body = () => {
                     >
                         {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
                     </Fab>
-                    <Box sx={{
-                        display: view == 'content' ? 'none' : 'block',
+                    <BottomBar sx={{
+                        display: view == 'map' ? 'block' : 'none',
                         pb: 'env(safe-area-inset-bottom)',
-                    }}>
-                        <BottomBar sx={{ height: BOTTOM_BAR_HEIGHT }}/>
-                    </Box>
-                </main>
+                    }}/>
+                </Box>
                 <Fab size="small" aria-label="share"
                     color="default"
                     onClick={shareCB}

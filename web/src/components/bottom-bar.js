@@ -19,7 +19,7 @@ import Box from '@mui/material/Box';
 import { Link } from 'react-router-dom';
 import { idToUrl, getTitles } from '../app';
 
-const BottomBar = () => {
+const BottomBar = (props) => {
     const filter        = useSelector(state => state.searchForm.filter);
     const radius        = useSelector(state => state.searchForm.radius);
     const panoramaIndex = useSelector(state => state.panorama.panoramaIndex);
@@ -134,7 +134,7 @@ const BottomBar = () => {
     </div>);
     const control = overlay ? OverlayControls : selectedItem ? ItemControls : FilterControls
     return (
-        <Toolbar sx={{width: '100%', backgroundColor: 'background.paper'}} variant="dense" data-testid="BottomBar">
+        <Toolbar sx={{width: '100%', backgroundColor: 'background.paper'}} data-testid="BottomBar" {...props}>
             <Box sx={sxBottomBarGroup}>
                 { control }
             </Box>
