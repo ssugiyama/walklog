@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, forwardRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     openWalkEditor,
@@ -21,7 +21,7 @@ import config from 'react-global-configuration';
 import { push } from '@lagunovsky/redux-react-router';
 import 'firebase/auth';
 
-const NavBar = () => {
+const NavBar = (props, ref) => {
     const provider = useRef();
     const [accountAnchorEl, setAccountAnchorEl] = useState(null);
     const dispatch = useDispatch();
@@ -83,7 +83,7 @@ const NavBar = () => {
         }} {...cpProps}>{props.children}</MenuItem> ;
     };
     return (
-        <AppBar position="static" enableColorOnDark={true}>
+        <AppBar position="static" enableColorOnDark={true} {...props} ref={ref}>
             <Toolbar>
                     <IconButton
                         onClick={() => dispatch(openToolBox(!toolBoxOpened))}
@@ -120,4 +120,4 @@ const NavBar = () => {
     );
 };
 
-export default NavBar;
+export default forwardRef(NavBar);
