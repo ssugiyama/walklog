@@ -21,10 +21,8 @@ const AUTO_GEOLOCATION_INTERVAL = 60000;
 
 const ToolBox = props => {
     const selectedPath  = useSelector(state => state.map.selectedPath);
-    const overlay       = useSelector(state => state.view.overlay);
     const mapLoaded     = useSelector(state => state.map.mapLoaded);
     const autoGeolocation = useSelector(state => state.map.autoGeolocation);
-    const selectedItem =  useSelector(state => state.api.selectedItem);
     const customStyle = useSelector(state => state.map.customStyle);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
@@ -46,10 +44,6 @@ const ToolBox = props => {
         }
     }, [mapLoaded]);
 
-    const editButtonClickCB = useCallback(() => dispatch(setPathEditable(true)));
-    const clearButtonClickCB = useCallback(() => clearPaths(), [mapLoaded]);
-    const downloadButtonClickCB = useCallback(() => downloadPath(), [mapLoaded]);
-    const uploadButtonClickCB = useCallback(() => uploadPath(), [mapLoaded]);
     const [confirmInfo, setConfirmInfo] = useState({open: false});
     const { addPoint } = context.state;
     const showMarker = (pos, updateCenter) => {
@@ -111,10 +105,6 @@ const ToolBox = props => {
             });
         }
     });
-    const ignoreClick = useCallback(event => {
-        event.stopPropagation();
-        return false;
-    });
 
     const locationChangeCB = useCallback(e => setLocation(e.target.value));
     const submitLocationCB = useCallback(e => {
@@ -147,7 +137,7 @@ const ToolBox = props => {
                 }
             >
                 <ListItem>
-                    <ListItemButton onClick={editButtonClickCB} disabled={!selectedPath} disableGutters dense>
+                    <ListItemButton onClick={() => dispatch(setPathEditable(true))} disabled={!selectedPath} disableGutters dense>
                         <ListItemIcon>
                             <EditorModeEdit />
                         </ListItemIcon>
@@ -155,7 +145,7 @@ const ToolBox = props => {
                     </ListItemButton>
                 </ListItem>
                 <ListItem>
-                    <ListItemButton onClick={clearButtonClickCB} disableGutters dense>
+                    <ListItemButton onClick={() => clearPaths()} disableGutters dense>
                         <ListItemIcon>
                             <NavigationRefresh />
                         </ListItemIcon>
@@ -163,7 +153,7 @@ const ToolBox = props => {
                     </ListItemButton>
                 </ListItem>
                 <ListItem>
-                    <ListItemButton onClick={downloadButtonClickCB} disableGutters dense>
+                    <ListItemButton onClick={() => downloadPath()} disabled={!selectedPath} disableGutters dense>
                         <ListItemIcon>
                             <FileDownload />
                         </ListItemIcon>
@@ -171,7 +161,7 @@ const ToolBox = props => {
                     </ListItemButton>
                 </ListItem>
                 <ListItem>
-                    <ListItemButton onClick={uploadButtonClickCB} disableGutters dense>
+                    <ListItemButton onClick={() => uploadPath()} disableGutters dense>
                         <ListItemIcon>
                             <FileUpload />
                         </ListItemIcon>
@@ -208,6 +198,7 @@ const ToolBox = props => {
                         variant="standard"
                         onChange={locationChangeCB}
                         onBlur={submitLocationCB}
+                        onKeyPress={submitLocationCB}
                     />
                 </ListItem>
                 <ListItem>
