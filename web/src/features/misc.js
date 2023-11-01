@@ -20,8 +20,12 @@ export const miscSlice = createSlice({
             state.users = action.payload;
         },
         setCurrentUser: (state, action) => {
-            const { uid, displayName, photoURL } = action.payload;
-            state.currentUser = { uid, displayName, photoURL };
+            if (action.payload) {
+                const { uid, displayName, photoURL } = action.payload;
+                state.currentUser = { uid, displayName, photoURL };
+            } else {
+                state.currentUser = null;
+            }
         },
     },
 });
