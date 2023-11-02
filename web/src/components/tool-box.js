@@ -10,10 +10,10 @@ import MyLocationIcon from '@mui/icons-material/MyLocation';
 import Circle from '@mui/icons-material/Circle';
 import Straighten from '@mui/icons-material/Straighten';
 import MapContext from './utils/map-context';
-import { openSnackbar, openToolBox } from '../features/view';
+import { openSnackbar } from '../features/view';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
-import { TextField, SwipeableDrawer, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, IconButton } from '@mui/material';
+import { TextField, Drawer, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from '@mui/material';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 
@@ -128,10 +128,7 @@ const ToolBox = props => {
         dispatch(setCustomStyle(!customStyle));
     };
     return (
-        <SwipeableDrawer variant="persistent" anchor="left"
-            onOpen={() => dispatch(openToolBox(true))}
-            onClose={() => dispatch(openToolBox(false))}
-            {... props}>
+        <Drawer variant="persistent" anchor="left" {... props}>
             <List dense
                 subheader={
                     <ListSubheader>
@@ -230,7 +227,7 @@ const ToolBox = props => {
                 </ListItem>
             </List>
             <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
-        </SwipeableDrawer>
+        </Drawer>
     );
 };
 
