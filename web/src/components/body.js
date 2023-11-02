@@ -107,10 +107,12 @@ const Body = () => {
                     >
                         {  view == 'content' ? <ExpandMoreIcon /> : <ExpandLessIcon /> }
                     </Fab>
-                    <BottomBar sx={{
-                        display: view == 'map' ? 'block' : 'none',
+                    <Box sx={{
+                        display: view == 'map' ? 'flex' : 'none',
                         pb: 'env(safe-area-inset-bottom)',
-                    }}/>
+                    }}>
+                        <BottomBar />
+                    </Box>
                 </Box>
                 <Fab size="small" aria-label="share"
                     color="default"
