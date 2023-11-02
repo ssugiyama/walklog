@@ -8,12 +8,13 @@ import FileUpload from '@mui/icons-material/Publish';
 import SearchIcon from '@mui/icons-material/Search';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import Circle from '@mui/icons-material/Circle';
+import Close from '@mui/icons-material/Close';
 import Straighten from '@mui/icons-material/Straighten';
 import MapContext from './utils/map-context';
-import { openSnackbar } from '../features/view';
+import { openSnackbar, openToolBox } from '../features/view';
 import ConfirmModal from './confirm-modal';
 import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
-import { TextField, Drawer, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from '@mui/material';
+import { TextField, Drawer, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, IconButton } from '@mui/material';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 
@@ -24,6 +25,7 @@ const ToolBox = props => {
     const mapLoaded     = useSelector(state => state.map.mapLoaded);
     const autoGeolocation = useSelector(state => state.map.autoGeolocation);
     const customStyle = useSelector(state => state.map.customStyle);
+    const toolBoxOpened = useSelector(state => state.view.toolBoxOpened);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
     const context = useContext(MapContext);
@@ -124,11 +126,18 @@ const ToolBox = props => {
         });
     }, [location]);
 
+    const closeButtonStyle = {
+        position: 'fixed',
+        left: 120,
+        top: 0,
+        zIndex: 100,
+    };
     const toggleCustomStyleChange = (e) => {
         dispatch(setCustomStyle(!customStyle));
     };
     return (
         <Drawer variant="persistent" anchor="left" {... props}>
+            <IconButton size="small" style={closeButtonStyle} onClick={() => dispatch(openToolBox(!toolBoxOpened))}><Close /></IconButton>
             <List dense
                 subheader={
                     <ListSubheader>
