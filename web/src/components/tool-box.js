@@ -128,7 +128,7 @@ const ToolBox = props => {
 
     const closeButtonStyle = {
         position: 'fixed',
-        left: 120,
+        left: 'calc(120px + env(safe-area-inset-left))',
         top: 0,
         zIndex: 100,
     };
@@ -137,7 +137,12 @@ const ToolBox = props => {
     };
     return (
         <Drawer variant="persistent" anchor="left" {... props}>
-            <IconButton size="small" style={closeButtonStyle} onClick={() => dispatch(openToolBox(!toolBoxOpened))}><Close /></IconButton>
+            <IconButton
+                size="small"
+                style={closeButtonStyle}
+                onClick={() => dispatch(openToolBox(!toolBoxOpened))}>
+                <Close />
+            </IconButton>
             <List dense
                 subheader={
                     <ListSubheader>
