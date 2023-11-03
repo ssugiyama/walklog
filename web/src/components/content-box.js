@@ -11,7 +11,7 @@ const ContentBox = props => {
             data-testid="ContentBox"
             {...props}
         >
-            <Box  maxWidth={800} paddingBottom={5} mx="auto">
+            <Box paddingBottom={5} mx="auto">
                 <Router />
             </Box>
         </Box>
