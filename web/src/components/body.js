@@ -22,6 +22,7 @@ const Body = () => {
     const view     = useSelector(state => state.view.view);
     const toolBoxOpened = useSelector(state => state.view.toolBoxOpened);
     const selectedItem =  useSelector(state => state.api.selectedItem);
+    const isDraft = useSelector(state => state.api.isDraft);
     const dispatch = useDispatch();
     const [ state, setState ] = useState({});
     const headerRef = useRef();
@@ -117,7 +118,8 @@ const Body = () => {
                 <Fab size="small" aria-label="share"
                     color="default"
                     onClick={shareCB}
-                    sx={shareButtonStyles}>
+                    sx={shareButtonStyles}
+                    disabled={isDraft}>
                     <ShareIcon />
                 </Fab>
                 <WalkEditor />

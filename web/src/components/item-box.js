@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { openWalkEditor } from '../features/view';
+import { setIsDraft } from '../features/misc';
 import { marked } from 'marked';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';

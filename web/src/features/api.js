@@ -10,6 +10,7 @@ const initialState = {
         showDistance: false,
         error: null,
         searching: false,
+        isDraft: false,
     },
     selectedItem: null,
     selectedIndex: -1,
@@ -83,6 +84,7 @@ export const apiSlice = createSlice({
             const { item, index } = action.payload;
             state.selectedItem = item;
             state.selectedIndex = index;
+            if (item) state.isDraft = item.draft;
             if (typeof(document) !== 'undefined') {
                 document.title = getTitles(item).join(' - ');
             }
@@ -94,7 +96,9 @@ export const apiSlice = createSlice({
             state.prevId = prevId;
         },
         setLastQuery: (state, action) => {
-            state.lastQuery = action.payload;
+            const lqs = Object.keys(action.payload).map(key => key + '=' + encodeURIComponent(action.payload[key])).join('&');
+            state.lastQuery = lqs;
+            state.isDraft = action.payload.draft;
         },
     },
     extraReducers: (builder) => {
