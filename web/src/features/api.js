@@ -113,6 +113,7 @@ export const apiSlice = createSlice({
             state.prevId = data.prevId;
             if (data.rows.length > 0) {
                 state.selectedItem = data.rows[0];
+                state.isDraft = state.selectedItem.draft;
                 state.selectedIndex = 0;
             }
         });
