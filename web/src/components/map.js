@@ -147,7 +147,7 @@ const Map = props => {
             new GsiMapType(GSI_MAP_TYPE, rc.map);
         }
         google.maps.event.addListener(rc.map, 'click', async event => {
-            if (rc.filter == 'neighborhood'){
+            if (['neighborhood', 'start', 'end'].includes(rc.filter)){
                 rc.distanceWidget.setCenter(event.latLng.toJSON());
             }
             else if (rc.filter == 'cities') {
@@ -340,11 +340,14 @@ const Map = props => {
 
     useEffect(() => {
         if (!mapLoaded) return;
-        if (rc.filter == 'neighborhood') {
+        if (['neighborhood', 'start', 'end'].includes(rc.filter)) {
+            const showDistanceWidget = !!rc.distanceWidget.getMap();
             rc.distanceWidget.setMap(rc.map);
             rc.distanceWidget.set('radius', parseFloat(radius));
-            const center = { lat: latitude, lng: longitude };
-            rc.distanceWidget.setCenter(center);
+            if (!showDistanceWidget) {
+                const center = { lat: latitude, lng: longitude };
+                rc.distanceWidget.setCenter(center);
+            }
         }
         else {
             rc.distanceWidget.setMap(null);

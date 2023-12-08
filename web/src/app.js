@@ -62,6 +62,8 @@ const formWatchMiddleware = store => next => action => {
     const currentFilter = payload.filter !== undefined ? payload.filter : state.searchForm.filter;
     switch (currentFilter) {
     case 'neighborhood':
+    case 'start':
+    case 'end':
         keys.push('radius', 'longitude', 'latitude');
         break;
     case 'cities':
@@ -77,7 +79,7 @@ const formWatchMiddleware = store => next => action => {
         const q = Object.assign({}, state.searchForm, payload);
         const query = {};
         keys.forEach(key => { query[key] = q[key] || ''; });
-        if (payload.filter && currentFilter == 'neighborhood' && state.map.center) {
+        if (payload.filter && ['neighborhood', 'start', 'end'].includes(currentFilter) && state.map.center) {
             query.latitude = state.map.center.lat;
             query.longitude = state.map.center.lng;
         }
@@ -97,7 +99,7 @@ const formWatchMiddleware = store => next => action => {
         if (typeof window !== 'undefined') { // client side only
             if (state.view.view == 'content') {
                 if ( payload.filter
-                    && ( ['neighborhood', 'cities'].includes(currentFilter))
+                    && ( ['neighborhood', 'start', 'end', 'cities'].includes(currentFilter))
                     || ( ['hausdorff', 'crossing', 'frechet'].includes(currentFilter) && ! query.searchPath) ) {
                     next(toggleView());
                 }
