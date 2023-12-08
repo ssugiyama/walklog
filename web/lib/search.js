@@ -38,7 +38,7 @@ exports.searchFunc = async (params, draftUid = null) => {
             where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(params.month)));
         }
 
-        if (params.filter == 'neighborhood') {
+        if (['neighborhood', 'start', 'end'].includes(params.filter)) {
             const latitude  = parseFloat(params.latitude);
             const longitude = parseFloat(params.longitude);
             const radius    = parseFloat(params.radius);
@@ -48,10 +48,22 @@ exports.searchFunc = async (params, draftUid = null) => {
             const center    = Walk.getPoint(longitude, latitude);
             const lb        = Walk.getPoint(longitude-dlon, latitude-dlat);
             const rt        = Walk.getPoint(longitude+dlon, latitude+dlat);
+            let target;
+            switch(params.filter) {
+            case 'neighborhood':
+                target = sequelize.col('path');
+                break;
+            case 'start':
+                target = sequelize.fn('st_startpoint', sequelize.col('path'));
+                break;
+            default:
+                target = sequelize.fn('st_endpoint', sequelize.col('path'));
+                break;
+            }
             where.push(sequelize.where(sequelize.fn('st_makebox2d', lb, rt), {
-                [Op.overlap]: sequelize.col('path')
+                [Op.overlap]: target
             }));
-            where.push(sequelize.where(sequelize.fn('st_distance', sequelize.col('path'), center, true), {
+            where.push(sequelize.where(sequelize.fn('st_distance', target, center, true), {
                 [Op.lte]: radius
             }));
         }

@@ -81,6 +81,8 @@ const SearchForm = () => {
                 <TextField select label="filter" value={filter} onChange={changeCBs['filter']} sx={sxFormInput} variant="standard">
                     <MenuItem value="" key="default">-</MenuItem>
                     <MenuItem value="neighborhood" key="neighborhood">Neighborhood</MenuItem>
+                    <MenuItem value="start" key="start">Start</MenuItem>
+                    <MenuItem value="end" key="end">End</MenuItem>
                     <MenuItem value="cities" key="cities">Cities</MenuItem>
                     <MenuItem value="frechet" key="frechet">Fréchet</MenuItem>
                     <MenuItem value="hausdorff" key="hausdorff">Hausdorff</MenuItem>

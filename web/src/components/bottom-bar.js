@@ -90,12 +90,14 @@ const BottomBar = (props) => {
             <Select value={filter} onChange={searchFormChangeCBs['filter']} variant="standard">
                 <MenuItem value="">-</MenuItem>
                 <MenuItem value="neighborhood">Neighborhood</MenuItem>
+                <MenuItem value="start">Start</MenuItem>
+                <MenuItem value="end">End</MenuItem>
                 <MenuItem value="cities">Cities</MenuItem>
                 <MenuItem value="frechet">Fréchet</MenuItem>
                 <MenuItem value="hausdorff">Hausdorff</MenuItem>
                 <MenuItem value="crossing">Crossing</MenuItem>
             </Select>
-            { filter == 'neighborhood' &&
+            { ['neighborhood', 'start', 'end'].includes(filter) &&
             <Select value={radius} onChange={searchFormChangeCBs['radius']} variant="standard">
                 <MenuItem value={1000}>1km</MenuItem>
                 <MenuItem value={500}>500m</MenuItem>
