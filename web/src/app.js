@@ -80,8 +80,8 @@ const formWatchMiddleware = store => next => action => {
         const query = {};
         keys.forEach(key => { query[key] = q[key] || ''; });
         if (payload.filter && ['neighborhood', 'start', 'end'].includes(currentFilter) && state.map.center) {
-            query.latitude = state.map.center.lat;
-            query.longitude = state.map.center.lng;
+            query.latitude ||= state.map.center.lat;
+            query.longitude ||= state.map.center.lng;
         }
         if (currentFilter === 'frechet' ||  currentFilter === 'hausdorff' && state.searchForm.order !== 'nearest_first') {
             query.order = 'nearest_first';
