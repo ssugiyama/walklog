@@ -80,8 +80,8 @@ const formWatchMiddleware = store => next => action => {
         const query = {};
         keys.forEach(key => { query[key] = q[key] || ''; });
         if (payload.filter && ['neighborhood', 'start', 'end'].includes(currentFilter) && state.map.center) {
-            query.latitude = state.map.center.lat;
-            query.longitude = state.map.center.lng;
+            query.latitude ||= state.map.center.lat;
+            query.longitude ||= state.map.center.lng;
         }
         if (currentFilter === 'frechet' ||  currentFilter === 'hausdorff' && state.searchForm.order !== 'nearest_first') {
             query.order = 'nearest_first';
@@ -96,21 +96,6 @@ const formWatchMiddleware = store => next => action => {
             pathname: '/',
             search: usp,
         }));
-        if (typeof window !== 'undefined') { // client side only
-            if (state.view.view == 'content') {
-                if ( payload.filter
-                    && ( ['neighborhood', 'start', 'end', 'cities'].includes(currentFilter))
-                    || ( ['hausdorff', 'crossing', 'frechet'].includes(currentFilter) && ! query.searchPath) ) {
-                    next(toggleView());
-                }
-            }
-            else {
-                if ( !payload.filter && ! (currentFilter == 'cities' && ! query.cities) &&
-                    ! (['crossing', 'hausdorff', 'frechet'].includes(currentFilter) && ! query.searchPath)) {
-                    next(toggleView());
-                }
-            }
-        }
     }
     return next(action);
 };
