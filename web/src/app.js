@@ -96,21 +96,6 @@ const formWatchMiddleware = store => next => action => {
             pathname: '/',
             search: usp,
         }));
-        if (typeof window !== 'undefined') { // client side only
-            if (state.view.view == 'content') {
-                if ( payload.filter
-                    && ( ['neighborhood', 'start', 'end', 'cities'].includes(currentFilter))
-                    || ( ['hausdorff', 'crossing', 'frechet'].includes(currentFilter) && ! query.searchPath) ) {
-                    next(toggleView());
-                }
-            }
-            else {
-                if ( !payload.filter && ! (currentFilter == 'cities' && ! query.cities) &&
-                    ! (['crossing', 'hausdorff', 'frechet'].includes(currentFilter) && ! query.searchPath)) {
-                    next(toggleView());
-                }
-            }
-        }
     }
     return next(action);
 };
