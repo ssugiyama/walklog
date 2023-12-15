@@ -79,7 +79,7 @@ const ItemBox = () => {
     const prevUrl = prevId ?
         idToUrl(prevId, draft && {draft}) :
         offset > 0 ?
-            '/?select=1&offset=' + offset +
+            '/?select_first=true&offset=' + offset +
                 (lastQuery ? '&' + lastQuery : '') : null;
 
     const sxImageBox = {

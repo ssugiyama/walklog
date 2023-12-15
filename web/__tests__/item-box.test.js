@@ -144,7 +144,7 @@ describe('<ItemBoxContainer />', () => {
             },
         };
         setup('/17', mainProps, {});
-        expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select=1&offset=20&filter=neighborhood');
+        expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select_first=true&offset=20&filter=neighborhood');
     });
     it('next url is more url if last_query is null', () => {
         const mainProps = {
@@ -173,7 +173,7 @@ describe('<ItemBoxContainer />', () => {
             },
         };
         setup('/17', mainProps, {});
-        expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select=1&offset=20');
+        expect(screen.getAllByRole('link').at(1)).toHaveAttribute('href', '/?select_first=true&offset=20');
     });
     it('prev button and next button are disabled', () => {
         const mainProps = {

@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from '@lagunovsky/redux-react-router';
-import { getTitles } from '../app';
+import { getTitles, idToUrl } from '../app';
 import fetchWithAuth from '../fetch_with_auth';
 const initialState = {
     result: {
@@ -23,6 +23,7 @@ const search = createAsyncThunk(
     'api/search',
     async (args, thunkApi) => {
         const { func, props } = args;
+        const selectFirst = props['select_first'];
         const offset = Number(props['offset']);
         const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset', 'draft'];
         const params = keys.filter(key => props[key]).map(key => `${key}=${encodeURIComponent(props[key])}`).join('&');
@@ -35,7 +36,11 @@ const search = createAsyncThunk(
             const response =  await fetchFunc('/api/search?' + params);
             data = await response.json();
         }
-        if (offset > 0) {
+        if (selectFirst) {
+            const draft = data.rows[0].draft;
+            thunkApi.dispatch(replace(idToUrl(data.rows[0].id, draft && {draft})));
+        }
+        else if (offset > 0) {
             data.append = true;
             const state = thunkApi.getState();
             thunkApi.dispatch(replace({pathname: '/', search: state.api.lastQuery}));

@@ -34,6 +34,7 @@ export async function handleRoute(itemId, query, isPathSelected, rows, queryChan
     delete query['reload'];
     const lastQuery = Object.assign({}, query);
     delete lastQuery['offset'];
+    delete lastQuery['select_first'];
     next(setLastQuery(lastQuery));
     const numberForms = ['radius', 'latitude', 'longitude'];
     const searchForm = Object.assign({}, defaultFormValues, query);
