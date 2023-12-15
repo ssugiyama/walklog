@@ -37,6 +37,7 @@ const search = createAsyncThunk(
             data = await response.json();
         }
         if (selectFirst) {
+            data.append = true;
             const draft = data.rows[0].draft;
             thunkApi.dispatch(replace(idToUrl(data.rows[0].id, draft && {draft})));
         }
