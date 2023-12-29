@@ -53,13 +53,13 @@ const Body = () => {
         zIndex: 10,
         transition: 'top 0.3s, left 0.3s',
         transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-        top: view == 'map' ? `calc(100dvh - ${barHeight + 28}px - env(safe-area-inset-bottom))` : `calc(40dvh + ${barHeight - 20}px)`,
+        top: view == 'map' ? `calc(100dvh - ${barHeight + 28}px - env(safe-area-inset-bottom))` : `calc(50dvh + ${barHeight/2}px - 20px)`,
     }), [view, toolBoxOpened, barHeight]);
     const mapStyles = useMemo(() => ({
         display: 'flex',
         flexGrow: 1,
         color: '#000',
-        height: view == 'map' ? '100%' : '40dvh',
+        height: view == 'map' ? '100%' : `calc(50dvh - ${barHeight/2}px)`,
     }), [view]);
     const shareButtonStyles = useMemo(() => ({
         position: 'fixed',
