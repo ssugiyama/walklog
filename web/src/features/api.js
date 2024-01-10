@@ -17,6 +17,7 @@ const initialState = {
     nextId: null,
     prevId: null,
     lastQuery: null,
+    needsReload: false,
 };
 
 const search = createAsyncThunk(
@@ -80,6 +81,7 @@ const _setSearchResult = (state, action) => {
     state.prevId = null;
     result.rows = data.append ? state.result.rows.concat(data.rows || []) : (data.rows || []);
     state.result = result;
+    state.needsReload = false;
 };
 
 export const apiSlice = createSlice({
@@ -117,11 +119,21 @@ export const apiSlice = createSlice({
             const data = action.payload;
             state.nextId = data.nextId;
             state.prevId = data.prevId;
+            const error = action.error;
             if (data.rows.length > 0) {
                 state.selectedItem = data.rows[0];
                 state.isDraft = state.selectedItem.draft;
                 state.selectedIndex = 0;
             }
+            state.result = {
+                count: data.rows.count,
+                offset: 0,
+                error,
+                searching: false,
+                rows: data.rows,
+            };
+            state.lastQuery = state.isDraft ? 'draft=true' : null;
+            state.needsReload = true;
         });
     },
 });

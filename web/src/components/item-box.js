@@ -71,9 +71,7 @@ const ItemBox = () => {
             if (u.uid == data.uid) dataUser = u;
         }
     }
-    const upUrl = location && location.search.search(/[?&]reload=true/) >= 0
-        ? '/' + location.search
-        : lastQuery ? '/?' + lastQuery : '/';
+    const upUrl = lastQuery ? '/?' + lastQuery : '/';
     const draft = data && data.draft;
     const nextUrl = nextId && idToUrl(nextId, draft && {draft});
     const prevUrl = prevId ?

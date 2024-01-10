@@ -165,11 +165,11 @@ exports.searchFunc = async (params, draftUid = null) => {
         });
         let prevId, nextId;
         if (params.id) {
-            const nextIds = await sequelize.query('SELECT id FROM walks where id > ? and draft = false order by id limit 1',
-                { replacements: [params.id], type: sequelize.QueryTypes.SELECT });
+            const nextIds = await sequelize.query('SELECT id FROM walks where id > ? and draft = ? order by id limit 1',
+                { replacements: [params.id, params.draft || false], type: sequelize.QueryTypes.SELECT });
             if (nextIds.length > 0) nextId = nextIds[0].id;
-            const prevIds = await sequelize.query('SELECT id FROM walks where id < ? and draft = false order by id desc limit 1',
-                { replacements: [params.id], type: sequelize.QueryTypes.SELECT });
+            const prevIds = await sequelize.query('SELECT id FROM walks where id < ? and draft = ? order by id desc limit 1',
+                { replacements: [params.id, params.draft || false], type: sequelize.QueryTypes.SELECT });
             if (prevIds.length > 0) prevId = prevIds[0].id;
             return ({
                 count:  result.count,
