@@ -96,7 +96,7 @@ const NavBar = (props, ref) => {
                     >
                     <MenuIcon />
                 </IconButton>
-                <Typography variant="h5" component="a" color="inherit" sx={{flex: 1, cursor: 'pointer'}} onClick={() => dispatch(push('/'))}>Walklog</Typography>
+                <Typography variant="h5" component="a" color="inherit" sx={{flex: 1, cursor: 'pointer'}} onClick={() => { location.href = '/'; }}>Walklog</Typography>
                 <IconButton onClick={accountMenuOpenCB} color="inherit" size="large">
                     { currentUser ? <img alt='user profile' style={{width: 24, borderRadius: '50%',}} src={currentUser.photoURL} /> : <AccountCircleIcon /> }
                 </IconButton>
