@@ -6,7 +6,7 @@ import searchFormReducer, { setSearchForm, defaultFormValues } from './features/
 import mapReducer, { setSelectedPath } from './features/map';
 import miscReducer from './features/misc';
 import panoramaReducer from './features/panorama';
-import viewReducer, { toggleView } from './features/view';
+import viewReducer from './features/view';
 import apiReducer, { search, getItem, setSelectedItem, setAdjacentItemIds, setLastQuery } from './features/api';
 import SearchBox from './components/search-box';
 import ItemBox from './components/item-box';
