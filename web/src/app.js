@@ -114,7 +114,7 @@ const dataFetchMiddleware = store => next => action => {
             const match = branch[branch.length - 1];
             const state = store.getState();
             const qsearch = action.payload.location.search &&  action.payload.location.search.slice(1);
-            const queryChanged = qsearch != state.api.lastQuery;
+            const queryChanged = state.api.needsReload || (qsearch != state.api.lastQuery);
             handleRoute(match.params.id, query, state.map.selectedPath, state.api.result.rows, queryChanged, next);
         }
         isFirstLocation = false;
