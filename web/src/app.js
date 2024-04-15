@@ -187,3 +187,5 @@ export const getTitles = (item) => {
 
 export const idToUrl = (id, params = null) =>
     `${config.get('itemPrefix')}${id}${params ? '?' + Object.keys(params).map(k => `${k}=${params[k] || ''}`).join('&') : ''}`;
+
+export const getCanonical = (data) => config.get('baseUrl') + (data ? idToUrl(data.id) : '/');
