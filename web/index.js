@@ -22,7 +22,8 @@ const configuration = {
     useFirebaseStorage: process.env.USE_FIREBASE_STORAGE,
     itemPrefix:      process.env.ITEM_PREFIX || '/',
     mapStyleConfig:  require(process.env.MAP_STYLE_CONFIG || './default-map-styles.js'),
-    mapTypeIds:      process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain'
+    mapTypeIds:      process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
+    mapId:           process.env.MAP_ID,
 };
 
 config.set(configuration);

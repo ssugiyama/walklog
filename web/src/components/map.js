@@ -36,7 +36,6 @@ const Map = props => {
     const zoom = useSelector(state => state.map.zoom);
     const mapLoaded = useSelector(state => state.map.mapLoaded);
     const rows = useSelector(state => state.api.result.rows);
-    const customStyle = useSelector(state => state.map.customStyle);
     const refs = useRef({});
     const rc = refs.current;
     rc.center = useSelector(state => state.map.center);
@@ -133,6 +132,7 @@ const Map = props => {
             disableDoubleClickZoom: true,
             scaleControl: true,
             streetViewControl: true,
+            mapId: config.get('mapId'),
             mapTypeControlOptions: {
                 position: google.maps.ControlPosition.TOP_LEFT,
                 mapTypeIds: mapTypeIds,
@@ -241,7 +241,7 @@ const Map = props => {
             }));
         });
         rc.elevationInfoWindow = new google.maps.InfoWindow();
-        rc.marker = new google.maps.Marker(rc.mapStyles.marker);
+        rc.marker = new google.maps.marker.AdvancedMarkerElement();
         if (window.localStorage.selectedPath) {
             dispatch(setSelectedPath(window.localStorage.selectedPath));
         }
@@ -267,7 +267,8 @@ const Map = props => {
     useEffect(() => {
         window.initMap = initMap;
         const params = {
-            libraries: 'geometry,drawing',
+            loading:   'async',
+            libraries: 'geometry,drawing,marker',
             v:          config.get('googleApiVersion'),
             key:        config.get('googleApiKey'),
             callback:   'initMap',
@@ -311,8 +312,8 @@ const Map = props => {
     }, [rc.center]);
     useEffect(() => {
         if (! rc.map) return;
-        rc.marker.setPosition({lat: geoMarker.lat, lng: geoMarker.lng});
-        rc.marker.setMap(geoMarker.show ? rc.map : null);
+        rc.marker.position = {lat: geoMarker.lat, lng: geoMarker.lng};
+        rc.marker.map = geoMarker.show ? rc.map : null;
     }, [geoMarker]);
     useEffect(() => {
         if (!mapLoaded) return;
@@ -353,11 +354,6 @@ const Map = props => {
             rc.distanceWidget.setMap(null);
         }
     }, [rc.filter, radius, latitude, longitude, mapLoaded]);
-
-    useEffect(() => {
-        if (!rc.map) return;
-        rc.map.setOptions({ styles: customStyle ? rc.mapStyles.map : [] });
-    }, [customStyle]);
 
     useEffect(() => {
         if (!mapLoaded) return;

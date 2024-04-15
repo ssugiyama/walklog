@@ -48,6 +48,7 @@ ONLY_ADMIN_CAN_CREATE=
 USE_FIREBASE_STORAGE=true
 MAP_STYLE_CONFIG=
 MAP_TYPE_IDS=
+MAP_ID=
 ＃ NODE_ENV＝production
 ```
 
@@ -61,6 +62,7 @@ MAP_TYPE_IDS=
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store
 - MAP_STYLE_CONFIG: url of config json of map styles. default is '/default-map-styles.json'
 - MAP_TYPE_IDS: selectable map types. default is 'roadmap,hybrid,satellite,terrain'. you can add 'gsi' to use tha map by GSI(The Geospatial Information Authority of Japan).
+- MAP_ID: A map ID is a unique identifier that represents a single instance of a Google Map. You can create map IDs and update a style associated with a map ID at any time in the Cloud Console.
 
 ### manage admin users
 
