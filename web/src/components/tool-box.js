@@ -24,7 +24,6 @@ const ToolBox = props => {
     const selectedPath  = useSelector(state => state.map.selectedPath);
     const mapLoaded     = useSelector(state => state.map.mapLoaded);
     const autoGeolocation = useSelector(state => state.map.autoGeolocation);
-    const customStyle = useSelector(state => state.map.customStyle);
     const toolBoxOpened = useSelector(state => state.view.toolBoxOpened);
     const dispatch      = useDispatch();
     const [location, setLocation] = useState('');
@@ -132,9 +131,6 @@ const ToolBox = props => {
         top: 0,
         zIndex: 100,
     };
-    const toggleCustomStyleChange = (e) => {
-        dispatch(setCustomStyle(!customStyle));
-    };
     return (
         <Drawer variant="persistent" anchor="left" {... props}>
             <IconButton
@@ -221,22 +217,6 @@ const ToolBox = props => {
                             <MyLocationIcon />
                         </ListItemIcon>
                         <ListItemText primary="here" />
-                    </ListItemButton>
-                </ListItem>
-            </List>
-            <Divider />
-            <List dense
-                subheader={
-                    <ListSubheader>
-                        style
-                    </ListSubheader>
-            }>
-                <ListItem>
-                    <ListItemButton onClick={toggleCustomStyleChange} disableGutters dense>
-                        <ListItemIcon>
-                            {customStyle ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-                        </ListItemIcon>
-                        <ListItemText primary="custom" />
                     </ListItemButton>
                 </ListItem>
             </List>
