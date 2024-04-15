@@ -15,7 +15,7 @@ import Fab from '@mui/material/Fab';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ShareIcon from '@mui/icons-material/Share';
-import { getTitles } from '../app';
+import { getTitles, getCanonical } from '../app';
 
 const Body = () => {
     const message  = useSelector(state => state.view.message);
@@ -34,7 +34,7 @@ const Body = () => {
     const toggleViewCB = useCallback(() => dispatch(toggleView()));
     const shareCB = useCallback(async () => {
         try {
-            const url = location.href;
+            const url = getCanonical(selectedItem);
             const text = getTitles(selectedItem).join(' - ');
             if (navigator.share) {
                 await navigator.share({url, text});
