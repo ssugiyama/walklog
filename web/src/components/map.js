@@ -267,6 +267,7 @@ const Map = props => {
     useEffect(() => {
         window.initMap = initMap;
         const params = {
+            loading:   'async',
             libraries: 'geometry,drawing',
             v:          config.get('googleApiVersion'),
             key:        config.get('googleApiKey'),
