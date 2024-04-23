@@ -1,12 +1,12 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
-import ContentBoxContainer from '../src/components/content-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
+import ContentBoxContainer from '../src/components/content-box';
 import '@testing-library/jest-dom';
 
 config.set({
@@ -29,7 +29,7 @@ function setup(path, props) {
                     <ContentBoxContainer />
                 </MemoryRouter>
             </ThemeProvider>
-        </Provider>
+        </Provider>,
     );
 }
 
@@ -41,7 +41,7 @@ describe('<ContentBox />', () => {
             },
             api: {
                 result: {
-                    rows: []
+                    rows: [],
                 },
             },
             misc: {
@@ -68,7 +68,7 @@ describe('<ContentBox />', () => {
             view: 'map',
             api: {
                 result: {
-                    rows: []
+                    rows: [],
                 },
             },
             misc: {

@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import NavBar from '../src/components/nav-bar';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import firebase from 'firebase/app';
 import config from 'react-global-configuration';
+import NavBar from '../src/components/nav-bar';
 import '@testing-library/jest-dom';
 
 config.set({
@@ -25,13 +25,13 @@ function setup(props) {
     return render(
         <Provider store={store}>
             <NavBar />
-        </Provider>
+        </Provider>,
     );
 }
 
 describe('<NavBar />', () => {
     it('should hace IconButton with SvgIcon when logoff', () => {
-        setup({misc: {}});
+        setup({ misc: {} });
         // screen.debug();
         expect(screen.getByTestId('AccountCircleIcon')).toBeInTheDocument();
     });

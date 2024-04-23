@@ -1,11 +1,11 @@
-'use strict';
 const {
-    Model
+    Model,
 } = require('sequelize');
-const encoder = require('./../path_encoder');
-const wkx     = require('wkx');
-const util    = require('util');
-const moment  = require('moment');
+const wkx = require('wkx');
+const util = require('util');
+const moment = require('moment');
+const encoder = require('../path_encoder');
+
 const EARTH_RADIUS = 6370986;
 const SRID = 4326;
 
@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate(_models) {
+        static associate() {
             // define association here
         }
 
@@ -25,17 +25,17 @@ module.exports = (sequelize, DataTypes) => {
         }
 
         static decodePath(path) {
-            const json = { type: 'LineString', coordinates: encoder.decode(path), crs:{type:'name',properties:{name: 'EPSG:' + SRID }} };
+            const json = { type: 'LineString', coordinates: encoder.decode(path), crs: { type: 'name', properties: { name: `EPSG:${SRID}` } } };
             return wkx.Geometry.parseGeoJSON(json).toEwkt();
         }
 
         static getPathExtent(path) {
             const points = encoder.decode(path);
-            return points.reduce(function (pv, cv) {
-                if (pv.xmax === undefined || pv.xmax < cv[0] ) pv.xmax = cv[0];
-                if (pv.xmin === undefined || pv.xmin > cv[0] ) pv.xmin = cv[0];
-                if (pv.ymax === undefined || pv.ymax < cv[1] ) pv.ymax = cv[1];
-                if (pv.ymin === undefined || pv.ymin > cv[1] ) pv.ymin = cv[1];
+            return points.reduce((pv, cv) => {
+                if (pv.xmax === undefined || pv.xmax < cv[0]) [pv.xmax] = cv;
+                if (pv.xmin === undefined || pv.xmin > cv[0]) [pv.xmin] = cv;
+                if (pv.ymax === undefined || pv.ymax < cv[1]) [, pv.ymax] = cv;
+                if (pv.ymin === undefined || pv.ymin > cv[1]) [, pv.ymin] = cv;
                 return pv;
             }, {});
         }
@@ -56,35 +56,35 @@ module.exports = (sequelize, DataTypes) => {
 
         asObject(includePath) {
             return {
-                id:         this.id,
-                date :      this.date ? moment(this.date).format('YYYY-MM-DD') : null,
-                title:      this.title,
-                comment:    this.comment,
-                draft:      this.draft,
-                image:      this.image,
-                length :    this.length,
-                path :      (includePath && this.path) ? this.encodedPath() : null,
-                createdAt:  this.created_at,
-                updatedAt:  this.updated_at,
-                distance:   this.distance,
-                uid:        this.uid,
+                id: this.id,
+                date: this.date ? moment(this.date).format('YYYY-MM-DD') : null,
+                title: this.title,
+                comment: this.comment,
+                draft: this.draft,
+                image: this.image,
+                length: this.length,
+                path: (includePath && this.path) ? this.encodedPath() : null,
+                createdAt: this.created_at,
+                updatedAt: this.updated_at,
+                distance: this.distance,
+                uid: this.uid,
             };
         }
     }
     Walk.init({
         id: {
             type: DataTypes.INTEGER,
-            primaryKey: true
+            primaryKey: true,
         },
-        date:     DataTypes.DATEONLY,
-        title:    DataTypes.STRING,
-        comment:  DataTypes.STRING,
-        draft:    DataTypes.BOOLEAN,
-        image:    DataTypes.STRING,
-        length:   DataTypes.FLOAT,
+        date: DataTypes.DATEONLY,
+        title: DataTypes.STRING,
+        comment: DataTypes.STRING,
+        draft: DataTypes.BOOLEAN,
+        image: DataTypes.STRING,
+        length: DataTypes.FLOAT,
         distance: DataTypes.VIRTUAL,
-        path:     DataTypes.TEXT,
-        uid:      DataTypes.STRING,
+        path: DataTypes.TEXT,
+        uid: DataTypes.STRING,
     }, {
         sequelize,
         modelName: 'Walk',

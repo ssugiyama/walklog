@@ -6,9 +6,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-const ConfirmModal = props => {
-    const { open, title, resolve, text, actions } = props;
-    
+const ConfirmModal = (props) => {
+    const {
+        open, title, resolve, text, actions,
+    } = props;
+
     return (
         <Dialog
             open={open}
@@ -18,10 +20,17 @@ const ConfirmModal = props => {
                 <DialogContentText>{text}</DialogContentText>
             </DialogContent>
             <DialogActions>
-                { 
-                    actions ? actions.map( (action) =>
-                        <Button key={action.value} onClick={() => resolve(action.value)}>{action.label}</Button>
-                    ) : null
+                {
+                    actions ?
+                        actions.map((action) => (
+                            <Button
+                                key={action.value}
+                                onClick={() => resolve(action.value)}
+                            >
+                                {action.label}
+                            </Button>
+                        )) :
+                        null
                 }
             </DialogActions>
         </Dialog>

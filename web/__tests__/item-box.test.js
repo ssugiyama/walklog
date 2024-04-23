@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import ItemBox from '../src/components/item-box';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import config from 'react-global-configuration';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
+import ItemBox from '../src/components/item-box';
 import '@testing-library/jest-dom';
 
 config.set({
@@ -31,7 +31,7 @@ function setup(path, props, router) {
                     <ItemBox />
                 </MemoryRouter>
             </ThemeProvider>
-        </Provider>
+        </Provider>,
     );
 }
 
@@ -52,7 +52,7 @@ describe('<ItemBoxContainer />', () => {
                 result: {
                     rows: [],
                     count: 0,
-                    offset: 0
+                    offset: 0,
                 },
             },
             misc: {
@@ -74,7 +74,7 @@ describe('<ItemBoxContainer />', () => {
     });
     it('show edit button', () => {
         const mainProps = {
-            api:{
+            api: {
                 prevId: 16,
                 nextId: 18,
                 selectedItem: {
@@ -88,11 +88,11 @@ describe('<ItemBoxContainer />', () => {
                 result: {
                     rows: [],
                     count: 0,
-                    offset: 0
+                    offset: 0,
                 },
             },
             misc: {
-                currentUser: {uid : 'uid'},
+                currentUser: { uid: 'uid' },
                 users: [{
                     uid: 'uid',
                     displayName: 'Alice',
@@ -122,7 +122,7 @@ describe('<ItemBoxContainer />', () => {
             api: {
                 prevId: null,
                 nextId: null,
-                result :{
+                result: {
                     offset: 20,
                 },
                 lastQuery: 'filter=neighborhood',
@@ -151,7 +151,7 @@ describe('<ItemBoxContainer />', () => {
             api: {
                 prevId: null,
                 nextId: null,
-                result :{
+                result: {
                     offset: 20,
                 },
                 lastQuery: null,
@@ -180,7 +180,7 @@ describe('<ItemBoxContainer />', () => {
             api: {
                 prevId: null,
                 nextId: null,
-                result :{
+                result: {
                     offset: null,
                 },
                 lastQuery: null,
