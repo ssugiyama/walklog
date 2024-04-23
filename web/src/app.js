@@ -180,7 +180,11 @@ export function configureReduxStore(state, history) {
 
     return configureStore({
         reducer: reducers,
-        middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(middlewares),
+        middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: ['misc/setCurrentUser'],
+            },
+        }).prepend(middlewares),
         devTools: (process.env.NODE_ENV !== 'production'),
         ...(state && { preloadedState: state }),
     });
