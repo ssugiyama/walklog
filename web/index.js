@@ -38,7 +38,7 @@ const app = express();
 const admin = require('firebase-admin');
 const sitemap = require('sitemap');
 const { Op } = require('sequelize');
-const handleSSR = require('./dist/components/ssr').default;
+const handleSSR = require('./dist/components/ssr').default; // eslint-disable-line
 const api = require('./lib/api');
 const models = require('./lib/models');
 
