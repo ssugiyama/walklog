@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState, useMemo, useContext, useCallback } from 'react';
+import React, {
+    useEffect, useRef, useState, useMemo, useContext, useCallback,
+} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setGeoMarker, setPathEditable, setAutoGeolocation, setCustomStyle } from '../features/map';
 import EditorModeEdit from '@mui/icons-material/Edit';
 import NavigationRefresh from '@mui/icons-material/Block';
 import FileDownload from '@mui/icons-material/GetApp';
@@ -10,33 +11,43 @@ import MyLocationIcon from '@mui/icons-material/MyLocation';
 import Circle from '@mui/icons-material/Circle';
 import Close from '@mui/icons-material/Close';
 import Straighten from '@mui/icons-material/Straighten';
+import {
+    TextField,
+    Drawer,
+    Divider,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    ListSubheader,
+    IconButton,
+} from '@mui/material';
 import MapContext from './utils/map-context';
 import { openSnackbar, openToolBox } from '../features/view';
-import ConfirmModal from './confirm-modal';
-import {APPEND_PATH_CONFIRM_INFO} from './confirm-modal';
-import { TextField, Drawer, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, IconButton } from '@mui/material';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal';
+import { setGeoMarker, setPathEditable, setAutoGeolocation } from '../features/map';
 
 const AUTO_GEOLOCATION_INTERVAL = 60000;
 
-const ToolBox = props => {
-    const selectedPath  = useSelector(state => state.map.selectedPath);
-    const mapLoaded     = useSelector(state => state.map.mapLoaded);
-    const autoGeolocation = useSelector(state => state.map.autoGeolocation);
-    const toolBoxOpened = useSelector(state => state.view.toolBoxOpened);
-    const dispatch      = useDispatch();
+const ToolBox = (props) => {
+    const selectedPath = useSelector((state) => state.map.selectedPath);
+    const mapLoaded = useSelector((state) => state.map.mapLoaded);
+    const autoGeolocation = useSelector((state) => state.map.autoGeolocation);
+    const toolBoxOpened = useSelector((state) => state.view.toolBoxOpened);
+    const dispatch = useDispatch();
     const [location, setLocation] = useState('');
     const context = useContext(MapContext);
     const { downloadPath, uploadPath, clearPaths } = context.state;
     const refs = useRef({});
-    const length  = useMemo(() => {
+    const length = useMemo(() => {
         if (selectedPath) {
-            return google.maps.geometry.spherical.computeLength(google.maps.geometry.encoding.decodePath(selectedPath))/1000;
+            return google.maps.geometry.spherical.computeLength(
+                google.maps.geometry.encoding.decodePath(selectedPath),
+            ) / 1000;
         }
-        else {
-            return 0;
-        }
+
+        return 0;
     }, [selectedPath]);
 
     useEffect(() => {
@@ -45,18 +56,20 @@ const ToolBox = props => {
         }
     }, [mapLoaded]);
 
-    const [confirmInfo, setConfirmInfo] = useState({open: false});
+    const [confirmInfo, setConfirmInfo] = useState({ open: false });
     const { addPoint } = context.state;
     const showMarker = (pos, updateCenter) => {
-        const geoMarker = { lat: pos.coords.latitude, lng: pos.coords.longitude, show: true, updateCenter };
+        const geoMarker = {
+            lat: pos.coords.latitude, lng: pos.coords.longitude, show: true, updateCenter,
+        };
         dispatch(setGeoMarker(geoMarker));
     };
     const addCurrentPosition = (pos, append) => {
-        setConfirmInfo({open: false});
+        setConfirmInfo({ open: false });
         addPoint(pos.coords.latitude, pos.coords.longitude, append);
     };
     const getCurrentPosition = (onSuccess, onFailure) => {
-        navigator.geolocation.getCurrentPosition( pos => {
+        navigator.geolocation.getCurrentPosition((pos) => {
             onSuccess(pos);
         }, () => {
             if (onFailure) onFailure();
@@ -65,7 +78,7 @@ const ToolBox = props => {
     useEffect(() => {
         if (autoGeolocation) {
             const intervalId = setInterval(() => {
-                getCurrentPosition(pos => {
+                getCurrentPosition((pos) => {
                     addCurrentPosition(pos, true);
                 });
             }, AUTO_GEOLOCATION_INTERVAL);
@@ -73,25 +86,25 @@ const ToolBox = props => {
                 clearInterval(intervalId);
             };
         }
+        return () => {};
     }, [autoGeolocation]);
     const toggleRecordCB = useCallback(() => {
         if (!autoGeolocation && navigator.geolocation) {
-            getCurrentPosition(async pos => {
+            getCurrentPosition(async (pos) => {
                 dispatch(openSnackbar('start following your location'));
                 const append = await new Promise((resolve) => {
                     if (selectedPath) {
-                        setConfirmInfo({open: true, resolve});
-                    }
-                    else {
+                        setConfirmInfo({ open: true, resolve });
+                    } else {
                         resolve(false);
                     }
                 });
                 addCurrentPosition(pos, append);
             }, () => {
-                alert('Unable to retrieve your location');
+                window.alert('Unable to retrieve your location');
             });
         } else if (!autoGeolocation) {
-            alert('Geolocation is not supported by your browser');
+            window.alert('Geolocation is not supported by your browser');
         } else {
             dispatch(openSnackbar('stop following your location'));
         }
@@ -99,20 +112,20 @@ const ToolBox = props => {
     });
     const currentLocationCB = useCallback(() => {
         if (navigator.geolocation) {
-            getCurrentPosition(async pos => {
+            getCurrentPosition(async (pos) => {
                 showMarker(pos, true);
             }, () => {
-                alert('Unable to retrieve your location');
+                window.alert('Unable to retrieve your location');
             });
         }
     });
 
-    const locationChangeCB = useCallback(e => setLocation(e.target.value));
-    const submitLocationCB = useCallback(e => {
+    const locationChangeCB = useCallback((e) => setLocation(e.target.value));
+    const submitLocationCB = useCallback((e) => {
         if (!location) return;
-        if (e.charCode && e.charCode != 13) return;
-        refs.current.geocoder.geocode( { 'address': location}, (results, status) =>  {
-            if (status == google.maps.GeocoderStatus.OK) {
+        if (e.charCode && e.charCode !== 13) return;
+        refs.current.geocoder.geocode({ address: location }, (results, status) => {
+            if (status === google.maps.GeocoderStatus.OK) {
                 dispatch(setGeoMarker({
                     lat: results[0].geometry.location.lat(),
                     lng: results[0].geometry.location.lng(),
@@ -120,7 +133,7 @@ const ToolBox = props => {
                     updateCenter: true,
                 }));
             } else {
-                alert('Geocode was not successful for the following reason: ' + status);
+                window.alert(`Geocode was not successful for the following reason: ${status}`);
             }
         });
     }, [location]);
@@ -136,18 +149,25 @@ const ToolBox = props => {
             <IconButton
                 size="small"
                 style={closeButtonStyle}
-                onClick={() => dispatch(openToolBox(!toolBoxOpened))}>
+                onClick={() => dispatch(openToolBox(!toolBoxOpened))}
+            >
                 <Close />
             </IconButton>
-            <List dense
-                subheader={
+            <List
+                dense
+                subheader={(
                     <ListSubheader>
                         path
                     </ListSubheader>
-                }
+                )}
             >
                 <ListItem>
-                    <ListItemButton onClick={() => dispatch(setPathEditable(true))} disabled={!selectedPath} disableGutters dense>
+                    <ListItemButton
+                        onClick={() => dispatch(setPathEditable(true))}
+                        disabled={!selectedPath}
+                        disableGutters
+                        dense
+                    >
                         <ListItemIcon>
                             <EditorModeEdit />
                         </ListItemIcon>
@@ -163,7 +183,12 @@ const ToolBox = props => {
                     </ListItemButton>
                 </ListItem>
                 <ListItem>
-                    <ListItemButton onClick={() => downloadPath()} disabled={!selectedPath} disableGutters dense>
+                    <ListItemButton
+                        onClick={() => downloadPath()}
+                        disabled={!selectedPath}
+                        disableGutters
+                        dense
+                    >
                         <ListItemIcon>
                             <FileDownload />
                         </ListItemIcon>
@@ -180,7 +205,7 @@ const ToolBox = props => {
                 </ListItem>
                 <ListItem>
                     <ListItemButton onClick={toggleRecordCB} disableGutters dense>
-                        <ListItemIcon sx={{color: autoGeolocation ? 'warning.main' : ''}}>
+                        <ListItemIcon sx={{ color: autoGeolocation ? 'warning.main' : '' }}>
                             <Circle />
                         </ListItemIcon>
                         <ListItemText primary="record" />
@@ -192,12 +217,13 @@ const ToolBox = props => {
                 </ListItem>
             </List>
             <Divider />
-            <List dense
-                subheader={
+            <List
+                dense
+                subheader={(
                     <ListSubheader>
                         move
                     </ListSubheader>
-                }
+                )}
             >
                 <ListItem>
                     <ListItemIcon>
@@ -220,7 +246,11 @@ const ToolBox = props => {
                     </ListItemButton>
                 </ListItem>
             </List>
-            <ConfirmModal {...APPEND_PATH_CONFIRM_INFO} open={confirmInfo.open} resolve={confirmInfo.resolve} />
+            <ConfirmModal
+                {...APPEND_PATH_CONFIRM_INFO}
+                open={confirmInfo.open}
+                resolve={confirmInfo.resolve}
+            />
         </Drawer>
     );
 };

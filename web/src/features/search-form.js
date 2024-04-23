@@ -8,8 +8,8 @@ const initialState = {
     year: '',
     order: 'newest_first',
     limit: '20',
-    latitude: NaN,
-    longitude: NaN,
+    latitude: null,
+    longitude: null,
     radius: 500,
     cities: '',
     user: '',
@@ -23,7 +23,7 @@ export const searchFormSlice = createSlice({
         setSearchForm: (state, action) => {
             Object.assign(state, action.payload);
         },
-    }
+    },
 });
 
 export const defaultFormValues = initialState;

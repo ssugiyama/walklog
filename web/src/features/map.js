@@ -15,7 +15,7 @@ const initialState = {
     elevationiInfoWindow: {
         open: false,
         message: null,
-        position: null
+        position: null,
     },
     autoGeolocation: false,
 };
@@ -50,7 +50,9 @@ export const mapSlice = createSlice({
             state.pathEditable = action.payload;
         },
         setGeoMarker: (state, action) => {
-            const { lat, lng, show, updateCenter } = action.payload;
+            const {
+                lat, lng, show, updateCenter,
+            } = action.payload;
             if (updateCenter) {
                 state.center = { lat, lng };
             }
@@ -81,5 +83,5 @@ export const {
     setGeoMarker,
     setElevationInfoWindow,
     setAutoGeolocation,
- } = mapSlice.actions;
+} = mapSlice.actions;
 export default mapSlice.reducer;

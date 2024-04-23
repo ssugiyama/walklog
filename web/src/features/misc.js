@@ -2,12 +2,12 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const currentYear = (new Date()).getFullYear();
 const years = [];
-for (let y = currentYear; y >= 1997; y--) {
+for (let y = currentYear; y >= 1997; y -= 1) {
     years.push(y);
 }
 
 const initialState = {
-    years: years,
+    years,
     users: [],
     currentUser: null,
 };

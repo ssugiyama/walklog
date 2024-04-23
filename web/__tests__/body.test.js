@@ -1,13 +1,13 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
-import BodyContainer from '../src/components/body';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
 import firebase from 'firebase/app';
+import BodyContainer from '../src/components/body';
 import '@testing-library/jest-dom';
 
 config.set({
@@ -34,12 +34,12 @@ function setup(path, props) {
                     <BodyContainer />
                 </MemoryRouter>
             </ThemeProvider>
-        </Provider>
+        </Provider>,
     );
 }
 
 describe('<BodyContainer />', () => {
-    it('should have invisible <BottomBar /> and vivible <ContentBox /> when view == content', () => {
+    it('should have invisible <BottomBar /> and vivible <ContentBox /> when view === content', () => {
         setup('/', {
             view: {
                 view: 'content',
@@ -68,7 +68,7 @@ describe('<BodyContainer />', () => {
         expect(screen.queryByTestId('BottomBar')).not.toBeVisible();
         expect(screen.queryByTestId('ContentBox')).toBeVisible();
     });
-    it('should have visible <BottomBar /> and invivible <ContentBox /> when view == map', () => {
+    it('should have visible <BottomBar /> and invivible <ContentBox /> when view === map', () => {
         setup('/1', {
             view: {
                 view: 'map',

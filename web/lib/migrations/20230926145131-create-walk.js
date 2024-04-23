@@ -1,4 +1,3 @@
-'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
@@ -7,7 +6,7 @@ module.exports = {
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
-                type: Sequelize.DataTypes.INTEGER
+                type: Sequelize.DataTypes.INTEGER,
             },
             date: {
                 type: Sequelize.DataTypes.DATEONLY,
@@ -35,7 +34,7 @@ module.exports = {
                 defaultValue: false,
             },
             path: {
-                type : Sequelize.DataTypes.GEOMETRY,
+                type: Sequelize.DataTypes.GEOMETRY,
             },
             uid: {
                 type: Sequelize.DataTypes.STRING,
@@ -43,12 +42,12 @@ module.exports = {
             },
             created_at: {
                 allowNull: false,
-                type: Sequelize.DataTypes.DATE
+                type: Sequelize.DataTypes.DATE,
             },
             updated_at: {
                 allowNull: false,
-                type: Sequelize.DataTypes.DATE
-            }
+                type: Sequelize.DataTypes.DATE,
+            },
         });
         await queryInterface.addConstraint('walks', {
             fields: ['path'],
@@ -60,7 +59,7 @@ module.exports = {
             fields: ['path'],
             type: 'CHECK',
             name: 'enforce_geotype_path',
-            where: Sequelize.literal("(geometrytype(path) = 'LINESTRING'::text) OR (path IS NULL)"),
+            where: Sequelize.literal('(geometrytype(path) = \'LINESTRING\'::text) OR (path IS NULL)'),
         });
         await queryInterface.addConstraint('walks', {
             fields: ['path'],
@@ -79,7 +78,7 @@ module.exports = {
             using: 'GIST',
         });
     },
-    async down(queryInterface, Sequelize) {
+    async down(queryInterface) {
         await queryInterface.dropTable('walks');
-    }
+    },
 };
