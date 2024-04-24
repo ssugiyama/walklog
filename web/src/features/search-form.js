@@ -21,6 +21,8 @@ export const searchFormSlice = createSlice({
     initialState,
     reducers: {
         setSearchForm: (state, action) => {
+            if (action.payload.draft === 'true') action.payload.draft = true;
+            else if (action.payload.draft === '') action.payload.draft = false;
             Object.assign(state, action.payload);
         },
     },

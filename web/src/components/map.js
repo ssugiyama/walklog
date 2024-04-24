@@ -314,7 +314,7 @@ const Map = (props) => {
     }, []);
 
     const citiesChanges = () => {
-        const a = new Set(rc.cities.split(/,/));
+        const a = rc.cities.split(/,/);
         const b = rc.polygonManager.idSet();
         if (a.length !== b.length) return true;
         if (a.some((j) => !b.has(j))) return true;
