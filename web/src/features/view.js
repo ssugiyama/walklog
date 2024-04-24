@@ -36,7 +36,7 @@ export const ViewSlice = createSlice({
             state.message = action.payload;
         },
         openToolBox: (state, action) => {
-            state.g = action.payload;
+            state.toolBoxOpened = action.payload;
         },
     },
 });

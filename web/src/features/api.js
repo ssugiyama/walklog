@@ -105,7 +105,7 @@ export const apiSlice = createSlice({
         setLastQuery: (state, action) => {
             const lqs = Object.keys(action.payload).map((key) => `${key}=${encodeURIComponent(action.payload[key])}`).join('&');
             state.lastQuery = lqs;
-            state.isDraft = action.payload.draft;
+            state.isDraft = action.payload.draft === 'true';
         },
     },
     extraReducers: (builder) => {

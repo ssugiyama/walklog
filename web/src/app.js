@@ -99,8 +99,8 @@ const formWatchMiddleware = (store) => (next) => (action) => {
         if (payload.filter &&
             ['neighborhood', 'start', 'end'].includes(currentFilter) &&
             state.map.center) {
-            query.latitude ??= state.map.center.lat;
-            query.longitude ??= state.map.center.lng;
+            query.latitude ||= state.map.center.lat;
+            query.longitude ||= state.map.center.lng;
         }
         if (currentFilter === 'frechet' ||
             (currentFilter === 'hausdorff' && state.searchForm.order !== 'nearest_first')) {
@@ -138,8 +138,8 @@ const dataFetchMiddleware = (store) => (next) => (action) => {
     if (action.type === ROUTER_ON_LOCATION_CHANGED) {
         const usp = new URLSearchParams(action.payload.location.search);
         const query = {};
-        usp.forEach((p) => {
-            query[p[0]] = p[1]; // eslint-disable-line
+        usp.entries().forEach(([key, value]) => {
+            query[key] = value;
         });
         if (!isFirstLocation) {
             const branch = matchRoutes(routes(), action.payload.location.pathname);
