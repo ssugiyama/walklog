@@ -138,7 +138,7 @@ const dataFetchMiddleware = (store) => (next) => (action) => {
     if (action.type === ROUTER_ON_LOCATION_CHANGED) {
         const usp = new URLSearchParams(action.payload.location.search);
         const query = {};
-        usp.entries().forEach(([key, value]) => {
+        usp.forEach((key, value) => {
             query[key] = value;
         });
         if (!isFirstLocation) {
