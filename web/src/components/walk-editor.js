@@ -100,7 +100,7 @@ const WalkEditor = () => {
     }, [state]);
     const handleChange = (name, value) => {
         keys.current.add(name);
-        setState((st) => ({ [name]: value, ...st }));
+        setState((st) => ({ ...st, [name]: value }));
     };
     const dateChangeCB = useCallback((e) => handleChange('date', e.target.value), []);
     const titleChangeCB = useCallback((e) => handleChange('title', e.target.value), []);
