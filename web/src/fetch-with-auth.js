@@ -2,13 +2,11 @@ import firebase from 'firebase/app';
 
 export default async function fetchWithAuth(url, params = null) {
     const user = firebase.auth().currentUser;
-    let p;
+    const p = (params === null) ? {} : params;
     if (user) {
         const idToken = await user.getIdToken();
-        if (params === null) p = {};
-        const headers = p.headers || {};
-        headers.Authorization = `Bearer ${idToken}`;
-        p.headers = headers;
+        p.headers ??= {};
+        p.headers.Authorization = `Bearer ${idToken}`;
     }
     return fetch(url, p);
 }
