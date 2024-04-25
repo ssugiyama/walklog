@@ -79,7 +79,7 @@ const Body = () => {
     useEffect(() => {
         setBarHeight(headerRef.current && headerRef.current.offsetHeight);
     }, [headerRef.current && headerRef.current.offsetHeight]);
-    const contextMemo = useMemo(() => ({ state, setState }), []);
+    const contextMemo = useMemo(() => ({ state, setState }), [state]);
     return (
         <Box
             sx={{
