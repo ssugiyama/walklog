@@ -30,7 +30,7 @@ export async function handleRoute(
 ) {
     if (itemId) {
         if (!query.reload) {
-            const index = rows.findIndex((row) => row.id === itemId);
+            const index = rows.findIndex((row) => row.id.toString() === itemId);
             if (index >= 0) {
                 const nextId = index > 0 ? rows[index - 1].id : null;
                 const prevId = index < rows.length - 1 ? rows[index + 1].id : null;
