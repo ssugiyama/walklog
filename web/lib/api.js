@@ -1,6 +1,6 @@
-const
-    express = require('express');
+const express = require('express');
 const multer = require('multer');
+
 const { nanoid } = import('nanoid');
 const path = require('path');
 const url = require('url');
