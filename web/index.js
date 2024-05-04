@@ -36,7 +36,8 @@ const morgan = require('morgan');
 
 const app = express();
 const admin = require('firebase-admin');
-const sitemap = require('sitemap');
+const { SitemapStream, streamToPromise } = require('sitemap');
+const { createGzip } = require('zlib');
 const { Op } = require('sequelize');
 const handleSSR = require('./dist/components/ssr').default; // eslint-disable-line
 const api = require('./lib/api');
@@ -66,24 +67,30 @@ if (app.get('env') === 'development') {
 app.use('/api', api);
 
 app.use('/sitemap.xml', async (req, res) => {
-    const sm = sitemap.createSitemap({});
-    const results = await Walk.findAll({
-        attributes: ['id'],
-        where: {
-            comment: { [Op.ne]: null },
-            draft: false,
-        },
-    });
-    results.forEach((row) => {
-        sm.add({ url: `${req.protocol}://${req.get('X-Forwarded-Host') || req.get('Host')}${config.get('itemPrefix')}${row.id}` });
-    });
-    sm.toXML((err, xml) => {
-        if (err) {
-            return res.status(500).end();
-        }
-        res.header('Content-Type', 'application/xml');
-        return res.send(xml);
-    });
+    res.header('content-type', 'application/xml');
+    res.header('content-encoding', 'gzip');
+    try {
+        const hostname = `${req.protocol}://${req.get('X-Forwarded-Host') || req.get('Host')}`;
+        const smStream = new SitemapStream({ hostname });
+        const pipeline = smStream.pipe(createGzip());
+        const results = await Walk.findAll({
+            attributes: ['id'],
+            where: {
+                comment: { [Op.ne]: null },
+                draft: false,
+            },
+        });
+        results.forEach((row) => {
+            const url = `${config.get('itemPrefix')}${row.id}`;
+            smStream.write({ url });
+        });
+        streamToPromise(pipeline);
+        smStream.end();
+        pipeline.pipe(res).on('error', (e) => { throw e; });
+    } catch (e) {
+        console.error(e);
+        res.status(500).end();
+    }
 });
 
 app.use('/', handleSSR);

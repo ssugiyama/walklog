@@ -1,7 +1,7 @@
-const
-    express = require('express');
+const express = require('express');
 const multer = require('multer');
-const { nanoid } = require('nanoid');
+
+const { nanoid } = import('nanoid');
 const path = require('path');
 const url = require('url');
 const config = require('react-global-configuration').default;
