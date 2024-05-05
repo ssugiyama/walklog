@@ -1,7 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 
-const { nanoid } = import('nanoid');
 const path = require('path');
 const url = require('url');
 const config = require('react-global-configuration').default;
@@ -19,6 +18,9 @@ const { Op } = Sequelize;
 const api = express.Router();
 module.exports = api;
 
+let nanoid;
+(async () => { nanoid = await import('nanoid'); })();
+
 const diskStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join('./public', config.get('imagePrefix')));
@@ -26,7 +28,7 @@ const diskStorage = multer.diskStorage({
     filename: (req, file, cb) => {
         const match = file.originalname.match(/\.\w+$/);
         const ext = match ? match[0] : '';
-        const basename = `${req.body.date}-${nanoid(4)}`;
+        const basename = `${req.body.date}-${nanoid.nanoid(4)}`;
         cb(null, match ? basename + ext : basename);
     },
 });
@@ -96,7 +98,7 @@ api.get('/cities', async (req, res) => {
 const getFilename = (req, file) => {
     const match = file.originalname.match(/\.\w+$/);
     const ext = match ? match[0] : '';
-    const basename = `${req.body.date}-${nanoid(4)}`;
+    const basename = `${req.body.date}-${nanoid.nanoid(4)}`;
     return match ? basename + ext : basename;
 };
 
