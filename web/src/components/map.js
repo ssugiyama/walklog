@@ -97,7 +97,7 @@ const Map = (props) => {
                 const item = pair && pair[1];
                 if (rc.autoGeolocation || item) {
                     rc.clickedItem = item;
-                    const content = '<span id="path-info-window-content">foo</span>';
+                    const content = '<span id="path-info-window-content"></span>';
                     rc.pathInfoWindow.setContent(content);
                     rc.pathInfoWindow.open(rc.map);
                     const pos = rc.autoGeolocation ?
