@@ -21,7 +21,7 @@ import {
     onAuthStateChanged,
     signInWithPopup,
     signOut,
-} from "firebase/auth";
+} from 'firebase/auth';
 import config from 'react-global-configuration';
 import { setCurrentUser } from '../features/misc';
 import {
