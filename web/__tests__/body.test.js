@@ -6,17 +6,23 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
-import firebase from 'firebase/app';
 import BodyContainer from '../src/components/body';
 import '@testing-library/jest-dom';
+
+jest.mock('firebase/app', () => ({
+    initializeApp: jest.fn(),
+}));
+jest.mock('firebase/auth', () => ({
+    getAuth: jest.fn(),
+    GoogleAuthProvider: jest.fn(),
+    onAuthStateChanged: jest.fn(),
+}));
 
 config.set({
     googleApiKey: '',
     firebaseConfig: {},
     itemPrefix: '/',
 });
-
-firebase.initializeApp = jest.fn();
 
 function setup(path, props) {
     const state = {

@@ -2,16 +2,22 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
-import firebase from 'firebase/app';
 import config from 'react-global-configuration';
 import NavBar from '../src/components/nav-bar';
 import '@testing-library/jest-dom';
 
+jest.mock('firebase/app', () => ({
+    initializeApp: jest.fn(),
+}));
+jest.mock('firebase/auth', () => ({
+    getAuth: jest.fn(),
+    GoogleAuthProvider: jest.fn(),
+    onAuthStateChanged: jest.fn(),
+}));
+
 config.set({
     firebaseConfig: {},
 });
-
-firebase.initializeApp = jest.fn();
 
 function setup(props) {
     const state = {

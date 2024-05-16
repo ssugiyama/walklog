@@ -12,7 +12,16 @@ import Typography from '@mui/material/Typography';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
 import MenuIcon from '@mui/icons-material/Menu';
-import firebase from 'firebase/app';
+import {
+    initializeApp,
+} from 'firebase/app';
+import {
+    getAuth,
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    signInWithPopup,
+    signOut,
+} from "firebase/auth";
 import config from 'react-global-configuration';
 import { setCurrentUser } from '../features/misc';
 import {
@@ -20,7 +29,6 @@ import {
     openSnackbar,
     openToolBox,
 } from '../features/view';
-import 'firebase/auth';
 
 const NavBar = (props, ref) => {
     const provider = useRef();
@@ -46,25 +54,21 @@ const NavBar = (props, ref) => {
     const accountMenuCloseCB = useCallback(handleMenuClose(setAccountAnchorEl), []);
 
     const handleLogin = useCallback(() => {
-        firebase.auth().signInWithPopup(provider.current).catch((error) => {
+        signInWithPopup(getAuth(), provider.current).catch((error) => {
             dispatch(openSnackbar(error.message));
         });
     }, []);
     const handleLogout = useCallback(() => {
-        firebase.auth().signOut().catch((error) => {
+        signOut(getAuth()).catch((error) => {
             dispatch(openSnackbar(error.message));
         });
     }, []);
     useEffect(() => {
-        if (firebase.apps.length === 0) {
-            firebase.initializeApp(config.get('firebaseConfig'));
-        }
-        if (firebase.apps.length > 0) {
-            provider.current = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().onAuthStateChanged((user) => {
-                dispatch(setCurrentUser(user));
-            });
-        }
+        initializeApp(config.get('firebaseConfig'));
+        provider.current = new GoogleAuthProvider(getAuth());
+        onAuthStateChanged(getAuth(), (user) => {
+            dispatch(setCurrentUser(user));
+        });
     }, []);
     const closeAllMenus = () => {
         setAccountAnchorEl(null);
