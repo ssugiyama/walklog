@@ -1,7 +1,7 @@
-import firebase from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 
 export default async function fetchWithAuth(url, params = null) {
-    const user = firebase.auth().currentUser;
+    const user = getAuth().currentUser;
     const p = (params === null) ? {} : params;
     if (user) {
         const idToken = await user.getIdToken();
