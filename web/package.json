@@ -4,7 +4,7 @@
   "description": "",
   "browserslist": "> 0.25%, not dead",
   "scripts": {
-    "build-cli": "parcel build --dist-dir public src/components/client-root.js",
+    "build-cli": "parcel build --no-cache --dist-dir public src/components/client-root.js",
     "build-svr": "babel src -d ./dist",
     "start": "node index.js",
     "start-with-dotenv": "node -r dotenv/config index.js",
