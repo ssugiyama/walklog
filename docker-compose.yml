@@ -12,7 +12,7 @@ services:
     # image: chezsugi/walklog_web
     env_file: web/.env
     volumes:
-      - ./public:/var/www/public
+      - "./public/${IMAGE_PREFIX}:/var/www/public/${IMAGE_PREFIX}"
       - ./web/src:/var/www/src
       - ./web/firebase:/var/www/firebase
     ports:
