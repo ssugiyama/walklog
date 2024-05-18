@@ -5,9 +5,11 @@ RUN mkdir -p /var/www
 ADD package.json setup.sh index.js yarn.lock babel.config.js .parcelrc .sequelizerc database.js /var/www/
 ADD lib /var/www/lib
 ADD src /var/www/src
-ADD assets /var/www/assets
+ADD assets /var/www/public
 WORKDIR /var/www
-RUN yarn install
-RUN yarn run build-svr
+RUN yarn install --production=false
+RUN yarn build-svr
+RUN yarn build-cli
 EXPOSE 3000
+ENTRYPOINT [ "entrypoint.sh" ]
 CMD [ "npm", "start" ]

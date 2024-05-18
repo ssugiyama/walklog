@@ -30,6 +30,8 @@ jobs:
           push: true
           tags: ${{ steps.web_meta.outputs.tags }}
           labels: ${{ steps.web_meta.outputs.labels }}
+        env:
+          NODE_ENV: production
 
       - name: Extract metadata (tags, labels) for DB
         id: db_meta
