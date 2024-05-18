@@ -89,7 +89,6 @@ or
 ### 2. set up and start servers
 
 ```
-% docker-compose run --rm web /var/www/setup.sh
 % docker-compose up -d
 ```
 
@@ -109,9 +108,9 @@ or
 ### 2. set up and start api server
     % cd ../web
     % export NODE_ENV=xxx
-    % yarn install && yarn run build-svr
-    % DB_URL=xxx ./setup.sh
-    % yarn run start-with-dotenv
+    % cp assets/* public/
+    % yarn install --production=false && yarn build-cli && yarn build-svr
+    % yarn start-with-dotenv
 
 You may access http://localhost:3000 .
 
