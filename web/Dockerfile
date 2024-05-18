@@ -11,5 +11,5 @@ RUN yarn install --production=false
 RUN yarn build-svr
 RUN yarn build-cli
 EXPOSE 3000
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "/var/www/entrypoint.sh" ]
 CMD [ "npm", "start" ]
