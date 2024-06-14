@@ -16,7 +16,7 @@ import {
 } from '../app';
 import Body from './body';
 import { setUsers } from '../features/misc';
-import { searchFunc } from '../../lib/search';
+import { searchFunc } from '../../server/search';
 
 const raw = (content) => ({ __html: content });
 
@@ -46,7 +46,6 @@ const Wrapper = ({
             <meta name="description" content={description} />
             <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
             <meta name="apple-mobile-web-app-capable" content="yes" />
-
             <meta property="og:type" content="blog" />
             <meta property="og:site_name" content={siteName} />
             <meta property="og:title" content={title} />
@@ -65,7 +64,7 @@ const Wrapper = ({
         <body style={{ margin: 0, height: '100%' }}>
             <div id="body" dangerouslySetInnerHTML={{ __html: html }} style={{ height: '100%' }} />
             <script dangerouslySetInnerHTML={definePreloadedStateAndConfig(preloadedState)} />
-            <script type="module" src="/client-root.js" />
+            <script type="module" src="/root.js" />
             <script src="/register-sw.js" />
         </body>
     </html>

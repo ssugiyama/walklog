@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
-import BodyContainer from '../src/components/body';
+import BodyContainer from '../shared/components/body';
 import '@testing-library/jest-dom';
 
 jest.mock('firebase/app', () => ({

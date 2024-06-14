@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import config from 'react-global-configuration';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
-import ItemBox from '../src/components/item-box';
+import ItemBox from '../shared/components/item-box';
 import '@testing-library/jest-dom';
 
 config.set({

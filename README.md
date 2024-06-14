@@ -56,7 +56,7 @@ MAP_ID=
 - GOOGLE_API_VERSION: see https://developers.google.com/maps/documentation/javascript/versions
 - EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
 - FIREBASE_CONFIG: firebase config json file path
-- GOOGLE_APPLICATION_CREDENTIALS: firebase service account json file path
+- GOOGLE_APPLICATION_CREDENTIALS: firebase admin service account json file path
 - ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
 - IMAGE_PREFIX: image store prefix
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store

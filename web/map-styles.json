@@ -1,0 +1,57 @@
+{
+    "polygon": {
+        "fillColor": "#fff",
+        "strokeColor": "#fff",
+        "zIndex": 20
+    },
+    "marker": {
+        "zIndex": 10
+    },
+    "circle": {
+        "strokeWeight": 2,
+        "editable": true,
+        "zIndex": 20
+    },
+    "polylines": {
+        "normal": {
+            "strokeColor": "#0091C5",
+            "strokeOpacity": 0.7,
+            "strokeWeight": 2,
+            "zIndex": 30
+        },
+        "new": {
+            "strokeColor": "#cddc39",
+            "strokeOpacity": 0.7,
+            "strokeWeight": 2,
+            "zIndex": 30
+        },
+        "current": {
+            "strokeColor": "#e91e63",
+            "strokeOpacity": 0.7,
+            "zIndex": 28
+        },
+        "selected": {
+            "strokeOpacity": 0.8,
+            "strokeWeight": 4,
+            "zIndex": 29
+        }
+    },
+    "map": [
+        {
+            "stylers": [
+              {
+                "saturation": -100
+              }
+            ]
+          },
+          {
+            "featureType": "water",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#a0a0a0"
+              }
+            ]
+          }
+    ]
+  }
