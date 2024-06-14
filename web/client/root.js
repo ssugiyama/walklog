@@ -8,8 +8,8 @@ import { createBrowserHistory } from 'history';
 import config from 'react-global-configuration';
 import { CacheProvider } from '@emotion/react';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import Body from './body';
-import { configureReduxStore, createMuiTheme, createEmotionCache } from '../app';
+import Body from '../shared/components/body';
+import { configureReduxStore, createMuiTheme, createEmotionCache } from '../shared/app';
 
 config.set(window.__INITIAL_CONFIG__);
 const history = createBrowserHistory();

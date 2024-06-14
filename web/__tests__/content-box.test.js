@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material';
 import config from 'react-global-configuration';
-import ContentBoxContainer from '../src/components/content-box';
+import ContentBoxContainer from '../shared/components/content-box';
 import '@testing-library/jest-dom';
 
 config.set({

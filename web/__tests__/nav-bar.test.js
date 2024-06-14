@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import config from 'react-global-configuration';
-import NavBar from '../src/components/nav-bar';
+import NavBar from '../shared/components/nav-bar';
 import '@testing-library/jest-dom';
 
 jest.mock('firebase/app', () => ({
