@@ -57,7 +57,7 @@ const Wrapper = ({
             <meta name="theme-color" content={themeColor} media="(prefers-color-scheme: light)" />
             <meta name="theme-color" content={darkThemeColor} media="(prefers-color-scheme: dark)" />
             <link rel="canonical" href={canonical} />
-            <link rel="stylesheet" href="/client-root.css" />
+            <link rel="stylesheet" href="/root.css" />
             <title>{title}</title>
             <style data-emotion="{key} {ids.join(' ')} ">{css}</style>
         </head>
