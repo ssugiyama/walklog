@@ -4080,10 +4080,10 @@ bignumber.js@^9.0.0:
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.2.tgz#b7c4242259c008903b13707983b5f4bbd31eda0c"
   integrity sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==
 
-billboard.js@^3.5.1:
-  version "3.11.3"
-  resolved "https://registry.yarnpkg.com/billboard.js/-/billboard.js-3.11.3.tgz#5a013637b94e6dd5d9120b1ad5694510e9d67d43"
-  integrity sha512-r5o1ZHlJ9Ju2xPdme4I/v3DL5qAIYNqDR0C9O1xpzC9cos5rJqaJhiVLLDCFKCJkJq+mwOvoYJx+YOOm+fZLhg==
+billboard.js@^3.12.4:
+  version "3.12.4"
+  resolved "https://registry.yarnpkg.com/billboard.js/-/billboard.js-3.12.4.tgz#c39479cd1eb5c406592f6cd6a71170b620b8e2fe"
+  integrity sha512-iXKDrci2UVH9J0b5Y8gRsr650bQk2TfIRycBAgVZZjdHkwmKDdTLD0D2YxbVe3GvcP60Tog2HypQV64QlAuTwQ==
   dependencies:
     "@types/d3-selection" "^3.0.0"
     "@types/d3-transition" "^3.0.0"
