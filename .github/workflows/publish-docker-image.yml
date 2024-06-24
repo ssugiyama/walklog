@@ -24,7 +24,7 @@ jobs:
           images: ${{ secrets.DOCKER_USERNAME }}/walklog_web
 
       - name: Build and push Web Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: web
           push: true
@@ -40,7 +40,7 @@ jobs:
           images: ${{ secrets.DOCKER_USERNAME }}/walklog_db
 
       - name: Build and push DB Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: db
           push: true
