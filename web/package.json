@@ -40,7 +40,7 @@
     "errorhandler": "*",
     "express": "^4.19",
     "firebase": "^10.11.1",
-    "firebase-admin": "^9.11.0",
+    "firebase-admin": "^12.3.0",
     "history": "^5.3.0",
     "isomorphic-fetch": "^3.0.0",
     "jssha": "^2.2.0",
