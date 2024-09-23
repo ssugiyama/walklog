@@ -3301,12 +3301,12 @@
   dependencies:
     "@types/node" "*"
 
-"@types/d3-selection@*", "@types/d3-selection@^3.0.0":
+"@types/d3-selection@*", "@types/d3-selection@^3.0.10":
   version "3.0.10"
   resolved "https://registry.yarnpkg.com/@types/d3-selection/-/d3-selection-3.0.10.tgz#98cdcf986d0986de6912b5892e7c015a95ca27fe"
   integrity sha512-cuHoUgS/V3hLdjJOLTT691+G2QoqAjCVLmr4kJXR4ha56w1Zdu8UUQ5TxLRqudgNjwXeQxKMq4j+lyf9sWuslg==
 
-"@types/d3-transition@^3.0.0":
+"@types/d3-transition@^3.0.8":
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/@types/d3-transition/-/d3-transition-3.0.8.tgz#677707f5eed5b24c66a1918cde05963021351a8f"
   integrity sha512-ew63aJfQ/ms7QQ4X7pk5NxQ9fZH/z+i24ZfJ6tJSfqxJMrYLiK01EAs2/Rtw/JreGUsS3pLPNV644qXFGnoZNQ==
@@ -4004,13 +4004,13 @@ bignumber.js@^9.0.0:
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.2.tgz#b7c4242259c008903b13707983b5f4bbd31eda0c"
   integrity sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==
 
-billboard.js@^3.12.4:
-  version "3.12.4"
-  resolved "https://registry.yarnpkg.com/billboard.js/-/billboard.js-3.12.4.tgz#c39479cd1eb5c406592f6cd6a71170b620b8e2fe"
-  integrity sha512-iXKDrci2UVH9J0b5Y8gRsr650bQk2TfIRycBAgVZZjdHkwmKDdTLD0D2YxbVe3GvcP60Tog2HypQV64QlAuTwQ==
+billboard.js@^3.13.0:
+  version "3.13.0"
+  resolved "https://registry.yarnpkg.com/billboard.js/-/billboard.js-3.13.0.tgz#9e7004212995f83e555d610aa013f3028ab0989b"
+  integrity sha512-zTvDlCRxaxZtgIpook29V87AsVG97CYRmqJJGNwyJS2cT2g43vIhBOksmpsUmF00hppqqinTjiBjE3qE+48mZQ==
   dependencies:
-    "@types/d3-selection" "^3.0.0"
-    "@types/d3-transition" "^3.0.0"
+    "@types/d3-selection" "^3.0.10"
+    "@types/d3-transition" "^3.0.8"
     d3-axis "^3.0.0"
     d3-brush "^3.0.0"
     d3-drag "^3.0.0"
