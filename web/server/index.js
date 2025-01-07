@@ -51,7 +51,7 @@ const models = require('./models');
 const { Walk } = models;
 
 const firebaseConfig = {
-    // ...config.get('firebaseConfig'),
+    ...config.get('firebaseConfig'),
     credential: admin.credential.applicationDefault(),
 };
 admin.initializeApp(firebaseConfig);
