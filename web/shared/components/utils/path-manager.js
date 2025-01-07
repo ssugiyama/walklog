@@ -1,3 +1,4 @@
+/* eslint new-cap: 'off' */
 const jsSHA1 = require('jssha/dist/sha1');
 
 export default class PathManager extends google.maps.MVCObject {
