@@ -1,4 +1,4 @@
-const JSSHA = require('jssha');
+const jsSHA1 = require('jssha/dist/sha1');
 
 export default class PathManager extends google.maps.MVCObject {
     constructor(optOptions) {
@@ -63,7 +63,7 @@ export default class PathManager extends google.maps.MVCObject {
     static pathToHash(path) {
         if (!path) return null;
         const key = typeof path === 'string' ? path : google.maps.geometry.encoding.encodePath(path);
-        const obj = new JSSHA('SHA-1', 'TEXT');
+        const obj = new jsSHA1('SHA-1', 'TEXT');
         obj.update(key);
         return obj.getHash('B64');
     }
