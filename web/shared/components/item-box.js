@@ -65,7 +65,7 @@ const ItemBox = () => {
         image;
     if (data) {
         title = `${data.date} : ${data.title} (${data.length.toFixed(1)} km)`;
-        createMarkup = () => ({ __html: DOMPurify.sanitize(marked.parse(data.comment || ''))});
+        createMarkup = () => ({ __html: DOMPurify.sanitize(marked.parse(data.comment || '')) });
         image = data.image;
         users.forEach((u) => {
             if (u.uid === data.uid) dataUser = u;
