@@ -22,7 +22,7 @@
     "testEnvironment": "jsdom"
   },
   "dependencies": {
-    "@emotion/cache": "^11.11.0",
+    "@emotion/cache": "^11.14.0",
     "@emotion/css": "^11.13.0",
     "@emotion/react": "^11.4.1",
     "@emotion/server": "^11.4.0",
