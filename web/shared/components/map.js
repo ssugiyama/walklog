@@ -13,8 +13,8 @@ import {
 } from '../features/map';
 import { toggleView } from '../features/view';
 import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal';
-import MapContext from './utils/map-context';
-import createGsiMapType from './utils/gsi-map-type';
+import MapContext from '../utils/map-context';
+import createGsiMapType from '../utils/gsi-map-type';
 
 function loadJS(src) {
     const ref = window.document.getElementsByTagName('script')[0];
@@ -203,9 +203,9 @@ const Map = (props) => {
             google.maps.event.clearListeners(rc.map, 'tilesloaded');
         });
 
-        const PathManager = require('./utils/path-manager').default;
+        const PathManager = require('../utils/map-context').default;
         rc.pathManager = new PathManager({ map: rc.map, styles: rc.mapStyles.polylines });
-        const PolygonManage = require('./utils/polygon-manager').default;
+        const PolygonManage = require('../utils/polygon-manager').default;
         rc.polygonManager = new PolygonManage({ map: rc.map, styles: rc.mapStyles.polygons });
         rc.pathInfoWindow = new google.maps.InfoWindow();
         google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {

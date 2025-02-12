@@ -17,7 +17,7 @@ import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import SearchForm from './search-form';
-import { idToUrl } from '../app';
+import { idToUrl } from '../utils/meta-utils';
 
 const SearchBox = () => {
     const lastQuery = useSelector((state) => state.api.lastQuery);

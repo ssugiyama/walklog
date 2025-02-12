@@ -23,7 +23,7 @@ import {
     ListSubheader,
     IconButton,
 } from '@mui/material';
-import MapContext from './utils/map-context';
+import MapContext from '../utils/map-context';
 import { openSnackbar, openToolBox } from '../features/view';
 import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal';
 import { setGeoMarker, setPathEditable, setAutoGeolocation } from '../features/map';

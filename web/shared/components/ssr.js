@@ -11,9 +11,9 @@ import * as admin from 'firebase-admin';
 import { createMemoryHistory } from 'history';
 import * as colors from '@mui/material/colors';
 import {
-    getTitles,
-    configureReduxStore, routes, handleRoute, createEmotionCache, createMuiTheme, getCanonical,
+    configureReduxStore, routes, handleRoute, createEmotionCache, createMuiTheme,
 } from '../app';
+import { getTitles, getCanonical } from '../utils/meta-utils';
 import Body from './body';
 import { setUsers } from '../features/misc';
 import { searchFunc } from '../../server/search';

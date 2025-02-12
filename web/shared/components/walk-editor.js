@@ -14,9 +14,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
 import ImageUploader from './image-uploader';
-import MapContext from './utils/map-context';
+import MapContext from '../utils/map-context';
 import fetchWithAuth from '../fetch-with-auth';
-import { idToUrl } from '../app';
+import { idToUrl } from '../utils/meta-utils';
 import { openWalkEditor } from '../features/view';
 
 const WalkEditor = () => {

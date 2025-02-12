@@ -11,7 +11,7 @@ import NavigationArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AvFastForwardIcon from '@mui/icons-material/FastForward';
 import AvFastRewindIcon from '@mui/icons-material/FastRewind';
 import Box from '@mui/material/Box';
-import MapContext from './utils/map-context';
+import MapContext from '../utils/map-context';
 import { setOverlay } from '../features/view';
 import { setPanoramaCount, setPanoramaIndex } from '../features/panorama';
 
