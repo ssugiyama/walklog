@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from '@lagunovsky/redux-react-router';
-import { getTitles, idToUrl } from '../app';
+import { getTitles, idToUrl } from '../utils/meta-utils';
 import fetchWithAuth from '../fetch-with-auth';
 
 const initialState = {

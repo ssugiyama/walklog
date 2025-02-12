@@ -17,7 +17,7 @@ import { Link } from 'react-router-dom';
 import { setOverlay } from '../features/view';
 import { setPanoramaIndex } from '../features/panorama';
 import { setSearchForm } from '../features/search-form';
-import { idToUrl, getTitles } from '../app';
+import { idToUrl, getTitles } from '../utils/meta-utils';
 
 const BottomBar = (props) => {
     const filter = useSelector((state) => state.searchForm.filter);

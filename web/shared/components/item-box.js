@@ -21,7 +21,7 @@ import SwipeableViews from 'react-swipeable-views';
 import { push } from '@lagunovsky/redux-react-router';
 import DOMPurify from 'dompurify';
 import fetchWithAuth from '../fetch-with-auth';
-import { idToUrl } from '../app';
+import { idToUrl } from '../utils/meta-utils';
 import PanoramaBox from './panorama-box';
 import ElevationBox from './elevation-box';
 import { openWalkEditor } from '../features/view';

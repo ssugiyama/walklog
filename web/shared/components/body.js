@@ -16,8 +16,8 @@ import BottomBar from './bottom-bar';
 import WalkEditor from './walk-editor';
 import ContentBox from './content-box';
 import { openSnackbar, toggleView } from '../features/view';
-import MapContext from './utils/map-context';
-import { getTitles, getCanonical } from '../app';
+import MapContext from '../utils/map-context';
+import { getTitles, getCanonical } from '../utils/meta-utils';
 
 const Body = () => {
     const message = useSelector((state) => state.view.message);
