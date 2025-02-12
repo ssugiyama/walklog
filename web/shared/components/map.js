@@ -203,7 +203,7 @@ const Map = (props) => {
             google.maps.event.clearListeners(rc.map, 'tilesloaded');
         });
 
-        const PathManager = require('../utils/map-context').default;
+        const PathManager = require('../utils/path-manager').default;
         rc.pathManager = new PathManager({ map: rc.map, styles: rc.mapStyles.polylines });
         const PolygonManage = require('../utils/polygon-manager').default;
         rc.polygonManager = new PolygonManage({ map: rc.map, styles: rc.mapStyles.polygons });
