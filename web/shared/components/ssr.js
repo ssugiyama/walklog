@@ -74,10 +74,6 @@ export default async function handleSSR(req, res) {
     global.navigator = {
         userAgent: req.headers['user-agent'],
     };
-    if (req.query.draft === 'true') {
-        res.redirect('/');
-        return;
-    }
     const branch = matchRoutes(routes(), req.path);
 
     const history = createMemoryHistory({ initialEntries: [req.url] });

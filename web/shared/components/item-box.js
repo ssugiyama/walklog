@@ -73,9 +73,9 @@ const ItemBox = () => {
     }
     const upUrl = lastQuery ? `/?${lastQuery}` : '/';
     const draft = data && data.draft;
-    const nextUrl = nextId && idToUrl(nextId, draft && { draft });
+    const nextUrl = nextId && idToUrl(nextId);
     const prevUrl = prevId ?
-        idToUrl(prevId, draft && { draft }) :
+        idToUrl(prevId) :
         offset > 0 ?
             `/?select_first=true&offset=${offset
             }${lastQuery ? `&${lastQuery}` : ''}` : null;

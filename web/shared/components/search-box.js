@@ -33,8 +33,7 @@ const SearchBox = () => {
 
     const handleSelect = (index) => {
         const item = rows[index];
-        const { draft } = item;
-        dispatch(push(idToUrl(item.id, draft && { draft })));
+        dispatch(push(idToUrl(item.id)));
     };
     const handleShowDistance = useCallback((e) => {
         setShowDistance(e.target.value);
@@ -122,7 +121,14 @@ const SearchBox = () => {
                     { rows.map((item, index) => {
                         const u = userObjs[item.uid];
                         return (
-                            <TableRow sx={{ '&:nth-of-type(odd)': { backgroundColor: 'background.default' } }} key={item.id} onClick={() => handleSelect(index)}>
+                            <TableRow
+                                sx={{
+                                    '&:nth-of-type(odd)': { backgroundColor: 'background.default' },
+                                    filter: item.draft ? 'opacity(.5)' : 'opacity(1)',
+                                }}
+                                key={item.id}
+                                onClick={() => handleSelect(index)}
+                            >
                                 <TableCell sx={sxCell}>
                                     {
                                         u &&

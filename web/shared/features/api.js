@@ -27,13 +27,13 @@ const search = createAsyncThunk(
         const { func, props } = args;
         const selectFirst = props.select_first;
         const offset = Number(props.offset);
-        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset', 'draft'];
+        const keys = ['user', 'date', 'filter', 'year', 'month', 'radius', 'longitude', 'latitude', 'cities', 'searchPath', 'limit', 'order', 'offset'];
         const params = keys.filter((key) => props[key]).map((key) => `${key}=${encodeURIComponent(props[key])}`).join('&');
         let data;
         if (func) {
             data = await func(props);
         } else {
-            const fetchFunc = props.draft ? fetchWithAuth : fetch;
+            const fetchFunc = fetchWithAuth;
             const response = await fetchFunc(`/api/search?${params}`);
             data = await response.json();
         }
