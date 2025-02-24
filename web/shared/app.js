@@ -40,7 +40,7 @@ export async function handleRoute(
                 return;
             }
         }
-        next(getItem({ id: itemId, draft: query.draft, func: searchFunc }));
+        next(getItem({ id: itemId, func: searchFunc }));
         return;
     }
     next(setSelectedItem({ item: null, index: -1 }));
@@ -66,13 +66,15 @@ const formWatchMiddleware = (store) => (next) => (action) => {
     let payload;
     if (action.type === 'searchForm/setSearchForm') {
         payload = action.payload;
+    } else if (action.type === 'misc/setCurrentUser') {
+        payload = { auth: action.payload !== null };
     } else if (action.type === 'map/setSelectedPath') {
         payload = { searchPath: action.path };
     } else {
         return next(action);
     }
     const state = store.getState();
-    const keys = ['filter', 'user', 'year', 'month', 'order', 'limit', 'draft'];
+    const keys = ['filter', 'user', 'year', 'month', 'order', 'limit', 'auth'];
     const currentFilter = payload.filter !== undefined ? payload.filter : state.searchForm.filter;
     switch (currentFilter) {
     case 'neighborhood':

@@ -149,8 +149,8 @@ exports.searchFunc = async (params, draftUid = null) => {
             }));
         }
     }
-    if (params.draft) {
-        where.push({ draft: true, uid: draftUid });
+    if (draftUid !== null) {
+        where.push({ [Op.or]: [{ draft: false }, { uid: draftUid }] });
     } else {
         where.push({ draft: false });
     }
@@ -169,13 +169,17 @@ exports.searchFunc = async (params, draftUid = null) => {
         nextId;
     if (params.id) {
         const nextIds = await sequelize.query(
-            'SELECT id FROM walks where id > ? and draft = ? order by id limit 1',
-            { replacements: [params.id, params.draft || false], type: sequelize.QueryTypes.SELECT },
+            draftUid === null ?
+                'SELECT id FROM walks where id > ? and draft = ? order by id limit 1' :
+                'SELECT id FROM walks where id > ? and (draft = ? or uid = ?) order by id limit 1',
+            { replacements: [params.id, false, draftUid], type: sequelize.QueryTypes.SELECT },
         );
         if (nextIds.length > 0) nextId = nextIds[0].id;
         const prevIds = await sequelize.query(
-            'SELECT id FROM walks where id < ? and draft = ? order by id desc limit 1',
-            { replacements: [params.id, params.draft || false], type: sequelize.QueryTypes.SELECT },
+            draftUid === null ?
+                'SELECT id FROM walks where id < ? and draft = ? order by id desc limit 1' :
+                'SELECT id FROM walks where id < ? and (draft = ? or uid = ?) order by id desc limit 1',
+            { replacements: [params.id, false, draftUid], type: sequelize.QueryTypes.SELECT },
         );
         if (prevIds.length > 0) prevId = prevIds[0].id;
         return ({

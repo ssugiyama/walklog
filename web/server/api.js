@@ -67,7 +67,7 @@ api.get('/get/:id', async (req, res) => {
     try {
         const claim = await authorize(req);
         const uid = claim ? claim.uid : null;
-        const json = await searchFunc({ id: req.params.id, draft: req.query.draft }, uid);
+        const json = await searchFunc({ id: req.params.id }, uid);
         res.json(json);
     } catch (error) {
         res.status(500).json(error);
