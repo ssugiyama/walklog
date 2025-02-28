@@ -39,8 +39,7 @@ const search = createAsyncThunk(
         }
         if (selectFirst) {
             data.append = true;
-            const { draft } = data.rows[0];
-            thunkApi.dispatch(replace(idToUrl(data.rows[0].id, draft && { draft })));
+            thunkApi.dispatch(replace(idToUrl(data.rows[0].id)));
         } else if (offset > 0) {
             data.append = true;
             const state = thunkApi.getState();
@@ -53,13 +52,13 @@ const search = createAsyncThunk(
 const getItem = createAsyncThunk(
     'api/getItem',
     async (args) => {
-        const { id, draft, func } = args;
+        const { id, func } = args;
         let data;
         if (func) {
             data = await func({ id });
         } else {
-            const fetchFunc = draft ? fetchWithAuth : fetch;
-            const path = `/api/get/${id}${draft ? '?draft=true' : ''}`;
+            const fetchFunc = fetchWithAuth;
+            const path = `/api/get/${id}`;
             const response = await fetchFunc(path);
             data = await response.json();
         }
@@ -133,7 +132,7 @@ export const apiSlice = createSlice({
                 searching: false,
                 rows: data.rows,
             };
-            state.lastQuery = state.isDraft ? 'draft=true' : null;
+            state.lastQuery = null;
             state.needsReload = true;
         });
     },
