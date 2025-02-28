@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    createRouterReducer, ROUTER_ON_LOCATION_CHANGED, createRouterMiddleware, push, replace,
+    createRouterReducer, ROUTER_ON_LOCATION_CHANGED, createRouterMiddleware, push,
 } from '@lagunovsky/redux-react-router';
 import { matchRoutes } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
@@ -164,12 +164,12 @@ const dataFetchMiddleware = (store) => (next) => (action) => {
 
 const currentUserChangedMiddleware = (store) => (next) => (action) => {
     const state = store.getState();
-    if (action.type === 'misc/setCurrentUser') {
+    if (action.type === 'misc/setCurrentUser' && action.payload !== state.misc.currentUser) {
         const usp = new URLSearchParams(state.router.location.search);
         usp.reload = true;
         const keys = Object.keys(usp);
         const query = keys.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(usp[key])}`).join('&');
-        next(replace({
+        next(push({
             pathname: state.router.location.pathname,
             search: query,
         }));
