@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    createRouterReducer, ROUTER_ON_LOCATION_CHANGED, createRouterMiddleware, push,
+    createRouterReducer, ROUTER_ON_LOCATION_CHANGED, createRouterMiddleware, push, replace,
 } from '@lagunovsky/redux-react-router';
 import { matchRoutes } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
@@ -63,17 +63,15 @@ export async function handleRoute(
 }
 
 const formWatchMiddleware = (store) => (next) => (action) => {
+    const state = store.getState();
     let payload;
     if (action.type === 'searchForm/setSearchForm') {
         payload = action.payload;
-    } else if (action.type === 'misc/setCurrentUser') {
-        payload = { auth: action.payload !== null };
     } else if (action.type === 'map/setSelectedPath') {
         payload = { searchPath: action.path };
     } else {
         return next(action);
     }
-    const state = store.getState();
     const keys = ['filter', 'user', 'year', 'month', 'order', 'limit', 'auth'];
     const currentFilter = payload.filter !== undefined ? payload.filter : state.searchForm.filter;
     switch (currentFilter) {
@@ -164,6 +162,21 @@ const dataFetchMiddleware = (store) => (next) => (action) => {
     return next(action);
 };
 
+const currentUserChangedMiddleware = (store) => (next) => (action) => {
+    const state = store.getState();
+    if (action.type === 'misc/setCurrentUser') {
+        const usp = new URLSearchParams(state.router.location.search);
+        usp.reload = true;
+        const keys = Object.keys(usp);
+        const query = keys.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(usp[key])}`).join('&');
+        next(replace({
+            pathname: state.router.location.pathname,
+            search: query,
+        }));
+    }
+    return next(action);
+};
+
 export function configureReduxStore(state, history) {
     const reducers = {
         searchForm: searchFormReducer,
@@ -176,6 +189,7 @@ export function configureReduxStore(state, history) {
     };
     const middlewares = [
         formWatchMiddleware,
+        currentUserChangedMiddleware,
         createRouterMiddleware(history),
         dataFetchMiddleware,
     ];
