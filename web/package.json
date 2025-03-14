@@ -1,6 +1,6 @@
 {
   "name": "walklog-web",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "",
   "browserslist": "> 0.25%, not dead",
   "scripts": {
