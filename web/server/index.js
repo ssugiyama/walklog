@@ -28,7 +28,7 @@ const fs = require('fs');
 let content = fs.readFileSync(process.env.FIREBASE_CONFIG);
 configuration.firebaseConfig = JSON.parse(content);
 
-content = fs.readFileSync(process.env.MAP_STYLE_CONFIG || '../default-map-styles.js');
+content = fs.readFileSync(process.env.MAP_STYLE_CONFIG || './default-map-styles.json');
 configuration.mapStyleConfig = JSON.parse(content);
 
 config.set(configuration);

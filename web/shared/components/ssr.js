@@ -71,11 +71,7 @@ const Wrapper = ({
 );
 
 export default async function handleSSR(req, res) {
-    global.navigator = {
-        userAgent: req.headers['user-agent'],
-    };
     const branch = matchRoutes(routes(), req.path);
-
     const history = createMemoryHistory({ initialEntries: [req.url] });
     const store = configureReduxStore(null, history);
     if (!branch) {

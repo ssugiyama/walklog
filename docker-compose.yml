@@ -1,19 +1,18 @@
-version: '2'
 services:
   db:
     restart: always
     build: db
     # image: chezsugi/walklog_db
+    env_file: .env
     volumes:
       - ./data:/var/lib/postgresql/data
   web:
     restart: always
     build: web
     # image: chezsugi/walklog_web
-    env_file: web/.env
+    env_file: .env
     volumes:
       - "./public/${IMAGE_PREFIX}:/var/www/public/${IMAGE_PREFIX}"
-      - ./web/src:/var/www/src
       - ./web/firebase:/var/www/firebase
     ports:
       - 3000:3000

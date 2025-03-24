@@ -1,8 +1,8 @@
-FROM node:20.9.0-alpine
+FROM node:23.10.0-alpine
 LABEL maintainer="Shinichi SUGIYAMA <shin.sugi@gmail.com>"
 RUN apk add --no-cache git yarn python3 make g++
 RUN mkdir -p /var/www
-ADD package.json entrypoint.sh yarn.lock babel.config.js .parcelrc .sequelizerc /var/www/
+ADD package.json entrypoint.sh yarn.lock babel.config.js .parcelrc .sequelizerc default-map-styles.json /var/www/
 ADD shared /var/www/shared
 ADD server /var/www/server
 ADD client /var/www/client
