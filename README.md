@@ -22,13 +22,14 @@ Firebase is required for authentication and storage. So you should create fireba
 ### setup envriment variables
 
 ```
-% cp web/.env.sample web/.env
+% cp .env.example .env
 ```
 
-and edit web/.env
+and edit .env
 
 ```
-DB_URL=postgres://postgres@db/walklog
+POSTGRES_PASSWORD=password
+DB_URL=postgres://postgres:${POSTGRES_PASSWORD}@db/postgres
 PORT=3000
 SITE_NAME=walklog
 DESCRIPTION=webapp for walk logging
@@ -51,7 +52,8 @@ MAP_TYPE_IDS=
 MAP_ID=
 ＃ NODE_ENV＝production
 ```
-
+- POSTGRES_PASSWORD: password for db server
+- DB_URL: url for connecting from web to db
 - GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
 - GOOGLE_API_VERSION: see https://developers.google.com/maps/documentation/javascript/versions
 - EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
