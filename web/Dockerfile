@@ -1,4 +1,4 @@
-FROM node:20.9.0-alpine
+FROM node:23.10.0-alpine
 LABEL maintainer="Shinichi SUGIYAMA <shin.sugi@gmail.com>"
 RUN apk add --no-cache git yarn python3 make g++
 RUN mkdir -p /var/www
