@@ -1,4 +1,4 @@
-FROM mdillon/postgis:11-alpine
+FROM postgis/postgis:17-3.5-alpine
 MAINTAINER Shinichi SUGIYAMA <shin.sugi@gmail.com>
 
 WORKDIR /tmp
