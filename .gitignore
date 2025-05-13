@@ -8,6 +8,7 @@ web/dist/
 public/*
 !public/.keep
 web/config.js
-.env
 web/firebase/*
 .DS_Store
+node_modules
+db/.env
