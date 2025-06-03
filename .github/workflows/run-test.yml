@@ -10,7 +10,7 @@ jobs:
       with:
         node-version: '23.x'
     - name: Install dependencies
-      run: npm install -legacy-peer-deps
+      run: npm install --force
       working-directory: next
     - name: Run tests
       run: npm run test

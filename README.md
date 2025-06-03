@@ -100,14 +100,14 @@ or
 ### 2. set up and start api server
     % cd ../next
     % export NODE_ENV=xxx
-    % npm install -legacy-peer-deps
+    % npm install --force
     % npm run build
     % npm start
 
 ## dev mode
 
     % cd next
-    % npm install -legacy-peer-deps
+    % npm install --force
     % npm run dev
 
 You may access http://localhost:3000 .
