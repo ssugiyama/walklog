@@ -4,13 +4,13 @@ global.TextEncoder = util.TextEncoder
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 global.TextDecoder = util.TextDecoder
 import { sequelize, Walk, Area, SRID } from '@/lib/db/models'
-import { Op } from 'Sequelize'
+import { Op } from 'sequelize'
 import '@testing-library/jest-dom'
 import fs from 'fs/promises'
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
-jest.mock('Sequelize', () => {
+jest.mock('sequelize', () => {
   return {
     Op: {
       and: Symbol.for('and'),
