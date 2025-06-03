@@ -1,70 +1,76 @@
 export default class PolygonManager extends google.maps.MVCObject {
-    constructor(optOptions) {
-        super();
-        this.polygons = {};
-        this.cache = {}
-        const options = optOptions || {};
-        this.setValues(options);
-    }
+  private cache: { [key: string]: string }
+  private polygons: { [key: string]: google.maps.Polygon }
+  private map: google.maps.Map
+  private styles: google.maps.PolygonOptions
 
-    addCache(id: string, str: string){
-        this.cache[id] = str
-    }
+  constructor(optOptions) {
+    super()
+    this.polygons = {}
+    this.cache = {}
+    const options = optOptions || {}
+    this.setValues(options)
+  }
 
-    getFromCache(id: string){
-        return this.cache[id]
-    }
+  addCache(id: string, str: string) {
+    this.cache[id] = str
+  }
 
-    addPolygon(id, str) {
-        this.addCache(id, str)
-        const paths = str.split(' ').map((element) => google.maps.geometry.encoding.decodePath(element));
-        const pg = new google.maps.Polygon({});
-        pg.setPaths(paths);
-        pg.setOptions(this.styles);
-        this.polygons[id] = pg;
-        google.maps.event.addListener(pg, 'click', () => {
-            this.deletePolygon(id, pg);
-        });
-        pg.setMap(this.map);
-        return pg;
-    }
+  getFromCache(id: string) {
+    return this.cache[id]
+  }
 
-    deletePolygon(id, pg) {
-        pg.setMap(null);
-        delete this.polygons[id];
-        google.maps.event.trigger(this, 'polygon_deleted', id);
-    }
+  addPolygon(id, str) {
+    console.log('addPolygon', id, str)
+    this.addCache(id, str)
+    const paths = str.split(' ').map((element) => google.maps.geometry.encoding.decodePath(element))
+    const pg = new google.maps.Polygon({})
+    pg.setPaths(paths)
+    pg.setOptions(this.styles)
+    this.polygons[id] = pg
+    google.maps.event.addListener(pg, 'click', () => {
+      this.deletePolygon(id, pg)
+    })
+    pg.setMap(this.map)
+    return pg
+  }
 
-    deleteAll() {
-        Object.keys(this.polygons).forEach((id) => {
-            const pg = this.polygons[id];
-            pg.setMap(null);
-        });
-        this.polygons = {};
-    }
+  deletePolygon(id, pg) {
+    pg.setMap(null)
+    delete this.polygons[id]
+    google.maps.event.trigger(this, 'polygon_deleted', id)
+  }
 
-    styles_changed() {
-        Object.keys(this.polygons).forEach((id) => {
-            const pg = this.polygons[id];
-            pg.setOptions(this.styles);
-        });
-    }
+  deleteAll() {
+    Object.keys(this.polygons).forEach((id) => {
+      const pg = this.polygons[id]
+      pg.setMap(null)
+    })
+    this.polygons = {}
+  }
 
-    showAll() {
-        Object.keys(this.polygons).forEach((id) => {
-            const pg = this.polygons[id];
-            pg.setMap(this.map);
-        });
-    }
+  styles_changed() {
+    Object.keys(this.polygons).forEach((id) => {
+      const pg = this.polygons[id]
+      pg.setOptions(this.styles)
+    })
+  }
 
-    hideAll() {
-        Object.keys(this.polygons).forEach((id) => {
-            const pg = this.polygons[id];
-            pg.setMap(null);
-        });
-    }
+  showAll() {
+    Object.keys(this.polygons).forEach((id) => {
+      const pg = this.polygons[id]
+      pg.setMap(this.map)
+    })
+  }
 
-    idSet() {
-        return new Set(Object.keys(this.polygons));
-    }
+  hideAll() {
+    Object.keys(this.polygons).forEach((id) => {
+      const pg = this.polygons[id]
+      pg.setMap(null)
+    })
+  }
+
+  idSet() {
+    return new Set(Object.keys(this.polygons))
+  }
 }

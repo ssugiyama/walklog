@@ -5,5 +5,7 @@ export default {
         bodySizeLimit: '2mb',
       },
       useCache: true,
+      authInterrupts: true,
     },
+    output: 'standalone',
   };

@@ -1,17 +1,17 @@
 'use server'
 
-import Sequelize from 'sequelize';
-import {sequelize, Walk, Area, EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH} from '../../lib/db/models'
-import { CityParams, CityResult, SearchProps, SearchResult, UserT } from '@/types'
+import Sequelize from 'sequelize'
+import { sequelize, Walk, Area, EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH, WalkAttributes } from '../../lib/db/models'
+import { CityParams, CityT, SearchProps, UserT, SearchState, GetItemState } from '@/types'
 import admin from 'firebase-admin'
 import url from 'url'
 import path from 'path'
 import { nanoid } from 'nanoid'
 import { cookies } from 'next/headers'
 import fs from 'fs/promises'
-import { cacheTag } from 'next/dist/server/use-cache/cache-tag';
-import { revalidateTag } from 'next/cache';
-const { Op } = Sequelize;
+import { unstable_cacheTag as cacheTag } from 'next/cache'
+import { revalidateTag } from 'next/cache'
+const { Op } = Sequelize
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
@@ -19,372 +19,377 @@ const openUserMode: boolean = !!process.env.OPEN_USER_MODE
 const firebaseStorage: boolean = !!process.env.FIREBASE_STORAGE
 
 const getUid = async (state) => {
-    const cookieStore = await cookies()
-    state.idTokenExpired = false
-    state.error = null
-    const idToken = cookieStore.get('idToken')
-    console.log('getUid', idToken);
-    if (!idToken?.value) {
-        return [null, false]
-    }
-    try {
-        const claim = await admin.auth()
-            .verifyIdToken(idToken.value)
-        return [claim?.uid, claim?.admin || false];
-    } catch (error) {
-        console.log('getUid', error);
-        if (error.code === 'auth/id-token-expired') {
-            state.idTokenExpired = true
-        } else {
-            state.error = error.message
-        }
-        return [null, false]
-    }
-};
-
-const attributes = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid', 'draft']
-
-export const searchInternalAction = async (props: SearchProps, uid: string): Promise<typeof prevState> => {
-    'use cache'
-    cacheTag(SEARCH_CACHE_TAG)
-    const state = {}
-    console.log('searchInternalAction', props);
-    const orderHash = {
-        newest_first: ['date', 'desc'],
-        oldest_first: 'date',
-        longest_first: ['length', 'desc'],
-        shortest_first: 'length',
-        easternmost_first: [sequelize.fn('st_xmax', sequelize.col('path')), 'desc'],
-        westernmost_first: sequelize.fn('st_xmin', sequelize.col('path')),
-        southernmost_first: sequelize.fn('st_ymin', sequelize.col('path')),
-        northernmost_first: [sequelize.fn('st_ymax', sequelize.col('path')), 'desc'],
-        nearest_first: sequelize.literal('distance'),
-    };
-
-    const where = [];
-    const order = orderHash[props.order || 'newest_first'];
-
-    if (props.date) {
-        where.push({ date: props.date });
-    }
-    if (props.user) {
-        where.push({ uid: props.user });
-    }
-    if (props.year) {
-        where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(props.year as string, 10)));
-    }
-    if (props.month) {
-        where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(props.month as string, 10)));
-    }
-    if (['neighborhood', 'start', 'end'].includes(props.filter as string)) {
-        const c = props.center.split(/,/)
-        const latitude = parseFloat(c[0]) || 0
-        const longitude = parseFloat(c[1]) || 0
-        const radius = parseFloat(props.radius as string);
-        const dlat = (radius * 180) / Math.PI / EARTH_RADIUS;
-        const mlat = latitude > 0 ? latitude + dlat : latitude - dlat;
-        const dlon = dlat / Math.cos((mlat / 180) * Math.PI);
-        const center = Walk.getPoint(longitude, latitude);
-        const lb = Walk.getPoint(longitude - dlon, latitude - dlat);
-        const rt = Walk.getPoint(longitude + dlon, latitude + dlat);
-        let target;
-        switch (props.filter) {
-        case 'neighborhood':
-            target = sequelize.col('path');
-            break;
-        case 'start':
-            target = sequelize.fn('st_startpoint', sequelize.col('path'));
-            break;
-        default:
-            target = sequelize.fn('st_endpoint', sequelize.col('path'));
-            break;
-        }
-        where.push(sequelize.where(sequelize.fn('st_makebox2d', lb, rt), {
-            [Op.overlap]: target,
-        }));
-        where.push(sequelize.where(sequelize.fn('st_distance', target, center, true), {
-            [Op.lte]: radius,
-        }));
-    } else if (props.filter === 'cities') {
-        if (!props.cities) {
-            state.count = 0
-            state.rows = []
-            return state
-        }
-        const cities = (props.cities as string).split(/,/).map((elm) => `'${elm}'`).join(',');
-        where.push(sequelize.literal(`EXISTS (SELECT * FROM areas WHERE jcode IN (${cities}) AND path && the_geom AND ST_Intersects(path, the_geom))`));
-    } else if (props.filter === 'crossing') {
-        if (!props.path) {
-            state.count = 0
-            state.rows = []
-            return state
-        }
-        const linestring = Walk.decodePath(props.path as string);
-        where.push({
-            path: {
-                [Op.overlap]: linestring,
-            },
-        });
-        where.push(sequelize.fn('ST_Intersects', sequelize.col('path'), linestring));
-    } else if (props.filter === 'hausdorff') {
-        if (!props.path) {
-            state.count = 0
-            state.rows = []
-            return state
-        }
-        const maxDistance = props.max_distance || 4000;
-        const linestring = Walk.decodePath(props.path as string);
-        const extent = Walk.getPathExtent(props.path as string);
-        const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS;
-        const mlat = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin - dlat));
-        const dlon = dlat / Math.cos((mlat / 180) * Math.PI);
-        const lb = Walk.getPoint(extent.xmin - dlon, extent.ymin - dlat);
-        const rt = Walk.getPoint(extent.xmax + dlon, extent.ymax + dlat);
-
-        attributes.push([`ST_HausdorffDistance(ST_Transform(path, ${SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance']);
-        where.push(sequelize.fn('ST_Within', sequelize.col('path'), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', lb, rt), SRID)));
-        where.push(sequelize.where(sequelize.fn(
-            'ST_HausdorffDistance',
-            sequelize.fn('ST_Transform', sequelize.col('path'), SRID_FOR_SIMILAR_SEARCH),
-            sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), SRID_FOR_SIMILAR_SEARCH),
-        ), {
-            [Op.lt]: maxDistance,
-        }));
-    } else if (props.filter === 'frechet') {
-        if (!props.path) {
-            state.count = 0
-            state.rows = []
-            return state
-        }
-        const maxDistance = props.max_distance || 4000;
-        const linestring = Walk.decodePath(props.path as string);
-        const sp = Walk.getStartPoint(props.path as string);
-        const ep = Walk.getEndPoint(props.path as string);
-        const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS;
-        const mlat = Math.max(
-            Math.abs(sp[1] + dlat),
-            Math.abs(sp[1] - dlat),
-            Math.abs(ep[1] + dlat),
-            Math.abs(ep[1] - dlat),
-        );
-        const dlon = dlat / Math.cos((mlat / 180) * Math.PI);
-        const slb = Walk.getPoint(sp[0] - dlon, sp[1] - dlat);
-        const srt = Walk.getPoint(sp[0] + dlon, sp[1] + dlat);
-        const elb = Walk.getPoint(ep[0] - dlon, ep[1] - dlat);
-        const ert = Walk.getPoint(ep[0] + dlon, ep[1] + dlat);
-
-        attributes.push([`ST_FrechetDistance(ST_Transform(path, ${SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance']);
-        where.push(sequelize.fn('ST_Within', sequelize.fn('ST_StartPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', slb, srt), SRID)));
-        where.push(sequelize.fn('ST_Within', sequelize.fn('ST_EndPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', elb, ert), SRID)));
-        where.push(sequelize.where(sequelize.fn(
-            'ST_FrechetDistance',
-            sequelize.fn('ST_Transform', sequelize.col('path'), SRID_FOR_SIMILAR_SEARCH),
-            sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), SRID_FOR_SIMILAR_SEARCH),
-        ), {
-            [Op.lt]: maxDistance,
-        }));
-    }
-    
-    if (uid !== null) {
-        where.push({ [Op.or]: [{ draft: false }, { uid }] });
+  const cookieStore = await cookies()
+  state.idTokenExpired = false
+  state.error = null
+  const idToken = cookieStore.get('idToken')
+  console.log('getUid', idToken)
+  if (!idToken?.value) {
+    return [null, false]
+  }
+  try {
+    const claim = await admin.auth()
+      .verifyIdToken(idToken.value)
+    return [claim?.uid, claim?.admin || false]
+  } catch (error) {
+    console.log('getUid', error)
+    if (error.code === 'auth/id-token-expired') {
+      state.idTokenExpired = true
     } else {
-        where.push({ draft: false });
+      state.error = error.message
     }
+    return [null, false]
+  }
+}
 
-    const limit = parseInt(props.limit as string, 10) || 20;
-    const offset = parseInt(props.offset as string, 10) || 0;
+const attributes: Array<string | [string, string]> = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid', 'draft']
 
-    const condition = { [Op.and]: where }
-    const result = await Walk.findAndCountAll({
-        attributes,
-        order: [order],
-        where: condition,
-        offset,
-        limit,
-    });
+export const searchInternalAction = async (props: SearchProps, uid: string): Promise<SearchState> => {
+  'use cache'
+  cacheTag(SEARCH_CACHE_TAG)
+  const state: SearchState = {
+    count: 0,
+    rows: [],
+  }
+  const orderHash = {
+    newest_first: ['date', 'desc'],
+    oldest_first: 'date',
+    longest_first: ['length', 'desc'],
+    shortest_first: 'length',
+    easternmost_first: [sequelize.fn('st_xmax', sequelize.col('path')), 'desc'],
+    westernmost_first: sequelize.fn('st_xmin', sequelize.col('path')),
+    southernmost_first: sequelize.fn('st_ymin', sequelize.col('path')),
+    northernmost_first: [sequelize.fn('st_ymax', sequelize.col('path')), 'desc'],
+    nearest_first: sequelize.literal('distance'),
+  }
 
-    state.count = result.count
-    state.offset = result.count > offset + limit ? offset + limit : 0,
-    state.rows = result.rows.map((row) => row.asObject(true))
+  const where = []
+  const order = orderHash[props.order || 'newest_first']
+
+  if (props.date) {
+    where.push({ date: props.date })
+  }
+  if (props.user) {
+    where.push({ uid: props.user })
+  }
+  if (props.year) {
+    where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(props.year as string, 10)))
+  }
+  if (props.month) {
+    where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(props.month as string, 10)))
+  }
+  if (['neighborhood', 'start', 'end'].includes(props.filter as string)) {
+    const c = props.center.split(/,/)
+    const latitude = parseFloat(c[0]) || 0
+    const longitude = parseFloat(c[1]) || 0
+    const radius = parseFloat(props.radius as string)
+    const dlat = (radius * 180) / Math.PI / EARTH_RADIUS
+    const mlat = latitude > 0 ? latitude + dlat : latitude - dlat
+    const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
+    const center = Walk.getPoint(longitude, latitude)
+    const lb = Walk.getPoint(longitude - dlon, latitude - dlat)
+    const rt = Walk.getPoint(longitude + dlon, latitude + dlat)
+    let target
+    switch (props.filter) {
+      case 'neighborhood':
+        target = sequelize.col('path')
+        break
+      case 'start':
+        target = sequelize.fn('st_startpoint', sequelize.col('path'))
+        break
+      default:
+        target = sequelize.fn('st_endpoint', sequelize.col('path'))
+        break
+    }
+    where.push(sequelize.where(sequelize.fn('st_makebox2d', lb, rt), {
+      [Op.overlap]: target,
+    }))
+    where.push(sequelize.where(sequelize.fn('st_distance', target, center, true), {
+      [Op.lte]: radius,
+    }))
+  } else if (props.filter === 'cities') {
+    if (!props.cities) {
+      state.count = 0
+      state.rows = []
+      return state
+    }
+    const cities = (props.cities as string).split(/,/).map((elm) => `'${elm}'`).join(',')
+    where.push(sequelize.literal(`EXISTS (SELECT * FROM areas WHERE jcode IN (${cities}) AND path && the_geom AND ST_Intersects(path, the_geom))`))
+  } else if (props.filter === 'crossing') {
+    if (!props.path) {
+      state.count = 0
+      state.rows = []
+      return state
+    }
+    const linestring = Walk.decodePath(props.path as string)
+    where.push({
+      path: {
+        [Op.overlap]: linestring,
+      },
+    })
+    where.push(sequelize.fn('ST_Intersects', sequelize.col('path'), linestring))
+  } else if (props.filter === 'hausdorff') {
+    if (!props.path) {
+      state.count = 0
+      state.rows = []
+      return state
+    }
+    const maxDistance = props.max_distance || 4000
+    const linestring = Walk.decodePath(props.path as string)
+    const extent = Walk.getPathExtent(props.path as string)
+    const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
+    const mlat = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin - dlat))
+    const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
+    const lb = Walk.getPoint(extent.xmin - dlon, extent.ymin - dlat)
+    const rt = Walk.getPoint(extent.xmax + dlon, extent.ymax + dlat)
+
+    attributes.push([`ST_HausdorffDistance(ST_Transform(path, ${SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance'])
+    where.push(sequelize.fn('ST_Within', sequelize.col('path'), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', lb, rt), SRID)))
+    where.push(sequelize.where(sequelize.fn(
+      'ST_HausdorffDistance',
+      sequelize.fn('ST_Transform', sequelize.col('path'), SRID_FOR_SIMILAR_SEARCH),
+      sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), SRID_FOR_SIMILAR_SEARCH),
+    ), {
+      [Op.lt]: maxDistance,
+    }))
+  } else if (props.filter === 'frechet') {
+    if (!props.path) {
+      state.count = 0
+      state.rows = []
+      return state
+    }
+    const maxDistance = props.max_distance || 4000
+    const linestring = Walk.decodePath(props.path as string)
+    const sp = Walk.getStartPoint(props.path as string)
+    const ep = Walk.getEndPoint(props.path as string)
+    const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
+    const mlat = Math.max(
+      Math.abs(sp[1] + dlat),
+      Math.abs(sp[1] - dlat),
+      Math.abs(ep[1] + dlat),
+      Math.abs(ep[1] - dlat),
+    )
+    const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
+    const slb = Walk.getPoint(sp[0] - dlon, sp[1] - dlat)
+    const srt = Walk.getPoint(sp[0] + dlon, sp[1] + dlat)
+    const elb = Walk.getPoint(ep[0] - dlon, ep[1] - dlat)
+    const ert = Walk.getPoint(ep[0] + dlon, ep[1] + dlat)
+
+    attributes.push([`ST_FrechetDistance(ST_Transform(path, ${SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance'])
+    where.push(sequelize.fn('ST_Within', sequelize.fn('ST_StartPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', slb, srt), SRID)))
+    where.push(sequelize.fn('ST_Within', sequelize.fn('ST_EndPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', elb, ert), SRID)))
+    where.push(sequelize.where(sequelize.fn(
+      'ST_FrechetDistance',
+      sequelize.fn('ST_Transform', sequelize.col('path'), SRID_FOR_SIMILAR_SEARCH),
+      sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), SRID_FOR_SIMILAR_SEARCH),
+    ), {
+      [Op.lt]: maxDistance,
+    }))
+  }
+
+  if (uid !== null) {
+    where.push({ [Op.or]: [{ draft: false }, { uid }] })
+  } else {
+    where.push({ draft: false })
+  }
+
+  const limit = props.limit || 20
+  const offset = props.offset || 0
+
+  const condition = { [Op.and]: where }
+  const result = await Walk.findAndCountAll({
+    attributes,
+    order: [order],
+    where: condition,
+    offset,
+    limit,
+  })
+
+  state.count = result.count
+  state.offset = result.count > offset + limit ? offset + limit : 0
+  state.rows = result.rows.map((row) => row.asObject(true))
+  return state
+}
+
+export const searchAction = async (prevState: SearchState, props: SearchProps, _getUid = getUid, _searchInternalAction = searchInternalAction): Promise<typeof prevState> => {
+  const state = { ...prevState }
+  state.serial++
+  state.error = null
+  state.idTokenExpired = false
+  state.append = (props.offset > 0)
+
+  const [uid] = await _getUid(state)
+  const newState = await _searchInternalAction(props, uid)
+  return Object.assign({ ...state }, newState)
+}
+
+export const getItemInternalAction = async (id: number, uid: string): Promise<GetItemState> => {
+  'use cache'
+  cacheTag(SEARCH_CACHE_TAG)
+  const state: GetItemState = {}
+
+  const walk = await Walk.findByPk(id)
+  if (walk?.draft && walk?.uid !== uid) {
     return state
-};
+  }
+  state.current = !walk?.draft || walk?.uid === uid ? walk?.asObject(true) : null
+  return state
+}
 
-export const searchAction = async (prevState, props: SearchProps): Promise<typeof prevState> => {
-    const state = { ...prevState }
-    state.serial ++
-    state.error = null
-    state.idTokenExpired = false
-    state.append = (props.offset > 0)
-    
-    const [uid] = await getUid(state)
-    const newState = await searchInternalAction(props, uid)
-    return Object.assign({ ...state }, newState)
-};
+export const getItemAction = async (prevState, id: number, _getUid = getUid, _getItemInternalAction = getItemInternalAction): Promise<GetItemState> => {
+  const state = { ...prevState }
+  state.serial++
+  state.error = null
+  state.idTokenExpired = false
 
-export const getItemInternalAction = async (id: number, uid: string): Promise<typeof prevState> => {
-    'use cache'
-    cacheTag(SEARCH_CACHE_TAG)
-    const state = {}
-
-    const walk = await Walk.findByPk(props.id);
-    state.current = !walk?.draft || walk?.uid === uid ? walk?.asObject(true) : null
-    return state
-};
-
-export const getItemAction = async (prevState, id: number): Promise<typeof prevState> => {
-    const state = { ...prevState }
-    state.serial ++
-    state.error = null
-    state.idTokenExpired = false
-    
-    const [uid] = await getUid(state)
-    const newState = await getItemInternalAction(id, uid)
-    return Object.assign({ ...state }, newState)
-};
+  const [uid] = await _getUid(state)
+  const newState = await _getItemInternalAction(id, uid)
+  return Object.assign({ ...state }, newState)
+}
 
 const getFilename = (id, file) => {
-    const match = file.name.match(/\.\w+$/);
-    const ext = match ? match[0] : '';
-    const basename = `${`00000${id}`.slice(-6)}-${nanoid(4)}`;
-    return match ? basename + ext : basename;
+  const match = file.name.match(/\.\w+$/)
+  const ext = match ? match[0] : ''
+  const basename = `${`00000${id}`.slice(-6)}-${nanoid(4)}`
+  return match ? basename + ext : basename
 }
 
-export const updateItemAction = async (prevState, formData): Promise<typeof prevState> => {
-    const state = { ...prevState }
-    state.error = null
-    state.id = null
-    state.serial ++
-    const [uid, isAdmin] = await getUid(state)
-    if (state.idTokenExpired) {
-        return state
-    }
-    if (!uid) {
-        state.error = 'not authorized'
-    } else if (!openUserMode && !isAdmin) {
-        state.error = 'admin only'
-    }
-    if(state.error !== null) {
-        return state
-    }
-
-    const id = formData.get('id')
-    const date = formData.get('date')
-    const title = formData.get('title')
-    const comment = formData.get('comment')
-    const image = formData.get('image')
-    const walkPath = formData.get('path')
-    const draft = formData.get('draft') === 'true' ? true : false
-    const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
-    const props = {
-        title,
-        comment,
-        date, 
-        draft,
-        uid,
-    }
-    if (walkPath !== '') {
-        props.path = Walk.decodePath(walkPath);
-        props.length = sequelize.literal(`ST_LENGTH('${props.path}', true)/1000`);
-    }
-    console.log('updateItemAction', willDeleteImage, image);
-    try {
-        if (willDeleteImage) {
-            props.image = null;
-        } else if (image.size > 0) {
-            const prefix = process.env.IMAGE_PREFIX || 'images';
-            const filePath = path.join(prefix, getFilename(id, image))
-            const content = await image.arrayBuffer();
-            const buffer = Buffer.from(content);
-            if (firebaseStorage) {
-                const bucket = admin.storage().bucket()
-                const blob = bucket.file(filePath)
-                blob.save(buffer)
-                props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name));
-            } else {
-                await fs.writeFile(`public/${filePath}`, buffer)
-                props.image = filePath
-            }
-        } 
-        console.log('updateItemAction', props);
-        if (id) {
-            const walk = await Walk.findByPk(id);
-            if (walk.uid !== uid) {
-                state.error = 'no permission to update';
-                return state
-            }
-            await walk.update(props);
-            state.id = id
-        } else {
-            const walk = await Walk.create(props);
-            state.id = walk?.id
-        }
-        revalidateTag(SEARCH_CACHE_TAG)
-        console.log('updateItemAction', props);
-    } catch (error) {
-        await console.error(error);
-        state.error = error.message;
-    }
+export const updateItemAction = async (prevState, formData, _getUid = getUid): Promise<typeof prevState> => {
+  const state = { ...prevState }
+  state.error = null
+  state.id = null
+  state.serial++
+  const [uid, isAdmin] = await _getUid(state)
+  if (state.idTokenExpired) {
     return state
-}
-
-export const deleteItemAction = async (prevState, id: number): Promise<typeof prevState> => {
-    const state = { ...prevState }
-    state.error = null
-    state.deleted = false
-    state.serial ++
-    const [uid, isAdmin] = await getUid(state)
-    if (state.idTokenExpired) {
-        return state
-    }
-    if (!uid) {
-        state.error = 'not authorized'
-    } else if (!openUserMode && !isAdmin) {
-        state.error = 'admin only'
-    }
-    if(state.error !== null) {
-        return state
-    }
-
-    const walk = await Walk.findByPk(id);
-    if (!walk) {
-        state.error = 'not found';
-        return state
-    }
-    if (walk.uid !== uid) {
-        state.error = 'no permission to delete';
-        return state
-    }
-    try {
-        await walk.destroy();
-        state.deleted = true
-        revalidateTag(SEARCH_CACHE_TAG)
-    } catch (error) {
-        console.error(error);
-        state.error = error.message;
-    }
+  }
+  if (!uid) {
+    state.error = 'unauthorized'
+  } else if (!openUserMode && !isAdmin) {
+    state.error = 'forbidden'
+  }
+  if (state.error !== null) {
     return state
-}
+  }
 
-export const getCityAction = async (params: CityParams): Promise<CityResult[]> => {
-    'use cache'
-    let where
-    if (params.jcodes) {
-        where = { jcode: { [Op.in]: params.jcodes } };
+  const id = formData.get('id')
+  const date = formData.get('date')
+  const title = formData.get('title')
+  const comment = formData.get('comment')
+  const image = formData.get('image')
+  const walkPath = formData.get('path')
+  const draft = formData.get('draft') === 'true' ? true : false
+  const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
+  const props: WalkAttributes = {
+    title,
+    comment,
+    date,
+    draft,
+    uid,
+  }
+  if (walkPath !== '') {
+    props.path = Walk.decodePath(walkPath)
+    props.length = sequelize.literal(`ST_LENGTH('${props.path}', true)/1000`)
+  }
+  console.log('updateItemAction', willDeleteImage, image)
+  try {
+    if (willDeleteImage) {
+      props.image = null
+    } else if ((image?.size || 0) > 0) {
+      const prefix = process.env.IMAGE_PREFIX || 'images'
+      const filePath = path.join(prefix, getFilename(id, image))
+      const content = await image.arrayBuffer()
+      const buffer = Buffer.from(content)
+      if (firebaseStorage) {
+        const bucket = admin.storage().bucket()
+        const blob = bucket.file(filePath)
+        blob.save(buffer)
+        props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
+      } else {
+        await fs.writeFile(`public/${filePath}`, buffer)
+        props.image = filePath
+      }
+    }
+    console.log('updateItemAction', props)
+    if (id) {
+      const walk = await Walk.findByPk(id)
+      if (walk.uid !== uid) {
+        state.error = 'forbidden'
+        return state
+      }
+      await walk.update(props)
+      state.id = id
     } else {
-        where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', params.longitude, params.latitude), SRID));
+      const walk = await Walk.create(props)
+      state.id = walk?.id
     }
-    const result = await Area.findAll({
-        where,
-    });
-    return result.map((obj) => obj.asObject())
+    revalidateTag(SEARCH_CACHE_TAG)
+    console.log('updateItemAction', props)
+  } catch (error) {
+    await console.error(error)
+    state.error = error.message
+  }
+  return state
+}
+
+export const deleteItemAction = async (prevState, id: number, _getUid = getUid): Promise<typeof prevState> => {
+  const state = { ...prevState }
+  state.error = null
+  state.deleted = false
+  state.serial++
+  const [uid, isAdmin] = await _getUid(state)
+  if (state.idTokenExpired) {
+    return state
+  }
+  if (!uid) {
+    state.error = 'unauthorized'
+  } else if (!openUserMode && !isAdmin) {
+    state.error = 'forbidden'
+  }
+  if (state.error !== null) {
+    return state
+  }
+
+  const walk = await Walk.findByPk(id)
+  if (!walk) {
+    state.error = 'not found'
+    return state
+  }
+  if (walk.uid !== uid) {
+    state.error = 'forbidden'
+    return state
+  }
+  try {
+    await walk.destroy()
+    state.deleted = true
+    revalidateTag(SEARCH_CACHE_TAG)
+  } catch (error) {
+    console.error(error)
+    state.error = error.message
+  }
+  return state
+}
+
+export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
+  'use cache'
+  let where
+  if (params.jcodes) {
+    where = { jcode: { [Op.in]: params.jcodes } }
+  } else {
+    where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', params.longitude, params.latitude), SRID))
+  }
+  const result = await Area.findAll({
+    where,
+  })
+  return result.map((obj) => obj.asObject())
 }
 
 export const getUsersAction = async (): Promise<UserT[]> => {
-    'use cache'
-    const userResult = await admin.auth().listUsers(1000);
-    return userResult.users.map((user) => {
-        const { uid, displayName, photoURL } = user;
-        return { uid, displayName, photoURL };
-    })
+  'use cache'
+  const userResult = await admin.auth().listUsers(1000)
+  return userResult.users.map((user) => {
+    const { uid, displayName, photoURL } = user
+    return { uid, displayName, photoURL }
+  })
 }
 

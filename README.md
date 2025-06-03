@@ -21,63 +21,54 @@ Firebase is required for authentication and storage. So you should create fireba
 
 ### setup envriment variables
 
-```
-% cp .env.example .env
-```
-
-and edit .env
+Copy `.env` to `.env.local` and edit it
 
 ```
-POSTGRES_PASSWORD=password
-DB_URL=postgres://postgres:${POSTGRES_PASSWORD}@db/postgres
-PORT=3000
-SITE_NAME=walklog
-DESCRIPTION=webapp for walk logging
-BASE_URL=http://localhost:3000
-IMAGE_PREFIX=uploads/
-GOOGLE_API_KEY=
-GOOGLE_API_VERSION=
-TWITTER_SITE=@chez_sugi
-EXTERNAL_LINKS=example=http://example.com;example2=http://example2.com
-THEME_PRIMARY=bluegrey
-THEME_SECONDARY=orange
-DARK_THEME_PRIMARY=blue
-DARK_THEME_SECONDARY=amber
-FIREBASE_CONFIG=./firebase/firebase-config.json
-GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
-ONLY_ADMIN_CAN_CREATE=
-USE_FIREBASE_STORAGE=true
-MAP_STYLE_CONFIG=
-MAP_TYPE_IDS=
-MAP_ID=
-＃ NODE_ENV＝production
+SITE_NAME=Walklog
+SITE_DESCRIPTION=webapp for managing your walking logs
+IMAGE_PREFIX=uploads
+OPEN_USER_MODE=
+DRAWING_STYLES_JSON=path-to-drawing-styles.json
+SRID=4326
+SRID_FOR_SIMILAR_SEARCH=32662
+FIREBASE_CONFIG=path-to-firebase-config.json
+DB_URL=postgres://dbuser:password@host/dbname
+NEXT_PUBLIC_GOOGLE_API_KEY=
+FIREBASE_STORAGE=on
+NEXT_PUBLIC_MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
+NEXT_PUBLIC_DEFAULT_CENTER=lat,lng
+NEXT_PUBLIC_MAP_ID=
+GOOGLE_APPLICATION_CREDENTIALS=path-to-google-credentials.json
 ```
-- POSTGRES_PASSWORD: password for db server
+- SITE_NAME: site name
+- SITE_DESCRIPTION: site description
 - DB_URL: url for connecting from web to db
-- GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
-- GOOGLE_API_VERSION: see https://developers.google.com/maps/documentation/javascript/versions
-- EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
+- IMAGE_PREFIX: image store prefix
+- OPEN_USER_MODE: everybody can manage walks unless blank
 - FIREBASE_CONFIG: firebase config json file path
 - GOOGLE_APPLICATION_CREDENTIALS: firebase admin service account json file path
-- ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
-- IMAGE_PREFIX: image store prefix
 - USE_FIREBASE_STORAGE: if true, use firebase storage as image store
-- MAP_STYLE_CONFIG: url of config json of map styles. default is '/default-map-styles.json'
-- MAP_TYPE_IDS: selectable map types. default is 'roadmap,hybrid,satellite,terrain'. you can add 'gsi' to use tha map by GSI(The Geospatial Information Authority of Japan).
-- MAP_ID: A map ID is a unique identifier that represents a single instance of a Google Map. You can create map IDs and update a style associated with a map ID at any time in the Cloud Console.
+- DRAWING_STYLES_JSON: url of config json of drawing styles. default is '/default-drawing-styles.json'
+- NEXT_PUBLIC_GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
+- NEXT_PUBLIC_GOOGLE_API_VERSION: see https://developers.google.com/maps/documentation/javascript/versions
+- NEXT_PUBLIC_MAP_TYPE_IDS: selectable map types. default is 'roadmap,hybrid,satellite,terrain'. you can add 'gsi' to use tha map by GSI(The Geospatial Information Authority of Japan).
+- NEXT_PUBLIC_MAP_ID: A map ID is a unique identifier that represents a single instance of a Google Map. You can create map IDs and update a style associated with a map ID at any time in the Cloud Console.
+- NEXT_PUBLIC_DEFAULT_CENTER: default map center
 
 ### manage admin users
 
+in `next` folder
+
 ```
-% cd web
-% ./set-admin.js add firebase-uid
+% GOOGLE_APPLICATION_CREDENTIALS=path-to-google-credentials.json \
+./bin/set-admin.js add firebase-uid
 ```
 
 or
 
 ```
-% cd web
-% ./set-admin.js rm firebase-uid
+% GOOGLE_APPLICATION_CREDENTIALS=path-to-google-credentials.json \
+./bin/set-admin.js rm firebase-uid
 ```
 
 ## with docker
@@ -101,18 +92,23 @@ or
 - postgresql with postgis 2.4 or higher
 - PosrGIS enabled database
 - node.js
-- yarn
 
 ### 1. setup areas table
     % cd *work_dir*
     % $(project_root)/db/manage-areas.sh *shp_file*
 
 ### 2. set up and start api server
-    % cd ../web
+    % cd ../next
     % export NODE_ENV=xxx
-    % cp assets/* public/
-    % yarn install --production=false && yarn build-cli && yarn build-svr
-    % yarn start-with-dotenv
+    % npm install
+    % npm run build
+    % npm start
+
+## dev mode
+
+    % cd next
+    % npm install
+    % npm run dev
 
 You may access http://localhost:3000 .
 

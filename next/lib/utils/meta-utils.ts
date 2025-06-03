@@ -1,11 +1,11 @@
 export const getTitles = (config, item) => {
-    const titles = [config.siteName];
-    if (item) {
-        titles.unshift(`${item.date} : ${item.title} (${item.length.toFixed(1)} km)`);
-    }
-    return titles;
-};
+  const titles = [config.siteName]
+  if (item) {
+    titles.unshift(`${item.date} : ${item.title} (${item.length.toFixed(1)} km)`)
+  }
+  return titles
+}
 
-export const idToUrl = (config, id, params = null) => `${config.itemPrefix}${id}${params ? `?${params.toString()}` : ''}`;
+export const idToUrl = (id, params: URLSearchParams = null) => `/walk/${id}${params ? `?${params.toString()}` : ''}`
 
-export const getCanonical = (config, data) => config.baseUrl + (data ? idToUrl(config, data.id) : '/');
+export const getCanonical = (config, data) => config.baseUrl + (data ? idToUrl(data.id) : '/')

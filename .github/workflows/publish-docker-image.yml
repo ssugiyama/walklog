@@ -26,7 +26,7 @@ jobs:
       - name: Build and push Web Docker image
         uses: docker/build-push-action@v6
         with:
-          context: web
+          context: next
           push: true
           tags: ${{ steps.web_meta.outputs.tags }}
           labels: ${{ steps.web_meta.outputs.labels }}

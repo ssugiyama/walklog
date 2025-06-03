@@ -1,11 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import userEvent from '@testing-library/user-event';
-import ToolBox from '../../lib/components/tool-box';
-import { MainProvider } from '../../lib/utils/main-context';
-import { MapProvider } from '../../lib/utils/map-context';
-import { ConfigProvider } from '../../lib/utils/config';
+import ToolBox from '@/lib/components/tool-box';
+import { MainContextProvider } from '@/lib/utils/main-context';
+import { MapContextProvider } from '@/lib/utils/map-context';
+import { ConfigProvider } from '@/lib/utils/config';
 
 // Test configuration
 const TEST_TIMEOUT = 10000;
@@ -39,8 +38,8 @@ const mockGeocoder = {
   geocode: jest.fn(),
 };
 
-const mockMapContext = {
-  state: {
+const mockMapContext = [
+  {
     map: mockMap,
     marker: mockMarker,
     pathManager: {
@@ -53,15 +52,15 @@ const mockMapContext = {
     clearPaths: jest.fn(),
     addPoint: jest.fn(),
   },
-};
+];
 
-const mockMainContext = {
-  mainState: {
-    autoGeoLocation: false,
+const mockMainContext = [
+  {
+    autoGeolocation: false,
     toolBoxOpen: true,
   },
-  dispatchMain: jest.fn(),
-};
+  jest.fn(),
+]
 
 const mockConfig = {
   googleApiKey: 'mock_api_key',
@@ -99,17 +98,17 @@ beforeEach(() => {
   global.navigator.geolocation = mockGeolocation;
 });
 
-jest.mock('../../lib/utils/map-context', () => ({
+jest.mock('@/lib/utils/map-context', () => ({
   useMapContext: jest.fn().mockImplementation(() => mockMapContext),
-  MapProvider: ({ children }) => <div data-testid="map-provider">{children}</div>,
+  MapContextProvider: ({ children }) => <div data-testid="map-provider">{children}</div>,
 }));
 
-jest.mock('../../lib/utils/main-context', () => ({
+jest.mock('@/lib/utils/main-context', () => ({
   useMainContext: jest.fn().mockImplementation(() => mockMainContext),
-  MainProvider: ({ children }) => <div data-testid="main-provider">{children}</div>,
+  MainContextProvider: ({ children }) => <div data-testid="main-provider">{children}</div>,
 }));
 
-jest.mock('../../lib/utils/config', () => ({
+jest.mock('@/lib/utils/config', () => ({
   useConfig: jest.fn().mockImplementation(() => mockConfig),
   ConfigProvider: ({ children }) => <div data-testid="config-provider">{children}</div>,
 }));
@@ -117,12 +116,12 @@ jest.mock('../../lib/utils/config', () => ({
 describe('ToolBox Component', () => {
   it('renders correctly when open', () => {
     render(
-      <ConfigProvider config={mockConfig}>
-        <MainProvider>
-          <MapProvider>
+      <ConfigProvider>
+        <MainContextProvider>
+          <MapContextProvider>
             <ToolBox open={true} />
-          </MapProvider>
-        </MainProvider>
+          </MapContextProvider>
+        </MainContextProvider>
       </ConfigProvider>
     );
     
@@ -140,12 +139,12 @@ describe('ToolBox Component', () => {
 
   it('handles current location button click', async () => {
     render(
-      <ConfigProvider config={mockConfig}>
-        <MainProvider>
-          <MapProvider>
+      <ConfigProvider>
+        <MainContextProvider>
+          <MapContextProvider>
             <ToolBox open={true} />
-          </MapProvider>
-        </MainProvider>
+          </MapContextProvider>
+        </MainContextProvider>
       </ConfigProvider>
     );
     
@@ -180,47 +179,48 @@ describe('ToolBox Component', () => {
         },
       ], 'OK');
     });
-
     render(
-      <ConfigProvider config={mockConfig}>
-        <MainProvider>
-          <MapProvider>
+      <ConfigProvider>
+        <MainContextProvider>
+          <MapContextProvider>
             <ToolBox open={true} />
-          </MapProvider>
-        </MainProvider>
+          </MapContextProvider>
+        </MainContextProvider>
       </ConfigProvider>
     );
-    
+
     // Type a location and press enter
     const locationInput = screen.getByPlaceholderText('location...');
     fireEvent.change(locationInput, { target: { value: 'Tokyo' } });
     fireEvent.keyPress(locationInput, { key: 'Enter', charCode: 13 });
     
     // Verify the geocoder was called
-    expect(mockGeocoder.geocode).toHaveBeenCalledWith(
-      { address: 'Tokyo' },
-      expect.any(Function)
-    );
-    
-    // Check marker was updated
+
     await waitFor(() => {
-      expect(mockMarker.position).toEqual({
-        lat: 35.6812,
-        lng: 139.7671,
-      });
-      expect(mockMarker.map).toBe(mockMap);
-      expect(mockMap.setCenter).toHaveBeenCalledWith(mockMarker.position);
+      expect(mockGeocoder.geocode).toHaveBeenCalledWith(
+        { address: 'Tokyo' },
+        expect.any(Function)
+      );
+    })
+
+    // Check marker was updated
+    
+    expect(mockMarker.position).toEqual({
+      lat: 35.6812,
+      lng: 139.7671,
     });
+    expect(mockMarker.map).toBe(mockMap);
+    expect(mockMap.setCenter).toHaveBeenCalledWith(mockMarker.position);
   });
 
   it('handles toggle record function', async () => {
     render(
-      <ConfigProvider config={mockConfig}>
-        <MainProvider>
-          <MapProvider>
+      <ConfigProvider>
+        <MainContextProvider>
+          <MapContextProvider>
             <ToolBox open={true} />
-          </MapProvider>
-        </MainProvider>
+          </MapContextProvider>
+        </MainContextProvider>
       </ConfigProvider>
     );
     
@@ -230,10 +230,10 @@ describe('ToolBox Component', () => {
     // Verify geolocation API was called
     expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled();
     
-    // Verify dispatch was called to update autoGeoLocation state
+    // Verify dispatch was called to update autoGeolocation state
     await waitFor(() => {
-      expect(mockMainContext.dispatchMain).toHaveBeenCalledWith({
-        type: 'SET_AUTO_GEO_LOCATION',
+      expect(mockMainContext[1]).toHaveBeenCalledWith({
+        type: 'SET_AUTO_GEOLOCATION',
         payload: true,
       });
     });
@@ -241,12 +241,12 @@ describe('ToolBox Component', () => {
 
   it('handles path editing', () => {
     render(
-      <ConfigProvider config={mockConfig}>
-        <MainProvider>
-          <MapProvider>
+      <ConfigProvider>
+        <MainContextProvider>
+          <MapContextProvider>
             <ToolBox open={true} />
-          </MapProvider>
-        </MainProvider>
+          </MapContextProvider>
+        </MainContextProvider>
       </ConfigProvider>
     );
     
@@ -254,17 +254,17 @@ describe('ToolBox Component', () => {
     fireEvent.click(screen.getByText('edit'));
     
     // Verify pathManager.set was called with editable=true
-    expect(mockMapContext.state.pathManager.set).toHaveBeenCalledWith('editable', true);
+    expect(mockMapContext[0].pathManager.set).toHaveBeenCalledWith('editable', true);
   });
 
   it('handles path clearing', () => {
     render(
-      <ConfigProvider config={mockConfig}>
-        <MainProvider>
-          <MapProvider>
+      <ConfigProvider>
+        <MainContextProvider>
+          <MapContextProvider>
             <ToolBox open={true} />
-          </MapProvider>
-        </MainProvider>
+          </MapContextProvider>
+        </MainContextProvider>
       </ConfigProvider>
     );
     
@@ -272,6 +272,6 @@ describe('ToolBox Component', () => {
     fireEvent.click(screen.getByText('clear'));
     
     // Verify clearPaths was called
-    expect(mockMapContext.state.clearPaths).toHaveBeenCalled();
+    expect(mockMapContext[0].clearPaths).toHaveBeenCalled();
   });
 });

@@ -1,5 +1,6 @@
 /** @type {import('jest').Config} */
 const config = {
+  rootDir: '.',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testPathIgnorePatterns: [
@@ -7,6 +8,7 @@ const config = {
     '<rootDir>/node_modules/',
   ],
   moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
     // Handle CSS imports (with CSS modules)
     '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
     // Handle CSS imports (without CSS modules)
@@ -20,6 +22,7 @@ const config = {
   collectCoverage: true,
   coverageReporters: ['text', 'lcov', 'json', 'html'],
   coverageDirectory: '<rootDir>/coverage',
+  testEnvironment: 'jest-fixed-jsdom',
 };
 
 module.exports = config;
