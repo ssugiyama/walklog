@@ -79,9 +79,9 @@ describe('Map Component', () => {
       mapId: 'test-map-id',
     });
 
-    (useData as jest.Mock).mockReturnValue({
-      data: { rows: [], current: null },
-    })
+    (useData as jest.Mock).mockReturnValue([
+      { rows: [], current: null },
+    ])
     google.maps.MapTypeControlStyle = {
       DROPDOWN_MENU: 1,
     }

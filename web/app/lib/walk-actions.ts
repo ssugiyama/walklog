@@ -8,9 +8,35 @@ import url from 'url'
 import path from 'path'
 import { nanoid } from 'nanoid'
 import { cookies } from 'next/headers'
-import fs from 'fs/promises'
+import fs from 'fs'
 import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
+
+
+const content = fs.readFileSync(process.env.FIREBASE_CONFIG)
+const firebaseConfig = JSON.parse(content.toString())
+if (admin.apps.length === 0) {
+  admin.initializeApp({ ...firebaseConfig, credential: admin.credential.applicationDefault() })
+}
+
+export const getConfig = async () => {
+  'use cache'
+  const content = fs.readFileSync(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
+  const drawingStyles = JSON.parse(content.toString())
+  
+  return {
+    googleApiKey: process.env.GOOGLE_API_KEY,
+    googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
+    appVersion: '0.9.0',
+    defaultCenter: process.env.DEFAULT_CENTER,
+    defaultRadius: 500,
+    mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
+    mapId: process.env.MAP_ID,
+    firebaseConfig,
+    drawingStyles,
+  }
+}
+
 const { Op } = Sequelize
 
 const SEARCH_CACHE_TAG = 'searchTag'
@@ -306,7 +332,7 @@ export const updateItemAction = async (prevState, formData, _getUid = getUid): P
         blob.save(buffer)
         props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
       } else {
-        await fs.writeFile(`public/${filePath}`, buffer)
+        fs.writeFileSync(`public/${filePath}`, buffer)
         props.image = filePath
       }
     }

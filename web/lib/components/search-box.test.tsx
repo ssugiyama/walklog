@@ -50,13 +50,13 @@ describe('SearchBox', () => {
       users: [],
     });
 
-    (useData as jest.Mock).mockReturnValue({
-      data: {
+    (useData as jest.Mock).mockReturnValue([
+      {
         offset: 0,
         count: 0,
         rows: [],
       },
-    })
+    ])
   })
 
   afterEach(() => {
@@ -72,21 +72,13 @@ describe('SearchBox', () => {
 
   it('calls router.replace when index is present in searchParams', () => {
     const mockRows = [{ id: 1, uid: 'user1', date: '2023-01-01', title: 'Test Walk', distance: 5 }];
-    (useData as jest.Mock).mockReturnValue({
-      data: {
+    (useData as jest.Mock).mockReturnValue([
+      {
         offset: 0,
         count: 1,
         rows: mockRows,
       },
-    })
-
-    // const mockSearchParams = {
-    //   get: jest.fn((key) => (key === 'index' ? '0' : null)),
-    // };
-
-    // jest.mocked(useRouter).mockReturnValue({
-    //   replace: mockRouterReplace,
-    // });
+    ])
 
     render(<SearchBox />)
     expect(mockRouterReplace).toHaveBeenCalledWith(expect.stringContaining('/walk/1'))
@@ -99,13 +91,13 @@ describe('SearchBox', () => {
 
   it('displays the correct count when count is greater than 0', () => {
     const mockRows = [{ id: '1', uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
-    (useData as jest.Mock).mockReturnValue({
-      data: {
+    (useData as jest.Mock).mockReturnValue([
+      {
         offset: 0,
         count: 1,
         rows: mockRows,
       },
-    })
+    ])
 
     render(<SearchBox />)
     expect(screen.getByText('1 / 1 item')).toBeInTheDocument()

@@ -44,9 +44,9 @@ describe('PanoramaBox', () => {
       mockDispatchMain,
     ]);
 
-    (useData as jest.Mock).mockReturnValue({
-      data: { current: { path: 'encodedPath' } },
-    });
+    (useData as jest.Mock).mockReturnValue([
+      { current: { path: 'encodedPath' } },
+    ]);
 
     (useMapContext as jest.Mock).mockReturnValue([
       {

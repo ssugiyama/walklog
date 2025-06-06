@@ -24,7 +24,7 @@ const PANORAMA_INTERVAL = 50
 
 const PanoramaBox = () => {
   const [mainState, dispatchMain] = useMainContext()
-  const { data } = useData()
+  const [data] = useData()
   const selectedItem = data.current
   const { overlay, panoramaIndex, panoramaCount } = mainState
   const [mapState] = useMapContext()

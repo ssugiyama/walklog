@@ -33,11 +33,11 @@ export async function generateMetadata({params}) {
       title,
       description,
       url: `/walk/${id}`,
-      images: [
+      images: image ? [
         {
           url: image,
         },
-      ],
+      ] : [],
     },
   }
 }

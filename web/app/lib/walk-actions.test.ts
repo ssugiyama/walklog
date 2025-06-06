@@ -6,7 +6,38 @@ global.TextDecoder = util.TextDecoder
 import { sequelize, Walk, Area, SRID } from '@/lib/db/models'
 import { Op } from 'sequelize'
 import '@testing-library/jest-dom'
-import fs from 'fs/promises'
+import fs from 'fs'
+import admin from 'firebase-admin'
+
+jest.mock('firebase-admin', () => {
+  return {
+    apps: [null],
+    initializeApp: jest.fn(),
+    auth: jest.fn(() => ({
+      verifyIdToken: jest.fn(() => Promise.resolve({ uid: 'testUserId' })),
+      listUsers: jest.fn().mockResolvedValue({ users: [1, 2] }),
+    })),
+  }
+})
+
+jest.mock('fs', () => ({
+  writeFileSync: jest.fn(),
+  readFileSync: jest.fn().mockReturnValue(JSON.stringify({ key: 'value' })),
+}))
+
+import {
+  searchInternalAction,
+  searchAction,
+  getItemInternalAction,
+  getItemAction,
+  getUsersAction,
+  getCityAction,
+  updateItemAction,
+  deleteItemAction,
+  getConfig,
+} from '@/app/lib/walk-actions'
+
+import { revalidateTag } from "next/cache"
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
@@ -20,28 +51,7 @@ jest.mock('sequelize', () => {
   }
 })
 
-jest.mock('firebase-admin', () => {
-  return {
-    initializeApp: jest.fn(),
-    auth: jest.fn(() => ({
-      verifyIdToken: jest.fn(() => Promise.resolve({ uid: 'testUserId' })),
-      listUsers: jest.fn().mockResolvedValue({ users: [1, 2] }),
-    })),
-  }
-})
 
-import admin from 'firebase-admin'
-import {
-  searchInternalAction,
-  searchAction,
-  getItemInternalAction,
-  getItemAction,
-  getUsersAction,
-  getCityAction,
-  updateItemAction,
-  deleteItemAction,
-} from '@/app/lib/walk-actions'
-import { revalidateTag } from "next/cache"
 
 jest.mock('next/cache', () => ({
   unstable_cacheTag: jest.fn(),
@@ -73,7 +83,6 @@ jest.mock('@/lib/db/models', () => {
     SRID: 4326,
     SRID_FOR_SIMILAR_SEARCH: 3857,
   }
-
 })
 
 jest.mock('nanoid', () => {
@@ -81,9 +90,7 @@ jest.mock('nanoid', () => {
     nanoid: jest.fn(() => 'mocked-nanoid'),
   }
 })
-jest.mock('fs/promises', () => ({
-  writeFile: jest.fn(() => Promise.resolve()),
-}))
+
 
 describe('searchInternalAction', () => {
   beforeEach(() => {
@@ -468,7 +475,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
 
     expect(result.error).toBeNull()
-    expect(fs.writeFile).toHaveBeenCalled()
+    expect(fs.writeFileSync).toHaveBeenCalled()
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         image: expect.any(String),
@@ -693,5 +700,60 @@ describe('getUsersAction', () => {
 
     await expect(getUsersAction()).rejects.toThrow('Failed to fetch users')
     expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
+  })
+})
+
+describe('getConfig', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should return the correct configuration object', async () => {
+    const mockDrawingStyles = { style: 'mockStyle' };
+
+    (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockDrawingStyles))
+
+    const result = await getConfig()
+
+    expect(result).toEqual({
+      googleApiKey: process.env.GOOGLE_API_KEY,
+      googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
+      appVersion: '0.9.0',
+      defaultCenter: process.env.DEFAULT_CENTER,
+      defaultRadius: 500,
+      mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
+      mapId: process.env.MAP_ID,
+      firebaseConfig: { key: 'value'},
+      drawingStyles: mockDrawingStyles,
+    })
+    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
+  })
+
+  it('should handle missing environment variables gracefully', async () => {
+    (fs.readFileSync as jest.Mock).mockImplementation(() => Buffer.from('{}'))
+
+    const result = await getConfig()
+
+    expect(result).toEqual({
+      googleApiKey: undefined,
+      googleApiVersion: 'weekly',
+      appVersion: '0.9.0',
+      defaultCenter: undefined,
+      defaultRadius: 500,
+      mapTypeIds: 'roadmap,hybrid,satellite,terrain',
+      mapId: undefined,
+      firebaseConfig: { key: 'value'},
+      drawingStyles: {},
+    })
+    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
+  })
+
+  it('should throw an error if reading the file fails', async () => {
+    (fs.readFileSync as jest.Mock).mockImplementation(() => {
+      throw new Error('File read error')
+    })
+
+    await expect(getConfig()).rejects.toThrow('File read error')
+    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
   })
 })

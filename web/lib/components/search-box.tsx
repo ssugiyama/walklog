@@ -25,7 +25,7 @@ import { useUserContext } from '../utils/user-context'
 const SearchBox = () => {
   const router = useRouter()
   const { users } = useUserContext()
-  const { data } = useData()
+  const [data] = useData()
   console.log('data', data)
   const { offset, count, rows } = data
   const [showDistance, setShowDistance] = useState(true)

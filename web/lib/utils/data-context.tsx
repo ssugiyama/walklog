@@ -148,7 +148,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [getItemState.serial])
 
   return (
-    <DataContext.Provider value={{ reset, data }}>
+    <DataContext.Provider value={[data, reset]}>
       {children}
     </DataContext.Provider>
   )

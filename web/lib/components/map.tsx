@@ -21,12 +21,6 @@ import { idToUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
 import type PolygonManager from '../utils/polygon-manager'
 
-export const loader = new Loader({
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-  version: process.env.NEXT_PUBLIC_GOOGLE_API_VERSION || 'weekly',
-  libraries: ['geometry', 'drawing', 'marker'],
-})
-
 const RESIZE_INTERVAL = 500
 const GSI_MAP_TYPE = 'gsi'
 const PRECISION = 0.0001
@@ -68,7 +62,7 @@ const Map = (props) => {
   const [searchCenter, setSearchCenter] = useQueryParam('center', withDefault(StringParam, config.defaultCenter))
   const [radius, setRadius] = useQueryParam('radius', withDefault(NumberParam, config.defaultRadius))
   const [cities, setCities] = useQueryParam('cities', withDefault(StringParam, ''))
-  const { data } = useData()
+  const [data] = useData()
   const { rows, current } = data
   const refs = useRef<MapRefs>({ initialized: false })
   const rc = refs.current
@@ -85,6 +79,12 @@ const Map = (props) => {
   rc.filter = filter
   rc.searchCenter = searchCenter
   rc.radius = radius
+
+  const loader = new Loader({
+    apiKey: config.googleApiKey,
+    version: config.googleApiVersion,
+    libraries: ['geometry', 'drawing', 'marker'],
+  })
 
   const handleLinkClick = (url) => {
     router.push(url)
@@ -321,10 +321,19 @@ const Map = (props) => {
   useEffect(() => { if (rc.initialized) pathChanged() }, [rc.autoGeolocation])
 
   useEffect(() => {
+    let isMounted = true;
+
+    console.log('useEffect initMap')
     loader.importLibrary('core').then(async () => {
-      await initMap()
+      if (isMounted) {
+        await initMap()
+      }
     })
     loader.importLibrary('geocoding').then(() => { })
+    // clean up
+    return () => {
+      isMounted = false;
+    }
   }, [])
 
   const citiesChanges = () => {
