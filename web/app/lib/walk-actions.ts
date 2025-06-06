@@ -12,18 +12,21 @@ import fs from 'fs'
 import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 
+let firebaseConfig
 
-const content = fs.readFileSync(process.env.FIREBASE_CONFIG)
-const firebaseConfig = JSON.parse(content.toString())
-if (admin.apps.length === 0) {
-  admin.initializeApp({ ...firebaseConfig, credential: admin.credential.applicationDefault() })
+const loadFirebaseConfig = () => {
+  const content = fs.readFileSync(process.env.FIREBASE_CONFIG)
+  firebaseConfig = JSON.parse(content.toString())
+  if (admin.apps.length === 0) {
+    admin.initializeApp({ ...firebaseConfig, credential: admin.credential.applicationDefault() })
+  }
 }
 
 export const getConfig = async () => {
   'use cache'
   const content = fs.readFileSync(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
   const drawingStyles = JSON.parse(content.toString())
-  
+  if (!firebaseConfig) loadFirebaseConfig()
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
