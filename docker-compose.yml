@@ -7,8 +7,7 @@ services:
       - ./data:/var/lib/postgresql/data
   web:
     restart: always
-    build: next
-    # image: chezsugi/walklog_web
+    build: web
     volumes:
       - "./public/${IMAGE_PREFIX:-uploads}:/var/www/public/${IMAGE_PREFIX:-uploads}"
       - ./web/firebase:/var/www/firebase
