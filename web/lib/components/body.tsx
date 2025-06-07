@@ -13,10 +13,9 @@ const Body = ({
 }) => {
   return (
     <AppRouterCacheProvider>
-      <Suspense>
       <ConfigProvider>
         <UserContextProvider>
-          {/* <Suspense> */}
+          <Suspense>
             <DataProvider>
               <MainContextProvider>
                 <Main>
@@ -24,10 +23,9 @@ const Body = ({
                 </Main>
               </MainContextProvider>
             </DataProvider>
-          {/* </Suspense> */}
+          </Suspense>
         </UserContextProvider>
       </ConfigProvider>
-      </Suspense>
     </AppRouterCacheProvider>
   )
 }
