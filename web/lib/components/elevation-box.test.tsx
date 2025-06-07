@@ -40,7 +40,7 @@ describe('ElevationBox', () => {
   })
 
   it('renders null when no selectedItem is present', () => {
-    (useData as jest.Mock).mockReturnValue({ data: { current: null } });
+    (useData as jest.Mock).mockReturnValue([{ current: null }]);
     (useMapContext as jest.Mock).mockReturnValue([{ map: null }])
 
     const { container } = render(<ElevationBox />)
@@ -48,7 +48,7 @@ describe('ElevationBox', () => {
   })
 
   it('renders the elevation box when selectedItem is present', () => {
-    (useData as jest.Mock).mockReturnValue({ data: { current: { path: 'encodedPath' } } });
+    (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
     (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
     (useConfig as jest.Mock).mockReturnValue({ drawingStyles: { polylines: { current: { strokeColor: '#000000' } } } })
 
@@ -58,7 +58,7 @@ describe('ElevationBox', () => {
 
   it('calls updateChart on selectedItem or mapLoaded change', async () => {
 
-    (useData as jest.Mock).mockReturnValue({ data: { current: { path: 'encodedPath' } } });
+    (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
     (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }])
 
     render(<ElevationBox />)

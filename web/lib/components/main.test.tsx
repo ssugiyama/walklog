@@ -66,9 +66,7 @@ Object.defineProperty(navigator, 'share', {
 function renderWithProviders(ui, { mainState = defaultMainState, data = defaultData } = {}) {
   const dispatchMain = jest.fn();
 
-  (useData as jest.Mock).mockReturnValue({
-    data,
-  })
+  (useData as jest.Mock).mockReturnValue([data])
   return {
     ...render(
       <DataProvider>

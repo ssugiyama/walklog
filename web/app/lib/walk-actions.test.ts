@@ -22,7 +22,7 @@ jest.mock('firebase-admin', () => {
 
 jest.mock('fs', () => ({
   writeFileSync: jest.fn(),
-  readFileSync: jest.fn().mockReturnValue(JSON.stringify({ key: 'value' })),
+  readFileSync: jest.fn(),
 }))
 
 import {
@@ -38,6 +38,7 @@ import {
 } from '@/app/lib/walk-actions'
 
 import { revalidateTag } from "next/cache"
+import path from "path"
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
@@ -710,9 +711,13 @@ describe('getConfig', () => {
 
   it('should return the correct configuration object', async () => {
     const mockDrawingStyles = { style: 'mockStyle' };
-
-    (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(mockDrawingStyles))
-
+    const mockFirebaseConfig = { key: 'value' };
+    (fs.readFileSync as jest.Mock).mockImplementation((path) => {
+      if (path === './default-drawing-styles.json') {
+        return Buffer.from(JSON.stringify(mockDrawingStyles));
+      }
+      return Buffer.from(JSON.stringify(mockFirebaseConfig));
+    });
     const result = await getConfig()
 
     expect(result).toEqual({
@@ -723,14 +728,21 @@ describe('getConfig', () => {
       defaultRadius: 500,
       mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
       mapId: process.env.MAP_ID,
-      firebaseConfig: { key: 'value'},
+      firebaseConfig: mockFirebaseConfig,
       drawingStyles: mockDrawingStyles,
     })
     expect(fs.readFileSync).toHaveBeenCalledWith(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
   })
 
   it('should handle missing environment variables gracefully', async () => {
-    (fs.readFileSync as jest.Mock).mockImplementation(() => Buffer.from('{}'))
+    const mockDrawingStyles = {};
+    const mockFirebaseConfig = { key: 'value' };
+    (fs.readFileSync as jest.Mock).mockImplementation((path) => {
+      if (path === './default-drawing-styles.json') {
+        return Buffer.from(JSON.stringify(mockDrawingStyles));
+      }
+      return Buffer.from(JSON.stringify(mockFirebaseConfig));
+    });
 
     const result = await getConfig()
 

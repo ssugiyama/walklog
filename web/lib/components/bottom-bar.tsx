@@ -40,7 +40,7 @@ const BottomBar = (props) => {
   const [, setCities] = useQueryParam('cities', withDefault(StringParam, defaultValues.cities))
   const { overlay, panoramaIndex, panoramaCount } = mainState
   const searchParams = useSearchParams()
-  const { data } = useData()
+  const [data] = useData()
   const pathname = usePathname()
   const match = pathname.match(/\/walk\/(\d+)/)
   const id = match ? Number(match[1]) : null

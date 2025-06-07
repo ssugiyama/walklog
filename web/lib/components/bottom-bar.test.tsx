@@ -79,7 +79,7 @@ describe('BottomBar', () => {
       mockDispatchMain,
     ]);
     (useMapContext as jest.Mock).mockReturnValue(mockMapContext);
-    (useData as jest.Mock).mockReturnValue({ data: mockData });
+    (useData as jest.Mock).mockReturnValue([mockData]);
     (useConfig as jest.Mock).mockReturnValue(mockConfig)
   })
 
@@ -128,7 +128,7 @@ describe('BottomBar', () => {
   })
 
   it('renders filter controls when no item is selected', () => {
-    (useData as jest.Mock).mockReturnValue({ data: { rows: [], offset: 0 } })
+    (useData as jest.Mock).mockReturnValue([{ rows: [], offset: 0 }])
     render(<BottomBar />)
     expect(screen.getByTestId('filter-select')).toBeInTheDocument()
   })

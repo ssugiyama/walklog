@@ -37,7 +37,7 @@ const ItemBox = () => {
   const [tabValue, setTabValue] = useState(0)
   const { users, currentUser } = useUserContext()
   const searchParams = useSearchParams()
-  const { data } = useData()
+  const [data] = useData()
   const item = data.current
   const [editorOpened, setEditorOpened] = useState(false)
   const handleEdit = () => {

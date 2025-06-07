@@ -20,7 +20,7 @@ const ElevationBox = () => {
   const config = useConfig()
   const rootRef = useRef({})
   const refs = useRef<ElevationRefs>({})
-  const { data } = useData()
+  const [data] = useData()
   const selectedItem = data.current
   const mapLoaded = !!mapState.map
   const { map, elevationInfoWindow } = mapState

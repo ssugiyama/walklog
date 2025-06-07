@@ -26,7 +26,7 @@ const Main = ({
 }: {
   children: React.ReactNode
 }) => {
-  const { data } = useData()
+  const [data] = useData()
   const current = data.current
   const headerRef = useRef(null)
   const [barHeight, setBarHeight] = useState(64)

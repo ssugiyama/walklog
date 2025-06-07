@@ -57,8 +57,8 @@ describe('ItemBox Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useData as jest.Mock).mockReturnValue({
-      data: {
+    (useData as jest.Mock).mockReturnValue([
+      {
         current: null,
         isPending: false,
         error: null,
@@ -66,7 +66,7 @@ describe('ItemBox Component', () => {
         prevId: null,
         offset: 0,
       },
-    });
+    ]);
     (useUserContext as jest.Mock).mockReturnValue({
       users: [],
       currentUser: null,
@@ -85,26 +85,26 @@ describe('ItemBox Component', () => {
   })
 
   it('renders loading state when data is pending', () => {
-    (useData as jest.Mock).mockReturnValue({
-      data: { isPending: true },
-    })
+    (useData as jest.Mock).mockReturnValue([
+      { isPending: true },
+    ])
 
     render(<ItemBox />)
     expect(screen.getByText('Loading...')).toBeInTheDocument()
   })
 
   it('renders error state when there is an error', () => {
-    (useData as jest.Mock).mockReturnValue({
-      data: { error: 'Test error' },
-    })
+    (useData as jest.Mock).mockReturnValue([
+      { error: 'Test error' },
+    ])
 
     render(<ItemBox />)
     expect(screen.getByText('Error: Test error')).toBeInTheDocument()
   })
 
   it('renders item details when data is available', () => {
-    (useData as jest.Mock).mockReturnValue({
-      data: {
+    (useData as jest.Mock).mockReturnValue([
+      {
         current: {
           date: '2023-01-01',
           title: 'Test Walk',
@@ -116,7 +116,7 @@ describe('ItemBox Component', () => {
         isPending: false,
         error: null,
       },
-    });
+    ]);
     (useUserContext as jest.Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
@@ -129,13 +129,13 @@ describe('ItemBox Component', () => {
   })
 
   it('calls handleEdit when edit button is clicked', () => {
-    (useData as jest.Mock).mockReturnValue({
-      data: {
+    (useData as jest.Mock).mockReturnValue([
+      {
         current: { uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
-    });
+    ]);
     (useUserContext as jest.Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
@@ -153,13 +153,13 @@ describe('ItemBox Component', () => {
 
   it('calls handleDelete when delete button is clicked', () => {
     window.confirm = jest.fn(() => true);
-    (useData as jest.Mock).mockReturnValue({
-      data: {
+    (useData as jest.Mock).mockReturnValue([
+      {
         current: { id: 'item1', uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
-    });
+    ]);
     (useUserContext as jest.Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
