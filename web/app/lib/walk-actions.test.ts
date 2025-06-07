@@ -38,7 +38,6 @@ import {
 } from '@/app/lib/walk-actions'
 
 import { revalidateTag } from "next/cache"
-import path from "path"
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
