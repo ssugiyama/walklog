@@ -5,13 +5,14 @@ import util from 'util'
 import moment from 'moment'
 import { CityT, WalkT } from '../../types'
 import wkx from 'wkx'
-
+import pg from 'pg'
 export const sequelize = new Sequelize(
   process.env.DB_URL,
   {
     omitNull: true,
     attributeBehavior: 'unsafe-legacy',
     dialect: 'postgres',
+    dialectModule: pg,
   })
 
 export const EARTH_RADIUS = 6370986
