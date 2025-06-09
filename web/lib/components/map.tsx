@@ -192,6 +192,7 @@ const Map = (props) => {
         style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
       },
       center: { lat: parseFloat(cs[0]), lng: parseFloat(cs[1]) },
+      zoom: config.defaultZoom,
     }
     mapElemRef.current.addEventListener('touchmove', (event) => {
       event.preventDefault()
@@ -308,6 +309,7 @@ const Map = (props) => {
       addPaths,
       deleteSelectedPath,
     })
+    console.log('map initialized')
     rc.initialized = true
   }
 
