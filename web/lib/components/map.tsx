@@ -197,10 +197,6 @@ const Map = (props) => {
       event.preventDefault()
     })
     rc.map = new google.maps.Map(mapElemRef.current, options)
-    if (window.localStorage.zoom) {
-      const zoom = parseInt(window.localStorage.zoom, 10)
-      rc.map.setZoom(zoom)
-    }
     if (mapTypeIds.includes(GSI_MAP_TYPE)) {
       createGsiMapType(GSI_MAP_TYPE, rc.map)
     }
@@ -213,9 +209,6 @@ const Map = (props) => {
         rc.polygonManager.addCache(response[0].jcode, response[0].theGeom)
         addCity(response[0].jcode)
       }
-    })
-    google.maps.event.addListener(rc.map, 'zoom_changed', () => {
-      window.localStorage.zoom = rc.map.getZoom()
     })
     google.maps.event.addListener(rc.map, 'tilesloaded', () => {
       google.maps.event.clearListeners(rc.map, 'tilesloaded')
