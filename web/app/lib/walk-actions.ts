@@ -30,7 +30,7 @@ export const getConfig = async () => {
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
-    appVersion: '0.9.0',
+    appVersion: process.env.npm_package_version,
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultRadius: 500,
     mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
