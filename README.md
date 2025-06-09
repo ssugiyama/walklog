@@ -1,119 +1,222 @@
-# walklog
+# Walklog
 
-walklog is a management tool of walking paths.
+Walklog is a web application for managing and tracking walking paths with map visualization and route recording capabilities.
 
-## prerequisite
+## Features
 
-### clone repository
+- Interactive map interface for viewing and creating walking routes
+- Path recording and management
+- User authentication via Firebase
+- Image upload and storage
+- Geographic data visualization
+- Admin user management
+- Multiple map types support (Google Maps, GSI Japan)
 
-```
-% git clone https://github.com/ssugiyama/walklog.git
-% cd walklog
-```
+## Prerequisites
 
-### import shp files
-visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html and download zip file japan_verXX.zip and extract files in some work directory. alternatively you can download data from  National Land Numerical Information (http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-N03.html) and convert into shp format.
+- Node.js (version 14 or higher)
+- PostgreSQL with PostGIS extension
+- Firebase project with authentication enabled
+- Google Maps API key
+- Docker (optional, for containerized deployment)
 
+## Setup
 
-### firebase configuration
+### 1. Clone Repository
 
-Firebase is required for authentication and storage. So you should create firebase project and web app in https://console.firebase.google.com , then enable Google login and create service account for firebase admin. And put firebase config json and service account json in **web/firebase** dir.
-
-### setup envriment variables
-
-```
-% cp .env.example .env
-```
-
-and edit .env
-
-```
-POSTGRES_PASSWORD=password
-DB_URL=postgres://postgres:${POSTGRES_PASSWORD}@db/postgres
-PORT=3000
-SITE_NAME=walklog
-DESCRIPTION=webapp for walk logging
-BASE_URL=http://localhost:3000
-IMAGE_PREFIX=uploads/
-GOOGLE_API_KEY=
-GOOGLE_API_VERSION=
-TWITTER_SITE=@chez_sugi
-EXTERNAL_LINKS=example=http://example.com;example2=http://example2.com
-THEME_PRIMARY=bluegrey
-THEME_SECONDARY=orange
-DARK_THEME_PRIMARY=blue
-DARK_THEME_SECONDARY=amber
-FIREBASE_CONFIG=./firebase/firebase-config.json
-GOOGLE_APPLICATION_CREDENTIALS=./firebase/service-account.json
-ONLY_ADMIN_CAN_CREATE=
-USE_FIREBASE_STORAGE=true
-MAP_STYLE_CONFIG=
-MAP_TYPE_IDS=
-MAP_ID=
-＃ NODE_ENV＝production
-```
-- POSTGRES_PASSWORD: password for db server
-- DB_URL: url for connecting from web to db
-- GOOGLE_API_KEY: needed for google maps. get at https://developers.google.com/maps/documentation/javascript/get-api-key
-- GOOGLE_API_VERSION: see https://developers.google.com/maps/documentation/javascript/versions
-- EXTERNAL_LINKS: specify external links in main menu such as 'name1=url1;name2=url2
-- FIREBASE_CONFIG: firebase config json file path
-- GOOGLE_APPLICATION_CREDENTIALS: firebase admin service account json file path
-- ONLY_ADMIN_CAN_CREATE: if true, only admin user can create new walks.
-- IMAGE_PREFIX: image store prefix
-- USE_FIREBASE_STORAGE: if true, use firebase storage as image store
-- MAP_STYLE_CONFIG: url of config json of map styles. default is '/default-map-styles.json'
-- MAP_TYPE_IDS: selectable map types. default is 'roadmap,hybrid,satellite,terrain'. you can add 'gsi' to use tha map by GSI(The Geospatial Information Authority of Japan).
-- MAP_ID: A map ID is a unique identifier that represents a single instance of a Google Map. You can create map IDs and update a style associated with a map ID at any time in the Cloud Console.
-
-### manage admin users
-
-```
-% cd web
-% ./set-admin.js add firebase-uid
+```bash
+git clone https://github.com/ssugiyama/walklog.git
+cd walklog
 ```
 
-or
+### 2. Import Geographic Data (Shape Files)
 
+You can obtain Japanese geographic data from either:
+
+**Option A: ESRI Japan**
+- Visit http://www.esrij.com/products/gis_data/japanshp/japanshp.html
+- Download `japan_verXX.zip`
+- Extract files to a working directory
+
+**Option B: National Land Numerical Information**
+- Visit http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-N03.html
+- Download data and convert to SHP format
+
+### 3. Firebase Configuration
+
+1. Create a Firebase project at https://console.firebase.google.com
+2. Create a web app in your Firebase project
+3. Enable Google Authentication in Firebase Console
+4. Create a service account for Firebase Admin SDK
+5. Download the following files:
+   - Firebase web app configuration JSON
+   - Service account credentials JSON
+6. Place both files in an arbitrary directory
+
+### 4. Environment Variables
+
+Copy the environment template and configure:
+
+```bash
+cp .env .env.local
 ```
-% cd web
-% ./set-admin.js rm firebase-uid
+
+Edit `.env.local` with your configuration:
+
+```bash
+SITE_NAME=Walklog
+SITE_DESCRIPTION=Web application for managing your walking logs
+IMAGE_PREFIX=uploads
+OPEN_USER_MODE=
+DRAWING_STYLES_JSON=/default-drawing-styles.json
+SRID=4326
+SRID_FOR_SIMILAR_SEARCH=32662
+FIREBASE_CONFIG=path-to-firebase-config.json
+DB_URL=postgres://dbuser:password@host/dbname
+GOOGLE_API_KEY=your-google-maps-api-key
+FIREBASE_STORAGE=on
+MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
+DEFAULT_CENTER=35.6762,139.6503
+MAP_ID=your-google-map-id
+GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
 ```
 
-## with docker
+#### Environment Variables Reference
 
-### 1. setup area table
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `SITE_NAME` | Display name for the application | Yes |
+| `SITE_DESCRIPTION` | Site description for meta tags | Yes |
+| `DB_URL` | PostgreSQL connection string | Yes |
+| `IMAGE_PREFIX` | Prefix for image storage paths | Yes |
+| `OPEN_USER_MODE` | If set, allows all users to manage walks | No |
+| `FIREBASE_CONFIG` | Path to Firebase web config JSON | Yes |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Path to Firebase service account JSON | Yes |
+| `FIREBASE_STORAGE` | Enable Firebase Storage for images (`on`/`off`) | Yes |
+| `DRAWING_STYLES_JSON` | Path to drawing styles configuration | No |
+| `GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
+| `MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
+| `MAP_ID` | Google Maps ID for custom styling | No |
+| `DEFAULT_CENTER` | Default map center as `lat,lng` | No |
+| `SRID` | Spatial Reference System ID for coordinates | No |
+| `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
 
-*work_dir* is the directory which you put shp files in.
+### 5. Admin User Management
 
-    % docker-compose run -v *work_dir*:/tmp --rm db manage-areas.sh -h db *shp_file*
+To manage admin users, use the provided script:
 
-### 2. set up and start servers
+```bash
+cd web
 
+# Add admin user
+GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
+./bin/set-admin.js add firebase-uid
+
+# Remove admin user
+GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
+./bin/set-admin.js rm firebase-uid
 ```
-% docker-compose up -d
+
+## Deployment Options
+
+### Option 1: Docker Deployment (Recommended)
+
+#### Setup Area Database
+Replace `*work_dir*` with your shapefile directory and `*shp_file*` with your shapefile name:
+
+```bash
+docker-compose run -v /path/to/work_dir:/tmp --rm db manage-areas.sh -h db shapefile.shp
 ```
 
-## without docker
+#### Start Services
+```bash
+docker-compose up -d
+```
 
-### 0. requirement
+The application will be available at http://localhost:3000
 
-- postgresql with postgis 2.4 or higher
-- PosrGIS enabled database
-- node.js
-- yarn
+### Option 2: Manual Deployment
 
-### 1. setup areas table
-    % cd *work_dir*
-    % $(project_root)/db/manage-areas.sh *shp_file*
+#### Prerequisites
+- PostgreSQL with PostGIS 2.4 or higher
+- PostGIS-enabled database
+- Node.js
 
-### 2. set up and start api server
-    % cd ../web
-    % export NODE_ENV=xxx
-    % cp assets/* public/
-    % yarn install --production=false && yarn build-cli && yarn build-svr
-    % yarn start-with-dotenv
+#### Setup Database
+```bash
+cd /path/to/work_dir
+/path/to/walklog/db/manage-areas.sh shapefile.shp
+```
 
-You may access http://localhost:3000 .
+#### Setup and Start Application
+```bash
+cd web
+export NODE_ENV=production
+npm install --force
+npm run build
+npm start
+```
 
- demo: http://walk.asharpminor.com/
+## Development
+
+### Development Mode
+```bash
+cd web
+npm install --force
+npm run dev
+```
+
+Access the development server at http://localhost:3000
+
+### Project Structure
+```
+walklog/
+├── web/            # Next.js application
+├── db/             # Database scripts and migrations
+├── docker-compose.yml
+└── README.md
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Database Connection Errors**
+- Verify PostgreSQL is running and accessible
+- Check DB_URL format: `postgres://user:password@host:port/database`
+- Ensure PostGIS extension is enabled
+
+**Firebase Authentication Issues**
+- Verify Firebase configuration files are correctly placed
+- Check that Google Authentication is enabled in Firebase Console
+- Ensure service account has proper permissions
+
+**Map Not Loading**
+- Verify `GOOGLE_API_KEY` is set correctly
+- Check that Google Maps JavaScript API is enabled
+- Ensure API key has proper restrictions and permissions
+
+**Image Upload Issues**
+- Check Firebase Storage rules and permissions
+- Verify `FIREBASE_STORAGE` environment variable
+- Ensure service account has Storage Admin role
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+MIT License
+
+## Demo
+
+Live demo: http://walk.asharpminor.com/
+
+## Support
+
+For issues and questions, please create an issue on the GitHub repository.
