@@ -4,6 +4,7 @@ import '@testing-library/jest-dom'
 import Main from '@/lib/components/main'
 import MainContext from '@/lib/utils/main-context'
 import { DataProvider, useData } from '@/lib/utils/data-context'
+import { useConfig } from '@/lib/utils/config'
 
 const defaultMainState = {
   mode: 'map',
@@ -47,6 +48,14 @@ jest.mock('use-query-params', () => ({
 }))
 
 jest.mock('next-query-params/app', () => ({}))
+
+jest.mock('@/lib/utils/config', () => ({
+  useConfig: jest.fn(() => ({
+    theme: {
+      palette: {},
+    }
+  })),
+})) 
 
 // Mock clipboard API
 Object.defineProperty(navigator, 'clipboard', {
