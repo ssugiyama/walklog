@@ -32,6 +32,7 @@ export const getConfig = async () => {
     googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
     appVersion: process.env.npm_package_version,
     defaultCenter: process.env.DEFAULT_CENTER,
+    defaultZoom: parseInt(process.env.DEFAULT_ZOOM || '12', 10),
     defaultRadius: 500,
     mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
     mapId: process.env.MAP_ID,
