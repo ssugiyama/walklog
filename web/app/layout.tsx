@@ -1,6 +1,15 @@
 import Body from '../lib/components/body';
 import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
+import type { Viewport } from 'next'
+ 
+export const viewport: Viewport = {
+
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: process.env.THEME_COLOR_LIGHT || '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: process.env.THEME_COLOR_DARK || '#000000' },
+  ],
+}
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
