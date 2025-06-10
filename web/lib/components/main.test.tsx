@@ -4,7 +4,6 @@ import '@testing-library/jest-dom'
 import Main from '@/lib/components/main'
 import MainContext from '@/lib/utils/main-context'
 import { DataProvider, useData } from '@/lib/utils/data-context'
-import { useConfig } from '@/lib/utils/config'
 
 const defaultMainState = {
   mode: 'map',

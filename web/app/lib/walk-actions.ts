@@ -24,9 +24,9 @@ const loadFirebaseConfig = () => {
 
 export const getConfig = async () => {
   'use cache'
-  let drawingStylesContent = fs.readFileSync(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
+  const drawingStylesContent = fs.readFileSync(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
   const drawingStyles = JSON.parse(drawingStylesContent.toString())
-  let themeContent = fs.readFileSync(process.env.THEME_JSON || './default-theme.json')
+  const themeContent = fs.readFileSync(process.env.THEME_JSON || './default-theme.json')
   const theme = JSON.parse(themeContent.toString())
   if (!firebaseConfig) loadFirebaseConfig()
   return {
