@@ -15,8 +15,9 @@ import Map from './map'
 import BottomBar from './bottom-bar'
 import { MapContextProvider } from '../utils/map-context'
 import { useData } from '../utils/data-context'
+import { useConfig } from '../utils/config'
+import { createTheme } from '@mui/material/styles'
 import { ThemeProvider } from '@mui/material/styles'
-import theme from '../../theme'
 import NextAdapterApp from 'next-query-params/app'
 import { QueryParamProvider } from 'use-query-params'
 import { useMainContext } from '../utils/main-context'
@@ -36,7 +37,11 @@ const Main = ({
   const handleRequestClose = useCallback(() => {
     console.log('snackbar closed')
     dispatchMain({ type: 'CLOSE_SNACKBAR' })
-  }, [])
+  }, []);
+  const config = useConfig()
+  const theme = useMemo(() => 
+    createTheme(config.theme), 
+  [config.theme])
   const toggleViewCB = useCallback(() => dispatchMain({ type: 'TOGGLE_VIEW' }), [])
   const shareCB = useCallback(async () => {
     try {
