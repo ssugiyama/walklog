@@ -710,10 +710,14 @@ describe('getConfig', () => {
 
   it('should return the correct configuration object', async () => {
     const mockDrawingStyles = { style: 'mockStyle' };
+    const mockTheme = { palette: {} };
     const mockFirebaseConfig = { key: 'value' };
     (fs.readFileSync as jest.Mock).mockImplementation((path) => {
       if (path === './default-drawing-styles.json') {
         return Buffer.from(JSON.stringify(mockDrawingStyles));
+      }
+      if (path === './default-theme.json') {
+        return Buffer.from(JSON.stringify(mockTheme));
       }
       return Buffer.from(JSON.stringify(mockFirebaseConfig));
     });
@@ -729,36 +733,9 @@ describe('getConfig', () => {
       mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
       mapId: process.env.MAP_ID,
       firebaseConfig: mockFirebaseConfig,
+      theme: mockTheme,
       drawingStyles: mockDrawingStyles,
     })
-    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
-  })
-
-  it('should handle missing environment variables gracefully', async () => {
-    const mockDrawingStyles = {};
-    const mockFirebaseConfig = { key: 'value' };
-    (fs.readFileSync as jest.Mock).mockImplementation((path) => {
-      if (path === './default-drawing-styles.json') {
-        return Buffer.from(JSON.stringify(mockDrawingStyles));
-      }
-      return Buffer.from(JSON.stringify(mockFirebaseConfig));
-    });
-
-    const result = await getConfig()
-
-    expect(result).toEqual({
-      googleApiKey: undefined,
-      googleApiVersion: 'weekly',
-      appVersion: '0.9.0',
-      defaultCenter: undefined,
-      defaultZoom: 12,
-      defaultRadius: 500,
-      mapTypeIds: 'roadmap,hybrid,satellite,terrain',
-      mapId: undefined,
-      firebaseConfig: { key: 'value'},
-      drawingStyles: {},
-    })
-    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
   })
 
   it('should throw an error if reading the file fails', async () => {

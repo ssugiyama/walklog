@@ -24,8 +24,10 @@ const loadFirebaseConfig = () => {
 
 export const getConfig = async () => {
   'use cache'
-  const content = fs.readFileSync(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
-  const drawingStyles = JSON.parse(content.toString())
+  const drawingStylesContent = fs.readFileSync(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
+  const drawingStyles = JSON.parse(drawingStylesContent.toString())
+  const themeContent = fs.readFileSync(process.env.THEME_JSON || './default-theme.json')
+  const theme = JSON.parse(themeContent.toString())
   if (!firebaseConfig) loadFirebaseConfig()
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
@@ -38,6 +40,7 @@ export const getConfig = async () => {
     mapId: process.env.MAP_ID,
     firebaseConfig,
     drawingStyles,
+    theme,
   }
 }
 

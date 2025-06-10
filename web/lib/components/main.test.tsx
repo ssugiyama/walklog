@@ -48,6 +48,14 @@ jest.mock('use-query-params', () => ({
 
 jest.mock('next-query-params/app', () => ({}))
 
+jest.mock('@/lib/utils/config', () => ({
+  useConfig: jest.fn(() => ({
+    theme: {
+      palette: {},
+    }
+  })),
+})) 
+
 // Mock clipboard API
 Object.defineProperty(navigator, 'clipboard', {
   value: {

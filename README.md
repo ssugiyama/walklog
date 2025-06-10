@@ -77,8 +77,11 @@ GOOGLE_API_KEY=your-google-maps-api-key
 FIREBASE_STORAGE=on
 MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
 DEFAULT_CENTER=35.6762,139.6503
+DEFAULT_ZOOM=12
 MAP_ID=your-google-map-id
 GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
+THEME_COLOR_LIGHT="#3874cb"
+THEME_COLOR_DARK="#3874cb"
 ```
 
 #### Environment Variables Reference
@@ -97,9 +100,13 @@ GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
 | `GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
 | `MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
 | `MAP_ID` | Google Maps ID for custom styling | No |
-| `DEFAULT_CENTER` | Default map center as `lat,lng` | No |
+| `DEFAULT_CENTER` | Default map center as `lat,lng` | Yes |
+| `DEFAULT_ZOOM` | Default map zoom | No |
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
+| `THEME_JSON` | Theme specification for material-ui | No |
+| `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
+| `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
 
 ### 5. Admin User Management
 
