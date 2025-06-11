@@ -14,11 +14,14 @@ jobs:
         node-version: '23.x'
     - name: Install dependencies
       run: npm ci --force
-    - uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
+    - name: run eslint
+      uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         reporter: github-pr-review
-    - uses: ziishaned/jest-reporter-action@872c1051350ecaf625ba2490d68e7cb63854b44c # v0.1.1
+        workdir: web
+    - name: run jest
+      uses: ziishaned/jest-reporter-action@872c1051350ecaf625ba2490d68e7cb63854b44c # v0.1.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         test-command: "npm run test"
