@@ -143,7 +143,7 @@ const ItemBox = () => {
         <Box sx={{ textAlign: 'right' }}>
           {
             draft ?
-              <Chip label="draft" color="warning" sx={{ float: 'right' }} /> : dataUser ?
+              <Chip label="draft" color="warning" /> : dataUser ?
                 (
                   <Chip
                     avatar={(
