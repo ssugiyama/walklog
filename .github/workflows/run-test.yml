@@ -10,11 +10,15 @@ jobs:
       with:
         node-version: '23.x'
     - name: Install dependencies
-      run: npm install --force
+      run: npm ci --force
       working-directory: web
-    - name: Run tests
-      run: npm run test
-      working-directory: web
-    - name: Run eslint
-      run: npm run lint
-      working-directory: web
+    - uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        reporter: github-pr-review
+        working-directory: web
+    - uses: ziishaned/jest-reporter-action@872c1051350ecaf625ba2490d68e7cb63854b44c # v0.1.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        test-command: "npm run test"
+        working-directory: web
