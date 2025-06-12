@@ -21,7 +21,7 @@ jobs:
     - name: run eslint
       env:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm run lint | reviewdog -f=eslint -reporter=github-pr-review -filter-mode=diff_context -fail-on-error=true
+      run: npm run lint | reviewdog -f=eslint -reporter=github-pr-review -filter-mode=diff_context -fail-level=error
     - name: run jest
       uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
       with:
