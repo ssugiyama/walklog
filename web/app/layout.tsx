@@ -6,8 +6,8 @@ import type { Viewport } from 'next'
 export const viewport: Viewport = {
 
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: process.env.THEME_COLOR_LIGHT || '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: process.env.THEME_COLOR_DARK || '#000000' },
+    { media: '(prefers-color-scheme: light)', color: process.env.THEME_COLOR_LIGHT || process.env.THEME_COLOR || '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: process.env.THEME_COLOR_DARK || process.env.THEME_COLOR || '#000000' },
   ],
 }
 

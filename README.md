@@ -80,8 +80,9 @@ DEFAULT_CENTER=35.6762,139.6503
 DEFAULT_ZOOM=12
 MAP_ID=your-google-map-id
 GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
-THEME_COLOR_LIGHT="#3874cb"
-THEME_COLOR_DARK="#3874cb"
+THEME_COLOR="#3874cb"
+# THEME_COLOR_LIGHT="#3874cb"
+# THEME_COLOR_DARK="#3874cb"
 ```
 
 #### Environment Variables Reference
@@ -105,6 +106,7 @@ THEME_COLOR_DARK="#3874cb"
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
 | `THEME_JSON` | Theme specification for material-ui | No |
+| `THEME_COLOR` | Theme color for UA in both light mode and dark mode| No |
 | `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
 | `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
 
