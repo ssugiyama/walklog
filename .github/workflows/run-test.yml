@@ -28,3 +28,4 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         test-command: "npm run test"
         working-directory: web
+        skip-stepp: install
