@@ -14,14 +14,16 @@ jobs:
         node-version: '23.x'
     - name: Install dependencies
       run: npm ci --force
-    - name: run eslint
-      uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
+    - name: setup reviewdog
+      uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        reporter: github-pr-review
-        workdir: web
+        version: latest
+    - name: run eslint
+      env:
+        REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm run lint | reviewdog -f=eslint -reporter=github-pr-review -filter-mode=diff_context -fail-on-error=true
     - name: run jest
-      uses: ziishaned/jest-reporter-action@872c1051350ecaf625ba2490d68e7cb63854b44c # v0.1.1
+      uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         test-command: "npm run test"
