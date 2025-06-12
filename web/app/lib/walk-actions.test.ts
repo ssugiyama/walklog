@@ -726,6 +726,7 @@ describe('getConfig', () => {
     expect(result).toEqual({
       googleApiKey: process.env.GOOGLE_API_KEY,
       googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
+      appVersion: '0.9.0',
       defaultCenter: process.env.DEFAULT_CENTER,
       defaultZoom: 12,
       defaultRadius: 500,
