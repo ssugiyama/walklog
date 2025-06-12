@@ -1,8 +1,11 @@
 name: run test
-on: [push]
+on: pull_request
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js
@@ -10,11 +13,19 @@ jobs:
       with:
         node-version: '23.x'
     - name: Install dependencies
-      run: npm install --force
-      working-directory: web
-    - name: Run tests
-      run: npm run test
-      working-directory: web
-    - name: Run eslint
-      run: npm run lint
-      working-directory: web
+      run: npm ci --force
+    - name: setup reviewdog
+      uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
+      with:
+        version: latest
+    - name: run eslint
+      env:
+        REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm run lint | reviewdog -f=eslint -reporter=github-pr-review -filter-mode=diff_context -fail-level=error
+    - name: run jest
+      uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        test-script: "npm run test"
+        working-directory: web
+        skip-step: install
