@@ -13,6 +13,7 @@ permissions:
   pages: write
   id-token: write
   packages: write
+  attestations: write
 
 jobs:
   push_to_registry:
@@ -36,6 +37,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web
 
       - name: Build and push Web Docker image
+        id: web_build
         uses: docker/build-push-action@v6
         with:
           context: web
@@ -49,7 +51,7 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web
-          subject-digest: ${{ steps.web_meta.outputs.digest }}
+          subject-digest: ${{ steps.web_build.outputs.digest }}
           push-to-registry: true
 
       - name: Extract metadata (tags, labels) for DB
@@ -59,6 +61,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-db
 
       - name: Build and push DB Docker image
+        id: db_build
         uses: docker/build-push-action@v6
         with:
           context: db
@@ -70,5 +73,5 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-db
-          subject-digest: ${{ steps.db_meta.outputs.digest }}
+          subject-digest: ${{ steps.db_build.outputs.digest }}
           push-to-registry: true
