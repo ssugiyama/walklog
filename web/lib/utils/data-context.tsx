@@ -42,6 +42,8 @@ const initialGetItemState = {
 
 const DataContext = createContext(null)
 
+const watchKeys = ['order', 'filter', 'month', 'year', 'user', 'path', 'center', 'radius', 'cities']
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const config = useConfig()
   const [isPending, startTransition] = useTransition()
@@ -63,8 +65,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     cities: '',
     path: '',
   }
-  console.log('DataProvider', data)
-  const watchKeys = ['order', 'filter', 'month', 'year', 'user', 'path', 'center', 'radius', 'cities']
   const searchParams = useSearchParams()
   const params = useParams()
   const props = { ...defaultValues }
@@ -80,9 +80,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setForceReload(forceReload + 1)
   }
   useEffect(() => {
-    console.log('isPending', isPending)
     data.isPending = isPending
-    console.log('data', { ...data })
     setData(data)
   }, [isPending])
   useEffect(() => {
@@ -91,7 +89,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       if (id !== null) {
         index = data.rows.findIndex((row) => row.id === id)
       }
-      console.log('index', index)
       if (index >= 0) {
         const newData = { ...data }
         newData.index = index
@@ -103,7 +100,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (watchKeys.every((key) => oldParams.get(key) === searchParams.get(key)) &&
           data.offset > 0 && props.limit > data.offset) {
           const current = data.offset
-          console.log('current', current)
           props.offset = current
           props.limit = props.limit - current
         }
@@ -128,7 +124,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     const newData = Object.assign({ ...initialData }, searchState)
     newData.params = searchParams.toString()
-    console.log('props', props)
     if (searchState.append) {
       newData.rows.unshift(...data.rows)
     }

@@ -121,7 +121,6 @@ const Map = (props) => {
   const pathChanged = () => {
     if (!rc.pathManager) return
     const nextPath = rc.pathManager.getEncodedSelection()
-    console.log('pathChanged', nextPath, rc.pathManager.getSelection()?.getPath())
     if (searchPath !== nextPath) {
       setSearchPath(nextPath)
       if (nextPath) {
@@ -175,7 +174,6 @@ const Map = (props) => {
   }
 
   const initMap = async () => {
-    console.log('initMap')
     if (rc.initialized) return
     rc.drawingStyles = config.drawingStyles
     const mapTypeIds = config.mapTypeIds.split(/,/)
@@ -202,7 +200,6 @@ const Map = (props) => {
       createGsiMapType(GSI_MAP_TYPE, rc.map)
     }
     google.maps.event.addListener(rc.map, 'click', async (event) => {
-      console.log('map click', rc.filter)
       if (['neighborhood', 'start', 'end'].includes(rc.filter)) {
         rc.distanceWidget.setCenter(event.latLng.toJSON())
       } else if (rc.filter === 'cities') {
@@ -309,7 +306,6 @@ const Map = (props) => {
       addPaths,
       deleteSelectedPath,
     })
-    console.log('map initialized')
     rc.initialized = true
   }
 
@@ -317,8 +313,6 @@ const Map = (props) => {
 
   useEffect(() => {
     let isMounted = true;
-
-    console.log('useEffect initMap')
     loader.importLibrary('core').then(async () => {
       if (isMounted) {
         await initMap()
@@ -348,7 +342,6 @@ const Map = (props) => {
   useEffect(() => {
     if (!rc.initialized) return
     clearPaths(true)
-    console.log('addPaths', rows)
     addPaths(rows)
   }, [rows, rc.initialized])
   useEffect(() => {
@@ -375,7 +368,6 @@ const Map = (props) => {
   }, [filter, searchCenter, radius, rc.initialized])
 
   useEffect(() => {
-    console.log('filter', filter, rc.filter, rc.initialized)
     if (!rc.initialized) return
     if (rc.filter === 'cities' && citiesChanges() && !rc.fetching) {
       rc.polygonManager.deleteAll()
@@ -393,7 +385,6 @@ const Map = (props) => {
             }
           })
           const cities = await getCityAction({ jcodes: uncached })
-          console.log('cities', cities)
           cities.forEach((city) => {
             rc.polygonManager.addPolygon(city.jcode, city.theGeom)
           })

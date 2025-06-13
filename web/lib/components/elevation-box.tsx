@@ -106,7 +106,6 @@ const ElevationBox = () => {
   useEffect(() => {
     updateChart()
   }, [selectedItem, mapLoaded])
-  console.log('elevation box', selectedItem)
   if (selectedItem) {
 
     return (

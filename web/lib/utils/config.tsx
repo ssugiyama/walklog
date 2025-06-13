@@ -10,7 +10,6 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
       setCOnfig(config)
     })
   }, [])
-  console.log('config', config)
   return (
     <ConfigContext.Provider value={config}>
       {config ? children : null}

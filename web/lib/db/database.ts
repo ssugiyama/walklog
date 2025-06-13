@@ -13,8 +13,10 @@ const config: {
   dialect: 'postgres',
 }
 
-export default {
+const configForEnv = {
   development: config,
   test: config,
   production: config,
 }
+
+export default configForEnv

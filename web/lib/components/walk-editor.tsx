@@ -31,7 +31,6 @@ const WalkEditor = ({ item, opened, setOpened }) => {
   }
 
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-  console.log('state', state)
   const { updateIdToken } = useUserContext()
   const [, reset] = useData()
   const [searchPath] = useQueryParam('path', withDefault(StringParam, ''));
@@ -50,7 +49,6 @@ const WalkEditor = ({ item, opened, setOpened }) => {
   }, [opened, formRef.current === null]);
   useEffect(() => {
     if (state.serial > 0) {
-      console.log('state', state)
       if (state.idTokenExpired) {
         (async () => {
           await updateIdToken()
@@ -62,7 +60,6 @@ const WalkEditor = ({ item, opened, setOpened }) => {
         if (item?.id) {
           reset()
         } else if (state.id) {
-          console.log('state.id', state.id)
           router.push(`/walk/${state.id}`)
         }
       }
@@ -106,7 +103,6 @@ const WalkEditor = ({ item, opened, setOpened }) => {
         <Button data-testid="submit-button" disabled={isPending} onClick={handleSubmit} color="secondary">{item?.id ? 'update' : 'create'}</Button>
       </DialogActions>
     </Dialog>
-
   );
 };
 

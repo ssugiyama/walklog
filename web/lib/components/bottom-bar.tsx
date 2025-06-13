@@ -49,7 +49,6 @@ const BottomBar = (props) => {
   const prevId = index > 0 ? data.rows[index - 1].id : null
   const nextId = index < data.rows.length - 1 ? data.rows[index + 1].id : null
   const createPanoramaIndexButtonClickCB = (d: number) => () => (
-    console.log('createPanoramaIndexButtonClickCB', d, panoramaIndex),
     dispatchMain({ type: 'SET_PANORAMA_INDEX', payload: panoramaIndex + d })
   )
   const panoramaIndexButtonClickCBs = {

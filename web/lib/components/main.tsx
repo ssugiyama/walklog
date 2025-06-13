@@ -35,7 +35,6 @@ const Main = ({
   const [mainState, dispatchMain] = useMainContext()
   const { toolBoxOpened } = mainState
   const handleRequestClose = useCallback(() => {
-    console.log('snackbar closed')
     dispatchMain({ type: 'CLOSE_SNACKBAR' })
   }, []);
   const config = useConfig()
