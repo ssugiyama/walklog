@@ -63,7 +63,6 @@ const NavBar = (props) => {
     })
   }, [])
   useEffect(() => {
-    console.log('firebase config', config.firebaseConfig)
     if (!config.firebaseConfig) return
 
     initializeApp(config.firebaseConfig)

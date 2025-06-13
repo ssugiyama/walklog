@@ -54,7 +54,6 @@ const ItemBox = () => {
   }, [swiper])
   
   const indexCHangeCB = useCallback((swiper: SwiperCore) => {
-    console.log('indexCHangeCB', swiper.activeIndex)
     setTabValue(swiper.activeIndex)
   }, [])
   const initialDeleteState = {
@@ -67,7 +66,6 @@ const ItemBox = () => {
   const [isPending, startTransition] = useTransition()
   const [deleteState, dispatchDelete] = useActionState(deleteItemAction, initialDeleteState)
   const handleDelete = useCallback(() => {
-    console.log('handleDelete', item?.id)
     startTransition(async () => {
       if (window.confirm('Are you sure to delete?')) {
         await dispatchDelete(item?.id)
@@ -76,7 +74,6 @@ const ItemBox = () => {
   }, [item?.id])
   useEffect(() => {
     if (deleteState.serial > 0) {
-      console.log('deleteState', deleteState)
       if (deleteState.idTokenExpired) {
         (async () => {
           await updateIdToken()
@@ -94,7 +91,6 @@ const ItemBox = () => {
   let dataUser: UserT 
   let image: string | undefined;
 
-  console.log('data', data)
   const itemWillRender = !data.isPending && !data.error && item
   if (data.isPending) {
     title = 'Loading...'

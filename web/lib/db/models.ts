@@ -133,7 +133,6 @@ export class Area extends Model<InferAttributes<Area>, InferCreationAttributes<A
   declare the_geom: MultiPolygonJson
 
   encodedGeom(): string {
-    console.log('encodedGeom', this.the_geom)
     return this.the_geom.coordinates.map((polygons) => encode(polygons[0])).join(' ')
   }
 

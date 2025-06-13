@@ -234,7 +234,6 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   getEncodedSelection() {
-    console.log('getEncodedSelection', this.selection?.getPath())
     if (this.selection) {
       return google.maps.geometry.encoding.encodePath(this.selection.getPath())
     }

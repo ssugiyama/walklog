@@ -71,7 +71,6 @@ const PanoramaBox = () => {
     const pt = item[0]
     const heading = item[1]
     const pnrm = overlay ? mapState.map.getStreetView() : refs.current.panorama
-    console.log('streetViewService', refs.current.streetViewService)
     const request = {
       location: pt,
       radius: 50,
@@ -91,7 +90,6 @@ const PanoramaBox = () => {
   const setStreetView = (pnrm) => {
     if (mapState.map) mapState.map.setStreetView(pnrm)
   }
-  console.log('panorama', mapLoaded)
   const updatePath = (item) => {
     if (!mapLoaded) return
     if (!item) {
@@ -104,7 +102,6 @@ const PanoramaBox = () => {
     }
     const path = google.maps.geometry.encoding.decodePath(item.path)
     refs.current.panoramaPointsAndHeadings = getPanoramaPointsAndHeadings(path)
-    console.log('refs.current.panoramaPointsAndHeadings', refs.current.panoramaPointsAndHeadings)
     dispatchMain({ type: 'SET_PANORAMA_COUNT', payload: refs.current.panoramaPointsAndHeadings.length })
     // setTimeout(() => {this.props.setPanoramaIndex(0);}, 0);
     dispatchMain({ type: 'SET_PANORAMA_INDEX', payload: 0 })
@@ -141,7 +138,6 @@ const PanoramaBox = () => {
   }, [overlay, mapLoaded])
 
   useEffect(() => {
-    console.log('panorama', selectedItem)
     updatePath(selectedItem)
   }, [selectedItem, mapLoaded])
 

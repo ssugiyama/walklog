@@ -46,7 +46,6 @@ const mainReducer = (state, action: MainAction) => {
     case 'SET_OVERLAY':
       return { ...state, overlay: action.payload }
     case 'SET_PANORAMA_INDEX':
-      console.log('SET_PANORAMA_INDEX', action.payload)
       return { ...state, panoramaIndex: action.payload }
     case 'SET_PANORAMA_COUNT':
       return { ...state, panoramaCount: action.payload }

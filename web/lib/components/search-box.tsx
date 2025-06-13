@@ -26,7 +26,6 @@ const SearchBox = () => {
   const router = useRouter()
   const { users } = useUserContext()
   const [data] = useData()
-  console.log('data', data)
   const { offset, count, rows } = data
   const [showDistance, setShowDistance] = useState(true)
   const searchParams = useSearchParams()
@@ -38,8 +37,6 @@ const SearchBox = () => {
     if (index !== null) {
       const i = Number(index)
       const id = rows[i]?.id
-      console.log('rows', rows)
-      console.log('id', id)
       if (id) {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.delete('index')

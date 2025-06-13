@@ -1,9 +1,20 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "next/typescript"
+    "next/typescript",
+    "prettier"
   ],
   "rules": {
-    "camelcase": ["error", { "properties": "never" }]
+    "camelcase": ["error", { "properties": "never" }],
+    "no-console": [
+      "error", {
+        "allow": [
+          "warn",
+          "error"
+        ]
+      }
+    ],
+    "react-hooks/exhaustive-deps": "off",
+    "@next/next/no-img-element": "off"
   }
 }

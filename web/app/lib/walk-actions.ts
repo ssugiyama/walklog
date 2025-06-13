@@ -56,7 +56,6 @@ const getUid = async (state) => {
   state.idTokenExpired = false
   state.error = null
   const idToken = cookieStore.get('idToken')
-  console.log('getUid', idToken)
   if (!idToken?.value) {
     return [null, false]
   }
@@ -65,7 +64,7 @@ const getUid = async (state) => {
       .verifyIdToken(idToken.value)
     return [claim?.uid, claim?.admin || false]
   } catch (error) {
-    console.log('getUid', error)
+    console.error('getUid', error)
     if (error.code === 'auth/id-token-expired') {
       state.idTokenExpired = true
     } else {
@@ -324,7 +323,6 @@ export const updateItemAction = async (prevState, formData, _getUid = getUid): P
     props.path = Walk.decodePath(walkPath)
     props.length = sequelize.literal(`ST_LENGTH('${props.path}', true)/1000`)
   }
-  console.log('updateItemAction', willDeleteImage, image)
   try {
     if (willDeleteImage) {
       props.image = null
@@ -343,7 +341,6 @@ export const updateItemAction = async (prevState, formData, _getUid = getUid): P
         props.image = filePath
       }
     }
-    console.log('updateItemAction', props)
     if (id) {
       const walk = await Walk.findByPk(id)
       if (walk.uid !== uid) {
@@ -357,9 +354,8 @@ export const updateItemAction = async (prevState, formData, _getUid = getUid): P
       state.id = walk?.id
     }
     revalidateTag(SEARCH_CACHE_TAG)
-    console.log('updateItemAction', props)
   } catch (error) {
-    await console.error(error)
+    console.error(error)
     state.error = error.message
   }
   return state
