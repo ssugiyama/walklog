@@ -1,5 +1,9 @@
 name: run test
 on: pull_request
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
 jobs:
   test:
     runs-on: ubuntu-latest
