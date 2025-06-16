@@ -13,14 +13,14 @@
     },
     "polylines": {
         "normal": {
-            "strokeColor": "#4040ff",
-            "strokeOpacity": 0.5,
+            "strokeColor": "#f09d38",
+            "strokeOpacity": 0.6,
             "strokeWeight": 2,
             "zIndex": 30
         },
         "new": {
             "strokeColor": "#32a852",
-            "strokeOpacity": 0.5,
+            "strokeOpacity": 0.8,
             "strokeWeight": 2,
             "zIndex": 30
         },

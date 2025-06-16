@@ -709,12 +709,12 @@ describe('getConfig', () => {
   })
 
   it('should return the correct configuration object', async () => {
-    const mockDrawingStyles = { style: 'mockStyle' };
+    const mockShapeStyles = { style: 'mockStyle' };
     const mockTheme = { palette: {} };
     const mockFirebaseConfig = { key: 'value' };
     (fs.readFileSync as jest.Mock).mockImplementation((path) => {
-      if (path === './default-drawing-styles.json') {
-        return Buffer.from(JSON.stringify(mockDrawingStyles));
+      if (path === './default-shape-styles.json') {
+        return Buffer.from(JSON.stringify(mockShapeStyles));
       }
       if (path === './default-theme.json') {
         return Buffer.from(JSON.stringify(mockTheme));
@@ -734,7 +734,7 @@ describe('getConfig', () => {
       mapId: process.env.MAP_ID,
       firebaseConfig: mockFirebaseConfig,
       theme: mockTheme,
-      drawingStyles: mockDrawingStyles,
+      drawingStyles: mockShapeStyles,
     })
   })
 
@@ -744,6 +744,6 @@ describe('getConfig', () => {
     })
 
     await expect(getConfig()).rejects.toThrow('File read error')
-    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.DRAWING_STYLES_JSON || './default-drawing-styles.json')
+    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON || './default-shape-styles.json')
   })
 })

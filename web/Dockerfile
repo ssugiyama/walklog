@@ -48,7 +48,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/default-drawing-styles.json ./default-drawing-styles.json
+COPY --from=builder /app/default-shape-styles.json ./default-shape-styles.json
 COPY --from=builder /app/default-theme.json ./default-theme.json
 
 # Automatically leverage output traces to reduce image size
