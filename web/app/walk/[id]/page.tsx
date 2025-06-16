@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation"
 import ItemBox from "../../../lib/components/item-box"
 import { getItemAction } from "../../lib/walk-actions"
 
@@ -7,7 +8,7 @@ export default async function Page() {
   )
 }
 
-export async function generateMetadata({params}) {
+export async function generateMetadata({params}: {params: Promise<{ id: string }>}) {
   const getItemState = {
     error: null,
     idTokenExpired: false,
@@ -15,12 +16,9 @@ export async function generateMetadata({params}) {
     serial: 0,
   }
   const { id } = await params
-  const newState = await getItemAction(getItemState, id)
+  const newState = await getItemAction(getItemState, Number(id))
   if (!newState.current) {
-    return {
-      title: newState.error ? 'Error' : 'Not Found',
-      description: newState.error ? newState.error : 'Not Found',
-    }
+    notFound()
   }
   const item = newState.current
   const title = `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`

@@ -116,9 +116,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (searchState.idTokenExpired) {
-      (async () => {
+      startTransition(async () => {
         await updateIdToken()
-      })()
+      })
       return
     }
 
@@ -132,9 +132,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (getItemState.idTokenExpired) {
-      (async () => {
+      startTransition(async () => {
         await updateIdToken()
-      })()
+      })
       return
     }
 
