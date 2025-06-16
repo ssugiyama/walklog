@@ -734,7 +734,7 @@ describe('getConfig', () => {
       mapId: process.env.MAP_ID,
       firebaseConfig: mockFirebaseConfig,
       theme: mockTheme,
-      drawingStyles: mockDrawingStyles,
+      drawingStyles: mockShapeStyles,
     })
   })
 
