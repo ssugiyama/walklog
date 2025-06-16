@@ -46,7 +46,7 @@ const SearchBox = () => {
   }, [offset])
   const moreUrl = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('limit', offset + 20)
+    params.set('limit', (offset + 20).toString())
     return `?${params.toString()}`
   }, [searchParams, offset])
 

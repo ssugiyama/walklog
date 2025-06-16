@@ -63,6 +63,20 @@ export type GetItemState = {
   serial?: number
 }
 
+export type UpdateItemState = {
+  id?: number
+  error?: string | null
+  idTokenExpired?: boolean
+  serial?: number
+}
+
+export type DeleteItemState = {
+  deleted?: boolean
+  error?: string | null
+  idTokenExpired?: boolean
+  serial?: number
+}
+
 export type CityParams = {
   jcodes?: string[]
   latitude?: number

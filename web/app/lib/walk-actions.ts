@@ -2,7 +2,7 @@
 
 import Sequelize from 'sequelize'
 import { sequelize, Walk, Area, EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH, WalkAttributes } from '../../lib/db/models'
-import { CityParams, CityT, SearchProps, UserT, SearchState, GetItemState } from '@/types'
+import { CityParams, CityT, SearchProps, UserT, SearchState, GetItemState, DeleteItemState, UpdateItemState } from '@/types'
 import admin from 'firebase-admin'
 import url from 'url'
 import path from 'path'
@@ -268,7 +268,7 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
   return state
 }
 
-export const getItemAction = async (prevState, id: number, _getUid = getUid, _getItemInternalAction = getItemInternalAction): Promise<GetItemState> => {
+export const getItemAction = async (prevState: GetItemState, id: number, _getUid = getUid, _getItemInternalAction = getItemInternalAction): Promise<GetItemState> => {
   const state = { ...prevState }
   state.serial++
   state.error = null
@@ -286,7 +286,7 @@ const getFilename = (id, file) => {
   return match ? basename + ext : basename
 }
 
-export const updateItemAction = async (prevState, formData, _getUid = getUid): Promise<typeof prevState> => {
+export const updateItemAction = async (prevState: UpdateItemState, formData, _getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.error = null
   state.id = null
@@ -361,7 +361,7 @@ export const updateItemAction = async (prevState, formData, _getUid = getUid): P
   return state
 }
 
-export const deleteItemAction = async (prevState, id: number, _getUid = getUid): Promise<typeof prevState> => {
+export const deleteItemAction = async (prevState: DeleteItemState, id: number, _getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.error = null
   state.deleted = false
