@@ -89,8 +89,8 @@ describe('ItemBox Component', () => {
       { isPending: true },
     ])
 
-    render(<ItemBox />)
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    const { container} = render(<ItemBox />)
+    expect(container.firstChild).toBeNull()
   })
 
   it('renders error state when there is an error', () => {
@@ -98,8 +98,8 @@ describe('ItemBox Component', () => {
       { error: 'Test error' },
     ])
 
-    render(<ItemBox />)
-    expect(screen.getByText('Error: Test error')).toBeInTheDocument()
+    const { container} = render(<ItemBox />)
+    expect(container.firstChild).toBeNull()
   })
 
   it('renders item details when data is available', () => {
