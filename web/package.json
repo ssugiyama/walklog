@@ -29,7 +29,7 @@
     "nanoid": "^5.1.5",
     "next": "^15.4.0-canary.83",
     "next-query-params": "^5.1.0",
-    "pg": "^8.14.1",
+    "pg": "^8.16.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sequelize": "^6.37.7",
