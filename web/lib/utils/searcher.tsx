@@ -47,8 +47,8 @@ export function Searcher() {
   const oldParams = new URLSearchParams(data.params)
 
   useEffect(() => {
-    data.isPending = isPending
-    setData(data)
+    const newData = { ...data, isPending }
+    setData(newData)
   }, [isPending])
   useEffect(() => {
     if (watchKeys.every((key) => oldParams.get(key) === searchParams.get(key)) &&

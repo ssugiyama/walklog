@@ -20,8 +20,8 @@ export function ItemFetcher() {
   const id = Number(params.id) || null
   const [data, setData] = useData()
   useEffect(() => {
-    data.isPending = isPending
-    setData(data)
+    const newData = { ...data, isPending }
+    setData(newData)
   }, [isPending])
   useEffect(() => {
     (async () => {
