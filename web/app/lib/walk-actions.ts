@@ -11,6 +11,7 @@ import { cookies } from 'next/headers'
 import fs from 'fs'
 import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
+import { notFound, unauthorized, forbidden } from 'next/navigation'
 
 let firebaseConfig
 
@@ -54,7 +55,6 @@ const firebaseStorage: boolean = !!process.env.FIREBASE_STORAGE
 const getUid = async (state) => {
   const cookieStore = await cookies()
   state.idTokenExpired = false
-  state.error = null
   const idToken = cookieStore.get('idToken')
   if (!idToken?.value) {
     return [null, false]
@@ -64,11 +64,11 @@ const getUid = async (state) => {
       .verifyIdToken(idToken.value)
     return [claim?.uid, claim?.admin || false]
   } catch (error) {
-    console.error('getUid', error)
     if (error.code === 'auth/id-token-expired') {
       state.idTokenExpired = true
     } else {
-      state.error = error.message
+      console.error('getUid', error)
+      throw error
     }
     return [null, false]
   }
@@ -246,7 +246,6 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
 export const searchAction = async (prevState: SearchState, props: SearchProps, _getUid = getUid, _searchInternalAction = searchInternalAction): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.serial++
-  state.error = null
   state.idTokenExpired = false
   state.append = (props.offset > 0)
 
@@ -261,9 +260,7 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
   const state: GetItemState = {}
 
   const walk = await Walk.findByPk(id)
-  if (walk?.draft && walk?.uid !== uid) {
-    return state
-  }
+
   state.current = !walk?.draft || walk?.uid === uid ? walk?.asObject(true) : null
   return state
 }
@@ -271,11 +268,12 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
 export const getItemAction = async (prevState: GetItemState, id: number, _getUid = getUid, _getItemInternalAction = getItemInternalAction): Promise<GetItemState> => {
   const state = { ...prevState }
   state.serial++
-  state.error = null
   state.idTokenExpired = false
-
   const [uid] = await _getUid(state)
   const newState = await _getItemInternalAction(id, uid)
+  if (!newState.current && !newState.idTokenExpired) {
+    notFound()
+  }
   return Object.assign({ ...state }, newState)
 }
 
@@ -288,7 +286,6 @@ const getFilename = (id, file) => {
 
 export const updateItemAction = async (prevState: UpdateItemState, formData, _getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
-  state.error = null
   state.id = null
   state.serial++
   const [uid, isAdmin] = await _getUid(state)
@@ -296,12 +293,9 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     return state
   }
   if (!uid) {
-    state.error = 'unauthorized'
+    unauthorized()
   } else if (!openUserMode && !isAdmin) {
-    state.error = 'forbidden'
-  }
-  if (state.error !== null) {
-    return state
+    forbidden()
   }
 
   const id = formData.get('id')
@@ -323,47 +317,40 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     props.path = Walk.decodePath(walkPath)
     props.length = sequelize.literal(`ST_LENGTH('${props.path}', true)/1000`)
   }
-  try {
-    if (willDeleteImage) {
-      props.image = null
-    } else if ((image?.size || 0) > 0) {
-      const prefix = process.env.IMAGE_PREFIX || 'images'
-      const filePath = path.join(prefix, getFilename(id, image))
-      const content = await image.arrayBuffer()
-      const buffer = Buffer.from(content)
-      if (firebaseStorage) {
-        const bucket = admin.storage().bucket()
-        const blob = bucket.file(filePath)
-        blob.save(buffer)
-        props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
-      } else {
-        fs.writeFileSync(`public/${filePath}`, buffer)
-        props.image = filePath
-      }
-    }
-    if (id) {
-      const walk = await Walk.findByPk(id)
-      if (walk.uid !== uid) {
-        state.error = 'forbidden'
-        return state
-      }
-      await walk.update(props)
-      state.id = id
+  if (willDeleteImage) {
+    props.image = null
+  } else if ((image?.size || 0) > 0) {
+    const prefix = process.env.IMAGE_PREFIX || 'images'
+    const filePath = path.join(prefix, getFilename(id, image))
+    const content = await image.arrayBuffer()
+    const buffer = Buffer.from(content)
+    if (firebaseStorage) {
+      const bucket = admin.storage().bucket()
+      const blob = bucket.file(filePath)
+      blob.save(buffer)
+      props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
     } else {
-      const walk = await Walk.create(props)
-      state.id = walk?.id
+      fs.writeFileSync(`public/${filePath}`, buffer)
+      props.image = filePath
     }
-    revalidateTag(SEARCH_CACHE_TAG)
-  } catch (error) {
-    console.error(error)
-    state.error = error.message
   }
+  if (id) {
+    const walk = await Walk.findByPk(id)
+    if (walk.uid !== uid) {
+      forbidden()
+    }
+    await walk.update(props)
+    state.id = id
+  } else {
+    const walk = await Walk.create(props)
+    state.id = walk?.id
+  }
+  revalidateTag(SEARCH_CACHE_TAG)
   return state
 }
 
 export const deleteItemAction = async (prevState: DeleteItemState, id: number, _getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
-  state.error = null
   state.deleted = false
   state.serial++
   const [uid, isAdmin] = await _getUid(state)
@@ -371,31 +358,21 @@ export const deleteItemAction = async (prevState: DeleteItemState, id: number, _
     return state
   }
   if (!uid) {
-    state.error = 'unauthorized'
+    unauthorized()
   } else if (!openUserMode && !isAdmin) {
-    state.error = 'forbidden'
-  }
-  if (state.error !== null) {
-    return state
+    forbidden()
   }
 
   const walk = await Walk.findByPk(id)
   if (!walk) {
-    state.error = 'not found'
-    return state
+    notFound()
   }
   if (walk.uid !== uid) {
-    state.error = 'forbidden'
-    return state
+    forbidden()
   }
-  try {
-    await walk.destroy()
-    state.deleted = true
-    revalidateTag(SEARCH_CACHE_TAG)
-  } catch (error) {
-    console.error(error)
-    state.error = error.message
-  }
+  await walk.destroy()
+  state.deleted = true
+  revalidateTag(SEARCH_CACHE_TAG)
   return state
 }
 

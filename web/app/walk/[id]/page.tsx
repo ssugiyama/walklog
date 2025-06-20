@@ -1,10 +1,13 @@
-import { notFound } from "next/navigation"
 import ItemBox from "../../../lib/components/item-box"
 import { getItemAction } from "../../lib/walk-actions"
+import ItemFetcher from "@/lib/utils/item-fetcher"
 
 export default async function Page() {
   return (
-    <ItemBox /> 
+    <>
+      <ItemFetcher />
+      <ItemBox /> 
+    </>
   )
 }
 
@@ -18,7 +21,7 @@ export async function generateMetadata({params}: {params: Promise<{ id: string }
   const { id } = await params
   const newState = await getItemAction(getItemState, Number(id))
   if (!newState.current) {
-    notFound()
+    return {}
   }
   const item = newState.current
   const title = `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`

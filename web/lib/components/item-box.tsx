@@ -57,7 +57,6 @@ const ItemBox = () => {
   }, [])
   const initialDeleteState: DeleteItemState = {
     deleted: false,
-    error: null,
     idTokenExpired: false,
     serial: 0,
   }
@@ -93,8 +92,6 @@ const ItemBox = () => {
           await updateIdToken()
           await dispatchDelete(item?.id)
         })
-      } else if (deleteState.error) {
-        window.alert(deleteState.error)
       }
     }
   }, [deleteState.serial])

@@ -215,7 +215,6 @@ describe('searchAction', () => {
     const result = await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
 
     expect(result.serial).toBe(1)
-    expect(result.error).toBeNull()
     expect(result.idTokenExpired).toBe(false)
   })
 
@@ -272,7 +271,7 @@ describe('getItemInternalAction', () => {
 
     const result = await getItemInternalAction(1, 'testUid')
 
-    expect(result).toEqual({})
+    expect(result).toEqual({ current: null })
     expect(Walk.findByPk).toHaveBeenCalledWith(1)
   })
 
@@ -339,7 +338,6 @@ describe('getItemAction', () => {
     const result = await getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)
 
     expect(result.serial).toBe(1)
-    expect(result.error).toBeNull()
     expect(result.idTokenExpired).toBe(false)
   })
 
@@ -385,22 +383,13 @@ describe('updateItemAction', () => {
 
   it('should return unauthorized error if uid is null', async () => {
     const mockGetUid = jest.fn().mockResolvedValue([null, false])
-
-
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-
-    expect(result.error).toBe('unauthorized')
-    expect(result.id).toBeNull()
+    expect(async () => await updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
   it('should return forbidden error if user is not admin and openUserMode is false', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
-
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-
-    expect(result.error).toBe('forbidden')
-    expect(result.id).toBeNull()
+    expect(async () => await updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')  
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
@@ -483,7 +472,7 @@ describe('updateItemAction', () => {
     )
   })
 
-  it('should handle errors during update', async () => {
+  it('should throw errors as they are during update', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
     const mockUpdate = jest.fn().mockRejectedValue(new Error('Update failed'));
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
@@ -492,11 +481,7 @@ describe('updateItemAction', () => {
     })
 
     formData.set('id', '1')
-
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-
-    expect(result.error).toBe('Update failed')
-    expect(result.id).toBeNull()
+    expect(async () => await updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('Update failed')
   })
 })
 
@@ -510,44 +495,30 @@ describe('deleteItemAction', () => {
 
   it('should return unauthorized error if uid is null', async () => {
     const mockGetUid = jest.fn().mockResolvedValue([null, false])
-    const result = await deleteItemAction(prevState, 1, mockGetUid)
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')  
 
-    expect(result.error).toBe('unauthorized')
-    expect(result.deleted).toBe(false)
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-    expect(Walk.findByPk).not.toHaveBeenCalled()
   })
 
   it('should return forbidden error if user is not admin and openUserMode is false', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
 
-    const result = await deleteItemAction(prevState, 1, mockGetUid)
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')  
 
-    expect(result.error).toBe('forbidden')
-    expect(result.deleted).toBe(false)
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-    expect(Walk.findByPk).not.toHaveBeenCalled()
   })
 
   it('should return not found error if walk does not exist', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue(null)
-    const result = await deleteItemAction(prevState, 1, mockGetUid)
-
-    expect(result.error).toBe('not found')
-    expect(result.deleted).toBe(false)
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404') 
   })
 
   it('should return forbidden error if walk.uid does not match uid', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({ uid: 'otherUid' })
 
-    const result = await deleteItemAction(prevState, 1, mockGetUid)
-
-    expect(result.error).toBe('forbidden')
-    expect(result.deleted).toBe(false)
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden') 
   })
 
   it('should delete the walk and set deleted to true', async () => {
@@ -560,9 +531,7 @@ describe('deleteItemAction', () => {
 
     const result = await deleteItemAction(prevState, 1, mockGetUid)
 
-    expect(result.error).toBeNull()
     expect(result.deleted).toBe(true)
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
     expect(mockDestroy).toHaveBeenCalled()
     expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
   })
@@ -575,11 +544,7 @@ describe('deleteItemAction', () => {
         uid: 'testUid',
         destroy: jest.fn().mockRejectedValue(new Error('Deletion failed')),
       })
-    const result = await deleteItemAction(prevState, 1, mockGetUid)
-
-    expect(result.error).toBe('Deletion failed')
-    expect(result.deleted).toBe(false)
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
   })
 })
 

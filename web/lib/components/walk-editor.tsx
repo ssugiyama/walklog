@@ -32,7 +32,7 @@ const WalkEditor = ({ item, opened, setOpened }) => {
 
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
   const { updateIdToken } = useUserContext()
-  const [, reset] = useData()
+  const [,, reset] = useData()
   const [searchPath] = useQueryParam('path', withDefault(StringParam, ''));
   const [mapState] = useMapContext();
   const { deleteSelectedPath } = mapState;
