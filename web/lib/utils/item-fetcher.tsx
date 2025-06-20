@@ -4,9 +4,11 @@ import { useParams } from "next/navigation"
 import { getItemAction } from "../../app/lib/walk-actions"
 import { useUserContext } from "./user-context"
 import { useData } from "./data-context"
-const initialGetItemState = {
+import { GetItemState } from "@/types"
+
+const initialGetItemState: GetItemState = {
   idTokenExpired: false,
-  curernt: null,
+  current: null,
   serial: 0,
 }
 
