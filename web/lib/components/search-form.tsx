@@ -99,7 +99,7 @@ const SearchForm = () => {
       params.set('order', 'newest_first')
     }
     router.push(`/?${params.toString()}`)
-  }, [])
+  }, [searchParams])
   const sxFormInput = {
     width: '50%',
     paddingLeft: 1,
