@@ -1,0 +1,62 @@
+'use client'
+import { useEffect, useActionState, useTransition } from "react"
+import { useParams } from "next/navigation"
+import { getItemAction } from "../../app/lib/walk-actions"
+import { useUserContext } from "./user-context"
+import { useData } from "./data-context"
+const initialGetItemState = {
+  idTokenExpired: false,
+  curernt: null,
+  serial: 0,
+}
+
+export function ItemFetcher() {
+  const [isPending, startTransition] = useTransition()
+  const [getItemState, dispatchGetItem] = useActionState(getItemAction, initialGetItemState)
+  const { updateIdToken, idToken } = useUserContext()
+  const params = useParams()
+  const id = Number(params.id) || null
+  const [data, setData] = useData()
+  useEffect(() => {
+    data.isPending = isPending
+    setData(data)
+  }, [isPending])
+  useEffect(() => {
+    (async () => {
+      let index = -1
+      if (id !== null) {
+        index = data.rows.findIndex((row) => row.id === id)
+      }
+      if (index >= 0) {
+        const newData = { ...data }
+        newData.index = index
+        newData.prevId = index > 0 ? data.rows[index - 1].id : null
+        newData.nextId = index < data.rows.length - 1 ? data.rows[index + 1].id : null
+        newData.current = data.rows[index]
+        setData(newData)
+      } else {
+        startTransition(async () => {
+          await dispatchGetItem(id)
+        })
+      }
+    })()
+  }, [id, data.forceReload, idToken])
+
+  useEffect(() => {
+    if (getItemState.idTokenExpired) {
+      startTransition(async () => {
+        await updateIdToken()
+      })
+      return
+    }
+
+    const newData ={ ...getItemState }
+    setData(newData)
+  }, [getItemState.serial])
+
+  return (
+    <></>
+  )
+}
+
+export default ItemFetcher

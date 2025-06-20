@@ -30,26 +30,11 @@ export type WalkT = {
   draft?: boolean
 }
 
-export type SearchResult = {
-  count: number
-  offset?: number
-  rows: WalkT[]
-  error?: string
-  searching?: boolean
-  append?: boolean
-  needsReload?: boolean
-  nextId?: number | null
-  prevId?: number | null
-  lastQuery?: string | null
-  idTokenExpired?: boolean
-}
-
 export type SearchState ={
   serial?: number
   rows: WalkT[]
   count: number
   offset?: number
-  error?: string | null
   idTokenExpired?: boolean
   index?: number
   append?: boolean
@@ -57,7 +42,6 @@ export type SearchState ={
 }
 
 export type GetItemState = {
-  error?: string | null
   idTokenExpired?: boolean
   current?: WalkT | null
   serial?: number
@@ -72,7 +56,6 @@ export type UpdateItemState = {
 
 export type DeleteItemState = {
   deleted?: boolean
-  error?: string | null
   idTokenExpired?: boolean
   serial?: number
 }
@@ -92,4 +75,16 @@ export type UserT = {
   uid: string
   displayName: string
   photoURL: string
+}
+
+export type DataT = SearchState & GetItemState &{
+  isPending?: boolean
+  count?: number
+  offset?: number
+  showDistance?: false,
+  index?: number,
+  nextId?: number | null
+  prevId?: number | null
+  params?: string
+  forceReload?: number
 }

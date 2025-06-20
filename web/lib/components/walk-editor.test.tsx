@@ -36,7 +36,7 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('@/lib/utils/data-context', () => ({
-  useData: () => [, jest.fn()],
+  useData: () => [,, jest.fn()],
 }))
 
 jest.mock('@/app/lib/walk-actions', () => ({
