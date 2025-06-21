@@ -47,10 +47,6 @@ export function Searcher() {
   const oldParams = new URLSearchParams(data.params)
 
   useEffect(() => {
-    const newData = { ...data, isPending }
-    setData(newData)
-  }, [isPending])
-  useEffect(() => {
     if (watchKeys.every((key) => oldParams.get(key) === searchParams.get(key)) &&
         data.offset > 0 && props.limit > data.offset) {
         const current = data.offset
@@ -63,6 +59,9 @@ export function Searcher() {
   }, [searchParams, data.forceReload, idToken])
 
   useEffect(() => {
+    if (searchState.serial <= 0) {
+      return
+    }
     if (searchState.idTokenExpired) {
       startTransition(async () => {
         await updateIdToken()
@@ -70,13 +69,13 @@ export function Searcher() {
       return
     }
 
-    const newData: DataT = { ...searchState }
+    const newData: DataT = { isPending, ...searchState }
     newData.params = searchParams.toString()
     if (searchState.append) {
       newData.rows.unshift(...data.rows)
     }
     setData(newData)
-  }, [searchState.serial])
+  }, [searchState.serial, isPending])
 
   return (
     <></>

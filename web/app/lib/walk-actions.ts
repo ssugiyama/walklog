@@ -339,11 +339,25 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     if (walk.uid !== uid) {
       forbidden()
     }
-    await walk.update(props)
-    state.id = id
+    try {
+      await walk.update(props)
+      state.id = id
+    } catch (error) {
+      console.error('updateItemAction error', error)
+      state.error = error
+      state.id = null
+      return state
+    }
   } else {
-    const walk = await Walk.create(props)
-    state.id = walk?.id
+    try {
+      const walk = await Walk.create(props)
+      state.id = walk?.id
+    } catch (error) {
+      console.error('updateItemAction create error', error)
+      state.error = error
+      state.id = null
+      return state
+    }
   }
   revalidateTag(SEARCH_CACHE_TAG)
   return state

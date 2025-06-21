@@ -481,7 +481,8 @@ describe('updateItemAction', () => {
     })
 
     formData.set('id', '1')
-    expect(async () => await updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('Update failed')
+    const state = await updateItemAction(prevState, formData, mockGetUid)
+    expect(state.error).toBeInstanceOf(Error)
   })
 })
 
