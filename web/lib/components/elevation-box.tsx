@@ -1,88 +1,54 @@
 import React from 'react'
-import Box from '@mui/material/Box'
-import bb, { Chart, line } from 'billboard.js'
-import 'billboard.js/dist/billboard.css'
-import './billboard.dark.css'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
-const { useRef, useEffect } = React
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts'
+const { useRef, useEffect, useState } = React
 
 type ElevationRefs = {
-  chart?: Chart
   elevator?: google.maps.ElevationService
   elevationResults?: google.maps.ElevationResult[]
-  elevationInfoWindow?: google.maps.InfoWindow
 }
 
 const ElevationBox = () => {
   const [mapState] = useMapContext()
   const config = useConfig()
-  const rootRef = useRef({})
   const refs = useRef<ElevationRefs>({})
   const [data] = useData()
+  const [chartData, setChartData] = useState<Array<{index: number, elevation: number}>>([])
   const selectedItem = data.current
   const mapLoaded = !!mapState.map
   const { map, elevationInfoWindow } = mapState
-  const handleHover = (d) => {
-    if (!d) {
-      refs.current.elevationInfoWindow.close()
-    } else {
-      const elevation = refs.current.elevationResults[d.index]
-      if (!elevation) return
-      const y = Math.round(d.value)
-      elevationInfoWindow.open(map)
-      elevationInfoWindow.setPosition(new google.maps.LatLng(elevation.location.lat(), elevation.location.lng()))
-      elevationInfoWindow.setContent(`${y}m`)
+  
+  const handleTooltipChange = (active: boolean, payload?: any) => {
+    if (!refs.current.elevationResults || !elevationInfoWindow || !map) return
+    
+    if (!active || !payload || !payload.length) {
+      elevationInfoWindow.close()
+      return
     }
+    
+    const data = payload[0].payload
+    const elevation = refs.current.elevationResults[data.index]
+    if (!elevation) return
+    
+    const y = Math.round(data.elevation)
+    elevationInfoWindow.open(map)
+    elevationInfoWindow.setPosition(new google.maps.LatLng(elevation.location.lat(), elevation.location.lng()))
+    elevationInfoWindow.setContent(`${y}m`)
   }
-  const plotElevation = (results, status) => {
+  
+  const plotElevation = (results: google.maps.ElevationResult[], status: google.maps.ElevationStatus) => {
     if (status === google.maps.ElevationStatus.OK) {
       refs.current.elevationResults = results
-      const data = results.map((result) => result.elevation)
-      if (!refs.current.chart) {
-        const drawingStyles = config.drawingStyles
-        refs.current.chart = bb.generate({
-          bindto: rootRef.current,
-          data: {
-            columns: [['elevation', 0]],
-            type: line(),
-            onover(d) {
-              handleHover(d)
-            },
-            colors: { elevation: drawingStyles.polylines.current.strokeColor },
-          },
-          legend: {
-            show: false,
-          },
-          tooltip: {
-            show: false,
-          },
-          axis: {
-            x: {
-              show: false,
-            },
-            y: {
-              tick: {
-                culling: true,
-              },
-            },
-          },
-          line: {
-            zerobased: true,
-          },
-          point: {
-            r: 1.5,
-          },
-        })
-      }
-      refs.current.chart.load({
-        columns: [
-          ['elevation'].concat(data),
-        ],
-      })
+      const formattedData = results.map((result, index) => ({
+        index,
+        elevation: result.elevation
+      }))
+      setChartData(formattedData)
     }
   }
+  
   const requestElevation = () => {
     if (!selectedItem) return
     const path = google.maps.geometry.encoding.decodePath(selectedItem.path)
@@ -91,7 +57,7 @@ const ElevationBox = () => {
       path,
       samples: 256,
     }
-    refs.current.elevator.getElevationAlongPath(pathRequest, (results, status) => {
+    refs.current.elevator?.getElevationAlongPath(pathRequest, (results, status) => {
       plotElevation(results, status)
     })
   }
@@ -103,13 +69,48 @@ const ElevationBox = () => {
     }
     requestElevation()
   }
+  
   useEffect(() => {
     updateChart()
   }, [selectedItem, mapLoaded])
-  if (selectedItem) {
-
+  
+  if (selectedItem && chartData.length > 0) {
+    const strokeColor = config?.drawingStyles?.polylines?.current?.strokeColor || '#82ca9d'
+    
     return (
-      <Box data-testid="elevation-box" width="100%" height="20vh" ref={rootRef} />
+      <div data-testid="elevation-box" style={{ width: '100%', height: '20vh' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={chartData}
+            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="index" 
+              tick={false}
+              axisLine={false}
+            />
+            <YAxis 
+              tick={{ fontSize: 12 }}
+              tickFormatter={(value) => `${Math.round(value)}m`}
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                handleTooltipChange(active || false, payload)
+                return null // カスタムツールチップは使わず、Google Maps InfoWindowを使用
+              }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="elevation" 
+              stroke={strokeColor}
+              strokeWidth={2}
+              dot={{ r: 1.5 }}
+              activeDot={{ r: 4 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     )
   }
   return null
