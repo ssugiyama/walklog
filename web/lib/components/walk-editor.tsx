@@ -54,7 +54,7 @@ const WalkEditor = ({ item, opened, setOpened }) => {
           await updateIdToken()
           handleSubmit()
         })()
-      } else if (state.id && !state.error) {
+      } else if (state.id) {
         if (searchPath) deleteSelectedPath();
         handleClose()
         if (item?.id) {
@@ -73,7 +73,7 @@ const WalkEditor = ({ item, opened, setOpened }) => {
     >
       <DialogTitle>{item?.id ? 'Update Walk' : 'New Walk'}</DialogTitle>
       <DialogContent>
-        <Typography variant="body1" color="error" >{state.error}</Typography>
+        <Typography variant="body1" color="error" >{state.error?.message}</Typography>
         <Form action={formAction} name="walk-form" ref={formRef}>
           <input type="hidden" name="path" defaultValue={searchPath} />
           <input type="hidden" name="id" defaultValue={item?.id} />

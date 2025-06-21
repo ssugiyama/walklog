@@ -23,7 +23,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const reset = () => {
     setData(initialData)
   }
-
   const setDataExternal = (d) => {
     setData({ ...data, ...d }) 
   }
@@ -34,7 +33,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function useData() {
+export function useData(): [DataT, (data: Partial<DataT>) => void, () => void] {
   return useContext(DataContext)
 }
 

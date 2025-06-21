@@ -38,7 +38,6 @@ export type SearchState ={
   idTokenExpired?: boolean
   index?: number
   append?: boolean
-  current?: WalkT | null
 }
 
 export type GetItemState = {
@@ -49,7 +48,7 @@ export type GetItemState = {
 
 export type UpdateItemState = {
   id?: number
-  error?: string | null
+  error?: Error | null
   idTokenExpired?: boolean
   serial?: number
 }
@@ -77,7 +76,7 @@ export type UserT = {
   photoURL: string
 }
 
-export type DataT = SearchState & GetItemState &{
+export type DataT = Omit<SearchState & GetItemState, 'serial'> &{
   isPending?: boolean
   count?: number
   offset?: number

@@ -76,17 +76,8 @@ const SearchBox = () => {
         <Typography variant="body1" sx={{ display: 'inline-block' }}>
           {
             (() => {
-
-              if (data.error) {
-                return (
-                  <span>
-                    Error:
-                    {data.error}
-                  </span>
-                )
-              }
               if (data.isPending) {
-                return <span>Searching now...</span>
+                return <span>Searching...</span>
               }
               switch (count) {
                 case null:

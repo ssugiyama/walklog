@@ -71,7 +71,7 @@ const ItemBox = () => {
     })
   }, [item?.id])
 
-  const itemWillRender = !data.isPending && !data.error && item
+  const itemWillRender = !data.isPending && item
   const title = itemWillRender ? `${item.date} : ${item.title} (${item.length.toFixed(1)} km)` : ''
   const createMarkup = () => ({ __html: DOMPurify.sanitize(marked.parse(item?.comment || '') as string) })
   const image = item?.image
@@ -113,10 +113,10 @@ const ItemBox = () => {
         <IconButton disabled={!prevUrl} component={Link} href={prevUrl || ''} size="large"><NavigationArrowBackIcon /></IconButton>
         <IconButton disabled={!nextUrl} component={Link} href={nextUrl || ''} size="large"><NavigationArrowForwardIcon /></IconButton>
         {
-          itemWillRender && currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton onClick={handleEdit} size="large" data-testid="edit-button"><EditIcon /></IconButton>) : null
+          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton onClick={handleEdit} size="large" data-testid="edit-button"><EditIcon /></IconButton>) : null
         }
         {
-          itemWillRender && currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
+          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
         }
         <Typography variant="h6" sx={{ fontSize: '100%' }}>{title || 'not found'}</Typography>
         <Box sx={{ textAlign: 'right' }}>
