@@ -44,7 +44,7 @@ jest.mock('use-query-params', () => ({
 
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(() => new URLSearchParams({ filter: 'cities', cities: '123' })),
-  usePathname: jest.fn(() => '/walk/1'),
+  usePathname: jest.fn(() => '/show/1'),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
     replace: jest.fn(),

@@ -45,7 +45,7 @@ const Main = ({
   const shareCB = useCallback(async () => {
     try {
       const origin = window.location.origin
-      const url = `${origin}${current ? '/walk/' + current.id : '/?' + window.location.search} `
+      const url = `${origin}${current ? '/show/' + current.id : '/?' + window.location.search} `
       const text = document.title
       if (navigator.share) {
         await navigator.share({ url, text })

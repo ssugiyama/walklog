@@ -97,7 +97,7 @@ describe('WalkEditor update', () => {
     fireEvent.click(screen.getByTestId('submit-button'))
     expect(submitSpy).toHaveBeenCalled()
     expect(mockSetOpened).toHaveBeenCalledWith(false)
-    expect(mockRouterPush).not.toHaveBeenCalledWith('/walk/2')
+    expect(mockRouterPush).not.toHaveBeenCalledWith('/show/2')
 
   })
 
@@ -146,7 +146,7 @@ describe('WalkEditor create', () => {
     fireEvent.click(screen.getByTestId('submit-button'))
     expect(submitSpy).toHaveBeenCalled()
     expect(mockSetOpened).toHaveBeenCalledWith(false)
-    expect(mockRouterPush).toHaveBeenCalledWith('/walk/2')
+    expect(mockRouterPush).toHaveBeenCalledWith('/show/2')
 
   })
 

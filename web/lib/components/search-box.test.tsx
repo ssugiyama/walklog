@@ -81,7 +81,7 @@ describe('SearchBox', () => {
     ])
 
     render(<SearchBox />)
-    expect(mockRouterReplace).toHaveBeenCalledWith(expect.stringContaining('/walk/1'))
+    expect(mockRouterReplace).toHaveBeenCalledWith(expect.stringContaining('/show/1'))
   })
 
   it('displays "No results" when count is 0', () => {
