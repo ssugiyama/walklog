@@ -24,7 +24,7 @@ jest.mock('../utils/config', () => ({
 
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(() => new URLSearchParams()),
-  usePathname: jest.fn(() => '/walk/1'),
+  usePathname: jest.fn(() => '/show/1'),
 }))
 
 jest.mock('use-query-params', () => ({

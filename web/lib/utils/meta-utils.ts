@@ -6,6 +6,6 @@ export const getTitles = (config, item) => {
   return titles
 }
 
-export const idToUrl = (id, params: URLSearchParams = null) => `/walk/${id}${params ? `?${params.toString()}` : ''}`
+export const idToUrl = (id, params: URLSearchParams = null) => `/show/${id}${params ? `?${params.toString()}` : ''}`
 
 export const getCanonical = (config, data) => config.baseUrl + (data ? idToUrl(data.id) : '/')

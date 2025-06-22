@@ -19,6 +19,7 @@ import { useQueryParam, StringParam, withDefault } from 'use-query-params';
 import { useRouter } from 'next/navigation';
 import { useUserContext } from '../utils/user-context';
 import { useMapContext } from '../utils/map-context';
+import { idToUrl } from '../utils/meta-utils'
 
 const WalkEditor = ({ item, opened, setOpened }) => {
   const router = useRouter()
@@ -60,7 +61,7 @@ const WalkEditor = ({ item, opened, setOpened }) => {
         if (item?.id) {
           reset()
         } else if (state.id) {
-          router.push(`/walk/${state.id}`)
+          router.push(idToUrl(state.id));
         }
       }
     }
