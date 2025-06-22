@@ -1,3 +1,4 @@
+import { idToUrl } from "@/lib/utils/meta-utils"
 import ItemBox from "../../../lib/components/item-box"
 import { getItemAction } from "../../lib/walk-actions"
 import ItemFetcher from "@/lib/utils/item-fetcher"
@@ -15,7 +16,7 @@ export async function generateMetadata({params}: {params: Promise<{ id: string }
   const getItemState = {
     error: null,
     idTokenExpired: false,
-    curernt: null,
+    current: null,
     serial: 0,
   }
   const { id } = await params
@@ -33,7 +34,7 @@ export async function generateMetadata({params}: {params: Promise<{ id: string }
     openGraph: {
       title,
       description,
-      url: `/show/${id}`,
+      url: idToUrl(item.id),
       images: image ? [
         {
           url: image,

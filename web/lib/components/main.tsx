@@ -21,6 +21,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import NextAdapterApp from 'next-query-params/app'
 import { QueryParamProvider } from 'use-query-params'
 import { useMainContext } from '../utils/main-context'
+import { idToUrl } from '../utils/meta-utils'
 
 const Main = ({
   children,
@@ -45,7 +46,7 @@ const Main = ({
   const shareCB = useCallback(async () => {
     try {
       const origin = window.location.origin
-      const url = `${origin}${current ? '/show/' + current.id : '/?' + window.location.search} `
+      const url = origin + current ? idToUrl(current.id) : '/?' + window.location.search
       const text = document.title
       if (navigator.share) {
         await navigator.share({ url, text })
