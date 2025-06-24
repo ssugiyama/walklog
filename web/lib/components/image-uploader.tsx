@@ -18,7 +18,6 @@ const ImageUploader = ({ name, nameForDeletion, label, defaultValue }) => {
     reader.readAsDataURL(file)
   }
 
-
   const handleSelect = useCallback(() => {
     const elem = fileInputRef.current
     setTimeout(() => elem.click(), 0)
@@ -30,7 +29,7 @@ const ImageUploader = ({ name, nameForDeletion, label, defaultValue }) => {
     setWillDeleteImage('true')
   }, [])
   return (
-    <FormControl>
+    <FormControl sx={{ textAlign: 'left'}}>
       <FormLabel>{label}</FormLabel>
       <Box sx={{ display: 'flex', flexDirection: 'row' }}>
         <Box

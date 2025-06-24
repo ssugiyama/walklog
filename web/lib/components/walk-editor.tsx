@@ -1,11 +1,10 @@
+'use client'
 import React, {
   useActionState, useEffect, useRef, useCallback,
 } from 'react';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
@@ -16,12 +15,16 @@ import { useData } from '../utils/data-context';
 import { updateItemAction } from '@/app/lib/walk-actions';
 import Form from 'next/form'
 import { useQueryParam, StringParam, withDefault } from 'use-query-params';
-import { useRouter } from 'next/navigation';
+import { unauthorized, forbidden, useRouter, useSearchParams } from 'next/navigation';
 import { useUserContext } from '../utils/user-context';
 import { useMapContext } from '../utils/map-context';
-import { idToUrl } from '../utils/meta-utils'
-
-const WalkEditor = ({ item, opened, setOpened }) => {
+import { idToShowUrl } from '../utils/meta-utils'
+import { WalkT } from '@/types'
+import { useConfig } from '../utils/config'
+import moment from 'moment'
+import { Link } from '@mui/material'
+const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
+  const searchParams = useSearchParams()
   const router = useRouter()
   const formRef = useRef(null);
   const initialState = {
@@ -30,9 +33,25 @@ const WalkEditor = ({ item, opened, setOpened }) => {
     idTokenExpired: false,
     serial: 0,
   }
-
+  const config = useConfig()
+  const { updateIdToken, currentUser, users } = useUserContext()
+  const [data] = useData()
+  let item: WalkT
+  if (mode === 'update') {
+    item = data.current
+  } else {
+    const today = moment().format('YYYY-MM-DD')
+    item = {
+      id: null,
+      uid: null,
+      date: today,
+      title: '',
+      comment: '',
+      image: '',
+      draft: true,      
+    }
+  }
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-  const { updateIdToken } = useUserContext()
   const [,, reset] = useData()
   const [searchPath] = useQueryParam('path', withDefault(StringParam, ''));
   const [mapState] = useMapContext();
@@ -40,14 +59,6 @@ const WalkEditor = ({ item, opened, setOpened }) => {
   const handleSubmit = useCallback(() => {
     formRef.current?.requestSubmit();
   }, [])
-  const handleClose = useCallback(() => {
-    setOpened(false)
-  }, []);
-  useEffect(() => {
-    if (opened) {
-      formRef.current?.reset()
-    }
-  }, [opened, formRef.current === null]);
   useEffect(() => {
     if (state.serial > 0) {
       if (state.idTokenExpired) {
@@ -57,26 +68,27 @@ const WalkEditor = ({ item, opened, setOpened }) => {
         })()
       } else if (state.id) {
         if (searchPath) deleteSelectedPath();
-        handleClose()
         if (item?.id) {
           reset()
         } else if (state.id) {
-          router.push(idToUrl(state.id));
+          router.push(idToShowUrl(state.id));
         }
       }
     }
-  }, [state.serial]);
+  }, [state.serial])
+  if (!currentUser) {
+    unauthorized()
+  }
+  const dataUser = users.find((u) => u.uid === currentUser.uid) || null
+  if (!config.openUserMode && !dataUser.admin) {
+    forbidden()
+  }
   return (
-    <Dialog
-      fullScreen
-      open={opened}
-      onClose={handleClose}
-    >
-      <DialogTitle>{item?.id ? 'Update Walk' : 'New Walk'}</DialogTitle>
-      <DialogContent>
+    <Box data-testid="WalkEditor">
+      <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
         <Typography variant="body1" color="error" >{state.error?.message}</Typography>
         <Form action={formAction} name="walk-form" ref={formRef}>
-          <input type="hidden" name="path" defaultValue={searchPath} />
+          <input type="hidden" name="path" defaultValue={searchPath || item?.path} />
           <input type="hidden" name="id" defaultValue={item?.id} />
           <FormGroup row>
             <TextField type="date" name="date" defaultValue={item?.date} variant="standard" label="date" fullWidth />
@@ -98,13 +110,13 @@ const WalkEditor = ({ item, opened, setOpened }) => {
             />
           </FormGroup>
         </Form>
-      </DialogContent>
-      <DialogActions sx={{ pb: 'env(safe-area-inset-bottom)' }}>
-        <Button onClick={handleClose} color="primary">cancel</Button>
-        <Button data-testid="submit-button" disabled={isPending} onClick={handleSubmit} color="secondary">{item?.id ? 'update' : 'create'}</Button>
-      </DialogActions>
-    </Dialog>
+        <Box sx={{ marginTop: 1, textAlign: 'right' }}>
+          <Button component={Link} href={mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`} color="primary">cancel</Button>
+          <Button data-testid="submit-button" disabled={isPending} onClick={handleSubmit} color="secondary">{mode}</Button>
+        </Box>
+      </Paper>
+    </Box>
   );
 };
 
-export default WalkEditor;
+export default WalkEditor

@@ -19,14 +19,13 @@ import Chip from '@mui/material/Chip'
 import Avatar from '@mui/material/Avatar'
 import NoSsr from '@mui/material/NoSsr'
 import DOMPurify from 'isomorphic-dompurify'
-import WalkEditor from './walk-editor'
 import PanoramaBox from './panorama-box'
 import ElevationBox from './elevation-box'
 import type { Swiper as SwiperCore } from 'swiper'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 
-import { idToUrl } from '../utils/meta-utils'
+import { idToEditUrl, idToShowUrl } from '../utils/meta-utils'
 import { useData } from '../utils/data-context'
 import { useSearchParams } from 'next/navigation'
 import { useUserContext } from '../utils/user-context'
@@ -38,10 +37,6 @@ const ItemBox = () => {
   const searchParams = useSearchParams()
   const [data] = useData()
   const item = data.current
-  const [editorOpened, setEditorOpened] = useState(false)
-  const handleEdit = useCallback(() => {
-    setEditorOpened(true)
-  }, [])
   const [swiper, setSwiper] = useState<SwiperCore | null>(null)
   const onSwiper = useCallback((currentSwiper: SwiperCore) => {
     const swiperInstance = currentSwiper
@@ -52,7 +47,7 @@ const ItemBox = () => {
     swiper?.slideTo(value)
   }, [swiper])
   
-  const indexCHangeCB = useCallback((swiper: SwiperCore) => {
+  const indexChangeCB = useCallback((swiper: SwiperCore) => {
     setTabValue(swiper.activeIndex)
   }, [])
   const initialDeleteState: DeleteItemState = {
@@ -78,13 +73,13 @@ const ItemBox = () => {
   const dataUser = users.find((u: UserT) => u.uid === item?.uid) || null
   const upUrl = `/?${searchParams.toString()}`
   const draft = item?.draft
-  let nextUrl = data.nextId && idToUrl(data.nextId, searchParams)
+  let nextUrl = data.nextId && idToShowUrl(data.nextId, searchParams)
   if (!nextUrl && data.offset > 0) {
     const params = new URLSearchParams(searchParams.toString())
     params.set('limit', (Number(data.offset) + 20).toString())
     nextUrl = `/?${params.toString()}&index=${data.offset}`
   }
-  const prevUrl = data.prevId && idToUrl(data.prevId, searchParams)
+  const prevUrl = data.prevId && idToShowUrl(data.prevId, searchParams)
   useEffect(() => {
     if (deleteState.serial > 0) {
       if (deleteState.idTokenExpired) {
@@ -113,7 +108,7 @@ const ItemBox = () => {
         <IconButton disabled={!prevUrl} component={Link} href={prevUrl || ''} size="large"><NavigationArrowBackIcon /></IconButton>
         <IconButton disabled={!nextUrl} component={Link} href={nextUrl || ''} size="large"><NavigationArrowForwardIcon /></IconButton>
         {
-          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton onClick={handleEdit} size="large" data-testid="edit-button"><EditIcon /></IconButton>) : null
+          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton component={Link} href={idToEditUrl(item?.id, searchParams)} size="large" data-testid="edit-button"><EditIcon /></IconButton>) : null
         }
         {
           currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
@@ -153,7 +148,7 @@ const ItemBox = () => {
       </Paper>
       <Swiper
         onSwiper={onSwiper}
-        onSlideChange={indexCHangeCB}
+        onSlideChange={indexChangeCB}
       >
         <SwiperSlide>
           <Box sx={{ padding: 2, overflow: 'auto' }}>
@@ -188,7 +183,6 @@ const ItemBox = () => {
           </Box>
         </SwiperSlide>
       </Swiper>
-      <WalkEditor item={item} opened={editorOpened} setOpened={setEditorOpened} />
     </Box>
 }
 

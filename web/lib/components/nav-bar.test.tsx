@@ -34,6 +34,12 @@ jest.mock('firebase/app', () => ({
   initializeApp: jest.fn(),
 }))
 
+jest.mock('next/navigation', () => ({
+  useSearchParams: jest.fn(() => ({
+    toString: jest.fn(() => 'param1=value1&param2=value2')
+  })),
+}))
+
 jest.mock('use-query-params', () => ({
   useQueryParam: jest.fn().mockReturnValue(['']),
   StringParam: jest.fn(),

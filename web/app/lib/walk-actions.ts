@@ -2,7 +2,7 @@
 
 import Sequelize from 'sequelize'
 import { sequelize, Walk, Area, EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH, WalkAttributes } from '../../lib/db/models'
-import { CityParams, CityT, SearchProps, UserT, SearchState, GetItemState, DeleteItemState, UpdateItemState } from '@/types'
+import { CityParams, CityT, SearchProps, UserT, SearchState, GetItemState, DeleteItemState, UpdateItemState, ConfigT } from '@/types'
 import admin from 'firebase-admin'
 import url from 'url'
 import path from 'path'
@@ -23,7 +23,7 @@ const loadFirebaseConfig = () => {
   }
 }
 
-export const getConfig = async () => {
+export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
   const drawingStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON || './default-shape-styles.json')
   const drawingStyles = JSON.parse(drawingStylesContent.toString())
@@ -33,6 +33,7 @@ export const getConfig = async () => {
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
+    openUserMode: !!process.env.OPEN_USER_MODE,
     appVersion: process.env.npm_package_version,
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultZoom: parseInt(process.env.DEFAULT_ZOOM || '12', 10),
@@ -67,8 +68,7 @@ const getUid = async (state) => {
     if (error.code === 'auth/id-token-expired') {
       state.idTokenExpired = true
     } else {
-      console.error('getUid', error)
-      throw error
+      state.error = error.message
     }
     return [null, false]
   }
@@ -260,8 +260,11 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
   const state: GetItemState = {}
 
   const walk = await Walk.findByPk(id)
-
-  state.current = !walk?.draft || walk?.uid === uid ? walk?.asObject(true) : null
+  if (!walk) {
+    return state
+  }
+  
+  state.current = (!walk.draft || walk.uid === uid) ? walk.asObject(true) : null
   return state
 }
 
@@ -306,6 +309,14 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   const walkPath = formData.get('path')
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
+  if (!title || !date) {
+    state.error = new Error('Title, date are required.')
+    return state
+  }
+  if (!walkPath) {
+    state.error = new Error('Path must be selected.')
+    return state
+  }
   const props: WalkAttributes = {
     title,
     comment,
@@ -409,7 +420,8 @@ export const getUsersAction = async (): Promise<UserT[]> => {
   const userResult = await admin.auth().listUsers(1000)
   return userResult.users.map((user) => {
     const { uid, displayName, photoURL } = user
-    return { uid, displayName, photoURL }
+    const admin = user.customClaims?.admin || false
+    return { uid, displayName, photoURL, admin }
   })
 }
 

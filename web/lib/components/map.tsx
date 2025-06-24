@@ -17,7 +17,7 @@ import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
 import { Loader } from '@googlemaps/js-api-loader'
 import { WalkT } from '@/types'
-import { idToUrl } from '../utils/meta-utils'
+import { idToShowUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
 import type PolygonManager from '../utils/polygon-manager'
 
@@ -245,7 +245,7 @@ const Map = (props) => {
         content = `geolocation at ${moment().format('HH:mm')}`
       } else {
         const item = rc.clickedItem
-        const url = idToUrl(item.id, searchParams)
+        const url = idToShowUrl(item.id, searchParams)
         content = (
           <Button onClick={() => { handleLinkClick(url) }}>
             {item.date}

@@ -404,6 +404,7 @@ describe('updateItemAction', () => {
     formData.set('id', '1')
     formData.set('title', 'Updated Walk')
     formData.set('date', '2023-05-15')
+    formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
     formData.set('draft', 'false')
 
     const result = await updateItemAction(prevState, formData, mockGetUid)
@@ -429,6 +430,7 @@ describe('updateItemAction', () => {
 
     formData.set('title', 'New Walk')
     formData.set('date', '2023-05-15')
+    formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
     formData.set('draft', 'true')
 
     const result = await updateItemAction(prevState, formData, mockGetUid)
@@ -459,6 +461,9 @@ describe('updateItemAction', () => {
       arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
     }
     formData.set('id', '1')
+    formData.set('title', 'Test Walk') // タイトルを追加
+    formData.set('date', '2023-05-15') // 日付を追加
+    formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
     formData.set('image', mockImage)
 
     const result = await updateItemAction(prevState, formData, mockGetUid)
@@ -644,8 +649,8 @@ describe('getUsersAction', () => {
     expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
     expect(result).toHaveLength(2)
     expect(result).toEqual([
-      { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg' },
-      { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg' },
+      { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg', admin: false },
+      { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg', admin: false },
     ])
 
   })
@@ -692,9 +697,10 @@ describe('getConfig', () => {
     expect(result).toEqual({
       googleApiKey: process.env.GOOGLE_API_KEY,
       googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
-      appVersion: '0.9.0',
+      openUserMode: false,
+      appVersion: process.env.npm_package_version,
       defaultCenter: process.env.DEFAULT_CENTER,
-      defaultZoom: 12,
+      defaultZoom: parseInt(process.env.DEFAULT_ZOOM || '12', 10),
       defaultRadius: 500,
       mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
       mapId: process.env.MAP_ID,

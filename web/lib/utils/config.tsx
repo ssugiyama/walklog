@@ -1,13 +1,14 @@
 'use client'
 import { createContext, useContext, useState, useEffect } from "react"
 import { getConfig } from "@/app/lib/walk-actions"
-const ConfigContext = createContext(null)
+import { ConfigT } from "@/types"
+const ConfigContext = createContext<ConfigT | null>(null)
 
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
-  const [config, setCOnfig] = useState(null)
+  const [config, setConfig] = useState<ConfigT | null>(null)
   useEffect(() => {
     getConfig().then((config) => {
-      setCOnfig(config)
+      setConfig(config)
     })
   }, [])
   return (
@@ -17,7 +18,7 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function useConfig() {
+export function useConfig(): ConfigT {
   return useContext(ConfigContext)
 }
 

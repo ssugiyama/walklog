@@ -13,7 +13,7 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Link from 'next/link'
-import { idToUrl } from '../utils/meta-utils'
+import { idToShowUrl } from '../utils/meta-utils'
 import { useData } from '../utils/data-context'
 import { useSearchParams, usePathname } from 'next/navigation'
 import { useConfig } from '../utils/config'
@@ -141,13 +141,13 @@ const BottomBar = (props) => {
   )
 
   const title = item && `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`
-  let nextUrl = nextId && idToUrl(nextId, searchParams)
+  let nextUrl = nextId && idToShowUrl(nextId, searchParams)
   if (!nextUrl && data.offset > 0) {
     const params = new URLSearchParams(searchParams.toString())
     params.set('limit', (Number(data.offset) + 20).toString())
     nextUrl = `/?${params.toString()}&index=${data.offset}`
   }
-  const prevUrl = prevId && idToUrl(prevId, searchParams)
+  const prevUrl = prevId && idToShowUrl(prevId, searchParams)
 
   const ItemControls = (
     <div key="item">
