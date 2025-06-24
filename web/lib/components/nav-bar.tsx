@@ -90,16 +90,6 @@ const NavBar = (props) => {
   }, [])
 
   const today = moment().format('YYYY-MM-DD')
-  const item = useMemo(() => {
-    return {
-      path: searchPath,
-      date: today,
-      title: '',
-      comment: '',
-      id: null,
-      draft: true,
-    }
-  }, [searchPath, today])
   return (
     <AppBar position="static" enableColorOnDark {...props}>
       <Toolbar>

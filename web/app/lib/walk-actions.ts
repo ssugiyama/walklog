@@ -57,7 +57,6 @@ const getUid = async (state) => {
   const cookieStore = await cookies()
   state.idTokenExpired = false
   const idToken = cookieStore.get('idToken')
-  console.log('getUid', idToken?.value)
   if (!idToken?.value) {
     return [null, false]
   }
@@ -66,7 +65,6 @@ const getUid = async (state) => {
       .verifyIdToken(idToken.value)
     return [claim?.uid, claim?.admin || false]
   } catch (error) {
-    console.log('getUid error', error)
     if (error.code === 'auth/id-token-expired') {
       state.idTokenExpired = true
     } else {
@@ -262,8 +260,6 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
   const state: GetItemState = {}
 
   const walk = await Walk.findByPk(id)
-  console.log('getItemInternalAction', uid, walk?.uid, walk?.draft)
-  
   if (!walk) {
     return state
   }
@@ -278,7 +274,6 @@ export const getItemAction = async (prevState: GetItemState, id: number, _getUid
   state.idTokenExpired = false
   const [uid] = await _getUid(state)
   const newState = await _getItemInternalAction(id, uid)
-  console.log('getItemAction', newState)
   if (!newState.current && !newState.idTokenExpired) {
     notFound()
   }
@@ -424,7 +419,6 @@ export const getUsersAction = async (): Promise<UserT[]> => {
   'use cache'
   const userResult = await admin.auth().listUsers(1000)
   return userResult.users.map((user) => {
-    console.log(user)
     const { uid, displayName, photoURL } = user
     const admin = user.customClaims?.admin || false
     return { uid, displayName, photoURL, admin }

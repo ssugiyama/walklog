@@ -30,18 +30,13 @@ import { useData } from '../utils/data-context'
 import { useSearchParams } from 'next/navigation'
 import { useUserContext } from '../utils/user-context'
 import { deleteItemAction } from '@/app/lib/walk-actions'
-import { useRouter } from 'next/navigation'
 
 const ItemBox = () => {
-  const router = useRouter()
   const [tabValue, setTabValue] = useState(0)
   const { users, currentUser } = useUserContext()
   const searchParams = useSearchParams()
   const [data] = useData()
   const item = data.current
-  const handleEdit = useCallback(() => {
-    router.push(idToEditUrl(item?.id))
-  }, [item?.id])
   const [swiper, setSwiper] = useState<SwiperCore | null>(null)
   const onSwiper = useCallback((currentSwiper: SwiperCore) => {
     const swiperInstance = currentSwiper

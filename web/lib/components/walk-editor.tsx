@@ -19,7 +19,7 @@ import { unauthorized, forbidden, useRouter, useSearchParams } from 'next/naviga
 import { useUserContext } from '../utils/user-context';
 import { useMapContext } from '../utils/map-context';
 import { idToShowUrl } from '../utils/meta-utils'
-import { UserT, WalkT } from '@/types'
+import { WalkT } from '@/types'
 import { useConfig } from '../utils/config'
 import moment from 'moment'
 import { Link } from '@mui/material'
@@ -35,9 +35,9 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   }
   const config = useConfig()
   const { updateIdToken, currentUser, users } = useUserContext()
+  const [data] = useData()
   let item: WalkT
   if (mode === 'update') {
-    const [data] = useData()
     item = data.current
   } else {
     const today = moment().format('YYYY-MM-DD')
