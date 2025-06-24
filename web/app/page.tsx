@@ -6,7 +6,7 @@ const description = process.env.SITE_DESCRIPTION || ''
 export const metadata: Metadata = {
   description,
   openGraph: {
-    title: process.env.SITE_NAME || 'Walklog',
+    title: 
     description,
     url: '/',
   }

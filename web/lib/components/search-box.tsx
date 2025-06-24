@@ -19,7 +19,7 @@ import MuiLink from '@mui/material/Link'
 import SearchForm from './search-form'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { idToUrl } from '../utils/meta-utils'
+import { idToShowUrl } from '../utils/meta-utils'
 import { useData } from '../utils/data-context'
 import { useUserContext } from '../utils/user-context'
 const SearchBox = () => {
@@ -40,7 +40,7 @@ const SearchBox = () => {
       if (id) {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.delete('index')
-        router.replace(idToUrl(id, newParams))
+        router.replace(idToShowUrl(id, newParams))
       }
     }
   }, [offset])
@@ -145,8 +145,8 @@ const SearchBox = () => {
                     )
                   }
                 </TableCell>
-                <TableCell sx={sxCell}><MuiLink href={idToUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.date}</MuiLink></TableCell>
-                <TableCell sx={sxCell}><MuiLink href={idToUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.title}</MuiLink></TableCell>
+                <TableCell sx={sxCell}><MuiLink href={idToShowUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.date}</MuiLink></TableCell>
+                <TableCell sx={sxCell}><MuiLink href={idToShowUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.title}</MuiLink></TableCell>
                 <TableCell sx={sxCell}>
                   {
                     showDistance && item.distance !== undefined ?

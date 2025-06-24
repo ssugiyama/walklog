@@ -9,7 +9,7 @@ export default function NotFound() {
     <Paper sx={{ width: '100%', textAlign: 'center', padding: 2, minHeight: 100 }}>
       <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary" component={Link} href="/"><ListIcon /></Fab>
       <Typography variant="h6">Not Found</Typography>
-      <Typography variant="body1">the requested resource is not found or deleted</Typography>
+      <Typography variant="body1" color="error">the requested resource is not found or deleted</Typography>
     </Paper>
   )
 }

@@ -1,4 +1,4 @@
-import { idToUrl } from "@/lib/utils/meta-utils"
+import { idToShowUrl } from "@/lib/utils/meta-utils"
 import ItemBox from "../../../lib/components/item-box"
 import { getItemAction } from "../../lib/walk-actions"
 import ItemFetcher from "@/lib/utils/item-fetcher"
@@ -34,7 +34,7 @@ export async function generateMetadata({params}: {params: Promise<{ id: string }
     openGraph: {
       title,
       description,
-      url: idToUrl(item.id),
+      url: idToShowUrl(item.id),
       images: image ? [
         {
           url: image,

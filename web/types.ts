@@ -74,6 +74,7 @@ export type UserT = {
   uid: string
   displayName: string
   photoURL: string
+  admin?: boolean
 }
 
 export type DataT = Omit<SearchState & GetItemState, 'serial'> &{
@@ -85,5 +86,19 @@ export type DataT = Omit<SearchState & GetItemState, 'serial'> &{
   nextId?: number | null
   prevId?: number | null
   params?: string
-  forceReload?: number
+}
+
+export type ConfigT = {
+  googleApiKey: string
+  googleApiVersion: string
+  openUserMode: boolean
+  appVersion: string
+  defaultCenter: string
+  defaultZoom: number
+  defaultRadius: number
+  mapTypeIds: string
+  mapId: string
+  firebaseConfig: object
+  drawingStyles: object
+  theme: object
 }

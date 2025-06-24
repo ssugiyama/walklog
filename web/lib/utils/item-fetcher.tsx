@@ -36,7 +36,7 @@ export function ItemFetcher() {
         await dispatchGetItem(id)
       })
     }
-  }, [id, data.forceReload, idToken])
+  }, [id, idToken])
 
   useEffect(() => {
     if (getItemState.serial <= 0) {

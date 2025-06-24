@@ -15,7 +15,6 @@ import Button from '@mui/material/Button'
 import MenuIcon from '@mui/icons-material/Menu'
 import { useConfig } from '../utils/config'
 import { useUserContext } from '../utils/user-context'
-import WalkEditor from './walk-editor'
 import {
   initializeApp,
 } from 'firebase/app'
@@ -27,20 +26,18 @@ import {
   signOut,
 } from 'firebase/auth'
 import { useMainContext } from '../utils/main-context'
-
+import { useSearchParams } from 'next/navigation'
+import { Link } from '@mui/material'
 const NavBar = (props) => {
+  const searchParams = useSearchParams()
   const [mainState, dispatchMain] = useMainContext()
   const { overlay } = mainState
-  const [editorOpened, setEditorOpened] = useState(false)
   const config = useConfig()
   const provider = useRef(null)
   const [accountAnchorEl, setAccountAnchorEl] = useState(null)
   const [searchPath] = useQueryParam('path', withDefault(StringParam, ''))
   const { currentUser, setCurrentUser } = useUserContext()
   const appVersion = `v${config.appVersion}`
-  const handleNewWalk = useCallback(() => {
-    setEditorOpened(true)
-  }, [])
   const handleMenuOpen = (setter) => (event) => {
     event.stopPropagation()
     setter(event.currentTarget)
@@ -136,12 +133,11 @@ const NavBar = (props) => {
               </MenuItem>
             ),
             (<Divider key="divider" />),
-            (<EndMenuItem key="new walk" onClick={handleNewWalk} disabled={searchPath === ''}>new walk...</EndMenuItem>),
+            (<EndMenuItem key="new walk" component={Link} href={`/new?${searchParams.toString()}`}>new walk...</EndMenuItem>),
             (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>),
           ] : [<EndMenuItem key="login" onClick={handleLogin}>login with Google</EndMenuItem>]
         }
       </Menu>
-      <WalkEditor item={item} opened={editorOpened} setOpened={setEditorOpened} />
     </AppBar>
   )
 }

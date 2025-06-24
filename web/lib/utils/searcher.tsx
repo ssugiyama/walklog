@@ -56,7 +56,7 @@ export function Searcher() {
     startTransition(async () => {
       await dispatchSearch(props)
     })
-  }, [searchParams, data.forceReload, idToken])
+  }, [searchParams, idToken])
 
   useEffect(() => {
     if (searchState.serial <= 0) {

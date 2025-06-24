@@ -9,6 +9,7 @@ export default function Forbidden() {
     <Paper sx={{ width: '100%', textAlign: 'center', padding: 2, minHeight: 100 }}>
       <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary" component={Link} href="/"><ListIcon /></Fab>
       <Typography variant="h6">Unauthorized</Typography>
+      <Typography variant="body1" color="error">authorization required</Typography>
     </Paper>
   )
 }

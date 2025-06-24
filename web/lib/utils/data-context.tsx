@@ -13,7 +13,6 @@ const initialData: DataT = {
   nextId: null,
   prevId: null,
   params: '',
-  forceReload: 0,
 }
 
 const DataContext = createContext(null)
