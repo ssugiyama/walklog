@@ -21,7 +21,7 @@ const initialState: UserContextT = {
 const UserContext = createContext(initialState)
 
 export function UserContextProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<FirebaseUser>(undefined)
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null | undefined>(null)
   const getCookieValue = (name: string) => {
     if (typeof document === 'undefined') return ''
     const value = `; ${document.cookie}`
