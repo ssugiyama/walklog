@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import { getConfig } from "@/app/lib/walk-actions"
 import { ConfigT } from "@/types"
-const ConfigContext = createContext(null)
+const ConfigContext = createContext<ConfigT | null>(null)
 
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<ConfigT | null>(null)
