@@ -20,7 +20,7 @@ const ElevationBox = () => {
   const mapLoaded = !!mapState.map
   const { map, elevationInfoWindow } = mapState
   
-  const handleTooltipChange = (active: boolean, payload?: any) => {
+  const handleTooltipChange = (active: boolean, payload?) => {
     if (!refs.current.elevationResults || !elevationInfoWindow || !map) return
     
     if (!active || !payload || !payload.length) {
