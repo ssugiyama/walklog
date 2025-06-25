@@ -6,7 +6,7 @@
     "start": "next start",
     "start-in-docker": "node ./server.js",
     "test": "jest",
-    "lint": "next lint -f stylish"
+    "lint": "next lint"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
