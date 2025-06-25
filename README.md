@@ -161,7 +161,7 @@ cd /path/to/work_dir
 ```bash
 cd web
 export NODE_ENV=production
-npm install --force
+npm install
 npm run build
 npm start
 ```
@@ -171,7 +171,7 @@ npm start
 ### Development Mode
 ```bash
 cd web
-npm install --force
+npm install
 npm run dev
 ```
 
