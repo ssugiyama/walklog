@@ -15,7 +15,6 @@ import { notFound, unauthorized, forbidden } from 'next/navigation'
 
 let firebaseConfig
 
- let aaa;
 const loadFirebaseConfig = () => {
   const content = fs.readFileSync(process.env.FIREBASE_CONFIG)
   firebaseConfig = JSON.parse(content.toString())
