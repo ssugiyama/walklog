@@ -8,7 +8,7 @@ type UserContextT = {
   users: UserT[]
   idToken: string | null
   currentUser: FirebaseUser | null | undefined
-  setCurrentUser: (user: UserT | null) => void
+  setCurrentUser: (user: FirebaseUser | null) => void
   updateIdToken: () => Promise<void>
 }
 const initialState: UserContextT = {
@@ -21,7 +21,7 @@ const initialState: UserContextT = {
 const UserContext = createContext(initialState)
 
 export function UserContextProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null | undefined>(null)
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null | undefined>(undefined)
   const getCookieValue = (name: string) => {
     if (typeof document === 'undefined') return ''
     const value = `; ${document.cookie}`

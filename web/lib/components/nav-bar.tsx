@@ -1,12 +1,10 @@
 import React, {
-  useEffect, useState, useCallback, useRef, useMemo,
+  useEffect, useState, useCallback, useRef,
 } from 'react'
-import { useQueryParam, StringParam, withDefault } from 'use-query-params'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
-import moment from 'moment'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
@@ -27,7 +25,8 @@ import {
 } from 'firebase/auth'
 import { useMainContext } from '../utils/main-context'
 import { useSearchParams } from 'next/navigation'
-import { Link } from '@mui/material'
+import Link from 'next/link'
+
 const NavBar = (props) => {
   const searchParams = useSearchParams()
   const [mainState, dispatchMain] = useMainContext()
@@ -35,7 +34,6 @@ const NavBar = (props) => {
   const config = useConfig()
   const provider = useRef(null)
   const [accountAnchorEl, setAccountAnchorEl] = useState(null)
-  const [searchPath] = useQueryParam('path', withDefault(StringParam, ''))
   const { currentUser, setCurrentUser } = useUserContext()
   const appVersion = `v${config.appVersion}`
   const handleMenuOpen = (setter) => (event) => {
@@ -89,7 +87,6 @@ const NavBar = (props) => {
     )
   }, [])
 
-  const today = moment().format('YYYY-MM-DD')
   return (
     <AppBar position="static" enableColorOnDark {...props}>
       <Toolbar>
