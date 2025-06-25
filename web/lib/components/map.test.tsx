@@ -74,7 +74,7 @@ describe('Map Component', () => {
     (useConfig as jest.Mock).mockReturnValue({
       defaultCenter: '35.6895,139.6917',
       defaultRadius: 1000,
-      shapeStyles: { polylines: {}, polygons: {}, circle: {} },
+      shapeStyles: { polylines: {}, polygons: {}, circle: {}, marker: {} },
       mapTypeIds: 'roadmap',
       mapId: 'test-map-id',
     });
