@@ -25,8 +25,8 @@ const loadFirebaseConfig = () => {
 
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
-  const drawingStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON || './default-shape-styles.json')
-  const drawingStyles = JSON.parse(drawingStylesContent.toString())
+  const shapeStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON || './default-shape-styles.json')
+  const shapeStyles = JSON.parse(shapeStylesContent.toString())
   const themeContent = fs.readFileSync(process.env.THEME_JSON || './default-theme.json')
   const theme = JSON.parse(themeContent.toString())
   if (!firebaseConfig) loadFirebaseConfig()
@@ -41,7 +41,7 @@ export const getConfig = async (): Promise<ConfigT> => {
     mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
     mapId: process.env.MAP_ID,
     firebaseConfig,
-    drawingStyles,
+    shapeStyles,
     theme,
   }
 }

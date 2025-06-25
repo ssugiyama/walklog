@@ -88,6 +88,18 @@ export type DataT = Omit<SearchState & GetItemState, 'serial'> &{
   params?: string
 }
 
+export type ShapeStyles = {
+  polylines: {
+    normal: google.maps.PolylineOptions
+    current: google.maps.PolylineOptions
+    selected: google.maps.PolylineOptions
+    new: google.maps.PolylineOptions
+  }
+  polygons: google.maps.PolygonOptions
+  circle: google.maps.CircleOptions
+  marker: google.maps.marker.AdvancedMarkerElementOptions
+}
+
 export type ConfigT = {
   googleApiKey: string
   googleApiVersion: string
@@ -99,6 +111,6 @@ export type ConfigT = {
   mapTypeIds: string
   mapId: string
   firebaseConfig: object
-  drawingStyles: object
+  shapeStyles: ShapeStyles
   theme: object
 }
