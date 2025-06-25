@@ -67,7 +67,7 @@ describe('ElevationBox', () => {
   it('renders null when selectedItem is present but no chartData', () => {
     (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
     (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as jest.Mock).mockReturnValue({ drawingStyles: { polylines: { current: { strokeColor: '#000000' } } } })
+    (useConfig as jest.Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
 
     const { container } = render(<ElevationBox />)
     expect(container.firstChild).toBeNull()
@@ -86,7 +86,7 @@ describe('ElevationBox', () => {
     (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
     (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
     (useConfig as jest.Mock).mockReturnValue({ 
-      drawingStyles: { 
+      shapeStyles: { 
         polylines: { 
           current: { strokeColor: '#82ca9d' } 
         } 
@@ -137,7 +137,7 @@ describe('ElevationBox', () => {
 
     (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
     (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as jest.Mock).mockReturnValue({ drawingStyles: { polylines: { current: { strokeColor: '#000000' } } } })
+    (useConfig as jest.Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
 
     const { container } = render(<ElevationBox />)
     

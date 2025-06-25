@@ -16,7 +16,7 @@ import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
 import { Loader } from '@googlemaps/js-api-loader'
-import { WalkT } from '@/types'
+import { ShapeStyles, WalkT } from '@/types'
 import { idToShowUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
 import type PolygonManager from '../utils/polygon-manager'
@@ -37,12 +37,7 @@ type MapRefs = {
   centerIntervalID?: number
   pathManager?: PathManager
   polygonManager?: PolygonManager
-  drawingStyles?: {
-    polylines: google.maps.StyledMapTypeOptions
-    polygons: google.maps.StyledMapTypeOptions
-    circle: google.maps.CircleOptions
-    marker: google.maps.marker.AdvancedMarkerElementOptions
-  }
+  shapeStyles?: ShapeStyles
   searchPath?: string
   radius?: number
   fetching?: boolean
@@ -175,7 +170,7 @@ const Map = (props) => {
 
   const initMap = async () => {
     if (rc.initialized) return
-    rc.drawingStyles = config.drawingStyles
+    rc.shapeStyles = config.shapeStyles
     const mapTypeIds = config.mapTypeIds.split(/,/)
     const cs = rc.searchCenter.split(/,/)
     const options = {
@@ -212,7 +207,7 @@ const Map = (props) => {
       google.maps.event.clearListeners(rc.map, 'tilesloaded')
     })
     const { default: PathManager } = await import('../utils/path-manager')
-    rc.pathManager = new PathManager({ map: rc.map, styles: rc.drawingStyles.polylines })
+    rc.pathManager = new PathManager({ map: rc.map, styles: rc.shapeStyles.polylines })
     google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged)
     google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged)
     google.maps.event.addListener(rc.pathManager, 'polylinecomplete', async (polyline) => {
@@ -227,7 +222,7 @@ const Map = (props) => {
       rc.pathManager.applyPath(polyline.getPath().getArray(), append)
     })
     const { default: PolygonManager } = await import('../utils/polygon-manager')
-    rc.polygonManager = new PolygonManager({ map: rc.map, styles: rc.drawingStyles.polygons, addCity })
+    rc.polygonManager = new PolygonManager({ map: rc.map, styles: rc.shapeStyles.polygons, addCity })
     google.maps.event.addListener(rc.polygonManager, 'polygon_deleted', (id) => {
       const citiesArray = rc.cities.split(/,/)
       const index = citiesArray.indexOf(id)
@@ -267,9 +262,9 @@ const Map = (props) => {
     const c = rc.searchCenter.split(/,/)
     const center = { lat: parseFloat(c[0]), lng: parseFloat(c[1]) }
     const circleOpts = {
-      ...rc.drawingStyles.circle,
+      ...rc.shapeStyles.circle,
       center: center,
-      radius: parseFloat(radius),
+      radius: radius,
     }
     rc.distanceWidget = new google.maps.Circle(circleOpts)
     google.maps.event.addListener(rc.distanceWidget, 'center_changed', () => {
