@@ -2,7 +2,7 @@
 import { DeleteItemState, UserT } from '@/types'
 import React, { useState, useCallback, useEffect, useTransition, useActionState } from 'react'
 import Link from 'next/link'
-import { marked } from 'marked'
+import ReactMarkdown from 'react-markdown'
 import Paper from '@mui/material/Paper'
 import IconButton from '@mui/material/IconButton'
 import Fab from '@mui/material/Fab'
@@ -18,7 +18,6 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Avatar from '@mui/material/Avatar'
 import NoSsr from '@mui/material/NoSsr'
-import DOMPurify from 'isomorphic-dompurify'
 import PanoramaBox from './panorama-box'
 import ElevationBox from './elevation-box'
 import type { Swiper as SwiperCore } from 'swiper'
@@ -68,7 +67,6 @@ const ItemBox = () => {
 
   const itemWillRender = !data.isPending && item
   const title = itemWillRender ? `${item.date} : ${item.title} (${item.length.toFixed(1)} km)` : ''
-  const createMarkup = () => ({ __html: DOMPurify.sanitize(marked.parse(item?.comment || '') as string) })
   const image = item?.image
   const dataUser = users.find((u: UserT) => u.uid === item?.uid) || null
   const upUrl = `/?${searchParams.toString()}`
@@ -166,8 +164,9 @@ const ItemBox = () => {
                   color: 'inherit',
                 },
               }}
-              dangerouslySetInnerHTML={createMarkup()}
-            />
+            >
+              <ReactMarkdown>{item?.comment || ''}</ReactMarkdown>
+            </Typography>
           </Box>
         </SwiperSlide>
         <SwiperSlide>

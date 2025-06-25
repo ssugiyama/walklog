@@ -9,6 +9,8 @@ const config = {
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    // Mock react-markdown for tests
+    '^react-markdown$': '<rootDir>/__mocks__/react-markdown.js',
     // Handle CSS imports (with CSS modules)
     '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
     // Handle CSS imports (without CSS modules)
