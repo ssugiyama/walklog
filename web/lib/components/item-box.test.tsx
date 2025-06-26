@@ -17,12 +17,6 @@ jest.mock('@/lib/components/walk-editor', () => function MockWalkEditor() {
   return <div data-testid="walk-editor">Walk Editor</div>
 })
 
-jest.mock('swiper/react', () => ({
-  Swiper: ({ children }) => <div>{children}</div>,
-  SwiperSlide: ({ children }) => <div>{children}</div>,
-}))
-jest.mock('swiper/css', () => ({}))
-
 jest.mock('../utils/data-context', () => ({
   useData: jest.fn(),
 }))
