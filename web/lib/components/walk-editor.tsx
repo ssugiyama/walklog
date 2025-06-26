@@ -52,7 +52,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     }
   }
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-  const [,, reset] = useData()
   const [searchPath] = useQueryParam('path', withDefault(StringParam, ''));
   const [mapState] = useMapContext();
   const { deleteSelectedPath } = mapState;
@@ -67,17 +66,16 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           handleSubmit()
         })()
       } else if (state.id) {
-        if (searchPath) deleteSelectedPath();
-        if (item?.id) {
-          reset()
-        } else if (state.id) {
-          router.push(idToShowUrl(state.id));
-        }
+        if (searchPath) deleteSelectedPath()
+        router.push(idToShowUrl(state.id))
       }
     }
   }, [state.serial])
-  if (!currentUser) {
+  if (currentUser === null) {
     unauthorized()
+  }
+  if (currentUser === undefined) {
+    return null
   }
   const dataUser = users.find((u) => u.uid === currentUser.uid) || null
   if (!config.openUserMode && !dataUser.admin) {
