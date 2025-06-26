@@ -52,7 +52,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     }
   }
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-    const [searchPath] = useQueryParam('path', withDefault(StringParam, ''));
+  const [searchPath] = useQueryParam('path', withDefault(StringParam, ''));
   const [mapState] = useMapContext();
   const { deleteSelectedPath } = mapState;
   const handleSubmit = useCallback(() => {
@@ -71,8 +71,11 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       }
     }
   }, [state.serial])
-  if (!currentUser) {
+  if (currentUser === null) {
     unauthorized()
+  }
+  if (currentUser === undefined) {
+    return null
   }
   const dataUser = users.find((u) => u.uid === currentUser.uid) || null
   if (!config.openUserMode && !dataUser.admin) {
