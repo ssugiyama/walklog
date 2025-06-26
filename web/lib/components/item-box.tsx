@@ -20,9 +20,6 @@ import Avatar from '@mui/material/Avatar'
 import NoSsr from '@mui/material/NoSsr'
 import PanoramaBox from './panorama-box'
 import ElevationBox from './elevation-box'
-import type { Swiper as SwiperCore } from 'swiper'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import 'swiper/css'
 
 import { idToEditUrl, idToShowUrl } from '../utils/meta-utils'
 import { useData } from '../utils/data-context'
@@ -30,25 +27,43 @@ import { useSearchParams } from 'next/navigation'
 import { useUserContext } from '../utils/user-context'
 import { deleteItemAction } from '@/app/lib/walk-actions'
 
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`item-tabpanel-${index}`}
+      aria-labelledby={`item-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ padding: 2, overflow: 'auto' }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  )
+}
+
 const ItemBox = () => {
   const [tabValue, setTabValue] = useState(0)
   const { users, currentUser } = useUserContext()
   const searchParams = useSearchParams()
   const [data] = useData()
   const item = data.current
-  const [swiper, setSwiper] = useState<SwiperCore | null>(null)
-  const onSwiper = useCallback((currentSwiper: SwiperCore) => {
-    const swiperInstance = currentSwiper
-    setSwiper(swiperInstance)
-  }, [])
+
   const tabChangeCB = useCallback((e: React.SyntheticEvent, value: number) => {
     setTabValue(value)
-    swiper?.slideTo(value)
-  }, [swiper])
-  
-  const indexChangeCB = useCallback((swiper: SwiperCore) => {
-    setTabValue(swiper.activeIndex)
   }, [])
+  
   const initialDeleteState: DeleteItemState = {
     deleted: false,
     idTokenExpired: false,
@@ -143,45 +158,34 @@ const ItemBox = () => {
           <Tab label="Elevation" sx={{ textTransform: 'none' }} />
           <Tab label="StreetView" sx={{ textTransform: 'none' }} />
         </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          {image &&
+            <Box sx={sxImageBox} component="img" src={image} data-testid="item-image" />}
+          <Typography
+            variant="body2"
+            component="div"
+            sx={{
+              textIndent: '1.2em',
+              lineHeight: '1.65',
+              letterSpacing: '.1em',
+              textAlign: 'justify',
+              '& a': {
+                color: 'inherit',
+              },
+            }}
+          >
+            <ReactMarkdown>{item?.comment || ''}</ReactMarkdown>
+          </Typography>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <NoSsr>
+            <ElevationBox />
+          </NoSsr>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <PanoramaBox />
+        </TabPanel>
       </Paper>
-      <Swiper
-        onSwiper={onSwiper}
-        onSlideChange={indexChangeCB}
-      >
-        <SwiperSlide>
-          <Box sx={{ padding: 2, overflow: 'auto' }}>
-            {image &&
-              <Box sx={sxImageBox} component="img" src={image} data-testid="item-image" />}
-            <Typography
-              variant="body2"
-              component="div"
-              sx={{
-                textIndent: '1.2em',
-                lineHeight: '1.65',
-                letterSpacing: '.1em',
-                textAlign: 'justify',
-                '& a': {
-                  color: 'inherit',
-                },
-              }}
-            >
-              <ReactMarkdown>{item?.comment || ''}</ReactMarkdown>
-            </Typography>
-          </Box>
-        </SwiperSlide>
-        <SwiperSlide>
-          <Box sx={{ padding: 2, overflow: 'auto' }}>
-            <NoSsr>
-              <ElevationBox />
-            </NoSsr>
-          </Box>
-        </SwiperSlide>
-        <SwiperSlide>
-          <Box sx={{ padding: 2, overflow: 'auto' }}>
-            <PanoramaBox />
-          </Box>
-        </SwiperSlide>
-      </Swiper>
     </Box>
 }
 
