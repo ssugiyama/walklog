@@ -67,12 +67,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           handleSubmit()
         })()
       } else if (state.id) {
-        if (searchPath) deleteSelectedPath();
-        if (item?.id) {
-          reset()
-        } else if (state.id) {
-          router.push(idToShowUrl(state.id));
-        }
+        if (searchPath) deleteSelectedPath()
+        router.push(idToShowUrl(state.id))
       }
     }
   }, [state.serial])
