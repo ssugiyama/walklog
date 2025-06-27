@@ -93,7 +93,7 @@ const SearchForm = () => {
     const value = e.target.value
     const params = new URLSearchParams(searchParams.toString())
     params.set('filter', value)
-    if (value === 'hausdorff' ?? value === 'frechet') {
+    if (value === 'hausdorff' || value === 'frechet') {
       params.set('order', 'nearest_first')
     } else if (order === 'nearest_first') {
       params.set('order', 'newest_first')
