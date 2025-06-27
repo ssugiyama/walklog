@@ -264,7 +264,7 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
     return state
   }
   
-  state.current = (!walk.draft ?? walk.uid === uid) ? walk.asObject(true) : null
+  state.current = (!walk.draft || walk.uid === uid) ? walk.asObject(true) : null
   return state
 }
 
@@ -309,7 +309,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   const walkPath = formData.get('path')
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
-  if (!title ?? !date) {
+  if (!title || !date) {
     state.error = new Error('Title, date are required.')
     return state
   }
@@ -420,7 +420,7 @@ export const getUsersAction = async (): Promise<UserT[]> => {
   const userResult = await admin.auth().listUsers(1000)
   return userResult.users.map((user) => {
     const { uid, displayName, photoURL } = user
-    const admin = user.customClaims?.admin ?? false
+    const admin = user.customClaims?.admin || false
     return { uid, displayName, photoURL, admin }
   })
 }
