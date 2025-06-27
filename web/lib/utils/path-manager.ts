@@ -264,7 +264,7 @@ export default class PathManager extends google.maps.MVCObject {
     if (this.selection) {
       this.set('length', google.maps.geometry.spherical.computeLength(this.selection.getPath()) / 1000)
     } else {
-      this.set('length', '')
+      this.set('length', 0)
     }
   }
 

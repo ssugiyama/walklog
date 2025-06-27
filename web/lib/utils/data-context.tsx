@@ -19,14 +19,11 @@ const DataContext = createContext(null)
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<DataT>(initialData)
-  const reset = () => {
-    setData(initialData)
-  }
   const setDataExternal = (d) => {
     setData({ ...data, ...d }) 
   }
   return (
-    <DataContext.Provider value={[data, setDataExternal, reset]}>
+    <DataContext.Provider value={[data, setDataExternal]}>
       {children}
     </DataContext.Provider>
   )
