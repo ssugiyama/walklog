@@ -26,7 +26,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     if (typeof document === 'undefined') return ''
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop()?.split(';').shift() || ''
+    if (parts.length === 2) return parts.pop()?.split(';').shift() ?? ''
     return ''
   }
   const initialIdToken = getCookieValue('idToken')
@@ -40,7 +40,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
       setIdToken('')
       return
     }
-    const newIdToken = await currentUser?.getIdToken() || ''
+    const newIdToken = await currentUser?.getIdToken() ?? ''
     const secure = location.protocol === 'https:' ? '; secure' : ''
     // Max-Ageを1時間に設定してトークンの有効期限を管理
     document.cookie = `idToken=${newIdToken}; path=/; samesite=strict${secure}; max-age=3600`

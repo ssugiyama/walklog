@@ -153,11 +153,11 @@ const BottomBar = (props) => {
     <div key="item">
       <Box sx={sxBottomBarGroupBody}>
         <Tooltip title="prev" placement="top">
-          <IconButton data-testid="prev-button" disabled={!prevUrl} component={Link} href={prevUrl || ''} size="large"><NavigationArrowBack /></IconButton>
+          <IconButton data-testid="prev-button" disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBack /></IconButton>
         </Tooltip>
         <Typography variant="body1" sx={{ display: 'inline', flexShrink: 1 }} noWrap>{title}</Typography>
         <Tooltip title="next" placement="top">
-          <IconButton data-testid="next-button" disabled={!nextUrl} component={Link} href={nextUrl || ''} size="large"><NavigationArrowForward /></IconButton>
+          <IconButton data-testid="next-button" disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForward /></IconButton>
         </Tooltip>
       </Box>
     </div>

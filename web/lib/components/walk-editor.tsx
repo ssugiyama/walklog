@@ -77,8 +77,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   if (currentUser === undefined) {
     return null
   }
-  const dataUser = users.find((u) => u.uid === currentUser.uid) || null
-  if (!config.openUserMode && !dataUser.admin) {
+  const dataUser = users.find((u) => u.uid === currentUser.uid) ?? null
+  if (!config.openUserMode && !dataUser?.admin) {
     forbidden()
   }
   return (
@@ -86,7 +86,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
         <Typography variant="body1" color="error" >{state.error?.message}</Typography>
         <Form action={formAction} name="walk-form" ref={formRef}>
-          <input type="hidden" name="path" defaultValue={searchPath || item?.path} />
+          <input type="hidden" name="path" defaultValue={searchPath ?? item?.path} />
           <input type="hidden" name="id" defaultValue={item?.id} />
           <FormGroup row>
             <TextField type="date" name="date" defaultValue={item?.date} variant="standard" label="date" fullWidth />

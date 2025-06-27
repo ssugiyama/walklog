@@ -37,11 +37,11 @@ const ToolBox = (props) => {
   const [mainState, dispatchMain] = useMainContext()
   const [mapState] = useMapContext()
   const pathManager = mapState.pathManager
-  const selectedPath = pathManager?.getEncodedSelection() || null
+  const selectedPath = pathManager?.getEncodedSelection() ?? null
   const autoGeolocation = mainState.autoGeolocation
   const [location, setLocation] = useState('')
   const geocoder = useRef<google.maps.Geocoder>(null)
-  const length = pathManager?.get('length') || 0
+  const length = pathManager?.get('length') ?? 0
   const { map, marker, addPoint, downloadPath, uploadPath, clearPaths } = mapState
   const [confirmInfo, setConfirmInfo] = useState<ConfirmInfo>({ open: false })
   const showMarker = (pos) => {
