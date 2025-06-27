@@ -5,7 +5,7 @@ import WalkEditor from './walk-editor'
 const mockUpdateIdToken = jest.fn()
 const mockDeleteSelectedPath = jest.fn()
 const mockRouterPush = jest.fn()
-const mockReset = jest.fn()
+const mockSetData = jest.fn()
 const mockSearchParams = {
   toString: jest.fn(() => 'param1=value1&param2=value2')
 }
@@ -35,8 +35,7 @@ jest.mock('../utils/config', () => ({
 jest.mock('../utils/data-context', () => ({
   useData: () => [
     { current: { id: '2', date: '2023-01-01', title: 'Test Walk', comment: 'Test comment', draft: true } },
-    ,
-    mockReset
+    mockSetData
   ],
 }))
 

@@ -35,7 +35,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   }
   const config = useConfig()
   const { updateIdToken, currentUser, users } = useUserContext()
-  const [data] = useData()
+  const [data, setData] = useData()
   let item: WalkT
   if (mode === 'update') {
     item = data.current
@@ -52,7 +52,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     }
   }
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-  const [searchPath] = useQueryParam('path', withDefault(StringParam, ''));
+  const [searchPath] = useQueryParam('path', withDefault(StringParam, null));
   const [mapState] = useMapContext();
   const { deleteSelectedPath } = mapState;
   const handleSubmit = useCallback(() => {
@@ -67,6 +67,9 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         })()
       } else if (state.id) {
         if (searchPath) deleteSelectedPath()
+        if (mode === 'update') {
+          setData({ rows: [] })
+        }
         router.push(idToShowUrl(state.id))
       }
     }
