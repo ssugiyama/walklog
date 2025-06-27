@@ -8,7 +8,7 @@ export default class PolygonManager extends google.maps.MVCObject {
     super()
     this.polygons = {}
     this.cache = {}
-    const options = optOptions || {}
+    const options = optOptions ?? {}
     this.setValues(options)
   }
 

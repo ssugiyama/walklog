@@ -25,20 +25,20 @@ const loadFirebaseConfig = () => {
 
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
-  const shapeStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON || './default-shape-styles.json')
+  const shapeStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
   const shapeStyles = JSON.parse(shapeStylesContent.toString())
-  const themeContent = fs.readFileSync(process.env.THEME_JSON || './default-theme.json')
+  const themeContent = fs.readFileSync(process.env.THEME_JSON ?? './default-theme.json')
   const theme = JSON.parse(themeContent.toString())
   if (!firebaseConfig) loadFirebaseConfig()
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
-    googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
+    googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
     openUserMode: !!process.env.OPEN_USER_MODE,
     appVersion: process.env.npm_package_version,
     defaultCenter: process.env.DEFAULT_CENTER,
-    defaultZoom: parseInt(process.env.DEFAULT_ZOOM || '12', 10),
+    defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
     defaultRadius: 500,
-    mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
+    mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
     mapId: process.env.MAP_ID,
     firebaseConfig,
     shapeStyles,
@@ -63,7 +63,7 @@ const getUid = async (state) => {
   try {
     const claim = await admin.auth()
       .verifyIdToken(idToken.value)
-    return [claim?.uid, claim?.admin || false]
+    return [claim?.uid, claim?.admin ?? false]
   } catch (error) {
     if (error.code === 'auth/id-token-expired') {
       state.idTokenExpired = true
@@ -96,7 +96,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
   }
 
   const where = []
-  const order = orderHash[props.order || 'newest_first']
+  const order = orderHash[props.order ?? 'newest_first']
 
   if (props.date) {
     where.push({ date: props.date })
@@ -112,8 +112,8 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
   }
   if (['neighborhood', 'start', 'end'].includes(props.filter as string)) {
     const c = props.center.split(/,/)
-    const latitude = parseFloat(c[0]) || 0
-    const longitude = parseFloat(c[1]) || 0
+    const latitude = parseFloat(c[0]) ?? 0
+    const longitude = parseFloat(c[1]) ?? 0
     const radius = parseFloat(props.radius as string)
     const dlat = (radius * 180) / Math.PI / EARTH_RADIUS
     const mlat = latitude > 0 ? latitude + dlat : latitude - dlat
@@ -166,7 +166,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       state.rows = []
       return state
     }
-    const maxDistance = props.max_distance || 4000
+    const maxDistance = props.max_distance ?? 4000
     const linestring = Walk.decodePath(props.path as string)
     const extent = Walk.getPathExtent(props.path as string)
     const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
@@ -190,7 +190,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       state.rows = []
       return state
     }
-    const maxDistance = props.max_distance || 4000
+    const maxDistance = props.max_distance ?? 4000
     const linestring = Walk.decodePath(props.path as string)
     const sp = Walk.getStartPoint(props.path as string)
     const ep = Walk.getEndPoint(props.path as string)
@@ -225,8 +225,8 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     where.push({ draft: false })
   }
 
-  const limit = props.limit || 20
-  const offset = props.offset || 0
+  const limit = props.limit ?? 20
+  const offset = props.offset ?? 0
 
   const condition = { [Op.and]: where }
   const result = await Walk.findAndCountAll({
@@ -264,7 +264,7 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
     return state
   }
   
-  state.current = (!walk.draft || walk.uid === uid) ? walk.asObject(true) : null
+  state.current = (!walk.draft ?? walk.uid === uid) ? walk.asObject(true) : null
   return state
 }
 
@@ -309,7 +309,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   const walkPath = formData.get('path')
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
-  if (!title || !date) {
+  if (!title ?? !date) {
     state.error = new Error('Title, date are required.')
     return state
   }
@@ -330,8 +330,8 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   }
   if (willDeleteImage) {
     props.image = null
-  } else if ((image?.size || 0) > 0) {
-    const prefix = process.env.IMAGE_PREFIX || 'images'
+  } else if ((image?.size ?? 0) > 0) {
+    const prefix = process.env.IMAGE_PREFIX ?? 'images'
     const filePath = path.join(prefix, getFilename(id, image))
     const content = await image.arrayBuffer()
     const buffer = Buffer.from(content)
@@ -420,7 +420,7 @@ export const getUsersAction = async (): Promise<UserT[]> => {
   const userResult = await admin.auth().listUsers(1000)
   return userResult.users.map((user) => {
     const { uid, displayName, photoURL } = user
-    const admin = user.customClaims?.admin || false
+    const admin = user.customClaims?.admin ?? false
     return { uid, displayName, photoURL, admin }
   })
 }

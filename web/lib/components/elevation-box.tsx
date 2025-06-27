@@ -77,7 +77,7 @@ const ElevationBox = () => {
   }, [selectedItem, mapLoaded])
   
   if (selectedItem && chartData.length > 0) {
-    const strokeColor = config?.shapeStyles?.polylines?.current?.strokeColor || '#82ca9d'
+    const strokeColor = config?.shapeStyles?.polylines?.current?.strokeColor ?? '#82ca9d'
     
     return (
       <div data-testid="elevation-box" style={{ width: '100%', height: '20vh' }}>
@@ -99,7 +99,7 @@ const ElevationBox = () => {
             <Tooltip
               content={({ active, payload }: { active: boolean, payload: TooltipPayload[]}) => {
                 
-                handleTooltipChange(active || false, payload)
+                handleTooltipChange(active ?? false, payload)
                 return null // カスタムツールチップは使わず、Google Maps InfoWindowを使用
               }}
             />

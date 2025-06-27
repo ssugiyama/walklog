@@ -83,7 +83,7 @@ const ItemBox = () => {
   const itemWillRender = !data.isPending && item
   const title = itemWillRender ? `${item.date} : ${item.title} (${item.length.toFixed(1)} km)` : ''
   const image = item?.image
-  const dataUser = users.find((u: UserT) => u.uid === item?.uid) || null
+  const dataUser = users.find((u: UserT) => u.uid === item?.uid) ?? null
   const upUrl = `/?${searchParams.toString()}`
   const draft = item?.draft
   let nextUrl = data.nextId && idToShowUrl(data.nextId, searchParams)
@@ -118,15 +118,15 @@ const ItemBox = () => {
     <Box data-testid="ItemBox">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
         <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary" component={Link} href={upUrl}><ListIcon /></Fab>
-        <IconButton disabled={!prevUrl} component={Link} href={prevUrl || ''} size="large"><NavigationArrowBackIcon /></IconButton>
-        <IconButton disabled={!nextUrl} component={Link} href={nextUrl || ''} size="large"><NavigationArrowForwardIcon /></IconButton>
+        <IconButton disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBackIcon /></IconButton>
+        <IconButton disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForwardIcon /></IconButton>
         {
           currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton component={Link} href={idToEditUrl(item?.id, searchParams)} size="large" data-testid="edit-button"><EditIcon /></IconButton>) : null
         }
         {
           currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
         }
-        <Typography variant="h6" sx={{ fontSize: '100%' }}>{title || 'not found'}</Typography>
+        <Typography variant="h6" sx={{ fontSize: '100%' }}>{title ?? 'not found'}</Typography>
         <Box sx={{ textAlign: 'right' }}>
           {
             draft ?
@@ -174,7 +174,7 @@ const ItemBox = () => {
               },
             }}
           >
-            <ReactMarkdown>{item?.comment || ''}</ReactMarkdown>
+            <ReactMarkdown>{item?.comment ?? ''}</ReactMarkdown>
           </Typography>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>

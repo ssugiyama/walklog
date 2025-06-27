@@ -696,13 +696,13 @@ describe('getConfig', () => {
 
     expect(result).toEqual({
       googleApiKey: process.env.GOOGLE_API_KEY,
-      googleApiVersion: process.env.GOOGLE_API_VERSION || 'weekly',
+      googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
       openUserMode: false,
       appVersion: process.env.npm_package_version,
       defaultCenter: process.env.DEFAULT_CENTER,
-      defaultZoom: parseInt(process.env.DEFAULT_ZOOM || '12', 10),
+      defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
       defaultRadius: 500,
-      mapTypeIds: process.env.MAP_TYPE_IDS || 'roadmap,hybrid,satellite,terrain',
+      mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
       mapId: process.env.MAP_ID,
       firebaseConfig: mockFirebaseConfig,
       theme: mockTheme,
@@ -716,6 +716,6 @@ describe('getConfig', () => {
     })
 
     await expect(getConfig()).rejects.toThrow('File read error')
-    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON || './default-shape-styles.json')
+    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
   })
 })

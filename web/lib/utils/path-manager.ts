@@ -18,7 +18,7 @@ export default class PathManager extends google.maps.MVCObject {
   
   constructor(optOptions) {
     super()
-    const options = optOptions || {}
+    const options = optOptions ?? {}
     this.polylines = {}
 
     this.drawingManager = new google.maps.drawing.DrawingManager({
