@@ -280,10 +280,10 @@ export const getItemAction = async (prevState: GetItemState, id: number, _getUid
   return Object.assign({ ...state }, newState)
 }
 
-const getFilename = (id, file) => {
+const getFilename = (uid: string, date: string, file: File) => {
   const match = file.name.match(/\.\w+$/)
   const ext = match ? match[0] : ''
-  const basename = `${`00000${id}`.slice(-6)}-${nanoid(4)}`
+  const basename = `${uid}-${date}-${nanoid(4)}`
   return match ? basename + ext : basename
 }
 
@@ -332,7 +332,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     props.image = null
   } else if ((image?.size ?? 0) > 0) {
     const prefix = process.env.IMAGE_PREFIX ?? 'images'
-    const filePath = path.join(prefix, getFilename(id, image))
+      const filePath = path.join(prefix, getFilename(uid, date, image))
     const content = await image.arrayBuffer()
     const buffer = Buffer.from(content)
     if (firebaseStorage) {
