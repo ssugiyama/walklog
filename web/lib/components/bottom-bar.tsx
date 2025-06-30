@@ -100,7 +100,7 @@ const BottomBar = (props) => {
         </Box>
       </div>
     )
-  } else if (pathname.startsWith('/new') || pathname.startsWith('/edit/')) {
+  } else if (pathname === '/new' || pathname === '/new/' || pathname.startsWith('/edit/')) {
     const cancelEditCB = () => {
       let cancelUrl: string | null = null 
       if (pathname.startsWith('/new/')) {
