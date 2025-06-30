@@ -126,9 +126,9 @@ const BottomBar = (props) => {
     const title = item && `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`
     let nextUrl = nextId && idToShowUrl(nextId, searchParams)
     if (!nextUrl && data.offset > 0) {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('limit', (Number(data.offset) + 20).toString())
-      nextUrl = `/?${params.toString()}&index=${data.offset}`
+      const queryParams = new URLSearchParams(searchParams.toString())
+      queryParams.set('limit', (Number(data.offset) + 20).toString())
+      nextUrl = `/?${queryParams.toString()}&index=${data.offset}`
     }
     const prevUrl = prevId && idToShowUrl(prevId, searchParams)
   
