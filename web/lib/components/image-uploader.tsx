@@ -1,13 +1,25 @@
 import React, {
   useState, useRef, useCallback,
+  useEffect,
 } from 'react'
 import { FormControl, FormLabel, Button } from '@mui/material'
 import Box from '@mui/material/Box'
 
-const ImageUploader = ({ name, nameForDeletion, label, defaultValue }) => {
-  const [imageUrl, setImageUrl] = useState(defaultValue)
+type ImageUploaderProps = {
+  name: string
+  nameForDeletion: string
+  label: string
+  value: string | null
+  forceValue?: number | null
+}
+const ImageUploader = ({ name, nameForDeletion, label, value, forceValue }: ImageUploaderProps) => {
+  const [imageUrl, setImageUrl] = useState(value)
   const [willDeleteImage, setWillDeleteImage] = useState('')
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    setImageUrl(value)
+  }, [value, forceValue])
 
   const handleChange = (ev1) => {
     const file = ev1.target.files[0]
@@ -17,7 +29,6 @@ const ImageUploader = ({ name, nameForDeletion, label, defaultValue }) => {
     })
     reader.readAsDataURL(file)
   }
-
   const handleSelect = useCallback(() => {
     const elem = fileInputRef.current
     setTimeout(() => elem.click(), 0)
