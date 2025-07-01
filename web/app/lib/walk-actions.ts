@@ -344,7 +344,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
 
   // Validate with zod
   try {
-    const validationResult = updateItemSchema.parse({
+    updateItemSchema.parse({
       id,
       date,
       title,
