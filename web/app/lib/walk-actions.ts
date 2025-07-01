@@ -383,13 +383,13 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   } else if ((image?.size ?? 0) > 0) {
     try {
       const prefix = process.env.IMAGE_PREFIX ?? 'images'
-        const filePath = path.join(prefix, getFilename(uid, date, image))
+      const filePath = path.join(prefix, getFilename(uid, date, image))
       const content = await image.arrayBuffer()
       const buffer = Buffer.from(content)
       if (firebaseStorage) {
         const bucket = admin.storage().bucket()
         const blob = bucket.file(filePath)
-        blob.save(buffer)
+        await blob.save(buffer) // await を追加
         props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
       } else {
         fs.writeFileSync(`public/${filePath}`, buffer)

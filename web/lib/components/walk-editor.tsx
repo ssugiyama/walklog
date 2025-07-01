@@ -178,7 +178,14 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         </Form>
         <Box sx={{ marginTop: 1, textAlign: 'right' }}>
           <Button component={Link} href={mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`} color="primary">cancel</Button>
-          <Button data-testid="submit-button" disabled={isPending} onClick={handleSubmit} color="secondary">{mode}</Button>
+          <Button 
+            data-testid="submit-button" 
+            disabled={isPending} 
+            onClick={handleSubmit} 
+            color="secondary"
+          >
+            {isPending ? 'Uploading...' : mode}
+          </Button>
         </Box>
       </Paper>
     </Box>
