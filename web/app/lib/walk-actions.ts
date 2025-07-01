@@ -12,6 +12,7 @@ import fs from 'fs'
 import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 import { notFound, unauthorized, forbidden } from 'next/navigation'
+import { z } from 'zod'
 
 let firebaseConfig
 
@@ -287,6 +288,36 @@ const getFilename = (uid: string, date: string, file: File) => {
   return match ? basename + ext : basename
 }
 
+// Zod schema for updateItemAction validation
+const updateItemSchema = z.object({
+  id: z.string().optional(),
+  date: z.string().min(1, 'Date is required'),
+  title: z.string().min(1, 'Title is required'),
+  comment: z.string().optional(),
+  image: z.any().optional().refine(
+    (file) => {
+      if (!file || file.size === 0) return true // Optional file
+      return file instanceof File || (file && typeof file.type === 'string')
+    },
+    { message: 'Image must be a valid file' }
+  ).refine(
+    (file) => {
+      if (!file || file.size === 0) return true // Optional file
+      return file.type?.startsWith('image/')
+    },
+    { message: 'Image must be an image file' }
+  ).refine(
+    (file) => {
+      if (!file || file.size === 0) return true // Optional file
+      return file.size <= 2 * 1024 * 1024 // 2MB
+    },
+    { message: 'Image size must be 2MB or less' }
+  ),
+  path: z.string().optional(),
+  draft: z.boolean().optional(),
+  will_delete_image: z.boolean().optional(),
+})
+
 export const updateItemAction = async (prevState: UpdateItemState, formData, _getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.id = null
@@ -301,6 +332,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     forbidden()
   }
 
+  // Extract form data
   const id = formData.get('id')
   const date = formData.get('date')
   const title = formData.get('title')
@@ -309,10 +341,28 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   const walkPath = formData.get('path')
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
-  if (!title || !date) {
-    state.error = new Error('Title, date are required.')
-    return state
+
+  // Validate with zod
+  try {
+    const validationResult = updateItemSchema.parse({
+      id,
+      date,
+      title,
+      comment,
+      image,
+      path: walkPath,
+      draft,
+      will_delete_image: willDeleteImage,
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errorMessage = error.errors.map(err => err.message).join(', ')
+      state.error = new Error(errorMessage)
+      return state
+    }
+    throw error
   }
+
   if (!walkPath) {
     state.error = new Error('Path must be selected.')
     return state
