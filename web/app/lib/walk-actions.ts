@@ -313,7 +313,7 @@ const updateItemSchema = z.object({
     },
     { message: 'Image size must be 2MB or less' }
   ),
-  path: z.string().optional(),
+  path: z.string().min(1, 'Path is required'),
   draft: z.boolean().optional(),
   will_delete_image: z.boolean().optional(),
 })
@@ -363,10 +363,6 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     throw error
   }
 
-  if (!walkPath) {
-    state.error = new Error('Path must be selected.')
-    return state
-  }
   const props: WalkAttributes = {
     title,
     comment,

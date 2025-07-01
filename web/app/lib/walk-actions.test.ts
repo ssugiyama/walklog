@@ -398,8 +398,8 @@ describe('updateItemAction', () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
     
     formData.set('title', 'Test Walk')
-    // date is missing
     formData.set('path', 'LINESTRING(0 0, 1 1)')
+    // date is missing
     
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
@@ -412,13 +412,41 @@ describe('updateItemAction', () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
     
     formData.set('date', '2023-05-15')
-    // title is missing
     formData.set('path', 'LINESTRING(0 0, 1 1)')
+    // title is missing
     
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeInstanceOf(Error)
     expect(result.error.message).toContain('Required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if path is missing', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    // path is missing
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if path is empty string', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    formData.set('path', '') // empty path
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Path is required')
     expect(result.id).toBeNull()
   })
 
@@ -431,6 +459,18 @@ describe('updateItemAction', () => {
     
     expect(result.error).toBeInstanceOf(Error)
     expect(result.error.message).toContain('Required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if multiple required fields are missing', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    // All required fields missing: date, title, path
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toMatch(/Required/)
     expect(result.id).toBeNull()
   })
 
