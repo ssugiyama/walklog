@@ -1,6 +1,6 @@
 'use client'
 import React, {
-  useActionState, useEffect, useRef, useCallback,
+  useActionState, useEffect, useRef, useCallback, useState,
 } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -27,6 +27,16 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const formRef = useRef(null);
+  
+  // フォームの状態を管理するstate
+  const [formData, setFormData] = useState({
+    date: '',
+    title: '',
+    comment: '',
+    image: '',
+    draft: false,
+  });
+  
   const initialState = {
     id: null,
     error: null,
@@ -51,13 +61,38 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       draft: true,      
     }
   }
+
+  // 初期値の設定
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        date: item.date,
+        title: item.title,
+        comment: item.comment,
+        image: item.image,
+        draft: item.draft,
+      })
+    }
+  }, [item.id]);
+
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
   const [searchPath] = useQueryParam('path', withDefault(StringParam, null));
   const [mapState] = useMapContext();
   const { deleteSelectedPath } = mapState;
+  
+  // フォーム入力の変更ハンドラー
+  const handleInputChange = useCallback((field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = field === 'draft' ? event.target.checked : event.target.value;
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
+
   const handleSubmit = useCallback(() => {
     formRef.current?.requestSubmit();
   }, [])
+  
   useEffect(() => {
     if (state.serial > 0) {
       if (state.idTokenExpired) {
@@ -74,6 +109,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       }
     }
   }, [state.serial])
+  
   if (currentUser === null) {
     unauthorized()
   }
@@ -92,21 +128,50 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           <input type="hidden" name="path" defaultValue={searchPath ?? item?.path} />
           <input type="hidden" name="id" defaultValue={item?.id} />
           <FormGroup row>
-            <TextField type="date" name="date" defaultValue={item?.date} variant="standard" label="date" fullWidth />
-            <TextField defaultValue={item?.title} name="title" label="title" variant="standard" fullWidth />
-            <ImageUploader label="image" name="image" nameForDeletion="will_delete_image" defaultValue={item?.image} />
+            <TextField 
+              type="date" 
+              name="date" 
+              value={formData.date}
+              onChange={handleInputChange('date')}
+              variant="standard" 
+              label="date" 
+              fullWidth 
+            />
+            <TextField 
+              value={formData.title}
+              onChange={handleInputChange('title')}
+              name="title" 
+              label="title" 
+              variant="standard" 
+              fullWidth 
+            />
+            <ImageUploader 
+              label="image" 
+              name="image" 
+              nameForDeletion="will_delete_image" 
+              value={item?.image}
+              forceValue={state.serial}
+            />
             <TextField
               multiline
               minRows={4}
               maxRows={20}
               variant="standard"
-              defaultValue={item?.comment}
+              value={formData.comment}
+              onChange={handleInputChange('comment')}
               label="comment"
               name="comment"
               fullWidth
             />
             <FormControlLabel
-              control={<Switch defaultChecked={item?.draft || false} value="true" name="draft" />}
+              control={
+                <Switch 
+                  checked={formData.draft} 
+                  onChange={handleInputChange('draft')}
+                  value="true" 
+                  name="draft" 
+                />
+              }
               label="draft?"
             />
           </FormGroup>
