@@ -1,5 +1,7 @@
 'use client'
-import { useReducer, useContext, createContext, Dispatch } from "react"
+import { useReducer, useContext, useCallback, useEffect, createContext, Dispatch } from "react"
+import { MouseEvent, MouseEventHandler } from "react"
+const MESSAGE_ON_LEAVE = 'You have unsaved changes. Are you sure you want to leave this page?'
 
 type MainState = {
   mode: 'content' | 'map'
@@ -9,6 +11,7 @@ type MainState = {
   panoramaIndex: number
   panoramaCount: number
   autoGeolocation: boolean
+  isDirty: boolean
 }
 
 type MainAction = { type: 'TOGGLE_VIEW' }
@@ -20,6 +23,7 @@ type MainAction = { type: 'TOGGLE_VIEW' }
   | { type: 'SET_PANORAMA_INDEX'; payload: number }
   | { type: 'SET_PANORAMA_COUNT'; payload: number }
   | { type: 'SET_AUTO_GEOLOCATION'; payload: boolean }
+  | { type: 'SET_IS_DIRTY'; payload: boolean }
 
 const initialMainState: MainState = {
   mode: 'content',
@@ -29,6 +33,7 @@ const initialMainState: MainState = {
   panoramaIndex: 0,
   panoramaCount: 0,
   autoGeolocation: false,
+  isDirty: false,
 }
 
 const mainReducer = (state, action: MainAction) => {
@@ -51,6 +56,8 @@ const mainReducer = (state, action: MainAction) => {
       return { ...state, panoramaCount: action.payload }
     case 'SET_AUTO_GEOLOCATION':
       return { ...state, autoGeolocation: action.payload }
+    case 'SET_IS_DIRTY':
+      return { ...state, isDirty: action.payload }
     default:
       return state
   }
@@ -60,15 +67,43 @@ const MainContext = createContext({})
 
 export function MainContextProvider({ children }: { children: React.ReactNode }) {
   const [mainState, dispatchMain] = useReducer(mainReducer, initialMainState)
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (mainState.isDirty) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [mainState.isDirty]) 
+
+  const interceptLink = useCallback((ev: MouseEvent) => {
+    if (mainState.isDirty) {
+      const confirmed = window.confirm(MESSAGE_ON_LEAVE)
+      if (confirmed) {
+        dispatchMain({ type: 'SET_IS_DIRTY', payload: false }) // Reset dirty state
+      }
+      else {
+        ev.preventDefault()
+        ev.stopPropagation()
+      }
+    }
+  }, [mainState.isDirty])
+
   return (
-    <MainContext.Provider value={[mainState, dispatchMain]}>
+    <MainContext.Provider value={[mainState, dispatchMain, interceptLink]}>
       {children}
     </MainContext.Provider>
   )
 }
 
 export function useMainContext() {
-  return useContext<[MainState, Dispatch<MainAction>]>(MainContext)
+  return useContext<[MainState, Dispatch<MainAction>, MouseEventHandler<HTMLButtonElement|HTMLAnchorElement>]>(MainContext)
 }
 
 export default MainContext

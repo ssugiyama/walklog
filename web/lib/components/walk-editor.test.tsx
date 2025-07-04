@@ -6,6 +6,8 @@ const mockUpdateIdToken = jest.fn()
 const mockDeleteSelectedPath = jest.fn()
 const mockRouterPush = jest.fn()
 const mockSetData = jest.fn()
+const mockDispatchMain = jest.fn()
+const mockInterceptLink = jest.fn()
 const mockSearchParams = {
   toString: jest.fn(() => 'param1=value1&param2=value2')
 }
@@ -34,7 +36,7 @@ jest.mock('../utils/config', () => ({
 
 jest.mock('../utils/data-context', () => ({
   useData: () => [
-    { current: { id: '2', date: '2023-01-01', title: 'Test Walk', comment: 'Test comment', draft: true } },
+    { current: { id: '2', date: '2023-01-01', title: 'Test Walk', comment: 'Test comment', draft: true, path: 'test-path' } },
     mockSetData
   ],
 }))
@@ -47,22 +49,25 @@ jest.mock('../utils/map-context', () => ({
   ]),
 }))
 
+jest.mock('../utils/main-context', () => ({
+  useMainContext: () => ([
+    {},
+    mockDispatchMain,
+    mockInterceptLink,
+  ]),
+}))
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
   useSearchParams: () => mockSearchParams,
+  unauthorized: jest.fn(),
+  forbidden: jest.fn(),
 }))
 
 jest.mock('@/app/lib/walk-actions', () => ({
-  updateItemAction: jest.fn().mockReturnValue(
-    {
-      serial: 1,
-      id: '2',
-      error: null,
-      idTokenExpired: false,
-    }
-  ),
+  updateItemAction: jest.fn().mockResolvedValue({})
 }))
 
 jest.mock('use-query-params', () => ({
@@ -70,6 +75,17 @@ jest.mock('use-query-params', () => ({
   StringParam: jest.fn(),
   withDefault: jest.fn((param, defaultValue) => [param, defaultValue]),
 }))
+
+jest.mock('moment', () => {
+  const moment = jest.requireActual('moment')
+  return {
+    ...moment,
+    __esModule: true,
+    default: () => ({
+      format: jest.fn(() => '2023-01-01')
+    })
+  }
+})
 
 describe('WalkEditor update', () => {
   beforeEach(() => {
@@ -85,11 +101,11 @@ describe('WalkEditor update', () => {
     expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument()
   })
 
-  it('calls router push when cancel button is clicked', () => {
+  it('calls interceptLink when cancel button is clicked', () => {
     render(<WalkEditor mode="update" />)
-    const cancelLink = screen.getByText('cancel')
-    // Material-UIのLinkコンポーネントのhref属性をチェック
-    expect(cancelLink.closest('a')).toHaveAttribute('href')
+    const cancelButton = screen.getByText('cancel')
+    fireEvent.click(cancelButton)
+    expect(mockInterceptLink).toHaveBeenCalled()
   })
 
   it('submits the form when update button is clicked', () => {
@@ -97,8 +113,19 @@ describe('WalkEditor update', () => {
     const submitButton = screen.getByTestId('submit-button')
     
     fireEvent.click(submitButton)
-    // Form submission is handled internally
     expect(submitButton).toBeInTheDocument()
+  })
+
+  it('updates form data when input changes', () => {
+    render(<WalkEditor mode="update" />)
+    const titleInput = screen.getByLabelText('title')
+    
+    fireEvent.change(titleInput, { target: { value: 'New Title' } })
+    
+    expect(mockDispatchMain).toHaveBeenCalledWith({
+      type: 'SET_IS_DIRTY',
+      payload: true
+    })
   })
 })
 

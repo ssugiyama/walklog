@@ -16,14 +16,14 @@ import Box from '@mui/material/Box'
 import Link from 'next/link'
 import { idToShowUrl } from '../utils/meta-utils'
 import { useData } from '../utils/data-context'
-import { useSearchParams, usePathname, useParams, useRouter } from 'next/navigation'
+import { useSearchParams, usePathname, useParams } from 'next/navigation'
 import { useConfig } from '../utils/config'
 import { useQueryParam, StringParam, withDefault, NumberParam } from 'use-query-params'
 import { useMainContext } from '../utils/main-context'
 
 const BottomBar = (props) => {
   const config = useConfig()
-  const [mainState, dispatchMain] = useMainContext()
+  const [mainState, dispatchMain, interceptLink] = useMainContext()
   const defaultValues = {
     filter: '',
     user: '',
@@ -43,7 +43,6 @@ const BottomBar = (props) => {
   const searchParams = useSearchParams()
   const [data] = useData()
   const pathname = usePathname()
-  const router = useRouter()
   const params = useParams()
   const id = params.id
   const item = data.current
@@ -101,21 +100,17 @@ const BottomBar = (props) => {
       </div>
     )
   } else if (pathname === '/new' || pathname === '/new/' || pathname.startsWith('/edit/')) {
-    const cancelEditCB = () => {
-      let cancelUrl: string | null = null 
-      if (pathname.startsWith('/new/')) {
-        cancelUrl = `/?${searchParams.toString()}`
-      } else if (pathname.startsWith('/edit/')) {
-        cancelUrl = idToShowUrl(id, searchParams)
-      }
-      if (cancelUrl && confirm('Are you sure to leave this page?')) {
-        router.push(cancelUrl)
-      }
+    let cancelUrl: string | null = null 
+    if (pathname.startsWith('/new')) {
+      cancelUrl = `/?${searchParams.toString()}`
+    } else if (pathname.startsWith('/edit/')) {
+      cancelUrl = idToShowUrl(id, searchParams)
     }
+
     controls = (
       <Box sx={sxBottomBarGroupBody}>
           <Tooltip title="cancel" placement="top">
-            <IconButton data-testid="cancel-button" onClick={cancelEditCB} size="large"><NavigationCancel /></IconButton>
+            <IconButton data-testid="cancel-button" component={Link} href={cancelUrl} onClick={interceptLink} size="large"><NavigationCancel /></IconButton>
           </Tooltip>
       </Box>
     )

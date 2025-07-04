@@ -36,6 +36,7 @@ jest.mock('use-query-params', () => ({
 
 describe('BottomBar', () => {
   const mockDispatchMain = jest.fn()
+  const mockPushWithGuard = jest.fn()
   const mockData = {
     rows: [
       { id: 1, date: '2023-01-01', title: 'Walk 1', length: 5.0 },
@@ -51,6 +52,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: false, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
+      mockPushWithGuard
     ]);
     (useData as jest.Mock).mockReturnValue([mockData]);
     (useConfig as jest.Mock).mockReturnValue(mockConfig)
@@ -74,6 +76,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
+      mockPushWithGuard
     ])
     
     render(<BottomBar />)
@@ -108,6 +111,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
+      mockPushWithGuard
     ])
     
     render(<BottomBar />)
@@ -120,6 +124,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 5, panoramaCount: 10 },
       mockDispatchMain,
+      mockPushWithGuard
     ])
     
     render(<BottomBar />)

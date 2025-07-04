@@ -47,6 +47,7 @@ jest.mock('use-query-params', () => ({
 }))
 describe('NavBar', () => {
   const mockDispatchMain = jest.fn()
+  const mockPushWithGuard = jest.fn(() => jest.fn())
   const mockSetCurrentUser = jest.fn()
 
   beforeEach(() => {
@@ -55,6 +56,7 @@ describe('NavBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: false, toolBoxOpened: false },
       mockDispatchMain,
+      mockPushWithGuard,
     ]);
 
     (useUserContext as jest.Mock).mockReturnValue({

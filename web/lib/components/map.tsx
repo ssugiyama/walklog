@@ -1,7 +1,7 @@
 'use client'
 
 import React, {
-  useRef, useEffect, useState,
+  useRef, useEffect, useState, MouseEventHandler
 } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Box, Button } from '@mui/material'
@@ -9,7 +9,7 @@ import moment from 'moment'
 import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal'
 import createGsiMapType from '../utils/gsi-map-type'
 import { useConfig } from '../utils/config'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useQueryParam, StringParam, withDefault, NumberParam } from 'use-query-params'
 import { getCityAction } from '../../app/lib/walk-actions'
 import { useData } from '../utils/data-context'
@@ -20,6 +20,7 @@ import { ShapeStyles, WalkT } from '@/types'
 import { idToShowUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
 import type PolygonManager from '../utils/polygon-manager'
+import Link from 'next/link'
 
 const RESIZE_INTERVAL = 500
 const GSI_MAP_TYPE = 'gsi'
@@ -46,11 +47,12 @@ type MapRefs = {
   resizeIntervalID?: NodeJS.Timeout | null
   elevationInfoWindow?: google.maps.InfoWindow
   marker?: google.maps.marker.AdvancedMarkerElement
+  interceptLink?: MouseEventHandler<HTMLButtonElement|HTMLAnchorElement>
   initialized: boolean
 }
 
 const Map = (props) => {
-  const [mainState, dispatchMain] = useMainContext()
+  const [mainState, dispatchMain, interceptLink] = useMainContext()
   const [, setMapState] = useMapContext()
   const config = useConfig()
   const [searchPath, setSearchPath] = useQueryParam('path', withDefault(StringParam, ''))
@@ -61,7 +63,6 @@ const Map = (props) => {
   const { rows, current } = data
   const refs = useRef<MapRefs>({ initialized: false })
   const rc = refs.current
-  const router = useRouter()
   rc.cities = cities
   rc.searchPath = searchPath
   rc.autoGeolocation = mainState.autoGeolocation
@@ -74,20 +75,12 @@ const Map = (props) => {
   rc.filter = filter
   rc.searchCenter = searchCenter
   rc.radius = radius
-
+  rc.interceptLink = interceptLink
   const loader = new Loader({
     apiKey: config.googleApiKey,
     version: config.googleApiVersion,
     libraries: ['geometry', 'drawing', 'marker'],
   })
-
-  const handleLinkClick = (url) => {
-    router.push(url)
-    rc.pathInfoWindow.close()
-    if (mainState.mode !== 'content') {
-      dispatchMain({ type: 'TOGGLE_VIEW' })
-    }
-  }
 
   const addPoint = (lat, lng, append) => {
     const pt = new google.maps.LatLng(lat, lng)
@@ -242,7 +235,7 @@ const Map = (props) => {
         const item = rc.clickedItem
         const url = idToShowUrl(item.id, searchParams)
         content = (
-          <Button onClick={() => { handleLinkClick(url) }}>
+          <Button component={Link} href={url} onClick={rc.interceptLink}>
             {item.date}
             :
             {' '}

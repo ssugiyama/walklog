@@ -11,8 +11,9 @@ type ImageUploaderProps = {
   label: string
   value: string | null
   forceValue?: number | null
+  onChange?: (ev: React.ChangeEvent<HTMLInputElement>) => void
 }
-const ImageUploader = ({ name, nameForDeletion, label, value, forceValue }: ImageUploaderProps) => {
+const ImageUploader = ({ name, nameForDeletion, label, value, forceValue, onChange }: ImageUploaderProps) => {
   const [imageUrl, setImageUrl] = useState(value)
   const [willDeleteImage, setWillDeleteImage] = useState('')
   const fileInputRef = useRef(null)
@@ -25,8 +26,11 @@ const ImageUploader = ({ name, nameForDeletion, label, value, forceValue }: Imag
     const file = ev1.target.files[0]
     const reader = new FileReader()
     reader.addEventListener('loadend', (ev2) => {
-      setImageUrl(ev2.target.result)
+      setImageUrl(ev2.target.result.toString())
     })
+    if (onChange) {
+      onChange(ev1)
+    }
     reader.readAsDataURL(file)
   }
   const handleSelect = useCallback(() => {
@@ -35,9 +39,12 @@ const ImageUploader = ({ name, nameForDeletion, label, value, forceValue }: Imag
     setWillDeleteImage('')
   }, [])
 
-  const handleClear = useCallback(() => {
+  const handleClear = useCallback((ev) => {
     setImageUrl(null)
     setWillDeleteImage('true')
+    if (onChange) {
+      onChange(ev)
+    }
   }, [])
   return (
     <FormControl sx={{ textAlign: 'left'}}>

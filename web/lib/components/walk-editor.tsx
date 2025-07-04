@@ -22,12 +22,14 @@ import { idToShowUrl } from '../utils/meta-utils'
 import { WalkT } from '@/types'
 import { useConfig } from '../utils/config'
 import moment from 'moment'
-import { Link } from '@mui/material'
+import { useMainContext } from '../utils/main-context'
+import Link from 'next/link'
+
 const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const formRef = useRef(null);
-  
+  const [, dispatchMain, interceptLink] = useMainContext()
   // フォームの状態を管理するstate
   const [formData, setFormData] = useState({
     date: '',
@@ -36,7 +38,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     image: '',
     draft: false,
   });
-  
+
   const initialState = {
     id: null,
     error: null,
@@ -65,15 +67,17 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   // 初期値の設定
   useEffect(() => {
     if (item) {
-      setFormData({
+      const initialData = {
         date: item.date,
         title: item.title,
         comment: item.comment,
         image: item.image,
         draft: item.draft,
-      })
+      };
+      setFormData(initialData);
+      dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
     }
-  }, [item.id]);
+  }, [item?.id]);
 
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
   const [searchPath] = useQueryParam('path', withDefault(StringParam, null));
@@ -86,7 +90,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
-    }));
+    }))
+    dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
   }, []);
 
   const handleSubmit = useCallback(() => {
@@ -101,6 +106,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           handleSubmit()
         })()
       } else if (state.id) {
+        // フォーム送信が成功したらdirtyフラグをリセット
+        dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
         if (searchPath) deleteSelectedPath()
         if (mode === 'update') {
           setData({ rows: [] })
@@ -108,7 +115,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         router.push(idToShowUrl(state.id))
       }
     }
-  }, [state.serial])
+  }, [state?.serial])
   
   if (currentUser === null) {
     unauthorized()
@@ -120,10 +127,13 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   if (!config.openUserMode && !dataUser?.admin) {
     forbidden()
   }
+
+  const cancelUrl = mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`;
+
   return (
     <Box data-testid="WalkEditor">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
-        <Typography variant="body1" color="error" >{state.error?.message}</Typography>
+        <Typography variant="body1" color="error" >{state?.error?.message}</Typography>
         <Form action={formAction} name="walk-form" ref={formRef}>
           <input type="hidden" name="path" defaultValue={searchPath ?? item?.path} />
           <input type="hidden" name="id" defaultValue={item?.id} />
@@ -149,8 +159,9 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
               label="image" 
               name="image" 
               nameForDeletion="will_delete_image" 
+              onChange={handleInputChange('image')}
               value={item?.image}
-              forceValue={state.serial}
+              forceValue={state?.serial}
             />
             <TextField
               multiline
@@ -177,7 +188,14 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           </FormGroup>
         </Form>
         <Box sx={{ marginTop: 1, textAlign: 'right' }}>
-          <Button component={Link} href={mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`} color="primary">cancel</Button>
+          <Button 
+            color="primary"
+            component={Link}
+            href={cancelUrl}
+            onClick={interceptLink}
+          >
+            cancel
+          </Button>
           <Button 
             data-testid="submit-button" 
             disabled={isPending} 
