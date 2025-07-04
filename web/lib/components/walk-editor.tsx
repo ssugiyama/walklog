@@ -160,8 +160,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
               name="image" 
               nameForDeletion="will_delete_image" 
               onChange={handleInputChange('image')}
-              value={item?.image}
-              forceValue={state?.serial}
+              defaultValue={item?.image}
+              forceDefaultValue={state?.serial}
             />
             <TextField
               multiline

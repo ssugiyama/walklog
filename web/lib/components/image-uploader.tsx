@@ -9,18 +9,18 @@ type ImageUploaderProps = {
   name: string
   nameForDeletion: string
   label: string
-  value: string | null
-  forceValue?: number | null
+  defaultValue: string | null
+  forceDefaultValue?: number | null
   onChange?: (ev: React.ChangeEvent<HTMLInputElement>) => void
 }
-const ImageUploader = ({ name, nameForDeletion, label, value, forceValue, onChange }: ImageUploaderProps) => {
-  const [imageUrl, setImageUrl] = useState(value)
+const ImageUploader = ({ name, nameForDeletion, label, defaultValue, forceDefaultValue, onChange }: ImageUploaderProps) => {
+  const [imageUrl, setImageUrl] = useState(defaultValue)
   const [willDeleteImage, setWillDeleteImage] = useState('')
   const fileInputRef = useRef(null)
 
   useEffect(() => {
-    setImageUrl(value)
-  }, [value, forceValue])
+    setImageUrl(defaultValue)
+  }, [defaultValue, forceDefaultValue])
 
   const handleChange = (ev1) => {
     const file = ev1.target.files[0]

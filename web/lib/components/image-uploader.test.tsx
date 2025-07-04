@@ -35,7 +35,7 @@ describe('ImageUploader', () => {
     name: 'image',
     nameForDeletion: 'will_delete_image',
     label: 'Image',
-    value: null,
+    defaultValue: null,
   }
 
   beforeEach(() => {
@@ -54,7 +54,7 @@ describe('ImageUploader', () => {
 
   it('displays image when value is provided', () => {
     const imageUrl = 'https://example.com/image.jpg'
-    render(<ImageUploader {...defaultProps} value={imageUrl} />)
+    render(<ImageUploader {...defaultProps} defaultValue={imageUrl} />)
     
     // 背景画像として設定されている画像を確認
     const imageContainer = screen.getByText('Image').nextSibling.firstChild
@@ -88,7 +88,7 @@ describe('ImageUploader', () => {
 
   it('handles clear button click', () => {
     const imageUrl = 'https://example.com/image.jpg'
-    render(<ImageUploader {...defaultProps} value={imageUrl} />)
+    render(<ImageUploader {...defaultProps} defaultValue={imageUrl} />)
     
     // 最初は画像が表示されている
     let imageContainer = screen.getByText('Image').nextSibling.firstChild
@@ -108,7 +108,7 @@ describe('ImageUploader', () => {
   })
 
   it('updates image when value prop changes', () => {
-    const { rerender } = render(<ImageUploader {...defaultProps} value={null} />)
+    const { rerender } = render(<ImageUploader {...defaultProps} defaultValue={null} />)
     
     // 最初は画像なし
     let imageContainer = screen.getByText('Image').nextSibling.firstChild
@@ -116,23 +116,23 @@ describe('ImageUploader', () => {
     
     // 新しい画像URLでre-render
     const newImageUrl = 'https://example.com/new-image.jpg'
-    rerender(<ImageUploader {...defaultProps} value={newImageUrl} />)
+    rerender(<ImageUploader {...defaultProps} defaultValue={newImageUrl} />)
     
     // 新しい画像が表示されている
     imageContainer = screen.getByText('Image').nextSibling.firstChild
     expect(imageContainer).toHaveStyle(`background-image: url(${newImageUrl})`)
   })
 
-  it('updates image when forceValue prop changes', () => {
+  it('updates image when forceDefaultValue prop changes', () => {
     const imageUrl = 'https://example.com/image.jpg'
-    const { rerender } = render(<ImageUploader {...defaultProps} value={imageUrl} forceValue={1} />)
+    const { rerender } = render(<ImageUploader {...defaultProps} defaultValue={imageUrl} forceDefaultValue={1} />)
     
     // 画像が表示されている
     let imageContainer = screen.getByText('Image').nextSibling.firstChild
     expect(imageContainer).toHaveStyle(`background-image: url(${imageUrl})`)
     
-    // forceValueを変更してre-render
-    rerender(<ImageUploader {...defaultProps} value={imageUrl} forceValue={2} />)
+    // forceDefaultValueを変更してre-render
+    rerender(<ImageUploader {...defaultProps} defaultValue={imageUrl} forceDefaultValue={2} />)
     
     // 画像が再設定されている（useEffectが再実行される）
     imageContainer = screen.getByText('Image').nextSibling.firstChild
@@ -156,7 +156,7 @@ describe('ImageUploader', () => {
 
   it('resets deletion flag when selecting new file', async () => {
     const imageUrl = 'https://example.com/image.jpg'
-    render(<ImageUploader {...defaultProps} value={imageUrl} />)
+    render(<ImageUploader {...defaultProps} defaultValue={imageUrl} />)
     
     // まずクリアして削除フラグを設定
     const clearButton = screen.getByText('clear')
