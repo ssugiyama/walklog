@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import Button from '@mui/material/Button'
 import MenuIcon from '@mui/icons-material/Menu'
+import Link from 'next/link'
 import { useConfig } from '../utils/config'
 import { useUserContext } from '../utils/user-context'
 import {
@@ -25,11 +26,10 @@ import {
 } from 'firebase/auth'
 import { useMainContext } from '../utils/main-context'
 import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 
 const NavBar = (props) => {
   const searchParams = useSearchParams()
-  const [mainState, dispatchMain] = useMainContext()
+  const [mainState, dispatchMain, interceptLink] = useMainContext()
   const { overlay } = mainState
   const config = useConfig()
   const provider = useRef(null)
@@ -75,9 +75,9 @@ const NavBar = (props) => {
     delete cpProps.onClick
     return (
       <MenuItem
-        onClick={() => {
+        onClick={(ev) => {
           closeAllMenus()
-          if (onClick) onClick()
+          if (onClick) onClick(ev)
           return true
         }}
         {...cpProps}
@@ -120,7 +120,7 @@ const NavBar = (props) => {
               </MenuItem>
             ),
             (<Divider key="divider" />),
-            (<EndMenuItem key="new walk" component={Link} href={`/new?${searchParams.toString()}`}>new walk...</EndMenuItem>),
+            (<EndMenuItem key="new walk" component={Link} href={`/new?${searchParams.toString()}`} onClick={interceptLink}>new walk...</EndMenuItem>),
             (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>),
           ] : [<EndMenuItem key="login" onClick={handleLogin}>login with Google</EndMenuItem>]
         }

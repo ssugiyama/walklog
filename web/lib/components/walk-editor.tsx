@@ -1,6 +1,6 @@
 'use client'
 import React, {
-  useActionState, useEffect, useRef, useCallback,
+  useActionState, useEffect, useRef, useCallback, useState,
 } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -22,11 +22,22 @@ import { idToShowUrl } from '../utils/meta-utils'
 import { WalkT } from '@/types'
 import { useConfig } from '../utils/config'
 import moment from 'moment'
-import { Link } from '@mui/material'
+import { useMainContext } from '../utils/main-context'
+import Link from 'next/link'
+
 const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const formRef = useRef(null);
+  const [, dispatchMain, interceptLink] = useMainContext()
+  // フォームの状態を管理するstate
+  const [formData, setFormData] = useState({
+    date: '',
+    title: '',
+    comment: '',
+    draft: false,
+  });
+
   const initialState = {
     id: null,
     error: null,
@@ -47,17 +58,47 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       date: today,
       title: '',
       comment: '',
-      image: '',
+      image: null,
       draft: true,      
     }
   }
+
+  // 初期値の設定
+  useEffect(() => {
+    if (item) {
+      const initialData = {
+        date: item.date,
+        title: item.title,
+        comment: item.comment,
+        image: item.image,
+        draft: item.draft,
+      };
+      setFormData(initialData);
+      dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
+    }
+  }, [item?.id]);
+
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
   const [searchPath] = useQueryParam('path', withDefault(StringParam, null));
   const [mapState] = useMapContext();
   const { deleteSelectedPath } = mapState;
+  
+  // フォーム入力の変更ハンドラー
+  const handleInputChange = useCallback((field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (field !== 'image') {
+      const value = field === 'draft' ? event.target.checked : event.target.value;
+      setFormData(prev => ({
+        ...prev,
+       [field]: value
+     }))
+    }
+    dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
+  }, []);
+
   const handleSubmit = useCallback(() => {
     formRef.current?.requestSubmit();
   }, [])
+  
   useEffect(() => {
     if (state.serial > 0) {
       if (state.idTokenExpired) {
@@ -66,6 +107,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           handleSubmit()
         })()
       } else if (state.id) {
+        // フォーム送信が成功したらdirtyフラグをリセット
+        dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
         if (searchPath) deleteSelectedPath()
         if (mode === 'update') {
           setData({ rows: [] })
@@ -73,7 +116,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         router.push(idToShowUrl(state.id))
       }
     }
-  }, [state.serial])
+  }, [state?.serial])
+  
   if (currentUser === null) {
     unauthorized()
   }
@@ -84,36 +128,83 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   if (!config.openUserMode && !dataUser?.admin) {
     forbidden()
   }
+
+  const cancelUrl = mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`;
+
   return (
     <Box data-testid="WalkEditor">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
-        <Typography variant="body1" color="error" >{state.error?.message}</Typography>
+        <Typography variant="body1" color="error" >{state?.error?.message}</Typography>
         <Form action={formAction} name="walk-form" ref={formRef}>
           <input type="hidden" name="path" defaultValue={searchPath ?? item?.path} />
           <input type="hidden" name="id" defaultValue={item?.id} />
           <FormGroup row>
-            <TextField type="date" name="date" defaultValue={item?.date} variant="standard" label="date" fullWidth />
-            <TextField defaultValue={item?.title} name="title" label="title" variant="standard" fullWidth />
-            <ImageUploader label="image" name="image" nameForDeletion="will_delete_image" defaultValue={item?.image} />
+            <TextField 
+              type="date" 
+              name="date" 
+              value={formData.date}
+              onChange={handleInputChange('date')}
+              variant="standard" 
+              label="date" 
+              fullWidth 
+            />
+            <TextField 
+              value={formData.title}
+              onChange={handleInputChange('title')}
+              name="title" 
+              label="title" 
+              variant="standard" 
+              fullWidth 
+            />
+            <ImageUploader 
+              label="image" 
+              name="image" 
+              nameForDeletion="will_delete_image" 
+              onChange={handleInputChange('image')}
+              defaultValue={item?.image}
+              forceDefaultValue={state?.serial}
+            />
             <TextField
               multiline
               minRows={4}
               maxRows={20}
               variant="standard"
-              defaultValue={item?.comment}
+              value={formData.comment}
+              onChange={handleInputChange('comment')}
               label="comment"
               name="comment"
               fullWidth
             />
             <FormControlLabel
-              control={<Switch defaultChecked={item?.draft || false} value="true" name="draft" />}
+              control={
+                <Switch 
+                  checked={formData.draft} 
+                  onChange={handleInputChange('draft')}
+                  value="true" 
+                  name="draft" 
+                />
+              }
               label="draft?"
             />
           </FormGroup>
         </Form>
         <Box sx={{ marginTop: 1, textAlign: 'right' }}>
-          <Button component={Link} href={mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`} color="primary">cancel</Button>
-          <Button data-testid="submit-button" disabled={isPending} onClick={handleSubmit} color="secondary">{mode}</Button>
+          <Button 
+            color="primary"
+            component={Link}
+            href={cancelUrl}
+            onClick={interceptLink}
+          >
+            cancel
+          </Button>
+          <Button 
+            data-testid="submit-button" 
+            disabled={isPending} 
+            onClick={handleSubmit} 
+            color="secondary"
+          >
+            {isPending ? 'Uploading...' : mode}
+          </Button>
         </Box>
       </Paper>
     </Box>

@@ -393,6 +393,175 @@ describe('updateItemAction', () => {
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
+  // Zod validation tests
+  it('should return validation error if date is missing', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    formData.set('title', 'Test Walk')
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    // date is missing
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if title is missing', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    formData.set('date', '2023-05-15')
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    // title is missing
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if path is missing', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    // path is missing
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if path is empty string', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    formData.set('path', '') // empty path
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Path is required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if both date and title are missing', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Required')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if multiple required fields are missing', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    
+    // All required fields missing: date, title, path
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toMatch(/Required/)
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if image is not an image file', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    const mockNonImageFile = {
+      name: 'document.pdf',
+      size: 1024,
+      type: 'application/pdf',
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
+    }
+    
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    formData.set('image', mockNonImageFile)
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Image must be an image file')
+    expect(result.id).toBeNull()
+  })
+
+  it('should return validation error if image size exceeds 2MB', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    const mockLargeImageFile = {
+      name: 'large-image.jpg',
+      size: 3 * 1024 * 1024, // 3MB
+      type: 'image/jpeg',
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(3 * 1024 * 1024)),
+    }
+    
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    formData.set('image', mockLargeImageFile)
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeInstanceOf(Error)
+    expect(result.error.message).toContain('Image size must be 2MB or less')
+    expect(result.id).toBeNull()
+  })
+
+  it('should pass validation with valid image file', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    const mockUpdate = jest.fn().mockResolvedValue({ id: 1 });
+    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
+      uid: 'testUid',
+      update: mockUpdate,
+    })
+    const mockValidImageFile = {
+      name: 'valid-image.jpg',
+      size: 1024 * 1024, // 1MB
+      type: 'image/jpeg',
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024 * 1024)),
+    }
+    
+    formData.set('id', '1')
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    formData.set('image', mockValidImageFile)
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeNull()
+    expect(result.id).toBe('1')
+  })
+
+  it('should pass validation without image file', async () => {
+    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
+    const mockUpdate = jest.fn().mockResolvedValue({ id: 1 });
+    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
+      uid: 'testUid',
+      update: mockUpdate,
+    })
+    
+    formData.set('id', '1')
+    formData.set('date', '2023-05-15')
+    formData.set('title', 'Test Walk')
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    // no image file
+    
+    const result = await updateItemAction(prevState, formData, mockGetUid)
+    
+    expect(result.error).toBeNull()
+    expect(result.id).toBe('1')
+  })
+
   it('should update an existing walk if id is provided', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
     const mockUpdate = jest.fn().mockResolvedValue({ id: 1 });
@@ -458,6 +627,7 @@ describe('updateItemAction', () => {
     const mockImage = {
       name: 'test-image.jpg',
       size: 1024,
+      type: 'image/jpeg',
       arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
     }
     formData.set('id', '1')
@@ -486,6 +656,10 @@ describe('updateItemAction', () => {
     })
 
     formData.set('id', '1')
+    formData.set('title', 'Test Walk')
+    formData.set('date', '2023-05-15')
+    formData.set('path', 'LINESTRING(0 0, 1 1)')
+    
     const state = await updateItemAction(prevState, formData, mockGetUid)
     expect(state.error).toBeInstanceOf(Error)
   })
