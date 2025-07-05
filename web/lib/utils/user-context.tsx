@@ -43,7 +43,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     const newIdToken = await currentUser?.getIdToken() ?? ''
     const secure = location.protocol === 'https:' ? '; secure' : ''
     // Max-Ageを1時間に設定してトークンの有効期限を管理
-    document.cookie = `idToken=${newIdToken}; path=/; samesite=strict${secure}; max-age=3600`
+    document.cookie = `idToken=${newIdToken}; path=/; samesite=strict${secure};`
     setIdToken(newIdToken)
   }, [currentUser])
   
