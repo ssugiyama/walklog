@@ -35,7 +35,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     date: '',
     title: '',
     comment: '',
-    image: '',
     draft: false,
   });
 
@@ -59,7 +58,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       date: today,
       title: '',
       comment: '',
-      image: '',
+      image: null,
       draft: true,      
     }
   }
@@ -86,11 +85,13 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback((field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = field === 'draft' ? event.target.checked : event.target.value;
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    if (field !== 'image') {
+      const value = field === 'draft' ? event.target.checked : event.target.value;
+      setFormData(prev => ({
+        ...prev,
+       [field]: value
+     }))
+    }
     dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
   }, []);
 
