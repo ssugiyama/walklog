@@ -290,7 +290,7 @@ const getFilename = (uid: string, date: string, file: File) => {
 
 // Zod schema for updateItemAction validation
 const updateItemSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().nullable().optional(),
   date: z.string().min(1, 'Date is required'),
   title: z.string().min(1, 'Title is required'),
   comment: z.string().optional(),
