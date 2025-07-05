@@ -65,7 +65,6 @@ describe('NavBar', () => {
     });
 
     (useConfig as jest.Mock).mockReturnValue({
-      appVersion: '1.0.0',
       firebaseConfig: {},
     })
   })
@@ -73,7 +72,6 @@ describe('NavBar', () => {
   it('renders the NavBar component', () => {
     render(<NavBar />)
     expect(screen.getByText('Walklog')).toBeInTheDocument()
-    expect(screen.getByText('v1.0.0')).toBeInTheDocument()
   })
 
   it('opens the account menu when the account icon is clicked', () => {

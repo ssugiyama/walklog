@@ -10,6 +10,7 @@ import MyLocationIcon from '@mui/icons-material/MyLocation'
 import Circle from '@mui/icons-material/Circle'
 import Close from '@mui/icons-material/Close'
 import Straighten from '@mui/icons-material/Straighten'
+import Numbers from '@mui/icons-material/Numbers'
 import {
   TextField,
   Drawer,
@@ -25,6 +26,7 @@ import {
 import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
 import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal'
+import { useConfig } from '../utils/config'
 
 const AUTO_GEOLOCATION_INTERVAL = 60000
 
@@ -42,6 +44,8 @@ const ToolBox = (props) => {
   const [location, setLocation] = useState('')
   const geocoder = useRef<google.maps.Geocoder>(null)
   const length = pathManager?.get('length') ?? 0
+  const config = useConfig()
+  const appVersion = `v${config.appVersion}`
   const { map, marker, addPoint, downloadPath, uploadPath, clearPaths } = mapState
   const [confirmInfo, setConfirmInfo] = useState<ConfirmInfo>({ open: false })
   const showMarker = (pos) => {
@@ -231,6 +235,20 @@ const ToolBox = (props) => {
             </ListItemIcon>
             <ListItemText primary="here" />
           </ListItemButton>
+        </ListItem>
+      </List>
+      <Divider />
+      <List
+        dense
+        subheader={(
+          <ListSubheader>
+            version
+          </ListSubheader>
+        )}
+      >
+        <ListItem>
+          <ListItemIcon><Numbers /></ListItemIcon>
+          <ListItemText primary={appVersion} />
         </ListItem>
       </List>
       <ConfirmModal

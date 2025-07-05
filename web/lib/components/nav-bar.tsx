@@ -9,7 +9,6 @@ import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
-import Button from '@mui/material/Button'
 import MenuIcon from '@mui/icons-material/Menu'
 import Link from 'next/link'
 import { useConfig } from '../utils/config'
@@ -35,7 +34,6 @@ const NavBar = (props) => {
   const provider = useRef(null)
   const [accountAnchorEl, setAccountAnchorEl] = useState(null)
   const { currentUser, setCurrentUser } = useUserContext()
-  const appVersion = `v${config.appVersion}`
   const handleMenuOpen = (setter) => (event) => {
     event.stopPropagation()
     setter(event.currentTarget)
@@ -105,7 +103,6 @@ const NavBar = (props) => {
         <IconButton onClick={accountMenuOpenCB} color="inherit" size="large" data-testid="account-button">
           {currentUser ? <img alt="user profile" style={{ width: 24, borderRadius: '50%' }} src={currentUser.photoURL} /> : <AccountCircleIcon />}
         </IconButton>
-        <Button component="a" href="https://github.com/ssugiyama/walklog" target="_blank" color="inherit" sx={{ textTransform: 'none' }}>{appVersion}</Button>
       </Toolbar>
       <Menu
         anchorEl={accountAnchorEl}
