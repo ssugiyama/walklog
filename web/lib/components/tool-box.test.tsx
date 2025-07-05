@@ -63,6 +63,7 @@ const mockMainContext = [
 ]
 
 const mockConfig = {
+  appVersion: '1.0.0',
   googleApiKey: 'mock_api_key',
   mapTypeIds: 'roadmap,hybrid',
 };
@@ -135,6 +136,7 @@ describe('ToolBox Component', () => {
     expect(screen.getByText('5.5km')).toBeInTheDocument();
     expect(screen.getByText('here')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('location...')).toBeInTheDocument();
+    expect(screen.getByText('v1.0.0')).toBeInTheDocument()
   });
 
   it('handles current location button click', async () => {
