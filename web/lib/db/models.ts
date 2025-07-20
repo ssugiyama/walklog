@@ -151,6 +151,7 @@ Area.init({
   the_geom: DataTypes.BLOB,
 }, {
   sequelize,
+  modelName: 'Area',
   timestamps: false,
   underscored: true,
 })
