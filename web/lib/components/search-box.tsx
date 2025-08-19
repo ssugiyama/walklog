@@ -29,6 +29,7 @@ const SearchBox = () => {
   const { offset, count, rows } = data
   const [showDistance, setShowDistance] = useState(true)
   const searchParams = useSearchParams()
+  const filter = searchParams.get('filter') || ''
   const handleShowDistance = useCallback((e) => {
     setShowDistance(e.target.value === 'true')  
   }, [])
@@ -111,7 +112,7 @@ const SearchBox = () => {
             <TableCell sx={sxCell}><Typography variant="body2">title</Typography></TableCell>
             <TableCell sx={sxCell}>
               {
-                rows.length > 0 && rows[0].distance !== undefined ?
+                rows.length > 0 && (filter === 'hausdorff' || filter === 'frechet') ?
                   (
                     <Select value={showDistance} onChange={handleShowDistance}>
                       <MenuItem value="true"><Typography variant="body2">distance</Typography></MenuItem>
