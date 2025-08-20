@@ -71,7 +71,7 @@ describe('SearchBox', () => {
   })
 
   it('calls router.replace when index is present in searchParams', () => {
-    const mockRows = [{ id: 1, uid: 'user1', date: '2023-01-01', title: 'Test Walk', distance: 5 }];
+    const mockRows = [{ id: 1, uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
     (useData as jest.Mock).mockReturnValue([
       {
         offset: 0,
