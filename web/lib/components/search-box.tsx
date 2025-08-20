@@ -150,7 +150,7 @@ const SearchBox = () => {
                 <TableCell sx={sxCell}><MuiLink href={idToShowUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.title}</MuiLink></TableCell>
                 <TableCell sx={sxCell}>
                   {
-                    showDistance && item.distance !== undefined ?
+                    showDistance && (filter === 'hausdorff' || filter === 'frechet')  ?
                       item.distance.toFixed(1) :
                       item.length.toFixed(1)
                   }
