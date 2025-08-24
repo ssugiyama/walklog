@@ -75,11 +75,10 @@ const getUid = async (state) => {
   }
 }
 
-const attributes: Array<string | [string, string]> = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid', 'draft']
-
 export const searchInternalAction = async (props: SearchProps, uid: string): Promise<SearchState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
+  const attributes: Array<string | [string, string]> = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid', 'draft']
   const state: SearchState = {
     count: 0,
     rows: [],
