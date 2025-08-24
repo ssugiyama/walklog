@@ -151,7 +151,7 @@ const SearchBox = () => {
                 <TableCell sx={sxCell}>
                   {
                     showDistance && (filter === 'hausdorff' || filter === 'frechet')  ?
-                      item.distance.toFixed(1) :
+                      item.distance?.toFixed(1) :
                       item.length.toFixed(1)
                   }
                 </TableCell>
