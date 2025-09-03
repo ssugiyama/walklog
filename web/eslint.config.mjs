@@ -13,6 +13,7 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
+    ...compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
     {
         ignores: [
             ".next/**",
@@ -26,7 +27,6 @@ export default defineConfig([
     },
     {
         files: ["**/*.{js,jsx,ts,tsx}"],
-        extends: compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
         rules: {
             camelcase: ["error", {
                 properties: "never",
