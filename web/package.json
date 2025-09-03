@@ -7,7 +7,7 @@
     "start-in-docker": "node ./server.js",
     "test": "jest",
     "lint": "eslint",
-    "lint-fix": "eslint --fix .",
+    "lint-fix": "eslint --fix ."
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
