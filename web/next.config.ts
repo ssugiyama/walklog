@@ -1,4 +1,4 @@
-export default {
+const nextConfig = {
     serverExternalPackages: ['sequelize'],
     experimental: {
       serverActions: {
@@ -9,3 +9,5 @@ export default {
     },
     output: 'standalone',
   };
+
+export default nextConfig;

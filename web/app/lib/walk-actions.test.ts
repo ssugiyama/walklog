@@ -1,7 +1,7 @@
 import util from "util"
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 global.TextEncoder = util.TextEncoder
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 global.TextDecoder = util.TextDecoder
 import { sequelize, Walk, Area, SRID } from '@/lib/db/models'
 import { Op } from 'sequelize'
