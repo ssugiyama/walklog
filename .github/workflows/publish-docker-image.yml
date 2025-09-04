@@ -48,7 +48,7 @@ jobs:
           NODE_ENV: production
       
       - name: Generate artifact attestation for Web
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web
           subject-digest: ${{ steps.web_build.outputs.digest }}
@@ -70,7 +70,7 @@ jobs:
           labels: ${{ steps.db_meta.outputs.labels }}
       
       - name: Generate artifact attestation for DB
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-db
           subject-digest: ${{ steps.db_build.outputs.digest }}
