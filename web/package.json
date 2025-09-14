@@ -30,7 +30,7 @@
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-markdown": "^10.1.0",
-    "recharts": "^3.0.0",
+    "recharts": "^3.1.2",
     "sequelize": "^6.37.7",
     "typescript": "^5.9.2",
     "use-query-params": "^2.2.1",
