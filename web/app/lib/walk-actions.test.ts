@@ -404,7 +404,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Required')
+    expect(result.error.message).toContain('Date is required')
     expect(result.id).toBeNull()
   })
 
@@ -418,7 +418,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Required')
+    expect(result.error.message).toContain('Title is required')
     expect(result.id).toBeNull()
   })
 
@@ -432,7 +432,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Required')
+    expect(result.error.message).toContain('Path is required')
     expect(result.id).toBeNull()
   })
 
@@ -458,7 +458,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Required')
+    expect(result.error.message).toMatch(/Date is required.*Title is required/)
     expect(result.id).toBeNull()
   })
 
@@ -470,7 +470,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toMatch(/Required/)
+    expect(result.error.message).toMatch(/Date is required.*Title is required.*Path is required/)
     expect(result.id).toBeNull()
   })
 

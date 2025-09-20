@@ -287,35 +287,7 @@ const getFilename = (uid: string, date: string, file: File) => {
   return match ? basename + ext : basename
 }
 
-// Zod schema for updateItemAction validation
-const updateItemSchema = z.object({
-  id: z.string().nullable().optional(),
-  date: z.string().min(1, 'Date is required'),
-  title: z.string().min(1, 'Title is required'),
-  comment: z.string().optional(),
-  image: z.any().optional().refine(
-    (file) => {
-      if (!file || file.size === 0) return true // Optional file
-      return file instanceof File || (file && typeof file.type === 'string')
-    },
-    { message: 'Image must be a valid file' }
-  ).refine(
-    (file) => {
-      if (!file || file.size === 0) return true // Optional file
-      return file.type?.startsWith('image/')
-    },
-    { message: 'Image must be an image file' }
-  ).refine(
-    (file) => {
-      if (!file || file.size === 0) return true // Optional file
-      return file.size <= 2 * 1024 * 1024 // 2MB
-    },
-    { message: 'Image size must be 2MB or less' }
-  ),
-  path: z.string().min(1, 'Path is required'),
-  draft: z.boolean().optional(),
-  will_delete_image: z.boolean().optional(),
-})
+// Manual validation replaces Zod schema for better error message control
 
 export const updateItemAction = async (prevState: UpdateItemState, formData, _getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
@@ -341,25 +313,35 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
 
-  // Validate with zod
-  try {
-    updateItemSchema.parse({
-      id,
-      date,
-      title,
-      comment,
-      image,
-      path: walkPath,
-      draft,
-      will_delete_image: willDeleteImage,
-    })
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errorMessage = error.errors.map(err => err.message).join(', ')
-      state.error = new Error(errorMessage)
-      return state
+  // Manual validation to ensure consistent error messages
+  const validationErrors = []
+  
+  if (!date || date.trim() === '') {
+    validationErrors.push('Date is required')
+  }
+  
+  if (!title || title.trim() === '') {
+    validationErrors.push('Title is required')
+  }
+  
+  if (!walkPath || walkPath.trim() === '') {
+    validationErrors.push('Path is required')
+  }
+  
+  // Image validation
+  if (image && image.size > 0) {
+    if (!(image instanceof File) && !image.type) {
+      validationErrors.push('Image must be a valid file')
+    } else if (!image.type?.startsWith('image/')) {
+      validationErrors.push('Image must be an image file')
+    } else if (image.size > 2 * 1024 * 1024) {
+      validationErrors.push('Image size must be 2MB or less')
     }
-    throw error
+  }
+  
+  if (validationErrors.length > 0) {
+    state.error = new Error(validationErrors.join(', '))
+    return state
   }
 
   const props: WalkAttributes = {
