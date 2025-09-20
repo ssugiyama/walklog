@@ -32,7 +32,7 @@
     "react-markdown": "^10.1.0",
     "recharts": "^3.2.0",
     "sequelize": "^6.37.7",
-    "typescript": "^5.9.2",
+    "typescript": "^5.8.3",
     "use-query-params": "^2.2.1",
     "zod": "^3.25.67"
   },
