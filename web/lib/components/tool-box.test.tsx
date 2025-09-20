@@ -5,6 +5,7 @@ import ToolBox from '@/lib/components/tool-box';
 import { MainContextProvider } from '@/lib/utils/main-context';
 import { MapContextProvider } from '@/lib/utils/map-context';
 import { ConfigProvider } from '@/lib/utils/config';
+import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 
 // Test configuration
 const TEST_TIMEOUT = 10000;
@@ -304,7 +305,6 @@ describe('ToolBox Component', () => {
 
   it('disables edit and download buttons when no path is selected', () => {
     // Mock useQueryParam to return null (no selected path)
-    const { useQueryParam } = require('use-query-params/dist/useQueryParam');
     useQueryParam.mockReturnValueOnce([null, jest.fn()]);
     
     render(
