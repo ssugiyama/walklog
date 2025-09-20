@@ -27,6 +27,9 @@ import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
 import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal'
 import { useConfig } from '../utils/config'
+import { useQueryParam } from 'use-query-params/dist/useQueryParam'
+import { withDefault } from 'serialize-query-params/dist/withDefault'
+import { StringParam } from 'serialize-query-params/dist/params'
 
 const AUTO_GEOLOCATION_INTERVAL = 60000
 
@@ -39,7 +42,7 @@ const ToolBox = (props) => {
   const [mainState, dispatchMain] = useMainContext()
   const [mapState] = useMapContext()
   const pathManager = mapState.pathManager
-  const selectedPath = pathManager?.getEncodedSelection() ?? null
+  const [selectedPath] = useQueryParam('path', withDefault(StringParam, null));
   const autoGeolocation = mainState.autoGeolocation
   const [location, setLocation] = useState('')
   const geocoder = useRef<google.maps.Geocoder>(null)
