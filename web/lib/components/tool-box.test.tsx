@@ -114,6 +114,31 @@ jest.mock('@/lib/utils/config', () => ({
   ConfigProvider: ({ children }) => <div data-testid="config-provider">{children}</div>,
 }));
 
+jest.mock('use-query-params/dist/useQueryParam', () => ({
+  useQueryParam: jest.fn(() => ['mock-path', jest.fn()]),
+}));
+
+jest.mock('serialize-query-params/dist/withDefault', () => ({
+  withDefault: jest.fn((param, defaultValue) => param),
+}));
+
+jest.mock('serialize-query-params/dist/params', () => ({
+  StringParam: {},
+}));
+
+jest.mock('./confirm-modal', () => ({
+  __esModule: true,
+  default: ({ open, resolve }) => (
+    <div data-testid="confirm-modal" data-open={open}>
+      <button onClick={() => resolve && resolve(true)}>Confirm</button>
+    </div>
+  ),
+  APPEND_PATH_CONFIRM_INFO: {
+    title: 'Confirm',
+    message: 'Are you sure?',
+  },
+}));
+
 describe('ToolBox Component', () => {
   it('renders correctly when open', () => {
     render(
@@ -275,5 +300,29 @@ describe('ToolBox Component', () => {
     
     // Verify clearPaths was called
     expect(mockMapContext[0].clearPaths).toHaveBeenCalled();
+  });
+
+  it('disables edit and download buttons when no path is selected', () => {
+    // Mock useQueryParam to return null (no selected path)
+    const { useQueryParam } = require('use-query-params/dist/useQueryParam');
+    useQueryParam.mockReturnValueOnce([null, jest.fn()]);
+    
+    render(
+      <ConfigProvider>
+        <MainContextProvider>
+          <MapContextProvider>
+            <ToolBox open={true} />
+          </MapContextProvider>
+        </MainContextProvider>
+      </ConfigProvider>
+    );
+    
+    // Check that edit and download buttons are disabled
+    // Material-UI ListItemButton renders as a div with role="button"
+    const editButton = screen.getByText('edit').closest('[role="button"]');
+    const downloadButton = screen.getByText('download').closest('[role="button"]');
+    
+    expect(editButton).toHaveAttribute('aria-disabled', 'true');
+    expect(downloadButton).toHaveAttribute('aria-disabled', 'true');
   });
 });
