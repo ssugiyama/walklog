@@ -330,7 +330,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   
   // Image validation
   if (image && image.size > 0) {
-    if (!(image instanceof File) || !image.type) {
+    if (!image.type) {
       validationErrors.push('Image must be a valid file')
     } else if (!image.type?.startsWith('image/')) {
       validationErrors.push('Image must be an image file')
