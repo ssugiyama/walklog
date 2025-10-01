@@ -109,9 +109,11 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       } else if (state.id) {
         // フォーム送信が成功したらdirtyフラグをリセット
         dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
-        if (searchPath) deleteSelectedPath()
+        
         if (mode === 'update') {
           setData({ rows: [] })
+        } else if (searchPath) {
+          deleteSelectedPath()
         }
         router.push(idToShowUrl(state.id))
       }
