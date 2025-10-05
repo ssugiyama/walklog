@@ -112,8 +112,10 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         
         if (mode === 'update') {
           const index = data.rows.findIndex((row) => row?.id === item.id)
-          data.rows[index].stale = true
-          setData({ rows: data.rows })
+          if (index >= 0) {
+            data.rows[index].stale = true
+            setData({ rows: data.rows })
+          }
         } else if (searchPath) {
           deleteSelectedPath()
         }
