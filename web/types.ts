@@ -28,6 +28,7 @@ export type WalkT = {
   path?: string
   image?: string
   draft?: boolean
+  stale?: boolean
 }
 
 export type SearchState ={
