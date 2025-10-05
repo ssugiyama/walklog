@@ -19,11 +19,13 @@ export function ItemFetcher() {
   const params = useParams()
   const id = Number(params.id) ?? null
   const [data, setData] = useData()
+
+  const findIndexById = (id: number) => {
+    return data.rows.findIndex((row) => row.id === id)
+  }
+
   useEffect(() => {
-    let index = -1
-    if (id !== null) {
-      index = data.rows.findIndex((row) => row.id === id)
-    }
+    const index = findIndexById(id)
     if (index >= 0 && !data.rows[index].stale) {
       const newData: Partial<DataT> = {}
       newData.index = index 
@@ -48,10 +50,7 @@ export function ItemFetcher() {
       })
       return
     }
-    let index = -1
-    if (id !== null) {
-      index = data.rows.findIndex((row) => row.id === id)
-    }
+    const index = findIndexById(id)
     const newData: Partial<DataT> = { isPending }
     if (index >= 0) {
       data.rows[index] = getItemState.current
