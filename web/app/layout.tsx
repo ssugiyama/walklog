@@ -41,4 +41,9 @@ export const metadata: Metadata = {
     template: `%s | ${process.env.SITE_NAME ?? 'Walklog'}`,
     default: process.env.SITE_NAME ?? 'Walklog',
   },
+  appleWebApp: {
+    title: 'Walklog',
+    capable: true,
+    statusBarStyle: 'black-translucent',
+  },
 }
