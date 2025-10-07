@@ -2,14 +2,19 @@ import React, { useCallback } from 'react'
 import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import Box from '@mui/material/Box'
 import { useQueryParam, StringParam, withDefault, NumberParam } from 'use-query-params'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { useConfig } from '../utils/config'
 import { useUserContext } from '../utils/user-context'
+import Accordion from '@mui/material/Accordion'
+import AccordionSummary from '@mui/material/AccordionSummary'
+import AccordionDetails from '@mui/material/AccordionDetails'
+import AccordionActions from '@mui/material/AccordionActions'
 
 const monthOptions = [
   { label: '-', value: '' },
@@ -107,92 +112,102 @@ const SearchForm = () => {
     verticalAlign: 'center',
   }
   return (
-    <Box sx={{ margin: 1 }}>
-      <div>
-        <TextField select label="filter" name="filter" value={filter} onChange={handleFilterChange} sx={sxFormInput} variant="standard">
-          <MenuItem value="" key="default">-</MenuItem>
-          <MenuItem value="neighborhood" key="neighborhood">Neighborhood</MenuItem>
-          <MenuItem value="start" key="start">Start</MenuItem>
-          <MenuItem value="end" key="end">End</MenuItem>
-          <MenuItem value="cities" key="cities">Cities</MenuItem>
-          <MenuItem value="frechet" key="frechet">Fréchet</MenuItem>
-          <MenuItem value="hausdorff" key="hausdorff">Hausdorff</MenuItem>
-          <MenuItem value="crossing" key="crossing">Crossing</MenuItem>
-        </TextField>
-        <TextField
-          select
-          label="user"
-          name="user"
-          value={user}
-          onChange={handleChange.user}
-          sx={sxFormInput}
-          variant="standard"
+    <Accordion>
+      <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="filter and sort"
+          id="filter-and-sort"
         >
-          <MenuItem value="" key="default">-</MenuItem>
-          {
-            users.map((u) => (
-              <MenuItem key={u.uid}>{u.displayName}</MenuItem>
-            ))
-          }
-        </TextField>
-      </div>
-      <div>
-        <TextField
-          select
-          label="month"
-          name="month"
-          value={month}
-          onChange={handleChange.month}
-          sx={sxFormInput}
-          variant="standard"
-        >
-          {
-            monthOptions.map((option) => (
-              <MenuItem
-                value={option.value}
-                key={option.value}
-              >
-                {option.label}
-              </MenuItem>
-            ))
-          }
-        </TextField>
-        <TextField
-          select
-          label="year"
-          name="year"
-          value={year}
-          onChange={handleChange.year}
-          sx={sxFormInput}
-          variant="standard"
-        >
-          <MenuItem value="" key="default">-</MenuItem>
-          {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
-        </TextField>
-      </div>
-      <div>
-        <TextField
-          select
-          label="order"
-          name="order"
-          value={order}
-          onChange={handleChange.order}
-          sx={sxFormInput}
-          variant="standard"
-        >
-          {
-            (filter === 'hausdorff' || filter === 'frechet' ? orderOptionsWithNearest : orderOptions).map((option) => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)
-          }
-        </TextField>
-        <TextField id="searchForm_limit" label="limit" name="limit" value={limit} onChange={handleChange.limit} sx={sxFormInput} variant="standard" />
-      </div>
-      <Box sx={{ marginTop: 1, textAlign: 'right' }}>
-        <Button variant="outlined" color="primary" component={Link} href="/">
-          <RefreshIcon sx={{ marginRight: 1 }} />
-          reset
-        </Button>
-      </Box>
-    </Box>
+          <Typography color="primary" variant="overline">filter & sort</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <div>
+            <TextField select label="filter" name="filter" value={filter} onChange={handleFilterChange} sx={sxFormInput} variant="standard">
+              <MenuItem value="" key="default">-</MenuItem>
+              <MenuItem value="neighborhood" key="neighborhood">Neighborhood</MenuItem>
+              <MenuItem value="start" key="start">Start</MenuItem>
+              <MenuItem value="end" key="end">End</MenuItem>
+              <MenuItem value="cities" key="cities">Cities</MenuItem>
+              <MenuItem value="frechet" key="frechet">Fréchet</MenuItem>
+              <MenuItem value="hausdorff" key="hausdorff">Hausdorff</MenuItem>
+              <MenuItem value="crossing" key="crossing">Crossing</MenuItem>
+            </TextField>
+            <TextField
+              select
+              label="user"
+              name="user"
+              value={user}
+              onChange={handleChange.user}
+              sx={sxFormInput}
+              variant="standard"
+            >
+              <MenuItem value="" key="default">-</MenuItem>
+              {
+                users.map((u) => (
+                  <MenuItem key={u.uid}>{u.displayName}</MenuItem>
+                ))
+              }
+            </TextField>
+          </div>
+          <div>
+            <TextField
+              select
+              label="month"
+              name="month"
+              value={month}
+              onChange={handleChange.month}
+              sx={sxFormInput}
+              variant="standard"
+            >
+              {
+                monthOptions.map((option) => (
+                  <MenuItem
+                    value={option.value}
+                    key={option.value}
+                  >
+                    {option.label}
+                  </MenuItem>
+                ))
+              }
+            </TextField>
+            <TextField
+              select
+              label="year"
+              name="year"
+              value={year}
+              onChange={handleChange.year}
+              sx={sxFormInput}
+              variant="standard"
+            >
+              <MenuItem value="" key="default">-</MenuItem>
+              {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+            </TextField>
+          </div>
+          <div>
+            <TextField
+              select
+              label="order"
+              name="order"
+              value={order}
+              onChange={handleChange.order}
+              sx={sxFormInput}
+              variant="standard"
+            >
+              {
+                (filter === 'hausdorff' || filter === 'frechet' ? orderOptionsWithNearest : orderOptions).map((option) => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)
+              }
+            </TextField>
+            <TextField id="searchForm_limit" label="limit" name="limit" value={limit} onChange={handleChange.limit} sx={sxFormInput} variant="standard" />
+          </div>
+        
+        </AccordionDetails>
+        <AccordionActions>
+          <Button variant="outlined" color="primary" component={Link} href="/">
+            <RefreshIcon sx={{ marginRight: 1 }} />
+            reset
+          </Button>
+        </AccordionActions>
+      </Accordion>
   )
 }
 
