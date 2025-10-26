@@ -72,7 +72,6 @@ const SearchBox = () => {
   return (
     <Paper sx={{ p: 1 }} data-testid="SearchBox">
       <SearchForm />
-      <Divider sx={{ m: (theme) => theme.spacing(2) }} />
       <Box display="flex" sx={{ m: 1 }}>
         <Typography variant="body1" sx={{ display: 'inline-block' }}>
           {
