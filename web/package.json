@@ -19,7 +19,7 @@
     "@types/google.maps": "^3.58.1",
     "@types/node": "^24.5.2",
     "@types/react": "19.1.12",
-    "firebase": "^12.2.1",
+    "firebase": "^12.4.0",
     "firebase-admin": "^13.5.0",
     "jssha": "^3.3.1",
     "moment": "^2.30.1",
