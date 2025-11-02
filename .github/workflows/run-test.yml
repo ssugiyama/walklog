@@ -19,6 +19,7 @@ jobs:
     - name: pnpm-setup
       uses: pnpm/action-setup@v4
       with:
+        version: 10
         run_install: true
     - name: run jest
       uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
