@@ -74,6 +74,9 @@ importers:
       sequelize:
         specifier: ^6.37.7
         version: 6.37.7(pg@8.16.3)
+      serialize-query-params:
+        specifier: ^2.0.2
+        version: 2.0.2
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
