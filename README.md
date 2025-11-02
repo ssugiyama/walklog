@@ -150,6 +150,7 @@ The application will be available at http://localhost:3000
 - PostgreSQL with PostGIS 2.4 or higher
 - PostGIS-enabled database
 - Node.js
+- pnpm
 
 #### Setup Database
 ```bash
@@ -161,9 +162,9 @@ cd /path/to/work_dir
 ```bash
 cd web
 export NODE_ENV=production
-npm install
-npm run build
-npm start
+pnpm install
+pnpm build
+pnpm start
 ```
 
 ## Development
@@ -171,8 +172,8 @@ npm start
 ### Development Mode
 ```bash
 cd web
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Access the development server at http://localhost:3000
