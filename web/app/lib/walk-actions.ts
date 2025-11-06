@@ -12,7 +12,6 @@ import fs from 'fs'
 import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 import { notFound, unauthorized, forbidden } from 'next/navigation'
-import { z } from 'zod'
 
 let firebaseConfig
 
