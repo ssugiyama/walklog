@@ -35,7 +35,11 @@ export default defineConfig([
             "no-console": ["error", {
                 allow: ["warn", "error"],
             }],
-
+            "@typescript-eslint/no-unused-vars": ["error", {
+                argsIgnorePattern: "^_",
+                varsIgnorePattern: "^_",
+                caughtErrorsIgnorePattern: "^_",
+            }],
             "react-hooks/exhaustive-deps": "off",
             "@next/next/no-img-element": "off",
             "@typescript-eslint/triple-slash-reference": "off",
