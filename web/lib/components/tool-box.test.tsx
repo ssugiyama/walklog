@@ -120,7 +120,7 @@ jest.mock('use-query-params/dist/useQueryParam', () => ({
 }));
 
 jest.mock('serialize-query-params/dist/withDefault', () => ({
-  withDefault: jest.fn((param, defaultValue) => param),
+  withDefault: jest.fn((param, _defaultValue) => param),
 }));
 
 jest.mock('serialize-query-params/dist/params', () => ({
