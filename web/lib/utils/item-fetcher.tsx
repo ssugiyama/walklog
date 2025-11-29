@@ -17,7 +17,7 @@ export function ItemFetcher() {
   const [getItemState, dispatchGetItem] = useActionState(getItemAction, initialGetItemState)
   const { updateIdToken, idToken } = useUserContext()
   const params = useParams()
-  const id = Number(params.id) ?? null
+  const id = params.id ? Number(params.id) : null
   const [data, setData] = useData()
 
   const findIndexById = (id: number) => {

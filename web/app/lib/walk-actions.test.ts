@@ -719,8 +719,7 @@ describe('deleteItemAction', () => {
   it('should handle errors during deletion', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
 
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue
-      ({
+    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
         uid: 'testUid',
         destroy: jest.fn().mockRejectedValue(new Error('Deletion failed')),
       })

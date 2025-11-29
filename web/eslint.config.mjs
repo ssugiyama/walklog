@@ -1,19 +1,9 @@
-import { defineConfig } from "eslint/config";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
-});
-
-export default defineConfig([
-    ...compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsparser from "@typescript-eslint/parser";
+import globals from "globals";
+export default [
+    js.configs.recommended,
     {
         ignores: [
             ".next/**",
@@ -27,29 +17,46 @@ export default defineConfig([
     },
     {
         files: ["**/*.{js,jsx,ts,tsx}"],
+        languageOptions: {
+            parser: tsparser,
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            globals: {
+                google: 'readonly',
+                React: 'readonly',
+                NodeJS: 'readonly',
+                ...globals.browser,
+                ...globals.node,
+                ...globals.jest,
+            },
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
+        },
+        plugins: {
+            "@typescript-eslint": tseslint,
+        },
         rules: {
             camelcase: ["error", {
                 properties: "never",
             }],
-
             "no-console": ["error", {
                 allow: ["warn", "error"],
             }],
+            "no-unused-vars": "off", // Use TypeScript version
             "@typescript-eslint/no-unused-vars": ["error", {
                 argsIgnorePattern: "^_",
                 varsIgnorePattern: "^_",
                 caughtErrorsIgnorePattern: "^_",
             }],
-            "react-hooks/exhaustive-deps": "off",
-            "@next/next/no-img-element": "off",
-            "@typescript-eslint/triple-slash-reference": "off",
         },
     },
     {
         files: ["bin/**/*.js"],
         rules: {
-            "@typescript-eslint/no-require-imports": "off",
             "no-console": "off",
         }
     }
-]);
+];
