@@ -10,8 +10,6 @@ type ElevationRefs = {
   elevationResults?: google.maps.ElevationResult[]
 }
 
-type TooltipPayload = { payload: { index: number; elevation: number } }
-
 const ElevationBox = () => {
   const [mapState] = useMapContext()
   const config = useConfig()
@@ -22,7 +20,7 @@ const ElevationBox = () => {
   const mapLoaded = !!mapState.map
   const { map, elevationInfoWindow } = mapState
   
-  const handleTooltipChange = (active: boolean, payload: TooltipPayload[]) => {
+  const handleTooltipChange = (active: boolean, payload: any[]) => {
     if (!refs.current.elevationResults || !elevationInfoWindow || !map) return
     
     if (!active || !payload || !payload.length) {
@@ -97,7 +95,7 @@ const ElevationBox = () => {
               tickFormatter={(value) => `${Math.round(value)}m`}
             />
             <Tooltip
-              content={({ active, payload }: { active: boolean, payload: TooltipPayload[]}) => {
+              content={({ active, payload }: any) => {
                 
                 handleTooltipChange(active ?? false, payload)
                 return null // カスタムツールチップは使わず、Google Maps InfoWindowを使用
