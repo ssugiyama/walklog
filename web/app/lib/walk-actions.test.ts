@@ -8,6 +8,7 @@ import { Op } from 'sequelize'
 import '@testing-library/jest-dom'
 import fs from 'fs'
 import admin from 'firebase-admin'
+import { getPackageVersion } from '@/app/lib/walk-actions'  
 
 jest.mock('firebase-admin', () => {
   return {
@@ -871,7 +872,7 @@ describe('getConfig', () => {
       googleApiKey: process.env.GOOGLE_API_KEY,
       googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
       openUserMode: false,
-      appVersion: process.env.npm_package_version,
+      appVersion: getPackageVersion(),
       defaultCenter: process.env.DEFAULT_CENTER,
       defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
       defaultRadius: 500,
