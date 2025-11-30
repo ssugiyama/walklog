@@ -23,7 +23,7 @@ const loadFirebaseConfig = () => {
   }
 }
 
-export const getPackageVersion = () => {
+export const getPackageVersion = async () => {
   const content = fs.readFileSync(process.env.npm_package_json)
   const packageJson = JSON.parse(content.toString())
   return packageJson.version
@@ -40,7 +40,7 @@ export const getConfig = async (): Promise<ConfigT> => {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
     openUserMode: !!process.env.OPEN_USER_MODE,
-    appVersion: getPackageVersion(),
+    appVersion: await getPackageVersion(),
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
     defaultRadius: 500,
