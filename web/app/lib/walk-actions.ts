@@ -23,8 +23,9 @@ const loadFirebaseConfig = () => {
   }
 }
 
-export const getPackageVersion = async () => {
-  const content = fs.readFileSync(process.env.npm_package_json)
+const getPackageVersion = async () => {
+  const content = fs.readFileSync('./package.json')
+  console.warn(content.toString())
   const packageJson = JSON.parse(content.toString())
   return packageJson.version
 }

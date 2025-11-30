@@ -8,7 +8,6 @@ import { Op } from 'sequelize'
 import '@testing-library/jest-dom'
 import fs from 'fs'
 import admin from 'firebase-admin'
-import { getPackageVersion } from '@/app/lib/walk-actions'  
 
 jest.mock('firebase-admin', () => {
   return {
@@ -857,12 +856,16 @@ describe('getConfig', () => {
     const mockShapeStyles = { style: 'mockStyle' };
     const mockTheme = { palette: {} };
     const mockFirebaseConfig = { key: 'value' };
+    const mockPackageJson = { version: '1.0.0' };
     (fs.readFileSync as jest.Mock).mockImplementation((path) => {
       if (path === './default-shape-styles.json') {
         return Buffer.from(JSON.stringify(mockShapeStyles));
       }
       if (path === './default-theme.json') {
         return Buffer.from(JSON.stringify(mockTheme));
+      }
+      if (path === './package.json') {
+        return Buffer.from(JSON.stringify(mockPackageJson));
       }
       return Buffer.from(JSON.stringify(mockFirebaseConfig));
     });
@@ -872,7 +875,7 @@ describe('getConfig', () => {
       googleApiKey: process.env.GOOGLE_API_KEY,
       googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
       openUserMode: false,
-      appVersion: await getPackageVersion(),
+      appVersion: '1.0.0',
       defaultCenter: process.env.DEFAULT_CENTER,
       defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
       defaultRadius: 500,
