@@ -872,7 +872,7 @@ describe('getConfig', () => {
       googleApiKey: process.env.GOOGLE_API_KEY,
       googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
       openUserMode: false,
-      appVersion: getPackageVersion(),
+      appVersion: await getPackageVersion(),
       defaultCenter: process.env.DEFAULT_CENTER,
       defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
       defaultRadius: 500,
