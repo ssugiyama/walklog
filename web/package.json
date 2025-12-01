@@ -39,7 +39,7 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.1",
     "@googlemaps/jest-mocks": "^2.22.6",
     "@testing-library/jest-dom": "^6.9.1",
