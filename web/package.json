@@ -32,7 +32,7 @@
     "react-markdown": "^10.1.0",
     "recharts": "^3.4.0",
     "sequelize": "^6.37.7",
-    "serialize-query-params": "^2.0.2",
+    "serialize-query-params": "^2.0.4",
     "typescript": "^5.8.3",
     "use-query-params": "^2.2.2",
     "wkx": "^0.5.0",

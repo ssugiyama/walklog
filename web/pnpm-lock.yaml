@@ -75,8 +75,8 @@ importers:
         specifier: ^6.37.7
         version: 6.37.7(pg@8.16.3)
       serialize-query-params:
-        specifier: ^2.0.2
-        version: 2.0.2
+        specifier: ^2.0.4
+        version: 2.0.4
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -3844,9 +3844,6 @@ packages:
         optional: true
       tedious:
         optional: true
-
-  serialize-query-params@2.0.2:
-    resolution: {integrity: sha512-1chMo1dST4pFA9RDXAtF0Rbjaut4is7bzFbI1Z26IuMub68pNCILku85aYmeFhvnY//BXUPUhoRMjYcsT93J/Q==}
 
   serialize-query-params@2.0.4:
     resolution: {integrity: sha512-y9WzzDj3BsGgKLCh0ugiinufS//YqOfao/yVJjkXA4VLuyNCfHOLU/cbulGPxs3aeCqhvROw7qPL04JSZnCo0w==}
@@ -9015,8 +9012,6 @@ snapshots:
       pg: 8.16.3
     transitivePeerDependencies:
       - supports-color
-
-  serialize-query-params@2.0.2: {}
 
   serialize-query-params@2.0.4: {}
 
