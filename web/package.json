@@ -20,7 +20,7 @@
     "@types/node": "^24.10.0",
     "@types/react": "19.2.2",
     "firebase": "^12.6.0",
-    "firebase-admin": "^13.5.0",
+    "firebase-admin": "^13.6.0",
     "jssha": "^3.3.1",
     "moment": "^2.30.1",
     "nanoid": "^5.1.6",
