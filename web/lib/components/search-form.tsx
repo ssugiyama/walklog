@@ -15,6 +15,7 @@ import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionActions from '@mui/material/AccordionActions'
+import NumberField from './number-field'
 
 const monthOptions = [
   { label: '-', value: '' },
@@ -90,10 +91,10 @@ const SearchForm = () => {
     order: useCallback((e) => {
       setOrder(e.target.value)
     }, [setOrder]),
-    limit: useCallback((e) => {
-      setLimit(e.target.value)
-    }, [setLimit]),
   }
+  const handleLimitCommited = useCallback((value) => {
+    setLimit(value)
+  }, [setLimit])
   const handleFilterChange = useCallback((e) => {
     const value = e.target.value
     const params = new URLSearchParams(searchParams.toString())
@@ -103,6 +104,7 @@ const SearchForm = () => {
     } else if (order === 'nearest_first') {
       params.set('order', 'newest_first')
     }
+    params.delete('limit')
     router.push(`/?${params.toString()}`)
   }, [searchParams.toString()])
   const sxFormInput = {
@@ -197,9 +199,19 @@ const SearchForm = () => {
                 (filter === 'hausdorff' || filter === 'frechet' ? orderOptionsWithNearest : orderOptions).map((option) => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)
               }
             </TextField>
-            <TextField id="searchForm_limit" label="limit" name="limit" value={limit} onChange={handleChange.limit} sx={sxFormInput} variant="standard" />
-          </div>
-        
+            <NumberField
+              label="limit"
+              min={10}
+              size="small"
+              id="searchForm_limit" 
+              name="limit" 
+              value={limit} 
+              onValueCommitted={handleLimitCommited} 
+              step={10}
+              style={sxFormInput} 
+            />
+</div>
+
         </AccordionDetails>
         <AccordionActions>
           <Button variant="outlined" color="primary" component={Link} href="/">
