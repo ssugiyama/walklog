@@ -71,7 +71,7 @@ export function Searcher() {
 
     const newData: DataT = { isPending, ...searchState }
     newData.params = searchParams.toString()
-    if (searchState.append) {
+    if (!isPending && searchState.append) {
       newData.rows.unshift(...data.rows)
     }
     setData(newData)
