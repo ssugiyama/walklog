@@ -45,7 +45,7 @@ export default function NumberField({
           required={state.required}
           error={error}
           variant="standard"
-          sx={other.sx}
+          sx={sx}
         >
           {props.children}
         </FormControl>
