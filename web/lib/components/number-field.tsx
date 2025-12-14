@@ -8,6 +8,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { SxProps } from '@mui/material/styles'
 
 /**
  * This component is a placeholder for FormControl to correctly set the shrink label state on SSR.
@@ -22,10 +23,12 @@ export default function NumberField({
   label,
   error,
   size = 'medium',
+  sx,
   ...other
 }: BaseNumberField.Root.Props & {
   label?: React.ReactNode;
   size?: 'small' | 'medium';
+  sx?: SxProps;
   error?: boolean;
 }) {
   let id = React.useId();
@@ -43,6 +46,7 @@ export default function NumberField({
           required={state.required}
           error={error}
           variant="standard"
+          sx={sx}
         >
           {props.children}
         </FormControl>
