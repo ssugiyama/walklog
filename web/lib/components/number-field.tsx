@@ -22,7 +22,7 @@ export default function NumberField({
   label,
   error,
   size = 'medium',
-  
+  sx,
   ...other
 }: BaseNumberField.Root.Props & {
   label?: React.ReactNode;
