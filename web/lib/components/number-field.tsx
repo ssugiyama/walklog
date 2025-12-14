@@ -22,10 +22,12 @@ export default function NumberField({
   label,
   error,
   size = 'medium',
+  
   ...other
 }: BaseNumberField.Root.Props & {
   label?: React.ReactNode;
   size?: 'small' | 'medium';
+  sx?: object;
   error?: boolean;
 }) {
   let id = React.useId();
@@ -43,6 +45,7 @@ export default function NumberField({
           required={state.required}
           error={error}
           variant="standard"
+          sx={other.sx}
         >
           {props.children}
         </FormControl>

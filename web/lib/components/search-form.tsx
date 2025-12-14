@@ -208,7 +208,7 @@ const SearchForm = () => {
               value={limit} 
               onValueCommitted={handleLimitCommited} 
               step={10}
-              style={sxFormInput} 
+              sx={sxFormInput}
             />
 </div>
 
