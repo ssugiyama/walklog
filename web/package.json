@@ -14,7 +14,7 @@
     "@emotion/cache": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@googlemaps/js-api-loader": "^1.16.10",
-    "@mui/icons-material": "^7.3.4",
+    "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
     "@mui/material-nextjs": "^7.3.5",
     "@types/google.maps": "^3.58.1",
