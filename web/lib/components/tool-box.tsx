@@ -111,7 +111,7 @@ const ToolBox = (props) => {
         window.alert('Unable to retrieve your location')
       })
     }
-  }, [])
+  }, [marker, map])
 
   const locationChangeCB = useCallback((e) => setLocation(e.target.value), [])
   const submitLocationCB = useCallback(async (e) => {
