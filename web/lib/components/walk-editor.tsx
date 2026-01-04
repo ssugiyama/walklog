@@ -1,6 +1,7 @@
 'use client'
 import React, {
-  useActionState, useEffect, useRef, useCallback, useState,
+  useActionState, useEffect, useCallback, useState,
+  startTransition,
 } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -13,7 +14,6 @@ import Typography from '@mui/material/Typography';
 import ImageUploader from './image-uploader';
 import { useData } from '../utils/data-context';
 import { updateItemAction } from '@/app/lib/walk-actions';
-import Form from 'next/form'
 import { useQueryParam, StringParam, withDefault } from 'use-query-params';
 import { unauthorized, forbidden, useRouter, useSearchParams } from 'next/navigation';
 import { useUserContext } from '../utils/user-context';
@@ -25,16 +25,25 @@ import moment from 'moment'
 import { useMainContext } from '../utils/main-context'
 import Link from 'next/link'
 
+type WalkFields = {
+  date: string;
+  title: string;
+  comment: string;
+  image: File | string |null;
+  will_delete_image: string;
+  draft: boolean;
+}
 const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const formRef = useRef(null);
   const [, dispatchMain, interceptLink] = useMainContext()
   // フォームの状態を管理するstate
-  const [formData, setFormData] = useState({
+  const [inputs, setInputs] = useState<WalkFields>({
     date: '',
     title: '',
     comment: '',
+    image: null,
+    will_delete_image: '',
     draft: false,
   });
 
@@ -71,9 +80,10 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         title: item.title,
         comment: item.comment,
         image: item.image,
+        will_delete_image: '',
         draft: item.draft,
       };
-      setFormData(initialData);
+      setInputs(initialData);
       dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
     }
   }, [item?.id]);
@@ -84,20 +94,46 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const { deleteSelectedPath } = mapState;
   
   // フォーム入力の変更ハンドラー
-  const handleInputChange = useCallback((field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (field !== 'image') {
-      const value = field === 'draft' ? event.target.checked : event.target.value;
-      setFormData(prev => ({
-        ...prev,
-       [field]: value
+  const handleInputChange = useCallback((field: string) => (event?: React.ChangeEvent<HTMLInputElement>) => {
+    const changes: Partial<WalkFields> = {}
+    switch (field) {
+      case 'draft':
+        changes.draft = event.target.checked
+        break
+      case 'will_delete_image':
+        changes.image = null
+        changes.will_delete_image = 'true'
+        break
+      case 'image':
+        changes.image = event.target.files ? event.target.files[0] : null
+        changes.will_delete_image = ''
+        break
+      default:
+        changes[field] = event.target.value
+    } 
+    setInputs(prev => ({
+      ...prev,
+      ...changes,
      }))
-    }
     dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
-  }, []);
+  }, [dispatchMain, setInputs]);
 
   const handleSubmit = useCallback(() => {
-    formRef.current?.requestSubmit();
-  }, [])
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.append('date', inputs.date)
+      formData.append('title', inputs.title)
+      formData.append('comment', inputs.comment)
+      formData.append('draft', inputs.draft ? 'true' : '')
+      formData.append('path', searchPath ?? item?.path ?? '')
+      formData.append('image', inputs.image ?? '')
+      formData.append('will_delete_image', inputs.will_delete_image ?? '')
+      if (mode === 'update' && item?.id) {
+        formData.append('id', item.id.toString())
+      }
+      await formAction(formData)
+    })
+  }, [inputs, searchPath, item, mode, formAction])
   
   useEffect(() => {
     if (state.serial > 0) {
@@ -141,21 +177,19 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     <Box data-testid="WalkEditor">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
         <Typography variant="body1" color="error" >{state?.error?.message}</Typography>
-        <Form action={formAction} name="walk-form" ref={formRef}>
-          <input type="hidden" name="path" defaultValue={searchPath ?? item?.path} />
-          <input type="hidden" name="id" defaultValue={item?.id} />
+        <form name="walk-form">
           <FormGroup row>
             <TextField 
               type="date" 
               name="date" 
-              value={formData.date}
+              value={inputs.date}
               onChange={handleInputChange('date')}
               variant="standard" 
               label="date" 
               fullWidth 
             />
             <TextField 
-              value={formData.title}
+              value={inputs.title}
               onChange={handleInputChange('title')}
               name="title" 
               label="title" 
@@ -165,17 +199,16 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
             <ImageUploader 
               label="image" 
               name="image" 
-              nameForDeletion="will_delete_image" 
-              onChange={handleInputChange('image')}
               defaultValue={item?.image}
-              forceDefaultValue={state?.serial}
+              onChange={handleInputChange('image')}
+              onClear={handleInputChange('will_delete_image')}
             />
             <TextField
               multiline
               minRows={4}
               maxRows={20}
               variant="standard"
-              value={formData.comment}
+              value={inputs.comment}
               onChange={handleInputChange('comment')}
               label="comment"
               name="comment"
@@ -184,7 +217,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
             <FormControlLabel
               control={
                 <Switch 
-                  checked={formData.draft} 
+                  checked={inputs.draft} 
                   onChange={handleInputChange('draft')}
                   value="true" 
                   name="draft" 
@@ -193,7 +226,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
               label="draft?"
             />
           </FormGroup>
-        </Form>
+        </form>
         <Box sx={{ marginTop: 1, textAlign: 'right' }}>
           <Button 
             color="primary"

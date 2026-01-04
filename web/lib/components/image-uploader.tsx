@@ -7,20 +7,18 @@ import Box from '@mui/material/Box'
 
 type ImageUploaderProps = {
   name: string
-  nameForDeletion: string
   label: string
   defaultValue: string | null
-  forceDefaultValue?: number | null
   onChange?: (ev: React.ChangeEvent<HTMLInputElement>) => void
+  onClear?: () => void
 }
-const ImageUploader = ({ name, nameForDeletion, label, defaultValue, forceDefaultValue, onChange }: ImageUploaderProps) => {
+const ImageUploader = ({ name, label, defaultValue, onChange, onClear }: ImageUploaderProps) => {
   const [imageUrl, setImageUrl] = useState(defaultValue)
-  const [willDeleteImage, setWillDeleteImage] = useState('')
   const fileInputRef = useRef(null)
 
   useEffect(() => {
     setImageUrl(defaultValue)
-  }, [defaultValue, forceDefaultValue])
+  }, [defaultValue])
 
   const handleChange = (ev1) => {
     const file = ev1.target.files[0]
@@ -36,16 +34,14 @@ const ImageUploader = ({ name, nameForDeletion, label, defaultValue, forceDefaul
   const handleSelect = useCallback(() => {
     const elem = fileInputRef.current
     setTimeout(() => elem.click(), 0)
-    setWillDeleteImage('')
   }, [])
 
-  const handleClear = useCallback((ev) => {
+  const handleClear = useCallback(() => {
     setImageUrl(null)
-    setWillDeleteImage('true')
-    if (onChange) {
-      onChange(ev)
+    if (onClear) {
+      onClear()
     }
-  }, [])
+  }, [onClear])
   return (
     <FormControl sx={{ textAlign: 'left'}}>
       <FormLabel>{label}</FormLabel>
@@ -66,7 +62,6 @@ const ImageUploader = ({ name, nameForDeletion, label, defaultValue, forceDefaul
         </Box>
       </Box>
       <input type="file" name={name} ref={fileInputRef} onChange={handleChange} style={{ display: 'none' }} />
-      <input type="hidden" name={nameForDeletion} value={willDeleteImage} />
     </FormControl>
   )
 }
