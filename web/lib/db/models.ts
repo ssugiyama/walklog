@@ -9,7 +9,7 @@ import pg from 'pg'
 export const sequelize = new Sequelize(
   process.env.DB_URL,
   {
-    omitNull: true,
+    omitNull: false,
     attributeBehavior: 'unsafe-legacy',
     dialect: 'postgres',
     dialectModule: pg,
