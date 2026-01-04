@@ -41,7 +41,7 @@ const ImageUploader = ({ name, label, defaultValue, onChange, onClear }: ImageUp
     if (onClear) {
       onClear()
     }
-  }, [])
+  }, [onClear])
   return (
     <FormControl sx={{ textAlign: 'left'}}>
       <FormLabel>{label}</FormLabel>
