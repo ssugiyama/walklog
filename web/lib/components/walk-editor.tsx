@@ -25,16 +25,24 @@ import moment from 'moment'
 import { useMainContext } from '../utils/main-context'
 import Link from 'next/link'
 
+type WalkFields = {
+  date: string;
+  title: string;
+  comment: string;
+  image: File | string |null;
+  will_delete_image: string;
+  draft: boolean;
+}
 const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [, dispatchMain, interceptLink] = useMainContext()
   // フォームの状態を管理するstate
-  const [inputs, setInputs] = useState({
+  const [inputs, setInputs] = useState<WalkFields>({
     date: '',
     title: '',
     comment: '',
-    image: '',
+    image: null,
     will_delete_image: '',
     draft: false,
   });
@@ -87,7 +95,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback((field: string) => (event?: React.ChangeEvent<HTMLInputElement>) => {
-    const changes: any = {}
+    const changes: Partial<WalkFields> = {}
     switch (field) {
       case 'draft':
         changes.draft = event.target.checked
@@ -108,7 +116,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       ...changes,
      }))
     dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
-  }, []);
+  }, [dispatchMain, setInputs]);
 
   const handleSubmit = useCallback(() => {
     startTransition(async () => {
