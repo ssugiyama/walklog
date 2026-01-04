@@ -33,7 +33,6 @@ global.FileReader = MockFileReader
 describe('ImageUploader', () => {
   const defaultProps = {
     name: 'image',
-    nameForDeletion: 'will_delete_image',
     label: 'Image',
     defaultValue: null,
   }
@@ -62,7 +61,8 @@ describe('ImageUploader', () => {
   })
 
   it('handles file selection', async () => {
-    render(<ImageUploader {...defaultProps} />)
+    const handleChange = jest.fn()
+    render(<ImageUploader {...defaultProps} onChange={handleChange} />)
     
     const selectButton = screen.getByText('select...')
     const fileInput = document.querySelector('input[type="file"]')
@@ -83,12 +83,15 @@ describe('ImageUploader', () => {
     await waitFor(() => {
       const imageContainer = screen.getByText('Image').nextSibling.firstChild
       expect(imageContainer).toHaveStyle('background-image: url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XmMwjwyJUJWE)')
+      // triggers clear event
+      expect(handleChange).toHaveBeenCalled()
     })
   })
 
   it('handles clear button click', () => {
     const imageUrl = 'https://example.com/image.jpg'
-    render(<ImageUploader {...defaultProps} defaultValue={imageUrl} />)
+    const handleClear = jest.fn()
+    render(<ImageUploader {...defaultProps} defaultValue={imageUrl} onClear={handleClear} />)
     
     // 最初は画像が表示されている
     let imageContainer = screen.getByText('Image').nextSibling.firstChild
@@ -102,9 +105,8 @@ describe('ImageUploader', () => {
     imageContainer = screen.getByText('Image').nextSibling.firstChild
     expect(imageContainer).not.toHaveStyle(`background-image: url(${imageUrl})`)
     
-    // 削除フラグが設定されている
-    const hiddenInput = screen.getByDisplayValue('true')
-    expect(hiddenInput).toHaveAttribute('name', 'will_delete_image')
+    // triggers clear event
+    expect(handleClear).toHaveBeenCalled()
   })
 
   it('updates image when value prop changes', () => {
@@ -123,22 +125,6 @@ describe('ImageUploader', () => {
     expect(imageContainer).toHaveStyle(`background-image: url(${newImageUrl})`)
   })
 
-  it('updates image when forceDefaultValue prop changes', () => {
-    const imageUrl = 'https://example.com/image.jpg'
-    const { rerender } = render(<ImageUploader {...defaultProps} defaultValue={imageUrl} forceDefaultValue={1} />)
-    
-    // 画像が表示されている
-    let imageContainer = screen.getByText('Image').nextSibling.firstChild
-    expect(imageContainer).toHaveStyle(`background-image: url(${imageUrl})`)
-    
-    // forceDefaultValueを変更してre-render
-    rerender(<ImageUploader {...defaultProps} defaultValue={imageUrl} forceDefaultValue={2} />)
-    
-    // 画像が再設定されている（useEffectが再実行される）
-    imageContainer = screen.getByText('Image').nextSibling.firstChild
-    expect(imageContainer).toHaveStyle(`background-image: url(${imageUrl})`)
-  })
-
   it('has correct hidden inputs', () => {
     render(<ImageUploader {...defaultProps} />)
     
@@ -147,32 +133,6 @@ describe('ImageUploader', () => {
     expect(fileInput).toHaveAttribute('name', 'image')
     expect(fileInput).toHaveAttribute('type', 'file')
     expect(fileInput).toHaveStyle('display: none')
-    
-    // 削除フラグの隠しフィールドが存在する
-    const hiddenInput = document.querySelector('input[type="hidden"]')
-    expect(hiddenInput).toHaveAttribute('name', 'will_delete_image')
-    expect(hiddenInput).toHaveAttribute('type', 'hidden')
-  })
-
-  it('resets deletion flag when selecting new file', async () => {
-    const imageUrl = 'https://example.com/image.jpg'
-    render(<ImageUploader {...defaultProps} defaultValue={imageUrl} />)
-    
-    // まずクリアして削除フラグを設定
-    const clearButton = screen.getByText('clear')
-    fireEvent.click(clearButton)
-    
-    expect(screen.getByDisplayValue('true')).toBeInTheDocument()
-    
-    // 新しいファイルを選択
-    const selectButton = screen.getByText('select...')
-    fireEvent.click(selectButton)
-    
-    // 削除フラグがリセットされている
-    await waitFor(() => {
-      const hiddenInput = document.querySelector('input[type="hidden"]')
-      expect(hiddenInput).toHaveAttribute('value', '')
-    })
   })
 
   it('handles file selection without file', () => {
