@@ -85,19 +85,19 @@ describe('Map Component', () => {
     google.maps.MapTypeControlStyle = {
       DROPDOWN_MENU: 1,
     }
-    google.maps.drawing = {
-      OverlayType: {
-        POLYGON: 'polygon',
-        POLYLINE: 'polyline',
-        CIRCLE: 'circle',
-      },
-      DrawingManager: jest.fn().mockImplementation(() => ({
-        setMap: jest.fn(),
-        setOptions: jest.fn(),
-        addListener: jest.fn(),
-        setDrawingMode: jest.fn(),
-      })),
-    }
+    // google.maps.drawing = {
+    //   OverlayType: {
+    //     POLYGON: 'polygon',
+    //     POLYLINE: 'polyline',
+    //     CIRCLE: 'circle',
+    //   },
+    //   DrawingManager: jest.fn().mockImplementation(() => ({
+    //     setMap: jest.fn(),
+    //     setOptions: jest.fn(),
+    //     addListener: jest.fn(),
+    //     setDrawingMode: jest.fn(),
+    //   })),
+    // }
   })
 
   it('renders without crashing and initializes map context state', async () => {

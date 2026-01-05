@@ -79,7 +79,7 @@ const Map = (props) => {
   const loader = new Loader({
     apiKey: config.googleApiKey,
     version: config.googleApiVersion,
-    libraries: ['geometry', 'drawing', 'marker'],
+    libraries: ['geometry', 'marker'],
   })
 
   const addPoint = (lat, lng, append) => {

@@ -4,7 +4,7 @@ import jsSHA1 from 'jssha/dist/sha1'
 
 export default class PathManager extends google.maps.MVCObject {
   polylines: { [key: string]: [google.maps.Polyline, WalkT | null] }
-  drawingManager: google.maps.drawing.DrawingManager
+  // drawingManager: google.maps.drawing.DrawingManager
   selection: google.maps.Polyline | null = null;
   current: google.maps.Polyline | null = null;
   lastClickLatLng: google.maps.LatLng | null = null;
@@ -21,31 +21,31 @@ export default class PathManager extends google.maps.MVCObject {
     const options = optOptions ?? {}
     this.polylines = {}
 
-    this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYLINE,
-      drawingControl: true,
-      drawingControlOptions: {
-        position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.POLYLINE],
-      },
-    })
+    // this.drawingManager = new google.maps.drawing.DrawingManager({
+    //   drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+    //   drawingControl: true,
+    //   drawingControlOptions: {
+    //     position: google.maps.ControlPosition.TOP_CENTER,
+    //     drawingModes: [google.maps.drawing.OverlayType.POLYLINE],
+    //   },
+    // })
     this.setValues(options)
-    this.drawingManager.setDrawingMode(null)
-    this.drawingManager.setMap(this.map)
+    // this.drawingManager.setDrawingMode(null)
+    // this.drawingManager.setMap(this.map)
     this.set('length', 0)
     this.set('prevSelection', null)
     this.set('prevCurrent', null)
-    google.maps.event.addListener(this.drawingManager, 'polylinecomplete', (polyline) => {
-      polyline.setMap(null)
-      google.maps.event.trigger(this, 'polylinecomplete', polyline)
-      this.drawingManager.setDrawingMode(null)
-    })
+    // google.maps.event.addListener(this.drawingManager, 'polylinecomplete', (polyline) => {
+    //   polyline.setMap(null)
+    //   google.maps.event.trigger(this, 'polylinecomplete', polyline)
+    //   this.drawingManager.setDrawingMode(null)
+    // })
     this.lastClickLatLng = null
   }
 
   styles_changed() {
     const drawingStyle = { ...this.styles.new, ...this.styles.selected }
-    this.drawingManager.setOptions({ polylineOptions: drawingStyle })
+    // this.drawingManager.setOptions({ polylineOptions: drawingStyle })
     Object.keys(this.polylines).forEach((key) => {
       const [pl] = this.polylines[key]
       pl.setOptions(this.getPolylineStyle(pl))
