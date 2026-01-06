@@ -63,6 +63,8 @@ jest.mock('terra-draw', () => {
       on: jest.fn(),
       getSnapshotFeature: jest.fn(),
       updateModeOptions: jest.fn(),
+      setMode: jest.fn(),
+      clear: jest.fn(),
     })),
     TerraDrawGoogleMapsAdapter: jest.fn().mockImplementation(() => ({})),
     TerraDrawLineStringMode: jest.fn().mockImplementation(() => ({})),
