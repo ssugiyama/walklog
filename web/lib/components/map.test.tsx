@@ -52,10 +52,28 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('@googlemaps/js-api-loader', () => ({
-  Loader: jest.fn().mockImplementation(() => ({
-    importLibrary: jest.fn().mockResolvedValue(true),
-  })),
+  setOptions: jest.fn(),
+  importLibrary: jest.fn().mockResolvedValue(true),
 }))
+
+jest.mock('terra-draw', () => {
+  return {
+    TerraDraw: jest.fn().mockImplementation(() => ({
+      start: jest.fn(),
+      on: jest.fn(),
+      getSnapshotFeature: jest.fn(),
+      updateModeOptions: jest.fn(),
+    })),
+    TerraDrawGoogleMapsAdapter: jest.fn().mockImplementation(() => ({})),
+    TerraDrawLineStringMode: jest.fn().mockImplementation(() => ({})),
+  }
+})
+
+jest.mock('terra-draw-google-maps-adapter', () => {
+  return {
+    TerraDrawGoogleMapsAdapter: jest.fn().mockImplementation(() => ({})),
+  }
+})
 
 describe('Map Component', () => {
   const mockSetState = jest.fn()
@@ -74,7 +92,7 @@ describe('Map Component', () => {
     (useConfig as jest.Mock).mockReturnValue({
       defaultCenter: '35.6895,139.6917',
       defaultRadius: 1000,
-      shapeStyles: { polylines: {}, polygons: {}, circle: {}, marker: {} },
+      shapeStyles: { polylines: { new: {} }, polygons: {}, circle: {}, marker: {} },
       mapTypeIds: 'roadmap',
       mapId: 'test-map-id',
     });
@@ -85,19 +103,6 @@ describe('Map Component', () => {
     google.maps.MapTypeControlStyle = {
       DROPDOWN_MENU: 1,
     }
-    // google.maps.drawing = {
-    //   OverlayType: {
-    //     POLYGON: 'polygon',
-    //     POLYLINE: 'polyline',
-    //     CIRCLE: 'circle',
-    //   },
-    //   DrawingManager: jest.fn().mockImplementation(() => ({
-    //     setMap: jest.fn(),
-    //     setOptions: jest.fn(),
-    //     addListener: jest.fn(),
-    //     setDrawingMode: jest.fn(),
-    //   })),
-    // }
   })
 
   it('renders without crashing and initializes map context state', async () => {

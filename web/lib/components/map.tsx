@@ -15,7 +15,7 @@ import { getCityAction } from '../../app/lib/walk-actions'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
-import { Loader } from '@googlemaps/js-api-loader'
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { ShapeStyles, WalkT } from '@/types'
 import { idToShowUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
@@ -76,11 +76,11 @@ const Map = (props) => {
   rc.searchCenter = searchCenter
   rc.radius = radius
   rc.interceptLink = interceptLink
-  const loader = new Loader({
-    apiKey: config.googleApiKey,
-    version: config.googleApiVersion,
-    libraries: ['geometry', 'marker'],
-  })
+  // const loader = new Loader({
+  //   apiKey: config.googleApiKey,
+  //   version: config.googleApiVersion,
+  //   libraries: ['geometry', 'marker'],
+  // })
 
   const addPoint = (lat, lng, append) => {
     const pt = new google.maps.LatLng(lat, lng)
@@ -301,12 +301,17 @@ const Map = (props) => {
 
   useEffect(() => {
     let isMounted = true;
-    loader.importLibrary('core').then(async () => {
+    setOptions({ 
+      key: config.googleApiKey,
+      v: config.googleApiVersion,
+      libraries: ['geometry', 'marker', 'elevation'],
+    });
+    importLibrary('core').then(async () => {
       if (isMounted) {
         await initMap()
       }
     })
-    loader.importLibrary('geocoding').then(() => { })
+    importLibrary('geocoding').then(() => { })
     // clean up
     return () => {
       isMounted = false;
