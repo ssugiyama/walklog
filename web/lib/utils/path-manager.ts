@@ -44,16 +44,16 @@ export default class PathManager extends google.maps.MVCObject {
     this.draw.start();
 
     this.draw.on('ready', () => {
-      this.draw.on("finish", (id: string, context: { action: string, mode: string }) => {
-        if (context.action !== "draw") return
-        const feature = this.draw.getSnapshotFeature(id);
-        if (feature && feature.geometry.type === "LineString") {
+      this.draw.on('finish', (id: string, context: { action: string, mode: string }) => {
+        if (context.action !== 'draw') return
+        const feature = this.draw.getSnapshotFeature(id)
+        if (feature && feature.geometry.type === 'LineString') {
           const path = feature.geometry.coordinates.map(
             (coord: number[]) => new google.maps.LatLng(coord[1], coord[0])
-          );
-          this.applyPath(path, false);
+          )
           this.draw.clear()
-          this.draw.setMode('static');
+          this.draw.setMode('static')
+          this.applyPath(path, false)
         }
       })
     })
