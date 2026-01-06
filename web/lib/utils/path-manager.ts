@@ -248,9 +248,10 @@ export default class PathManager extends google.maps.MVCObject {
     if (selection) {
       selection.setOptions(this.getPolylineStyle(selection))
     }
-    this.updateLength()
-    this.unbind('editable')
-    if (selection) this.bindTo('editable', selection)
+    setTimeout(() => {
+      this.updateLength()
+      selection?.setEditable(true)
+    }, 0)
   }
 
   getSelection() {
