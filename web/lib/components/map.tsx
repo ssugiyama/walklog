@@ -76,11 +76,6 @@ const Map = (props) => {
   rc.searchCenter = searchCenter
   rc.radius = radius
   rc.interceptLink = interceptLink
-  // const loader = new Loader({
-  //   apiKey: config.googleApiKey,
-  //   version: config.googleApiVersion,
-  //   libraries: ['geometry', 'marker'],
-  // })
 
   const addPoint = (lat, lng, append) => {
     const pt = new google.maps.LatLng(lat, lng)
