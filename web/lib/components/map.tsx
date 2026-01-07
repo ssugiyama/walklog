@@ -198,7 +198,7 @@ const Map = (props) => {
     rc.pathManager = new PathManager({ map: rc.map, styles: rc.shapeStyles.polylines })
     google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged)
     google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged)
-    google.maps.event.addListener(rc.pathManager, 'polylinecomplete', async (polyline) => {
+    google.maps.event.addListener(rc.pathManager, 'drawfinish', async (path) => {
       const append = await new Promise((resolve) => {
         if (rc.searchPath) {
           setConfirmInfo({ open: true, resolve })
@@ -207,7 +207,7 @@ const Map = (props) => {
         }
       })
       setConfirmInfo({ open: false })
-      rc.pathManager.applyPath(polyline.getPath().getArray(), append)
+      rc.pathManager.applyPath(path, append)
     })
     const { default: PolygonManager } = await import('../utils/polygon-manager')
     rc.polygonManager = new PolygonManager({ map: rc.map, styles: rc.shapeStyles.polygons, addCity })

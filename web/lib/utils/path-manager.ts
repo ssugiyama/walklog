@@ -2,14 +2,14 @@
 import { WalkT } from '@/types'
 import jsSHA1 from 'jssha/dist/sha1'
 import {
+  HexColor,
   TerraDraw,
   TerraDrawLineStringMode,
 } from 'terra-draw'
-import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter';
+import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter'
 
 export default class PathManager extends google.maps.MVCObject {
   polylines: { [key: string]: [google.maps.Polyline, WalkT | null] }
-  // drawingManager: google.maps.drawing.DrawingManager
   draw: TerraDraw | null = null;
   selection: google.maps.Polyline | null = null;
   current: google.maps.Polyline | null = null;
@@ -34,7 +34,7 @@ export default class PathManager extends google.maps.MVCObject {
         new TerraDrawLineStringMode({
           editable: true,
           styles: { 
-            lineStringColor: this.styles.new.strokeColor,
+            lineStringColor: this.styles.new.strokeColor as HexColor,
             lineStringWidth: this.styles.new.strokeWeight
           },
           pointerDistance: 2,
@@ -53,7 +53,7 @@ export default class PathManager extends google.maps.MVCObject {
           )
           this.draw.clear()
           this.draw.setMode('static')
-          this.applyPath(path, false)
+          google.maps.event.trigger(this, 'drawfinish', path)
         }
       })
     })
@@ -64,9 +64,9 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   styles_changed() {
-    this.draw?.updateModeOptions<typeof TerraDrawLineStringMode>('lineString', {
+    this.draw?.updateModeOptions<typeof TerraDrawLineStringMode>('linestring', {
       styles: {
-        lineStringColor: this.styles.new.strokeColor,
+        lineStringColor: this.styles.new.strokeColor as HexColor,
         lineStringWidth: this.styles.new.strokeWeight,
       }
     })
