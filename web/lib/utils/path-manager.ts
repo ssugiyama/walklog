@@ -5,7 +5,7 @@ import {
   TerraDraw,
   TerraDrawLineStringMode,
 } from 'terra-draw'
-import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter';
+import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter'
 
 export default class PathManager extends google.maps.MVCObject {
   polylines: { [key: string]: [google.maps.Polyline, WalkT | null] }
