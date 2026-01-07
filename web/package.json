@@ -6,8 +6,7 @@
     "start": "next start",
     "start-in-docker": "node ./server.js",
     "test": "jest",
-    "lint": "eslint",
-    "lint-fix": "eslint --fix ."
+    "lint": "eslint"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",
