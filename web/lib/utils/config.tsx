@@ -1,7 +1,7 @@
 'use client'
-import { createContext, useContext, useState, useEffect } from "react"
-import { getConfig } from "@/app/lib/walk-actions"
-import { ConfigT } from "@/types"
+import { createContext, useContext, useState, useEffect } from 'react'
+import { getConfig } from '@/app/lib/walk-actions'
+import { ConfigT } from '@/types'
 const ConfigContext = createContext<ConfigT | null>(null)
 
 export function ConfigProvider({ children }: { children: React.ReactNode }) {

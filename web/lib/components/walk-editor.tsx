@@ -2,22 +2,22 @@
 import React, {
   useActionState, useEffect, useCallback, useState,
   startTransition,
-} from 'react';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
-import Typography from '@mui/material/Typography';
-import ImageUploader from './image-uploader';
-import { useData } from '../utils/data-context';
-import { updateItemAction } from '@/app/lib/walk-actions';
-import { useQueryParam, StringParam, withDefault } from 'use-query-params';
-import { unauthorized, forbidden, useRouter, useSearchParams } from 'next/navigation';
-import { useUserContext } from '../utils/user-context';
-import { useMapContext } from '../utils/map-context';
+} from 'react'
+import Button from '@mui/material/Button'
+import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
+import FormGroup from '@mui/material/FormGroup'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import TextField from '@mui/material/TextField'
+import Switch from '@mui/material/Switch'
+import Typography from '@mui/material/Typography'
+import ImageUploader from './image-uploader'
+import { useData } from '../utils/data-context'
+import { updateItemAction } from '@/app/lib/walk-actions'
+import { useQueryParam, StringParam, withDefault } from 'use-query-params'
+import { unauthorized, forbidden, useRouter, useSearchParams } from 'next/navigation'
+import { useUserContext } from '../utils/user-context'
+import { useMapContext } from '../utils/map-context'
 import { idToShowUrl } from '../utils/meta-utils'
 import { WalkT } from '@/types'
 import { useConfig } from '../utils/config'
@@ -45,7 +45,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     image: null,
     will_delete_image: '',
     draft: false,
-  });
+  })
 
   const initialState = {
     id: null,
@@ -82,41 +82,41 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         image: item.image,
         will_delete_image: '',
         draft: item.draft,
-      };
-      setInputs(initialData);
+      }
+      setInputs(initialData)
       dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
     }
-  }, [item?.id]);
+  }, [item?.id])
 
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-  const [searchPath] = useQueryParam('path', withDefault(StringParam, null));
-  const [mapState] = useMapContext();
-  const { deleteSelectedPath } = mapState;
+  const [searchPath] = useQueryParam('path', withDefault(StringParam, null))
+  const [mapState] = useMapContext()
+  const { deleteSelectedPath } = mapState
   
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback((field: string) => (event?: React.ChangeEvent<HTMLInputElement>) => {
     const changes: Partial<WalkFields> = {}
     switch (field) {
-      case 'draft':
-        changes.draft = event.target.checked
-        break
-      case 'will_delete_image':
-        changes.image = null
-        changes.will_delete_image = 'true'
-        break
-      case 'image':
-        changes.image = event.target.files ? event.target.files[0] : null
-        changes.will_delete_image = ''
-        break
-      default:
-        changes[field] = event.target.value
+    case 'draft':
+      changes.draft = event.target.checked
+      break
+    case 'will_delete_image':
+      changes.image = null
+      changes.will_delete_image = 'true'
+      break
+    case 'image':
+      changes.image = event.target.files ? event.target.files[0] : null
+      changes.will_delete_image = ''
+      break
+    default:
+      changes[field] = event.target.value
     } 
     setInputs(prev => ({
       ...prev,
       ...changes,
-     }))
+    }))
     dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
-  }, [dispatchMain, setInputs]);
+  }, [dispatchMain, setInputs])
 
   const handleSubmit = useCallback(() => {
     startTransition(async () => {
@@ -171,7 +171,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     forbidden()
   }
 
-  const cancelUrl = mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`;
+  const cancelUrl = mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`
 
   return (
     <Box data-testid="WalkEditor">
@@ -247,7 +247,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
         </Box>
       </Paper>
     </Box>
-  );
-};
+  )
+}
 
 export default WalkEditor

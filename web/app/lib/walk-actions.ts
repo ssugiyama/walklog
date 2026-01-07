@@ -129,15 +129,15 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     const rt = Walk.getPoint(longitude + dlon, latitude + dlat)
     let target
     switch (props.filter) {
-      case 'neighborhood':
-        target = sequelize.col('path')
-        break
-      case 'start':
-        target = sequelize.fn('st_startpoint', sequelize.col('path'))
-        break
-      default:
-        target = sequelize.fn('st_endpoint', sequelize.col('path'))
-        break
+    case 'neighborhood':
+      target = sequelize.col('path')
+      break
+    case 'start':
+      target = sequelize.fn('st_startpoint', sequelize.col('path'))
+      break
+    default:
+      target = sequelize.fn('st_endpoint', sequelize.col('path'))
+      break
     }
     where.push(sequelize.where(sequelize.fn('st_makebox2d', lb, rt), {
       [Op.overlap]: target,

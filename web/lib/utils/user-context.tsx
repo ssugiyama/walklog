@@ -1,9 +1,9 @@
 'use client'
-import { useState, useEffect, useCallback } from "react"
-import { createContext, useContext } from "react"
-import { getUsersAction } from "../../app/lib/walk-actions"
-import { UserT } from "@/types"
-import { User as FirebaseUser } from "firebase/auth"
+import { useState, useEffect, useCallback } from 'react'
+import { createContext, useContext } from 'react'
+import { getUsersAction } from '../../app/lib/walk-actions'
+import { UserT } from '@/types'
+import { User as FirebaseUser } from 'firebase/auth'
 type UserContextT = {
   users: UserT[]
   idToken: string | null
@@ -66,7 +66,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
       currentUser,
       setCurrentUser,
       idToken,
-      updateIdToken
+      updateIdToken,
     }}>
       {children}
     </UserContext.Provider>

@@ -1,11 +1,11 @@
-import ItemFetcher from "@/lib/utils/item-fetcher"
-import WalkEditor from "@/lib/components/walk-editor"
+import ItemFetcher from '@/lib/utils/item-fetcher'
+import WalkEditor from '@/lib/components/walk-editor'
 
 export default async function Page() {
   return (
     <>
       <ItemFetcher />
-      <WalkEditor mode='update' /> 
+      <WalkEditor mode="update" /> 
     </>
   )
 }

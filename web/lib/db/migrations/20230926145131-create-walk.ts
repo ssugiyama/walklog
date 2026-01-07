@@ -48,37 +48,37 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DataTypes.DATE,
       },
-    });
+    })
     await queryInterface.addConstraint('walks', {
       fields: ['path'],
       type: 'CHECK',
       name: 'enforce_dims_path',
       where: Sequelize.literal('st_ndims(path) = 2'),
-    });
+    })
     await queryInterface.addConstraint('walks', {
       fields: ['path'],
       type: 'CHECK',
       name: 'enforce_geotype_path',
       where: Sequelize.literal('(geometrytype(path) = \'LINESTRING\'::text) OR (path IS NULL)'),
-    });
+    })
     await queryInterface.addConstraint('walks', {
       fields: ['path'],
       type: 'CHECK',
       name: 'enforce_srid_path',
       where: Sequelize.literal('st_srid(path) = 4326'),
-    });
+    })
     await queryInterface.addIndex('walks', {
       fields: ['date'],
-    });
+    })
     await queryInterface.addIndex('walks', {
       fields: ['draft'],
-    });
+    })
     await queryInterface.addIndex('walks', {
       fields: ['path'],
       using: 'GIST',
-    });
+    })
   },
   async down(queryInterface) {
-    await queryInterface.dropTable('walks');
+    await queryInterface.dropTable('walks')
   },
-};
+}

@@ -10,10 +10,10 @@ import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter'
 
 export default class PathManager extends google.maps.MVCObject {
   polylines: { [key: string]: [google.maps.Polyline, WalkT | null] }
-  draw: TerraDraw | null = null;
-  selection: google.maps.Polyline | null = null;
-  current: google.maps.Polyline | null = null;
-  lastClickLatLng: google.maps.LatLng | null = null;
+  draw: TerraDraw | null = null
+  selection: google.maps.Polyline | null = null
+  current: google.maps.Polyline | null = null
+  lastClickLatLng: google.maps.LatLng | null = null
   map: google.maps.Map
   styles: {
     new: google.maps.PolylineOptions
@@ -35,13 +35,13 @@ export default class PathManager extends google.maps.MVCObject {
           editable: true,
           styles: { 
             lineStringColor: this.styles.new.strokeColor as HexColor,
-            lineStringWidth: this.styles.new.strokeWeight
+            lineStringWidth: this.styles.new.strokeWeight,
           },
           pointerDistance: 2,
         }),
       ],
-    });
-    this.draw.start();
+    })
+    this.draw.start()
 
     this.draw.on('ready', () => {
       this.draw.on('finish', (id: string, context: { action: string, mode: string }) => {
@@ -49,7 +49,7 @@ export default class PathManager extends google.maps.MVCObject {
         const feature = this.draw.getSnapshotFeature(id)
         if (feature && feature.geometry.type === 'LineString') {
           const path = feature.geometry.coordinates.map(
-            (coord: number[]) => new google.maps.LatLng(coord[1], coord[0])
+            (coord: number[]) => new google.maps.LatLng(coord[1], coord[0]),
           )
           this.draw.clear()
           this.draw.setMode('static')
@@ -68,7 +68,7 @@ export default class PathManager extends google.maps.MVCObject {
       styles: {
         lineStringColor: this.styles.new.strokeColor as HexColor,
         lineStringWidth: this.styles.new.strokeWeight,
-      }
+      },
     })
     Object.keys(this.polylines).forEach((key) => {
       const [pl] = this.polylines[key]

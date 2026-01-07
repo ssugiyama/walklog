@@ -1,6 +1,6 @@
 'use client'
-import { useReducer, useContext, useCallback, useEffect, createContext, Dispatch } from "react"
-import { MouseEvent, MouseEventHandler } from "react"
+import { useReducer, useContext, useCallback, useEffect, createContext, Dispatch } from 'react'
+import { MouseEvent, MouseEventHandler } from 'react'
 const MESSAGE_ON_LEAVE = 'You have unsaved changes. Are you sure you want to leave this page?'
 
 type MainState = {
@@ -38,28 +38,28 @@ const initialMainState: MainState = {
 
 const mainReducer = (state, action: MainAction) => {
   switch (action.type) {
-    case 'TOGGLE_VIEW':
-      return { ...state, mode: state.mode === 'map' ? 'content' : 'map' }
-    case 'OPEN_TOOL_BOX':
-      return { ...state, toolBoxOpened: true }
-    case 'CLOSE_TOOL_BOX':
-      return { ...state, toolBoxOpened: false }
-    case 'OPEN_SNACKBAR':
-      return { ...state, message: action.payload }
-    case 'CLOSE_SNACKBAR':
-      return { ...state, message: null }
-    case 'SET_OVERLAY':
-      return { ...state, overlay: action.payload }
-    case 'SET_PANORAMA_INDEX':
-      return { ...state, panoramaIndex: action.payload }
-    case 'SET_PANORAMA_COUNT':
-      return { ...state, panoramaCount: action.payload }
-    case 'SET_AUTO_GEOLOCATION':
-      return { ...state, autoGeolocation: action.payload }
-    case 'SET_IS_DIRTY':
-      return { ...state, isDirty: action.payload }
-    default:
-      return state
+  case 'TOGGLE_VIEW':
+    return { ...state, mode: state.mode === 'map' ? 'content' : 'map' }
+  case 'OPEN_TOOL_BOX':
+    return { ...state, toolBoxOpened: true }
+  case 'CLOSE_TOOL_BOX':
+    return { ...state, toolBoxOpened: false }
+  case 'OPEN_SNACKBAR':
+    return { ...state, message: action.payload }
+  case 'CLOSE_SNACKBAR':
+    return { ...state, message: null }
+  case 'SET_OVERLAY':
+    return { ...state, overlay: action.payload }
+  case 'SET_PANORAMA_INDEX':
+    return { ...state, panoramaIndex: action.payload }
+  case 'SET_PANORAMA_COUNT':
+    return { ...state, panoramaCount: action.payload }
+  case 'SET_AUTO_GEOLOCATION':
+    return { ...state, autoGeolocation: action.payload }
+  case 'SET_IS_DIRTY':
+    return { ...state, isDirty: action.payload }
+  default:
+    return state
   }
 }
 

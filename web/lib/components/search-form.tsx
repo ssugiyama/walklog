@@ -116,110 +116,110 @@ const SearchForm = () => {
   return (
     <Accordion>
       <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="filter and sort"
-          id="filter-and-sort"
-        >
-          <Typography color="primary" variant="overline">filter & sort</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <div>
-            <TextField select label="filter" name="filter" value={filter} onChange={handleFilterChange} sx={sxFormInput} variant="standard">
-              <MenuItem value="" key="default">-</MenuItem>
-              <MenuItem value="neighborhood" key="neighborhood">Neighborhood</MenuItem>
-              <MenuItem value="start" key="start">Start</MenuItem>
-              <MenuItem value="end" key="end">End</MenuItem>
-              <MenuItem value="cities" key="cities">Cities</MenuItem>
-              <MenuItem value="frechet" key="frechet">Fréchet</MenuItem>
-              <MenuItem value="hausdorff" key="hausdorff">Hausdorff</MenuItem>
-              <MenuItem value="crossing" key="crossing">Crossing</MenuItem>
-            </TextField>
-            <TextField
-              select
-              label="user"
-              name="user"
-              value={user}
-              onChange={handleChange.user}
-              sx={sxFormInput}
-              variant="standard"
-            >
-              <MenuItem value="" key="default">-</MenuItem>
-              {
-                users.map((u) => (
-                  <MenuItem key={u.uid}>{u.displayName}</MenuItem>
-                ))
-              }
-            </TextField>
-          </div>
-          <div>
-            <TextField
-              select
-              label="month"
-              name="month"
-              value={month}
-              onChange={handleChange.month}
-              sx={sxFormInput}
-              variant="standard"
-            >
-              {
-                monthOptions.map((option) => (
-                  <MenuItem
-                    value={option.value}
-                    key={option.value}
-                  >
-                    {option.label}
-                  </MenuItem>
-                ))
-              }
-            </TextField>
-            <TextField
-              select
-              label="year"
-              name="year"
-              value={year}
-              onChange={handleChange.year}
-              sx={sxFormInput}
-              variant="standard"
-            >
-              <MenuItem value="" key="default">-</MenuItem>
-              {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
-            </TextField>
-          </div>
-          <div>
-            <TextField
-              select
-              label="order"
-              name="order"
-              value={order}
-              onChange={handleChange.order}
-              sx={sxFormInput}
-              variant="standard"
-            >
-              {
-                (filter === 'hausdorff' || filter === 'frechet' ? orderOptionsWithNearest : orderOptions).map((option) => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)
-              }
-            </TextField>
-            <NumberField
-              label="limit"
-              min={10}
-              size="small"
-              id="searchForm_limit" 
-              name="limit" 
-              value={limit} 
-              onValueCommitted={handleLimitCommited} 
-              step={10}
-              sx={sxFormInput}
-            />
-</div>
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="filter and sort"
+        id="filter-and-sort"
+      >
+        <Typography color="primary" variant="overline">filter & sort</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <div>
+          <TextField select label="filter" name="filter" value={filter} onChange={handleFilterChange} sx={sxFormInput} variant="standard">
+            <MenuItem value="" key="default">-</MenuItem>
+            <MenuItem value="neighborhood" key="neighborhood">Neighborhood</MenuItem>
+            <MenuItem value="start" key="start">Start</MenuItem>
+            <MenuItem value="end" key="end">End</MenuItem>
+            <MenuItem value="cities" key="cities">Cities</MenuItem>
+            <MenuItem value="frechet" key="frechet">Fréchet</MenuItem>
+            <MenuItem value="hausdorff" key="hausdorff">Hausdorff</MenuItem>
+            <MenuItem value="crossing" key="crossing">Crossing</MenuItem>
+          </TextField>
+          <TextField
+            select
+            label="user"
+            name="user"
+            value={user}
+            onChange={handleChange.user}
+            sx={sxFormInput}
+            variant="standard"
+          >
+            <MenuItem value="" key="default">-</MenuItem>
+            {
+              users.map((u) => (
+                <MenuItem key={u.uid}>{u.displayName}</MenuItem>
+              ))
+            }
+          </TextField>
+        </div>
+        <div>
+          <TextField
+            select
+            label="month"
+            name="month"
+            value={month}
+            onChange={handleChange.month}
+            sx={sxFormInput}
+            variant="standard"
+          >
+            {
+              monthOptions.map((option) => (
+                <MenuItem
+                  value={option.value}
+                  key={option.value}
+                >
+                  {option.label}
+                </MenuItem>
+              ))
+            }
+          </TextField>
+          <TextField
+            select
+            label="year"
+            name="year"
+            value={year}
+            onChange={handleChange.year}
+            sx={sxFormInput}
+            variant="standard"
+          >
+            <MenuItem value="" key="default">-</MenuItem>
+            {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+          </TextField>
+        </div>
+        <div>
+          <TextField
+            select
+            label="order"
+            name="order"
+            value={order}
+            onChange={handleChange.order}
+            sx={sxFormInput}
+            variant="standard"
+          >
+            {
+              (filter === 'hausdorff' || filter === 'frechet' ? orderOptionsWithNearest : orderOptions).map((option) => <MenuItem value={option.value} key={option.value}>{option.label}</MenuItem>)
+            }
+          </TextField>
+          <NumberField
+            label="limit"
+            min={10}
+            size="small"
+            id="searchForm_limit" 
+            name="limit" 
+            value={limit} 
+            onValueCommitted={handleLimitCommited} 
+            step={10}
+            sx={sxFormInput}
+          />
+        </div>
 
-        </AccordionDetails>
-        <AccordionActions>
-          <Button variant="outlined" color="primary" component={Link} href="/">
-            <RefreshIcon sx={{ marginRight: 1 }} />
+      </AccordionDetails>
+      <AccordionActions>
+        <Button variant="outlined" color="primary" component={Link} href="/">
+          <RefreshIcon sx={{ marginRight: 1 }} />
             reset
-          </Button>
-        </AccordionActions>
-      </Accordion>
+        </Button>
+      </AccordionActions>
+    </Accordion>
   )
 }
 

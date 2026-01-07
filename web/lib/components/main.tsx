@@ -37,7 +37,7 @@ const Main = ({
   const { toolBoxOpened } = mainState
   const handleRequestClose = useCallback(() => {
     dispatchMain({ type: 'CLOSE_SNACKBAR' })
-  }, []);
+  }, [])
   const config = useConfig()
   const theme = useMemo(() => 
     createTheme(config.theme), 

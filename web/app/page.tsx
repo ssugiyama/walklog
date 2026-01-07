@@ -1,6 +1,6 @@
-import SearchBox from "@/lib/components/search-box";
+import SearchBox from '@/lib/components/search-box'
 import type { Metadata } from 'next'
-import Searcher from "@/lib/utils/searcher";
+import Searcher from '@/lib/utils/searcher'
 const description = process.env.SITE_DESCRIPTION ?? ''
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: 
     description,
     url: '/',
-  }
+  },
 }
 
 export default function Page() {

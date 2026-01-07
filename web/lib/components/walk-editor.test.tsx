@@ -9,14 +9,14 @@ const mockSetData = jest.fn()
 const mockDispatchMain = jest.fn()
 const mockInterceptLink = jest.fn()
 const mockSearchParams = {
-  toString: jest.fn(() => 'param1=value1&param2=value2')
+  toString: jest.fn(() => 'param1=value1&param2=value2'),
 }
 
 beforeAll(() => {
   global.FormData = jest.fn(() => ({
     append: jest.fn(),
     get: jest.fn(),
-    entries: jest.fn(() => [])
+    entries: jest.fn(() => []),
   }))
 })
 
@@ -37,7 +37,7 @@ jest.mock('../utils/config', () => ({
 jest.mock('../utils/data-context', () => ({
   useData: () => [
     { current: { id: '2', date: '2023-01-01', title: 'Test Walk', comment: 'Test comment', draft: true, path: 'test-path' } },
-    mockSetData
+    mockSetData,
   ],
 }))
 
@@ -67,7 +67,7 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('@/app/lib/walk-actions', () => ({
-  updateItemAction: jest.fn().mockResolvedValue({})
+  updateItemAction: jest.fn().mockResolvedValue({}),
 }))
 
 jest.mock('use-query-params', () => ({
@@ -82,8 +82,8 @@ jest.mock('moment', () => {
     ...moment,
     __esModule: true,
     default: () => ({
-      format: jest.fn(() => '2023-01-01')
-    })
+      format: jest.fn(() => '2023-01-01'),
+    }),
   }
 })
 
@@ -124,7 +124,7 @@ describe('WalkEditor update', () => {
     
     expect(mockDispatchMain).toHaveBeenCalledWith({
       type: 'SET_IS_DIRTY',
-      payload: true
+      payload: true,
     })
   })
 })

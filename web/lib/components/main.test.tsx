@@ -52,7 +52,7 @@ jest.mock('@/lib/utils/config', () => ({
   useConfig: jest.fn(() => ({
     theme: {
       palette: {},
-    }
+    },
   })),
 })) 
 
@@ -81,7 +81,7 @@ function renderWithProviders(ui, { mainState = defaultMainState, data = defaultD
         <MainContext.Provider value={[mainState, dispatchMain]}>
           {ui}
         </MainContext.Provider>
-      </DataProvider>
+      </DataProvider>,
     ),
     dispatchMain,
   }
@@ -92,7 +92,7 @@ describe('Main Component', () => {
     renderWithProviders(
       <Main>
         <div data-testid="main-children">Test Content</div>
-      </Main>
+      </Main>,
     )
 
     expect(screen.getByTestId('map')).toBeInTheDocument()
@@ -108,7 +108,7 @@ describe('Main Component', () => {
       <Main>
         <div data-testid="main-children">Test Content</div>
       </Main>,
-      { mainState: { ...defaultMainState, mode: 'content' } }
+      { mainState: { ...defaultMainState, mode: 'content' } },
     )
 
     expect(screen.getByTestId('map')).toBeInTheDocument()
@@ -125,7 +125,7 @@ describe('Main Component', () => {
     const { dispatchMain } = renderWithProviders(
       <Main>
         <div>Test Content</div>
-      </Main>
+      </Main>,
     )
 
     // Find and click the toggle view button
@@ -140,7 +140,7 @@ describe('Main Component', () => {
     renderWithProviders(
       <Main>
         <div>Test Content</div>
-      </Main>
+      </Main>,
     )
 
     // Find and click the share button
@@ -161,7 +161,7 @@ describe('Main Component', () => {
     const { dispatchMain } = renderWithProviders(
       <Main>
         <div>Test Content</div>
-      </Main>
+      </Main>,
     )
 
     // Find and click the share button
@@ -173,7 +173,7 @@ describe('Main Component', () => {
       expect(navigator.clipboard.writeText).toHaveBeenCalled()
       expect(dispatchMain).toHaveBeenCalledWith({
         type: 'OPEN_SNACKBAR',
-        payload: 'copied to clipboard'
+        payload: 'copied to clipboard',
       })
     })
 
@@ -187,7 +187,7 @@ describe('Main Component', () => {
       <Main>
         <div>Test Content</div>
       </Main>,
-      { mainState: { ...defaultMainState, message: 'Test message' } }
+      { mainState: { ...defaultMainState, message: 'Test message' } },
     )
 
     // Find the snackbar
@@ -214,7 +214,7 @@ describe('Main Component', () => {
       <Main>
         <div>Test Content</div>
       </Main>,
-      { mainState: { ...defaultMainState, toolBoxOpened: true } }
+      { mainState: { ...defaultMainState, toolBoxOpened: true } },
     )
 
     // Find the toolbox
