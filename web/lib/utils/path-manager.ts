@@ -53,7 +53,7 @@ export default class PathManager extends google.maps.MVCObject {
           )
           this.draw.clear()
           this.draw.setMode('static')
-          this.applyPath(path, false)
+          google.maps.event.trigger(this, 'drawfinish', path)
         }
       })
     })
