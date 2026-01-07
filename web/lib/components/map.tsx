@@ -15,7 +15,7 @@ import { getCityAction } from '../../app/lib/walk-actions'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
-import { Loader } from '@googlemaps/js-api-loader'
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { ShapeStyles, WalkT } from '@/types'
 import { idToShowUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
@@ -76,11 +76,6 @@ const Map = (props) => {
   rc.searchCenter = searchCenter
   rc.radius = radius
   rc.interceptLink = interceptLink
-  const loader = new Loader({
-    apiKey: config.googleApiKey,
-    version: config.googleApiVersion,
-    libraries: ['geometry', 'drawing', 'marker'],
-  })
 
   const addPoint = (lat, lng, append) => {
     const pt = new google.maps.LatLng(lat, lng)
@@ -203,7 +198,7 @@ const Map = (props) => {
     rc.pathManager = new PathManager({ map: rc.map, styles: rc.shapeStyles.polylines })
     google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged)
     google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged)
-    google.maps.event.addListener(rc.pathManager, 'polylinecomplete', async (polyline) => {
+    google.maps.event.addListener(rc.pathManager, 'drawfinish', async (path) => {
       const append = await new Promise((resolve) => {
         if (rc.searchPath) {
           setConfirmInfo({ open: true, resolve })
@@ -212,7 +207,7 @@ const Map = (props) => {
         }
       })
       setConfirmInfo({ open: false })
-      rc.pathManager.applyPath(polyline.getPath().getArray(), append)
+      rc.pathManager.applyPath(path, append)
     })
     const { default: PolygonManager } = await import('../utils/polygon-manager')
     rc.polygonManager = new PolygonManager({ map: rc.map, styles: rc.shapeStyles.polygons, addCity })
@@ -301,12 +296,17 @@ const Map = (props) => {
 
   useEffect(() => {
     let isMounted = true;
-    loader.importLibrary('core').then(async () => {
+    setOptions({ 
+      key: config.googleApiKey,
+      v: config.googleApiVersion,
+      libraries: ['geometry', 'marker', 'elevation'],
+    });
+    importLibrary('core').then(async () => {
       if (isMounted) {
         await initMap()
       }
     })
-    loader.importLibrary('geocoding').then(() => { })
+    importLibrary('geocoding').then(() => { })
     // clean up
     return () => {
       isMounted = false;

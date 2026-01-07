@@ -80,6 +80,12 @@ importers:
       serialize-query-params:
         specifier: ^2.0.4
         version: 2.0.4
+      terra-draw:
+        specifier: ^1.21.2
+        version: 1.21.2
+      terra-draw-google-maps-adapter:
+        specifier: ^1.2.1
+        version: 1.2.1(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.21.2)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -4078,6 +4084,15 @@ packages:
   teeny-request@9.0.0:
     resolution: {integrity: sha512-resvxdc6Mgb7YEThw6G6bExlXKkv6+YbuzGg9xuXxSgxJF7Ozs+o8Y9+2R3sArdWdW8nOokoQb1yrpFB0pQK2g==}
     engines: {node: '>=14'}
+
+  terra-draw-google-maps-adapter@1.2.1:
+    resolution: {integrity: sha512-KBjuoXRwZSSFPVxtJBisG5A7pnuNyUI4NNMc1qT/05tjMcJ3FLABWrhp4JoaJrCGW5U4YeuOweLEusPT+FJrPQ==}
+    peerDependencies:
+      '@googlemaps/js-api-loader': ^1.14.3 || ^2.0.0
+      terra-draw: ^1.0.0
+
+  terra-draw@1.21.2:
+    resolution: {integrity: sha512-DS8TYAJRKjfNvesZF28rmhqRmWpBKhAi+VKCQLR8PPWlNbyJOebfTHiy4VjvMVBJRd+hfQJnqmJJ1TtSkc4Peg==}
 
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
@@ -9330,6 +9345,13 @@ snapshots:
       - encoding
       - supports-color
     optional: true
+
+  terra-draw-google-maps-adapter@1.2.1(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.21.2):
+    dependencies:
+      '@googlemaps/js-api-loader': 2.0.2
+      terra-draw: 1.21.2
+
+  terra-draw@1.21.2: {}
 
   test-exclude@6.0.0:
     dependencies:

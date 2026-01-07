@@ -1,10 +1,16 @@
 /* eslint new-cap: 'off' */
 import { WalkT } from '@/types'
 import jsSHA1 from 'jssha/dist/sha1'
+import {
+  HexColor,
+  TerraDraw,
+  TerraDrawLineStringMode,
+} from 'terra-draw'
+import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter'
 
 export default class PathManager extends google.maps.MVCObject {
   polylines: { [key: string]: [google.maps.Polyline, WalkT | null] }
-  drawingManager: google.maps.drawing.DrawingManager
+  draw: TerraDraw | null = null;
   selection: google.maps.Polyline | null = null;
   current: google.maps.Polyline | null = null;
   lastClickLatLng: google.maps.LatLng | null = null;
@@ -20,32 +26,50 @@ export default class PathManager extends google.maps.MVCObject {
     super()
     const options = optOptions ?? {}
     this.polylines = {}
+    this.map = options.map
+    this.styles = options.styles
+    this.draw = new TerraDraw({
+      adapter: new TerraDrawGoogleMapsAdapter({ map: this.map, lib: google.maps, coordinatePrecision: 9 }),
+      modes: [
+        new TerraDrawLineStringMode({
+          editable: true,
+          styles: { 
+            lineStringColor: this.styles.new.strokeColor as HexColor,
+            lineStringWidth: this.styles.new.strokeWeight
+          },
+          pointerDistance: 2,
+        }),
+      ],
+    });
+    this.draw.start();
 
-    this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYLINE,
-      drawingControl: true,
-      drawingControlOptions: {
-        position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.POLYLINE],
-      },
+    this.draw.on('ready', () => {
+      this.draw.on('finish', (id: string, context: { action: string, mode: string }) => {
+        if (context.action !== 'draw') return
+        const feature = this.draw.getSnapshotFeature(id)
+        if (feature && feature.geometry.type === 'LineString') {
+          const path = feature.geometry.coordinates.map(
+            (coord: number[]) => new google.maps.LatLng(coord[1], coord[0])
+          )
+          this.draw.clear()
+          this.draw.setMode('static')
+          google.maps.event.trigger(this, 'drawfinish', path)
+        }
+      })
     })
-    this.setValues(options)
-    this.drawingManager.setDrawingMode(null)
-    this.drawingManager.setMap(this.map)
     this.set('length', 0)
     this.set('prevSelection', null)
     this.set('prevCurrent', null)
-    google.maps.event.addListener(this.drawingManager, 'polylinecomplete', (polyline) => {
-      polyline.setMap(null)
-      google.maps.event.trigger(this, 'polylinecomplete', polyline)
-      this.drawingManager.setDrawingMode(null)
-    })
     this.lastClickLatLng = null
   }
 
   styles_changed() {
-    const drawingStyle = { ...this.styles.new, ...this.styles.selected }
-    this.drawingManager.setOptions({ polylineOptions: drawingStyle })
+    this.draw?.updateModeOptions<typeof TerraDrawLineStringMode>('linestring', {
+      styles: {
+        lineStringColor: this.styles.new.strokeColor as HexColor,
+        lineStringWidth: this.styles.new.strokeWeight,
+      }
+    })
     Object.keys(this.polylines).forEach((key) => {
       const [pl] = this.polylines[key]
       pl.setOptions(this.getPolylineStyle(pl))
@@ -288,5 +312,9 @@ export default class PathManager extends google.maps.MVCObject {
 
   getLastClickLatLng() {
     return this.lastClickLatLng
+  }
+
+  startDraw() {
+    this.draw?.setMode('linestring')
   }
 }
