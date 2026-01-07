@@ -2,6 +2,7 @@
 import { WalkT } from '@/types'
 import jsSHA1 from 'jssha/dist/sha1'
 import {
+  HexColor,
   TerraDraw,
   TerraDrawLineStringMode,
 } from 'terra-draw'
@@ -33,7 +34,7 @@ export default class PathManager extends google.maps.MVCObject {
         new TerraDrawLineStringMode({
           editable: true,
           styles: { 
-            lineStringColor: this.styles.new.strokeColor,
+            lineStringColor: this.styles.new.strokeColor as HexColor,
             lineStringWidth: this.styles.new.strokeWeight
           },
           pointerDistance: 2,
@@ -63,9 +64,9 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   styles_changed() {
-    this.draw?.updateModeOptions<typeof TerraDrawLineStringMode>('lineString', {
+    this.draw?.updateModeOptions<typeof TerraDrawLineStringMode>('linestring', {
       styles: {
-        lineStringColor: this.styles.new.strokeColor,
+        lineStringColor: this.styles.new.strokeColor as HexColor,
         lineStringWidth: this.styles.new.strokeWeight,
       }
     })
