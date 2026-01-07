@@ -112,7 +112,7 @@ const ItemBox = () => {
     mb: { xs: 0, sm: 2 },
     ml: { xs: 'auto', sm: 0 },
     display: { xs: 'inherit', sm: 'block' },
-  };
+  }
 
   return itemWillRender && 
     <Box data-testid="ItemBox">

@@ -1,7 +1,7 @@
 'use client'
 
 import React, {
-  useRef, useEffect, useState, MouseEventHandler
+  useRef, useEffect, useState, MouseEventHandler,
 } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Box, Button } from '@mui/material'
@@ -295,12 +295,12 @@ const Map = (props) => {
   useEffect(() => { if (rc.initialized) pathChanged() }, [rc.autoGeolocation])
 
   useEffect(() => {
-    let isMounted = true;
+    let isMounted = true
     setOptions({ 
       key: config.googleApiKey,
       v: config.googleApiVersion,
       libraries: ['geometry', 'marker', 'elevation'],
-    });
+    })
     importLibrary('core').then(async () => {
       if (isMounted) {
         await initMap()
@@ -309,7 +309,7 @@ const Map = (props) => {
     importLibrary('geocoding').then(() => { })
     // clean up
     return () => {
-      isMounted = false;
+      isMounted = false
     }
   }, [])
 

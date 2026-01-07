@@ -9,7 +9,7 @@ import '@testing-library/jest-dom'
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(() => ({
-    get: jest.fn((key) => (key === 'index' ? '0' : null))
+    get: jest.fn((key) => (key === 'index' ? '0' : null)),
   })),
 }))
 
@@ -65,7 +65,7 @@ describe('SearchBox', () => {
 
   it('renders the SearchBox component', () => {
     render(
-      <SearchBox />
+      <SearchBox />,
     )
     expect(screen.getByTestId('SearchBox')).toBeInTheDocument()
   })

@@ -52,7 +52,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: false, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
-      mockPushWithGuard
+      mockPushWithGuard,
     ]);
     (useData as jest.Mock).mockReturnValue([mockData]);
     (useConfig as jest.Mock).mockReturnValue(mockConfig)
@@ -76,7 +76,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
-      mockPushWithGuard
+      mockPushWithGuard,
     ])
     
     render(<BottomBar />)
@@ -111,7 +111,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
-      mockPushWithGuard
+      mockPushWithGuard,
     ])
     
     render(<BottomBar />)
@@ -124,7 +124,7 @@ describe('BottomBar', () => {
     (useMainContext as jest.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 5, panoramaCount: 10 },
       mockDispatchMain,
-      mockPushWithGuard
+      mockPushWithGuard,
     ])
     
     render(<BottomBar />)

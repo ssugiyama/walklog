@@ -1,22 +1,22 @@
 
-import * as React from 'react';
-import { NumberField as BaseNumberField } from '@base-ui-components/react/number-field';
-import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
-import Input from '@mui/material/Input';
-import InputAdornment from '@mui/material/InputAdornment';
-import InputLabel from '@mui/material/InputLabel';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import * as React from 'react'
+import { NumberField as BaseNumberField } from '@base-ui-components/react/number-field'
+import IconButton from '@mui/material/IconButton'
+import FormControl from '@mui/material/FormControl'
+import Input from '@mui/material/Input'
+import InputAdornment from '@mui/material/InputAdornment'
+import InputLabel from '@mui/material/InputLabel'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { SxProps } from '@mui/material/styles'
 
 /**
  * This component is a placeholder for FormControl to correctly set the shrink label state on SSR.
  */
 function SSRInitialFilled(_: BaseNumberField.Root.Props) {
-  return null;
+  return null
 }
-SSRInitialFilled.muiName = 'Input';
+SSRInitialFilled.muiName = 'Input'
 
 export default function NumberField({
   id: idProp,
@@ -31,9 +31,9 @@ export default function NumberField({
   sx?: SxProps;
   error?: boolean;
 }) {
-  let id = React.useId();
+  let id = React.useId()
   if (idProp) {
-    id = idProp;
+    id = idProp
   }
   return (
     <BaseNumberField.Root
@@ -106,5 +106,5 @@ export default function NumberField({
         )}
       />
     </BaseNumberField.Root>
-  );
+  )
 }

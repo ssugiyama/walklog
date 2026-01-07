@@ -79,24 +79,24 @@ const SearchBox = () => {
                 return <span>Searching...</span>
               }
               switch (count) {
-                case null:
-                  return <span>successfully saved</span>
-                case 0:
-                  return <span>No results</span>
-                case 1:
-                  return <span>1 / 1 item</span>
-                default:
-                  return (
-                    <span>
-                      {rows.length}
-                      {' '}
+              case null:
+                return <span>successfully saved</span>
+              case 0:
+                return <span>No results</span>
+              case 1:
+                return <span>1 / 1 item</span>
+              default:
+                return (
+                  <span>
+                    {rows.length}
+                    {' '}
                       /
-                      {' '}
-                      {count}
-                      {' '}
+                    {' '}
+                    {count}
+                    {' '}
                       walks
-                    </span>
-                  )
+                  </span>
+                )
               }
             })()
           }

@@ -1,9 +1,9 @@
 'use client'
-import { useState, useContext, Dispatch } from "react"
+import { useState, useContext, Dispatch } from 'react'
 import { createContext } from 'react'
-import { Path } from "typescript"
-import type PathManager from "@/lib/utils/path-manager"
-import PolygonManager from "./polygon-manager"
+import { Path } from 'typescript'
+import type PathManager from '@/lib/utils/path-manager'
+import PolygonManager from './polygon-manager'
 type MapState = {
   map: google.maps.Map | null
   pathManager: PathManager | null

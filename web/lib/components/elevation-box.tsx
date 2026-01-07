@@ -43,7 +43,7 @@ const ElevationBox = () => {
       refs.current.elevationResults = results
       const formattedData = results.map((result, index) => ({
         index,
-        elevation: result.elevation
+        elevation: result.elevation,
       }))
       setChartData(formattedData)
     }

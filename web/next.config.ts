@@ -1,13 +1,13 @@
 const nextConfig = {
-    serverExternalPackages: ['sequelize'],
-    experimental: {
-      serverActions: {
-        bodySizeLimit: '2mb',
-      },
-      useCache: true,
-      authInterrupts: true,
+  serverExternalPackages: ['sequelize'],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
     },
-    output: 'standalone',
-  };
+    useCache: true,
+    authInterrupts: true,
+  },
+  output: 'standalone',
+}
 
-export default nextConfig;
+export default nextConfig

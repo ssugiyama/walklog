@@ -42,7 +42,7 @@ const ToolBox = (props) => {
   const [mainState, dispatchMain] = useMainContext()
   const [mapState] = useMapContext()
   const pathManager = mapState.pathManager
-  const [selectedPath] = useQueryParam('path', withDefault(StringParam, null));
+  const [selectedPath] = useQueryParam('path', withDefault(StringParam, null))
   const autoGeolocation = mainState.autoGeolocation
   const [location, setLocation] = useState('')
   const geocoder = useRef<google.maps.Geocoder>(null)

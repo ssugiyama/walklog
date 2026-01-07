@@ -1,7 +1,7 @@
-import { idToShowUrl } from "@/lib/utils/meta-utils"
-import ItemBox from "../../../lib/components/item-box"
-import { getItemAction } from "../../lib/walk-actions"
-import ItemFetcher from "@/lib/utils/item-fetcher"
+import { idToShowUrl } from '@/lib/utils/meta-utils'
+import ItemBox from '../../../lib/components/item-box'
+import { getItemAction } from '../../lib/walk-actions'
+import ItemFetcher from '@/lib/utils/item-fetcher'
 
 export default async function Page() {
   return (

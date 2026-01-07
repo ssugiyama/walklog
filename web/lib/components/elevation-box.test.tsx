@@ -5,7 +5,7 @@ import ElevationBox from './elevation-box'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
-import { initialize } from "@googlemaps/jest-mocks"
+import { initialize } from '@googlemaps/jest-mocks'
 
 // Rechartsのモック
 jest.mock('recharts', () => ({
@@ -32,7 +32,7 @@ jest.mock('../utils/map-context', () => ({
 
 describe('ElevationBox', () => {
   const mockElevationService = {
-    getElevationAlongPath: jest.fn()
+    getElevationAlongPath: jest.fn(),
   }
 
   beforeEach(() => {
@@ -43,15 +43,15 @@ describe('ElevationBox', () => {
         ...global.google.maps,
         geometry: {
           encoding: {
-            decodePath: jest.fn(() => [{ lat: 35.6762, lng: 139.6503 }])
-          }
+            decodePath: jest.fn(() => [{ lat: 35.6762, lng: 139.6503 }]),
+          },
         },
         ElevationService: jest.fn(() => mockElevationService),
         ElevationStatus: {
-          OK: 'OK'
+          OK: 'OK',
         },
-        LatLng: jest.fn((lat, lng) => ({ lat: () => lat, lng: () => lng }))
-      }
+        LatLng: jest.fn((lat, lng) => ({ lat: () => lat, lng: () => lng })),
+      },
     }
     jest.clearAllMocks()
   })
@@ -78,7 +78,7 @@ describe('ElevationBox', () => {
     mockElevationService.getElevationAlongPath.mockImplementation((request, callback) => {
       const results = [
         { elevation: 100, location: { lat: () => 35.6762, lng: () => 139.6503 } },
-        { elevation: 110, location: { lat: () => 35.6763, lng: () => 139.6504 } }
+        { elevation: 110, location: { lat: () => 35.6763, lng: () => 139.6504 } },
       ]
       callback(results, 'OK')
     });
@@ -88,9 +88,9 @@ describe('ElevationBox', () => {
     (useConfig as jest.Mock).mockReturnValue({ 
       shapeStyles: { 
         polylines: { 
-          current: { strokeColor: '#82ca9d' } 
-        } 
-      } 
+          current: { strokeColor: '#82ca9d' }, 
+        }, 
+      }, 
     })
 
     const { rerender } = render(<ElevationBox />)
@@ -113,7 +113,7 @@ describe('ElevationBox', () => {
   it('uses default stroke color when config is not available', async () => {
     mockElevationService.getElevationAlongPath.mockImplementation((request, callback) => {
       const results = [
-        { elevation: 100, location: { lat: () => 35.6762, lng: () => 139.6503 } }
+        { elevation: 100, location: { lat: () => 35.6762, lng: () => 139.6503 } },
       ]
       callback(results, 'OK')
     });

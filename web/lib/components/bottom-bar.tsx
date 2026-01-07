@@ -109,9 +109,9 @@ const BottomBar = (props) => {
 
     controls = (
       <Box sx={sxBottomBarGroupBody}>
-          <Tooltip title="cancel" placement="top">
-            <IconButton data-testid="cancel-button" component={Link} href={cancelUrl} onClick={interceptLink} size="large"><NavigationCancel /></IconButton>
-          </Tooltip>
+        <Tooltip title="cancel" placement="top">
+          <IconButton data-testid="cancel-button" component={Link} href={cancelUrl} onClick={interceptLink} size="large"><NavigationCancel /></IconButton>
+        </Tooltip>
       </Box>
     )
   } else if (pathname.startsWith('/show/') && item) {

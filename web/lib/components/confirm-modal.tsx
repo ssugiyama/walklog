@@ -1,15 +1,15 @@
-import React from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import React from 'react'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
 
 const ConfirmModal = (props) => {
   const {
     open, title, resolve, text, actions,
-  } = props;
+  } = props
 
   return (
     <Dialog
@@ -34,10 +34,10 @@ const ConfirmModal = (props) => {
         }
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}
 
-export default ConfirmModal;
+export default ConfirmModal
 
 export const APPEND_PATH_CONFIRM_INFO = {
   title: 'path selection',
@@ -52,4 +52,4 @@ export const APPEND_PATH_CONFIRM_INFO = {
       value: true,
     },
   ],
-};
+}

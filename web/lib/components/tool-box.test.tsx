@@ -1,43 +1,43 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import ToolBox from '@/lib/components/tool-box';
-import { MainContextProvider } from '@/lib/utils/main-context';
-import { MapContextProvider } from '@/lib/utils/map-context';
-import { ConfigProvider } from '@/lib/utils/config';
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import ToolBox from '@/lib/components/tool-box'
+import { MainContextProvider } from '@/lib/utils/main-context'
+import { MapContextProvider } from '@/lib/utils/map-context'
+import { ConfigProvider } from '@/lib/utils/config'
 import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 
 // Test configuration
-const TEST_TIMEOUT = 10000;
-jest.setTimeout(TEST_TIMEOUT);
+const TEST_TIMEOUT = 10000
+jest.setTimeout(TEST_TIMEOUT)
 
 // Mock the Google Maps API
 const mockMap = {
   setCenter: jest.fn(),
-};
+}
 
 const mockMarker = {
   setMap: jest.fn(),
   set position(pos) {
-    this._position = pos;
+    this._position = pos
   },
   get position() {
-    return this._position;
+    return this._position
   },
   set map(map) {
-    this._map = map;
-    this.setMap(map);
+    this._map = map
+    this.setMap(map)
   },
   get map() {
-    return this._map;
+    return this._map
   },
   _position: null,
   _map: null,
-};
+}
 
 const mockGeocoder = {
   geocode: jest.fn(),
-};
+}
 
 const mockMapContext = [
   {
@@ -54,7 +54,7 @@ const mockMapContext = [
     clearPaths: jest.fn(),
     addPoint: jest.fn(),
   },
-];
+]
 
 const mockMainContext = [
   {
@@ -68,7 +68,7 @@ const mockConfig = {
   appVersion: '1.0.0',
   googleApiKey: 'mock_api_key',
   mapTypeIds: 'roadmap,hybrid',
-};
+}
 
 // Mock the geolocation API
 const mockGeolocation = {
@@ -78,9 +78,9 @@ const mockGeolocation = {
         latitude: 35.6812,
         longitude: 139.7671,
       },
-    })
+    }),
   ),
-};
+}
 
 // Mock the Google Maps libraries
 global.google = {
@@ -92,41 +92,41 @@ global.google = {
       ERROR: 'ERROR',
     },
   },
-};
+}
 
 // Setup for all tests
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.clearAllMocks()
   // Mock the geolocation API
-  global.navigator.geolocation = mockGeolocation;
-});
+  global.navigator.geolocation = mockGeolocation
+})
 
 jest.mock('@/lib/utils/map-context', () => ({
   useMapContext: jest.fn().mockImplementation(() => mockMapContext),
   MapContextProvider: ({ children }) => <div data-testid="map-provider">{children}</div>,
-}));
+}))
 
 jest.mock('@/lib/utils/main-context', () => ({
   useMainContext: jest.fn().mockImplementation(() => mockMainContext),
   MainContextProvider: ({ children }) => <div data-testid="main-provider">{children}</div>,
-}));
+}))
 
 jest.mock('@/lib/utils/config', () => ({
   useConfig: jest.fn().mockImplementation(() => mockConfig),
   ConfigProvider: ({ children }) => <div data-testid="config-provider">{children}</div>,
-}));
+}))
 
 jest.mock('use-query-params/dist/useQueryParam', () => ({
   useQueryParam: jest.fn(() => ['mock-path', jest.fn()]),
-}));
+}))
 
 jest.mock('serialize-query-params/dist/withDefault', () => ({
   withDefault: jest.fn((param, _defaultValue) => param),
-}));
+}))
 
 jest.mock('serialize-query-params/dist/params', () => ({
   StringParam: {},
-}));
+}))
 
 jest.mock('./confirm-modal', () => ({
   __esModule: true,
@@ -139,7 +139,7 @@ jest.mock('./confirm-modal', () => ({
     title: 'Confirm',
     message: 'Are you sure?',
   },
-}));
+}))
 
 describe('ToolBox Component', () => {
   it('renders correctly when open', () => {
@@ -150,21 +150,21 @@ describe('ToolBox Component', () => {
             <ToolBox open={true} />
           </MapContextProvider>
         </MainContextProvider>
-      </ConfigProvider>
-    );
+      </ConfigProvider>,
+    )
     
-    expect(screen.getByText('path')).toBeInTheDocument();
-    expect(screen.getByText('move')).toBeInTheDocument();
-    expect(screen.getByText('draw')).toBeInTheDocument();
-    expect(screen.getByText('clear')).toBeInTheDocument();
-    expect(screen.getByText('download')).toBeInTheDocument();
-    expect(screen.getByText('upload')).toBeInTheDocument();
-    expect(screen.getByText('record')).toBeInTheDocument();
-    expect(screen.getByText('5.5km')).toBeInTheDocument();
-    expect(screen.getByText('here')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('location...')).toBeInTheDocument();
+    expect(screen.getByText('path')).toBeInTheDocument()
+    expect(screen.getByText('move')).toBeInTheDocument()
+    expect(screen.getByText('draw')).toBeInTheDocument()
+    expect(screen.getByText('clear')).toBeInTheDocument()
+    expect(screen.getByText('download')).toBeInTheDocument()
+    expect(screen.getByText('upload')).toBeInTheDocument()
+    expect(screen.getByText('record')).toBeInTheDocument()
+    expect(screen.getByText('5.5km')).toBeInTheDocument()
+    expect(screen.getByText('here')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('location...')).toBeInTheDocument()
     expect(screen.getByText('v1.0.0')).toBeInTheDocument()
-  });
+  })
 
   it('handles current location button click', async () => {
     render(
@@ -174,25 +174,25 @@ describe('ToolBox Component', () => {
             <ToolBox open={true} />
           </MapContextProvider>
         </MainContextProvider>
-      </ConfigProvider>
-    );
+      </ConfigProvider>,
+    )
     
     // Click the "here" button to get current location
-    fireEvent.click(screen.getByText('here'));
+    fireEvent.click(screen.getByText('here'))
     
     // Verify the geolocation API was called
-    expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled();
+    expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled()
     
     // Wait for the marker to be updated
     await waitFor(() => {
       expect(mockMarker.position).toEqual({
         lat: 35.6812,
         lng: 139.7671,
-      });
-      expect(mockMarker.map).toBe(mockMap);
-      expect(mockMap.setCenter).toHaveBeenCalledWith(mockMarker.position);
-    });
-  });
+      })
+      expect(mockMarker.map).toBe(mockMap)
+      expect(mockMap.setCenter).toHaveBeenCalledWith(mockMarker.position)
+    })
+  })
 
   it('handles location search', async () => {
     // Mock successful geocode response
@@ -206,8 +206,8 @@ describe('ToolBox Component', () => {
             },
           },
         },
-      ], 'OK');
-    });
+      ], 'OK')
+    })
     render(
       <ConfigProvider>
         <MainContextProvider>
@@ -215,21 +215,21 @@ describe('ToolBox Component', () => {
             <ToolBox open={true} />
           </MapContextProvider>
         </MainContextProvider>
-      </ConfigProvider>
-    );
+      </ConfigProvider>,
+    )
 
     // Type a location and press enter
-    const locationInput = screen.getByPlaceholderText('location...');
-    fireEvent.change(locationInput, { target: { value: 'Tokyo' } });
-    fireEvent.keyPress(locationInput, { key: 'Enter', charCode: 13 });
+    const locationInput = screen.getByPlaceholderText('location...')
+    fireEvent.change(locationInput, { target: { value: 'Tokyo' } })
+    fireEvent.keyPress(locationInput, { key: 'Enter', charCode: 13 })
     
     // Verify the geocoder was called
 
     await waitFor(() => {
       expect(mockGeocoder.geocode).toHaveBeenCalledWith(
         { address: 'Tokyo' },
-        expect.any(Function)
-      );
+        expect.any(Function),
+      )
     })
 
     // Check marker was updated
@@ -237,10 +237,10 @@ describe('ToolBox Component', () => {
     expect(mockMarker.position).toEqual({
       lat: 35.6812,
       lng: 139.7671,
-    });
-    expect(mockMarker.map).toBe(mockMap);
-    expect(mockMap.setCenter).toHaveBeenCalledWith(mockMarker.position);
-  });
+    })
+    expect(mockMarker.map).toBe(mockMap)
+    expect(mockMap.setCenter).toHaveBeenCalledWith(mockMarker.position)
+  })
 
   it('handles toggle record function', async () => {
     render(
@@ -250,23 +250,23 @@ describe('ToolBox Component', () => {
             <ToolBox open={true} />
           </MapContextProvider>
         </MainContextProvider>
-      </ConfigProvider>
-    );
+      </ConfigProvider>,
+    )
     
     // Click the record button
-    fireEvent.click(screen.getByText('record'));
+    fireEvent.click(screen.getByText('record'))
     
     // Verify geolocation API was called
-    expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled();
+    expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled()
     
     // Verify dispatch was called to update autoGeolocation state
     await waitFor(() => {
       expect(mockMainContext[1]).toHaveBeenCalledWith({
         type: 'SET_AUTO_GEOLOCATION',
         payload: true,
-      });
-    });
-  });
+      })
+    })
+  })
 
   it('handles draw button click', () => {
     render(
@@ -276,15 +276,15 @@ describe('ToolBox Component', () => {
             <ToolBox open={true} />
           </MapContextProvider>
         </MainContextProvider>
-      </ConfigProvider>
-    );
+      </ConfigProvider>,
+    )
     
     // Click the draw button
-    fireEvent.click(screen.getByText('draw'));
+    fireEvent.click(screen.getByText('draw'))
     
     // Verify pathManager.set was called with editable=true
-    expect(mockMapContext[0].pathManager.startDraw).toHaveBeenCalled();
-  });
+    expect(mockMapContext[0].pathManager.startDraw).toHaveBeenCalled()
+  })
 
   it('handles path clearing', () => {
     render(
@@ -294,19 +294,19 @@ describe('ToolBox Component', () => {
             <ToolBox open={true} />
           </MapContextProvider>
         </MainContextProvider>
-      </ConfigProvider>
-    );
+      </ConfigProvider>,
+    )
     
     // Click the clear button
-    fireEvent.click(screen.getByText('clear'));
+    fireEvent.click(screen.getByText('clear'))
     
     // Verify clearPaths was called
-    expect(mockMapContext[0].clearPaths).toHaveBeenCalled();
-  });
+    expect(mockMapContext[0].clearPaths).toHaveBeenCalled()
+  })
 
   it('disables download buttons when no path is selected', () => {
     // Mock useQueryParam to return null (no selected path)
-    useQueryParam.mockReturnValueOnce([null, jest.fn()]);
+    useQueryParam.mockReturnValueOnce([null, jest.fn()])
     
     render(
       <ConfigProvider>
@@ -315,12 +315,12 @@ describe('ToolBox Component', () => {
             <ToolBox open={true} />
           </MapContextProvider>
         </MainContextProvider>
-      </ConfigProvider>
-    );
+      </ConfigProvider>,
+    )
     
     // Check that download buttons are disabled
     // Material-UI ListItemButton renders as a div with role="button"
-    const downloadButton = screen.getByText('download').closest('[role="button"]');    
-    expect(downloadButton).toHaveAttribute('aria-disabled', 'true');
-  });
-});
+    const downloadButton = screen.getByText('download').closest('[role="button"]')    
+    expect(downloadButton).toHaveAttribute('aria-disabled', 'true')
+  })
+})

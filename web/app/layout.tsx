@@ -1,4 +1,4 @@
-import Body from '../lib/components/body';
+import Body from '../lib/components/body'
 import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 import type { Viewport } from 'next'

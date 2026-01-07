@@ -1,7 +1,7 @@
 'use client'
-import { useState } from "react"
-import { createContext, useContext } from "react"
-import { DataT } from "@/types"
+import { useState } from 'react'
+import { createContext, useContext } from 'react'
+import { DataT } from '@/types'
 const initialData: DataT = {
   isPending: true,
   rows: [],

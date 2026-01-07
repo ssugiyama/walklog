@@ -6,7 +6,7 @@ import { useMainContext } from '../utils/main-context'
 import { useMapContext } from '../utils/map-context'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
-import { initialize } from "@googlemaps/jest-mocks"
+import { initialize } from '@googlemaps/jest-mocks'
 
 jest.mock('../utils/main-context', () => ({
   useMainContext: jest.fn(),
@@ -31,7 +31,7 @@ jest.mock('@/app/lib/walk-actions', () => ({
         jcode: '123',
         theGeom: jest.fn(),
       },
-    ]
+    ],
   ),
 }))
 

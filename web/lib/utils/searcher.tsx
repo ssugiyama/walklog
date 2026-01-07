@@ -1,11 +1,11 @@
 'use client'
-import { useEffect, useActionState, useTransition } from "react"
-import { useSearchParams } from "next/navigation"
-import { useConfig } from "./config"
-import { searchAction } from "../../app/lib/walk-actions"
-import { useUserContext } from "./user-context"
-import { useData } from "./data-context"
-import { DataT } from "@/types"
+import { useEffect, useActionState, useTransition } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useConfig } from './config'
+import { searchAction } from '../../app/lib/walk-actions'
+import { useUserContext } from './user-context'
+import { useData } from './data-context'
+import { DataT } from '@/types'
 
 const initialSearchState = {
   rows: [],
@@ -49,9 +49,9 @@ export function Searcher() {
   useEffect(() => {
     if (watchKeys.every((key) => oldParams.get(key) === searchParams.get(key)) &&
         data.offset > 0 && props.limit > data.offset) {
-        const current = data.offset
-        props.offset = current
-        props.limit = props.limit - current
+      const current = data.offset
+      props.offset = current
+      props.limit = props.limit - current
     }
     startTransition(async () => {
       await dispatchSearch(props)

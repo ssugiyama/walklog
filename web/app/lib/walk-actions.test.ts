@@ -1,4 +1,4 @@
-import util from "util"
+import util from 'util'
  
 global.TextEncoder = util.TextEncoder
  
@@ -37,7 +37,7 @@ import {
   getConfig,
 } from '@/app/lib/walk-actions'
 
-import { revalidateTag } from "next/cache"
+import { revalidateTag } from 'next/cache'
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
@@ -103,8 +103,8 @@ describe('searchInternalAction', () => {
     (Walk.findAndCountAll as jest.Mock).mockResolvedValue({
       count: 1,
       rows: [{
-        asObject: jest.fn().mockReturnValue({ id: 1, title: 'Test Walk' })
-      }]
+        asObject: jest.fn().mockReturnValue({ id: 1, title: 'Test Walk' }),
+      }],
     })
 
     // Create a props instance using the Map-like interface
@@ -126,13 +126,13 @@ describe('searchInternalAction', () => {
             { date: '2023-05-15' },
             expect.objectContaining({
               [Symbol.for('or')]: expect.arrayContaining([
-                { uid: "testUserId" },
+                { uid: 'testUserId' },
                 { draft: false },
-              ])
-            })
-          ])
-        })
-      })
+              ]),
+            }),
+          ]),
+        }),
+      }),
     )
   })
   it('should handle user filter properly', async () => {
@@ -141,8 +141,8 @@ describe('searchInternalAction', () => {
       count: 2,
       rows: [
         { asObject: jest.fn().mockReturnValue({ id: 1, title: 'Walk 1', uid: 'user123' }) },
-        { asObject: jest.fn().mockReturnValue({ id: 2, title: 'Walk 2', uid: 'user123' }) }
-      ]
+        { asObject: jest.fn().mockReturnValue({ id: 2, title: 'Walk 2', uid: 'user123' }) },
+      ],
     })
 
     // Create a props instance using the Map-like interface
@@ -161,10 +161,10 @@ describe('searchInternalAction', () => {
         where: expect.objectContaining({
           [Symbol.for('and')]: expect.arrayContaining([
             { uid: 'user123' },
-            { draft: false }
-          ])
-        })
-      })
+            { draft: false },
+          ]),
+        }),
+      }),
     )
   })
 
@@ -176,7 +176,7 @@ describe('searchInternalAction', () => {
     // Mock the findAndCountAll response
     (Walk.findAndCountAll as jest.Mock).mockResolvedValue({
       count: 1,
-      rows: [{ asObject: jest.fn().mockReturnValue({ id: 1, title: 'January Walk' }) }]
+      rows: [{ asObject: jest.fn().mockReturnValue({ id: 1, title: 'January Walk' }) }],
     })
 
     const props = {
@@ -587,7 +587,7 @@ describe('updateItemAction', () => {
         date: '2023-05-15',
         draft: false,
         uid: 'testUid',
-      })
+      }),
     )
     expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
   })
@@ -612,7 +612,7 @@ describe('updateItemAction', () => {
         date: '2023-05-15',
         draft: true,
         uid: 'testUid',
-      })
+      }),
     )
     expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
   })
@@ -643,7 +643,7 @@ describe('updateItemAction', () => {
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         image: expect.any(String),
-      })
+      }),
     )
   })
 
@@ -720,9 +720,9 @@ describe('deleteItemAction', () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
 
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-        uid: 'testUid',
-        destroy: jest.fn().mockRejectedValue(new Error('Deletion failed')),
-      })
+      uid: 'testUid',
+      destroy: jest.fn().mockRejectedValue(new Error('Deletion failed')),
+    })
     expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
   })
 })
@@ -772,8 +772,8 @@ describe('getCityAction', () => {
         sequelize.fn(
           'st_setsrid',
           sequelize.fn('st_point', 139.6917, 35.6895),
-          SRID
-        )
+          SRID,
+        ),
       ),
     })
   })
@@ -853,22 +853,22 @@ describe('getConfig', () => {
   })
 
   it('should return the correct configuration object', async () => {
-    const mockShapeStyles = { style: 'mockStyle' };
-    const mockTheme = { palette: {} };
-    const mockFirebaseConfig = { key: 'value' };
+    const mockShapeStyles = { style: 'mockStyle' }
+    const mockTheme = { palette: {} }
+    const mockFirebaseConfig = { key: 'value' }
     const mockPackageJson = { version: '1.0.0' };
     (fs.readFileSync as jest.Mock).mockImplementation((path) => {
       if (path === './default-shape-styles.json') {
-        return Buffer.from(JSON.stringify(mockShapeStyles));
+        return Buffer.from(JSON.stringify(mockShapeStyles))
       }
       if (path === './default-theme.json') {
-        return Buffer.from(JSON.stringify(mockTheme));
+        return Buffer.from(JSON.stringify(mockTheme))
       }
       if (path === './package.json') {
-        return Buffer.from(JSON.stringify(mockPackageJson));
+        return Buffer.from(JSON.stringify(mockPackageJson))
       }
-      return Buffer.from(JSON.stringify(mockFirebaseConfig));
-    });
+      return Buffer.from(JSON.stringify(mockFirebaseConfig))
+    })
     const result = await getConfig()
 
     expect(result).toEqual({

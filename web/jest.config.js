@@ -1,7 +1,6 @@
 /** @type {import('jest').Config} */
 const config = {
   rootDir: '.',
-  testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
@@ -25,6 +24,6 @@ const config = {
   coverageReporters: ['text', 'lcov', 'json', 'html'],
   coverageDirectory: '<rootDir>/coverage',
   testEnvironment: 'jest-fixed-jsdom',
-};
+}
 
-module.exports = config;
+module.exports = config
