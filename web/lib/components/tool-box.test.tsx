@@ -47,6 +47,7 @@ const mockMapContext = [
       getEncodedSelection: jest.fn().mockReturnValue('mock_path'),
       get: jest.fn().mockReturnValue(5.5),
       set: jest.fn(),
+      startDraw: jest.fn(),
     },
     downloadPath: jest.fn(),
     uploadPath: jest.fn(),
@@ -154,7 +155,7 @@ describe('ToolBox Component', () => {
     
     expect(screen.getByText('path')).toBeInTheDocument();
     expect(screen.getByText('move')).toBeInTheDocument();
-    expect(screen.getByText('edit')).toBeInTheDocument();
+    expect(screen.getByText('draw')).toBeInTheDocument();
     expect(screen.getByText('clear')).toBeInTheDocument();
     expect(screen.getByText('download')).toBeInTheDocument();
     expect(screen.getByText('upload')).toBeInTheDocument();
@@ -267,7 +268,7 @@ describe('ToolBox Component', () => {
     });
   });
 
-  it('handles path editing', () => {
+  it('handles draw button click', () => {
     render(
       <ConfigProvider>
         <MainContextProvider>
@@ -278,11 +279,11 @@ describe('ToolBox Component', () => {
       </ConfigProvider>
     );
     
-    // Click the edit button
-    fireEvent.click(screen.getByText('edit'));
+    // Click the draw button
+    fireEvent.click(screen.getByText('draw'));
     
     // Verify pathManager.set was called with editable=true
-    expect(mockMapContext[0].pathManager.set).toHaveBeenCalledWith('editable', true);
+    expect(mockMapContext[0].pathManager.startDraw).toHaveBeenCalled();
   });
 
   it('handles path clearing', () => {
@@ -303,7 +304,7 @@ describe('ToolBox Component', () => {
     expect(mockMapContext[0].clearPaths).toHaveBeenCalled();
   });
 
-  it('disables edit and download buttons when no path is selected', () => {
+  it('disables download buttons when no path is selected', () => {
     // Mock useQueryParam to return null (no selected path)
     useQueryParam.mockReturnValueOnce([null, jest.fn()]);
     
@@ -317,12 +318,9 @@ describe('ToolBox Component', () => {
       </ConfigProvider>
     );
     
-    // Check that edit and download buttons are disabled
+    // Check that download buttons are disabled
     // Material-UI ListItemButton renders as a div with role="button"
-    const editButton = screen.getByText('edit').closest('[role="button"]');
-    const downloadButton = screen.getByText('download').closest('[role="button"]');
-    
-    expect(editButton).toHaveAttribute('aria-disabled', 'true');
+    const downloadButton = screen.getByText('download').closest('[role="button"]');    
     expect(downloadButton).toHaveAttribute('aria-disabled', 'true');
   });
 });

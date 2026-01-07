@@ -2,7 +2,6 @@ import React, {
   useEffect, useRef, useState, useCallback,
 } from 'react'
 import Draw from '@mui/icons-material/Draw'
-import EditorModeEdit from '@mui/icons-material/Edit'
 import NavigationRefresh from '@mui/icons-material/Block'
 import FileDownload from '@mui/icons-material/GetApp'
 import FileUpload from '@mui/icons-material/Publish'
@@ -166,19 +165,6 @@ const ToolBox = (props) => {
               <Draw />
             </ListItemIcon>
             <ListItemText primary="draw" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton
-            onClick={() => pathManager.set('editable', true)}
-            disabled={!selectedPath}
-            disableGutters
-            dense
-          >
-            <ListItemIcon>
-              <EditorModeEdit />
-            </ListItemIcon>
-            <ListItemText primary="edit" />
           </ListItemButton>
         </ListItem>
         <ListItem>
