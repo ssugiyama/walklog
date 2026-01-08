@@ -13,6 +13,10 @@ import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 import { notFound, unauthorized, forbidden } from 'next/navigation'
 
+const getKeys = <T extends {[key: string]: unknown}>(obj: T): (keyof T)[] => {
+  return Object.keys(obj)
+}
+
 let firebaseConfig
 
 const loadFirebaseConfig = () => {
@@ -401,7 +405,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     }
   } else {
     try {
-      const walk = await Walk.create(props, { fields: Object.keys(props) })
+      const walk = await Walk.create(props, { fields: getKeys(props) })
       state.id = walk?.id
     } catch (error) {
       console.error('updateItemAction create error', error)
