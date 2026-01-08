@@ -315,7 +315,7 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   startDraw() {
-    this.draw.start()
+    this.draw?.start()
     this.draw?.setMode('linestring')
   }
 }
