@@ -401,7 +401,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     }
   } else {
     try {
-      const walk = await Walk.create(props)
+      const walk = await Walk.create(props, { fields: Object.keys(props) })
       state.id = walk?.id
     } catch (error) {
       console.error('updateItemAction create error', error)
