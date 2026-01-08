@@ -115,16 +115,16 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     where.push({ uid: props.user })
   }
   if (props.year) {
-    where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(props.year as string, 10)))
+    where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(props.year, 10)))
   }
   if (props.month) {
-    where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(props.month as string, 10)))
+    where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(props.month, 10)))
   }
-  if (['neighborhood', 'start', 'end'].includes(props.filter as string)) {
+  if (['neighborhood', 'start', 'end'].includes(props.filter)) {
     const c = props.center.split(/,/)
     const latitude = parseFloat(c[0]) ?? 0
     const longitude = parseFloat(c[1]) ?? 0
-    const radius = parseFloat(props.radius as string)
+    const radius = parseFloat(props.radius)
     const dlat = (radius * 180) / Math.PI / EARTH_RADIUS
     const mlat = latitude > 0 ? latitude + dlat : latitude - dlat
     const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
@@ -155,7 +155,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       state.rows = []
       return state
     }
-    const cities = (props.cities as string).split(/,/).map((elm) => `'${elm}'`).join(',')
+    const cities = (props.cities).split(/,/).map((elm) => `'${elm}'`).join(',')
     where.push(sequelize.literal(`EXISTS (SELECT * FROM areas WHERE jcode IN (${cities}) AND path && the_geom AND ST_Intersects(path, the_geom))`))
   } else if (props.filter === 'crossing') {
     if (!props.path) {
@@ -163,7 +163,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       state.rows = []
       return state
     }
-    const linestring = Walk.decodePath(props.path as string)
+    const linestring = Walk.decodePath(props.path)
     where.push({
       path: {
         [Op.overlap]: linestring,
@@ -177,8 +177,8 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       return state
     }
     const maxDistance = props.max_distance ?? 4000
-    const linestring = Walk.decodePath(props.path as string)
-    const extent = Walk.getPathExtent(props.path as string)
+    const linestring = Walk.decodePath(props.path)
+    const extent = Walk.getPathExtent(props.path)
     const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
     const mlat = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin - dlat))
     const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
@@ -201,9 +201,9 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       return state
     }
     const maxDistance = props.max_distance ?? 4000
-    const linestring = Walk.decodePath(props.path as string)
-    const sp = Walk.getStartPoint(props.path as string)
-    const ep = Walk.getEndPoint(props.path as string)
+    const linestring = Walk.decodePath(props.path)
+    const sp = Walk.getStartPoint(props.path)
+    const ep = Walk.getEndPoint(props.path)
     const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
     const mlat = Math.max(
       Math.abs(sp[1] + dlat),

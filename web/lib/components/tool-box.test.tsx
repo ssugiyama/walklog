@@ -132,7 +132,7 @@ jest.mock('./confirm-modal', () => ({
   __esModule: true,
   default: ({ open, resolve }) => (
     <div data-testid="confirm-modal" data-open={open}>
-      <button onClick={() => resolve && resolve(true)}>Confirm</button>
+      <button onClick={() => resolve?.(true)}>Confirm</button>
     </div>
   ),
   APPEND_PATH_CONFIRM_INFO: {

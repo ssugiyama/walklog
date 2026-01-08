@@ -87,8 +87,8 @@ const Main = ({
     },
   }), [])
   useEffect(() => {
-    setBarHeight(headerRef.current && headerRef.current.offsetHeight)
-  }, [headerRef.current && headerRef.current.offsetHeight])
+    setBarHeight(headerRef.current?.offsetHeight)
+  }, [headerRef.current?.offsetHeight])
 
   return (
     <Box
