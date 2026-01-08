@@ -613,6 +613,7 @@ describe('updateItemAction', () => {
         draft: true,
         uid: 'testUid',
       }),
+      { fields: expect.any(Array) },
     )
     expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
   })
