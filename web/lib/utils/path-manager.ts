@@ -41,7 +41,6 @@ export default class PathManager extends google.maps.MVCObject {
         }),
       ],
     })
-    this.draw.start()
 
     this.draw.on('ready', () => {
       this.draw.on('finish', (id: string, context: { action: string, mode: string }) => {
@@ -52,7 +51,7 @@ export default class PathManager extends google.maps.MVCObject {
             (coord: number[]) => new google.maps.LatLng(coord[1], coord[0]),
           )
           this.draw.clear()
-          this.draw.setMode('static')
+          this.draw.stop()
           google.maps.event.trigger(this, 'drawfinish', path)
         }
       })
@@ -316,6 +315,7 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   startDraw() {
+    this.draw?.start()
     this.draw?.setMode('linestring')
   }
 }
