@@ -17,7 +17,6 @@ import { updateItemAction } from '@/app/lib/walk-actions'
 import { useQueryParam, StringParam, withDefault } from 'use-query-params'
 import { unauthorized, forbidden, useRouter, useSearchParams } from 'next/navigation'
 import { useUserContext } from '../utils/user-context'
-import { useMapContext } from '../utils/map-context'
 import { idToShowUrl } from '../utils/meta-utils'
 import { WalkT } from '@/types'
 import { useConfig } from '../utils/config'
@@ -90,8 +89,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
 
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
   const [searchPath] = useQueryParam('path', withDefault(StringParam, null))
-  const [mapState] = useMapContext()
-  const { deleteSelectedPath } = mapState
   
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback((field: string) => (event?: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,8 +149,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
             data.rows[index].stale = true
             setData({ rows: data.rows })
           }
-        } else if (searchPath) {
-          deleteSelectedPath()
         }
         router.push(idToShowUrl(state.id))
       }
