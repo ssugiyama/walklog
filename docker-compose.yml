@@ -2,7 +2,6 @@ services:
   db:
     restart: always
     build: db
-    # image: chezsugi/walklog_db
     volumes:
       - ./data:/var/lib/postgresql/data
   web:
@@ -17,3 +16,5 @@ services:
       - db:walklog
     depends_on:
       - db
+    profiles:
+      - production

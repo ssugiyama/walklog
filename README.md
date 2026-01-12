@@ -58,10 +58,19 @@ You can obtain Japanese geographic data from either:
 Copy the environment template and configure:
 
 ```bash
-cp .env .env.local
+cp .env.example .env
+cp web/.env web/.env.local
 ```
 
-Edit `.env.local` with your configuration:
+Edit `.env` with your configuration:
+
+```bash
+POSTGRES_DATABASE=walklog
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+```
+
+Edit `web/.env.local` with your configuration:
 
 ```bash
 SITE_NAME=Walklog
