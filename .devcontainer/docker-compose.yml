@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   # Update this to the name of the service you want to work with in your docker-compose.yml file
-   dev:
+  dev:
     build:
       context: web
       target: deps  # ensure we use the 'deps' stage from the Dockerfile
