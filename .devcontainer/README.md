@@ -65,4 +65,4 @@ If you encounter issues:
 1. **Rebuild container**: Press `Ctrl+Shift+P` → "Dev Containers: Rebuild Container"
 2. **Check Docker**: Ensure Docker Desktop is running
 3. **Port conflicts**: Make sure ports 3000 and 5432 are not in use by other applications
-4. **Permissions**: The container runs as the `node` user with UID 1001
+4. **Permissions**: The container runs as the `vscode` user with UID 1001
