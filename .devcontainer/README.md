@@ -20,7 +20,7 @@ This project includes a complete development container setup using VS Code Dev C
 
 The development container includes:
 - **Node.js 24** with npm/pnpm
-- **PostGIS/Postrgesql** database
+- **PostGIS/PostgreSQL** database
 - **VS Code extensions** for TypeScript, ESLint, Prettier, Jest, and more
 - **Port forwarding** for Next.js app (3000) and PostgreSQL (5432)
 - **Git client** for version control
