@@ -55,7 +55,7 @@ The PostgreSQL database is automatically initialized with the schema from `walks
 
 ```bash
 # From within the container
-psql -h db -U <user>> -d <database>>
+psql -h db -U <user> -d <database>
 ```
 
 ### Troubleshooting
