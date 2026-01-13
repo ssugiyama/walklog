@@ -33,7 +33,7 @@
     "recharts": "^3.6.0",
     "sequelize": "^6.37.7",
     "serialize-query-params": "^2.0.4",
-    "terra-draw": "^1.21.2",
+    "terra-draw": "^1.22.0",
     "terra-draw-google-maps-adapter": "^1.2.1",
     "typescript": "^5.8.3",
     "use-query-params": "^2.2.2",

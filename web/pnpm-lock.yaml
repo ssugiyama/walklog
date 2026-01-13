@@ -81,11 +81,11 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4
       terra-draw:
-        specifier: ^1.21.2
-        version: 1.21.2
+        specifier: ^1.22.0
+        version: 1.22.0
       terra-draw-google-maps-adapter:
         specifier: ^1.2.1
-        version: 1.2.1(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.21.2)
+        version: 1.2.1(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.22.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -4096,8 +4096,8 @@ packages:
       '@googlemaps/js-api-loader': ^1.14.3 || ^2.0.0
       terra-draw: ^1.0.0
 
-  terra-draw@1.21.2:
-    resolution: {integrity: sha512-DS8TYAJRKjfNvesZF28rmhqRmWpBKhAi+VKCQLR8PPWlNbyJOebfTHiy4VjvMVBJRd+hfQJnqmJJ1TtSkc4Peg==}
+  terra-draw@1.22.0:
+    resolution: {integrity: sha512-Awp0670ZU0x8sZUDhkQs91uwRV/ZGj5uOJqlw0uNYXapdKllU6ykQJWTDHJ4gIa1dqm32NiLetPRHFHLbzxVFw==}
 
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
@@ -9357,12 +9357,12 @@ snapshots:
       - supports-color
     optional: true
 
-  terra-draw-google-maps-adapter@1.2.1(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.21.2):
+  terra-draw-google-maps-adapter@1.2.1(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.22.0):
     dependencies:
       '@googlemaps/js-api-loader': 2.0.2
-      terra-draw: 1.21.2
+      terra-draw: 1.22.0
 
-  terra-draw@1.21.2: {}
+  terra-draw@1.22.0: {}
 
   test-exclude@6.0.0:
     dependencies:
