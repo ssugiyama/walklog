@@ -17,7 +17,7 @@
     "@mui/material": "^7.3.7",
     "@mui/material-nextjs": "^7.3.7",
     "@types/google.maps": "^3.58.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.8",
     "@types/react": "19.2.7",
     "firebase": "^12.7.0",
     "firebase-admin": "^13.6.0",
