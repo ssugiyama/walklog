@@ -65,7 +65,7 @@ cp web/.env web/.env.local
 Edit `.env` with your configuration:
 
 ```bash
-POSTGRES_DATABASE=walklog
+POSTGRES_DB=walklog
 POSTGRES_USER=walklog
 POSTGRES_PASSWORD=walklog
 ```
