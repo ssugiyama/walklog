@@ -117,7 +117,9 @@ THEME_COLOR="#3874cb"
 | `THEME_COLOR` | Theme color for UA in both light mode and dark mode| No |
 | `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
 | `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
-| `DB_URL` | PostgreSQL connection string | Yes(The environment variable *DB_URL* have higher priority) |
+| `DB_URL` | PostgreSQL connection string | Yes *|
+
+* if using docker, **DB_URL** is provided as an environment variable.
 
 ### 5. Admin User Management
 
