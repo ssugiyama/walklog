@@ -171,7 +171,7 @@ The application will be available at http://localhost:3000
 
 ```bash
 cd /path/to/work_dir/web
-npx sequelize-cli db:migrate --url db_url
+npx sequelize-cli db:migrate --url postgres://user:password@host/db
 ```
 
 #### Setup Area Database
