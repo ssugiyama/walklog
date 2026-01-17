@@ -56,7 +56,7 @@ COPY --from=builder /app/default-theme.json ./default-theme.json
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-COPY migrations ./migrations
+COPY --chown=nextjs:nodejs migrations ./migrations
 
 USER nextjs
 
