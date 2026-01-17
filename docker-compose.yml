@@ -2,11 +2,17 @@ services:
   db:
     restart: always
     build: db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-walklog}
+      - POSTGRES_USER=${POSTGRES_USER:-walklog}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-walklog}
     volumes:
-      - ./data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
   web:
     restart: always
     build: web
+    environment:
+      - DB_URL=postgresql://${POSTGRES_USER:-walklog}:${POSTGRES_PASSWORD:-walklog}@db:5432/${POSTGRES_DB:-walklog}
     volumes:
       - "./public/${IMAGE_PREFIX:-uploads}:/var/www/public/${IMAGE_PREFIX:-uploads}"
       - ./web/firebase:/var/www/firebase
@@ -18,3 +24,5 @@ services:
       - db
     profiles:
       - production
+volumes:
+  postgres_data: {}

@@ -66,8 +66,8 @@ Edit `.env` with your configuration:
 
 ```bash
 POSTGRES_DATABASE=walklog
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=password
+POSTGRES_USER=walklog
+POSTGRES_PASSWORD=walklog
 ```
 
 Edit `web/.env.local` with your configuration:
@@ -81,7 +81,6 @@ SHAPE_STYLES_JSON=/default-shape-styles.json
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
 FIREBASE_CONFIG=path-to-firebase-config.json
-DB_URL=postgres://dbuser:password@host/dbname
 GOOGLE_API_KEY=your-google-maps-api-key
 FIREBASE_STORAGE=on
 MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
@@ -92,6 +91,7 @@ GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
 THEME_COLOR="#3874cb"
 # THEME_COLOR_LIGHT="#3874cb"
 # THEME_COLOR_DARK="#3874cb"
+# DB_URL=postgres://user:password@host/db
 ```
 
 #### Environment Variables Reference
@@ -100,7 +100,6 @@ THEME_COLOR="#3874cb"
 |----------|-------------|----------|
 | `SITE_NAME` | Display name for the application | Yes |
 | `SITE_DESCRIPTION` | Site description for meta tags | Yes |
-| `DB_URL` | PostgreSQL connection string | Yes |
 | `IMAGE_PREFIX` | Prefix for image storage paths | Yes |
 | `OPEN_USER_MODE` | If set, allows all users to manage walks | No |
 | `FIREBASE_CONFIG` | Path to Firebase web config JSON | Yes |
@@ -118,6 +117,7 @@ THEME_COLOR="#3874cb"
 | `THEME_COLOR` | Theme color for UA in both light mode and dark mode| No |
 | `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
 | `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
+| `DB_URL` | PostgreSQL connection string | Yes(The environment variable *DB_URL* have higher priority) |
 
 ### 5. Admin User Management
 
@@ -139,8 +139,13 @@ GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
 
 ### Option 1: Docker Deployment (Recommended)
 
+#### Migrate DB
+
+```bash
+docker-compose run --rm web sh -c 'npx sequelize-cli db:migrate --url $DB_URL'
+```
+
 #### Setup Area Database
-Replace `*work_dir*` with your shapefile directory and `*shp_file*` with your shapefile name:
 
 ```bash
 docker-compose run -v /path/to/work_dir:/tmp --rm db manage-areas.sh -h db shapefile.shp
@@ -161,10 +166,18 @@ The application will be available at http://localhost:3000
 - Node.js
 - pnpm
 
-#### Setup Database
+
+#### Migrate DB
+
+```bash
+cd /path/to/work_dir/web
+npx sequelize-cli db:migrate --url db_url
+```
+
+#### Setup Area Database
 ```bash
 cd /path/to/work_dir
-/path/to/walklog/db/manage-areas.sh shapefile.shp
+/path/to/work_dir/db/manage-areas.sh shapefile.shp
 ```
 
 #### Setup and Start Application
