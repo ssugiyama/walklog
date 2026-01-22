@@ -539,7 +539,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeNull()
-    expect(result.id).toBe('1')
+    expect(result.id).toBe(1)
   })
 
   it('should pass validation without image file', async () => {
@@ -559,7 +559,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeNull()
-    expect(result.id).toBe('1')
+    expect(result.id).toBe(1)
   })
 
   it('should update an existing walk if id is provided', async () => {
@@ -579,7 +579,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
 
     expect(result.error).toBeNull()
-    expect(result.id).toBe('1')
+    expect(result.id).toBe(1)
     expect(Walk.findByPk).toHaveBeenCalledWith('1')
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -116,7 +116,7 @@ const ToolBox = (props) => {
   const locationChangeCB = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value), [])
   const submitLocationCB = useCallback(async (e: React.FocusEvent | React.KeyboardEvent) => {
     if (!location) return
-    if (e.type === 'keydown' && (e as React.KeyboardEvent).charCode !== 13) return
+    if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return
     if (!geocoder.current) {
       await google.maps.importLibrary('geocoding')
       geocoder.current = new google.maps.Geocoder()

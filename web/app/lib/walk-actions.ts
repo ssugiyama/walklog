@@ -49,7 +49,7 @@ const getPackageVersion = (): string => {
   return packageJson.version
 }
 
-export const getConfig = (): Promise<ConfigT> => {
+export const getConfig = (): ConfigT => {
   'use cache'
   const shapeStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
   const shapeStyles = JSON.parse(shapeStylesContent.toString()) as ShapeStyles
