@@ -15,11 +15,12 @@ const initialData: DataT = {
   params: '',
 }
 
-const DataContext = createContext(null)
+type DataContextT = [DataT, (data: Partial<DataT>) => void]
+const DataContext = createContext<DataContextT | null>(null)
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<DataT>(initialData)
-  const setDataExternal = (d) => {
+  const setDataExternal = (d: Partial<DataT>) => {
     setData({ ...data, ...d }) 
   }
   return (
@@ -29,8 +30,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function useData(): [DataT, (data: Partial<DataT>) => void, () => void] {
-  return useContext(DataContext)
+export function useData() {
+  return useContext<DataContextT>(DataContext)
 }
 
 export default DataContext

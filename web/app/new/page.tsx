@@ -1,7 +1,7 @@
 import WalkEditor from '@/lib/components/walk-editor'
 import type { Metadata } from 'next'
 
-export default async function Page() {
+export default function Page() {
   return (
     <WalkEditor mode="create" /> 
   )

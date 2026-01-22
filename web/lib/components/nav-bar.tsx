@@ -26,32 +26,32 @@ import {
 import { useMainContext } from '../utils/main-context'
 import { useSearchParams } from 'next/navigation'
 
-const NavBar = (props) => {
+const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const searchParams = useSearchParams()
   const [mainState, dispatchMain, interceptLink] = useMainContext()
   const { overlay } = mainState
   const config = useConfig()
-  const provider = useRef(null)
-  const [accountAnchorEl, setAccountAnchorEl] = useState(null)
+  const provider = useRef<GoogleAuthProvider | null>(null)
+  const [accountAnchorEl, setAccountAnchorEl] = useState<HTMLElement | null>(null)
   const { currentUser, setCurrentUser } = useUserContext()
-  const handleMenuOpen = (setter) => (event) => {
+  const handleMenuOpen = (setter: typeof setAccountAnchorEl) => (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation()
     setter(event.currentTarget)
   }
   const accountMenuOpenCB = useCallback(handleMenuOpen(setAccountAnchorEl), [])
-  const handleMenuClose = (setter) => (event) => {
+  const handleMenuClose = (setter: typeof setAccountAnchorEl) => (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation()
     setter(null)
   }
   const accountMenuCloseCB = useCallback(handleMenuClose(setAccountAnchorEl), [])
 
   const handleLogin = useCallback(() => {
-    signInWithPopup(getAuth(), provider.current).catch((error) => {
+    signInWithPopup(getAuth(), provider.current).catch((error: Error) => {
       dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
     })
   }, [])
   const handleLogout = useCallback(() => {
-    signOut(getAuth()).catch((error) => {
+    signOut(getAuth()).catch((error: Error) => {
       dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
     })
   }, [])
@@ -67,7 +67,7 @@ const NavBar = (props) => {
   const closeAllMenus = () => {
     setAccountAnchorEl(null)
   }
-  const EndMenuItem = useCallback((prps) => {
+  const EndMenuItem = useCallback((prps: React.ComponentProps<typeof MenuItem>) => {
     const { onClick, children } = prps
     const cpProps = { ...prps }
     delete cpProps.onClick

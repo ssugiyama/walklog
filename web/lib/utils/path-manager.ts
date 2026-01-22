@@ -2,11 +2,23 @@
 import { WalkT } from '@/types'
 import jsSHA1 from 'jssha/dist/sha1'
 import {
+  GeoJSONStoreFeatures,
+  GeoJSONStoreGeometries,
   HexColor,
   TerraDraw,
   TerraDrawLineStringMode,
 } from 'terra-draw'
 import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter'
+
+type PathManagerOptions = {
+  map?: google.maps.Map
+  styles?: {
+    new: google.maps.PolylineOptions
+    normal: google.maps.PolylineOptions
+    selected: google.maps.PolylineOptions
+    current: google.maps.PolylineOptions
+  }
+}
 
 export default class PathManager extends google.maps.MVCObject {
   polylines: { [key: string]: [google.maps.Polyline, WalkT | null] }
@@ -22,7 +34,7 @@ export default class PathManager extends google.maps.MVCObject {
     current: google.maps.PolylineOptions
   }
   
-  constructor(optOptions) {
+  constructor(optOptions: PathManagerOptions | null = null) {
     super()
     const options = optOptions ?? {}
     this.polylines = {}
@@ -45,9 +57,9 @@ export default class PathManager extends google.maps.MVCObject {
     this.draw.on('ready', () => {
       this.draw.on('finish', (id: string, context: { action: string, mode: string }) => {
         if (context.action !== 'draw') return
-        const feature = this.draw.getSnapshotFeature(id)
+        const feature: GeoJSONStoreFeatures<GeoJSONStoreGeometries> = this.draw.getSnapshotFeature(id)
         if (feature?.geometry.type === 'LineString') {
-          const path = feature.geometry.coordinates.map(
+          const path: google.maps.LatLng[] = feature.geometry.coordinates.map(
             (coord: number[]) => new google.maps.LatLng(coord[1], coord[0]),
           )
           this.draw.clear()
@@ -75,7 +87,7 @@ export default class PathManager extends google.maps.MVCObject {
     })
   }
 
-  applyPath(path, append) {
+  applyPath(path: google.maps.LatLng[], append: boolean) {
     if (this.selection && append) {
       if (this.current === this.selection) {
         const pl = new google.maps.Polyline({})
@@ -98,7 +110,7 @@ export default class PathManager extends google.maps.MVCObject {
     }
   }
 
-  static pathToHash(path) {
+  static pathToHash(path: string | google.maps.LatLng[] | null): string | null {
     if (!path) return null
     const key = typeof path === 'string' ? path : google.maps.geometry.encoding.encodePath(path)
     const obj = new jsSHA1('SHA-1', 'TEXT')
@@ -106,7 +118,7 @@ export default class PathManager extends google.maps.MVCObject {
     return obj.getHash('B64')
   }
 
-  deletePolyline(pl) {
+  deletePolyline(pl: google.maps.Polyline) {
     if (pl === this.selection) {
       this.set('selection', null)
     }
@@ -144,14 +156,14 @@ export default class PathManager extends google.maps.MVCObject {
     })
   }
 
-  searchPolyline(path) {
+  searchPolyline(path: string | google.maps.LatLng[]): [google.maps.Polyline, WalkT | null] | null {
     const key = PathManager.pathToHash(path)
     return this.polylines[key]
   }
 
   showPath(path: string | google.maps.LatLng[], select = false, current = false, item: WalkT | null = null) {
     const pair = this.searchPolyline(path)
-    let pl = pair && pair[0]
+    let pl = pair?.[0]
     if (typeof path === 'string') {
       path = google.maps.geometry.encoding.decodePath(path)
     }
@@ -165,10 +177,10 @@ export default class PathManager extends google.maps.MVCObject {
       pl.setOptions(this.getPolylineStyle(pl))
     }
     if ((select || current) && path.length > 0) {
-      let xmin
-      let xmax
-      let ymin
-      let ymax
+      let xmin: number
+      let xmax: number
+      let ymin: number
+      let ymax: number
 
       if (select) {
         this.set('selection', pl)
@@ -199,7 +211,7 @@ export default class PathManager extends google.maps.MVCObject {
     pl.setMap(this.map)
     const key = PathManager.pathToHash(pl.getPath())
     this.polylines[key] = [pl, item]
-    google.maps.event.addListener(pl, 'click', (event) => {
+    google.maps.event.addListener(pl, 'click', (event: google.maps.MapMouseEvent) => {
       this.lastClickLatLng = event.latLng
       if (pl.getEditable()) {
         pl.setEditable(false)
@@ -207,7 +219,7 @@ export default class PathManager extends google.maps.MVCObject {
         this.set('selection', pl === this.selection ? null : pl)
       }
     })
-    const deleteNode = (mev) => {
+    const deleteNode = (mev: google.maps.PolyMouseEvent) => {
       if (mev.vertex !== null) {
         pl.getPath().removeAt(mev.vertex)
       } else if (!pl.getEditable()) {
@@ -223,9 +235,9 @@ export default class PathManager extends google.maps.MVCObject {
     google.maps.event.addListener(pl.getPath(), 'set_at', pathCallback)
   }
 
-  getPolylineStyle(pl) {
+  getPolylineStyle(pl: google.maps.Polyline) {
     const pair = this.searchPolyline(google.maps.geometry.encoding.encodePath(pl.getPath()))
-    let style = pair && pair[1] ? { ...this.styles.normal } : { ...this.styles.new }
+    let style = pair?.[1] ? { ...this.styles.normal } : { ...this.styles.new }
     if (pl === this.current) {
       style = Object.assign(style, this.styles.current)
     }
@@ -236,12 +248,12 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   selection_changed() {
-    const prevSelection = this.get('prevSelection')
+    const prevSelection = this.get('prevSelection') as google.maps.Polyline | null
     if (prevSelection) {
       prevSelection.setOptions(this.getPolylineStyle(prevSelection))
       prevSelection.setEditable(false)
     }
-    const selection = this.get('selection')
+    const selection = this.get('selection') as google.maps.Polyline | null
     this.set('prevSelection', selection)
 
     if (selection) {
@@ -272,11 +284,11 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   current_changed() {
-    const prevCurrent = this.get('prevCurrent')
+    const prevCurrent = this.get('prevCurrent') as google.maps.Polyline | null
     if (prevCurrent) {
       prevCurrent.setOptions(this.getPolylineStyle(prevCurrent))
     }
-    const current = this.get('current')
+    const current = this.get('current') as google.maps.Polyline
     this.set('prevCurrent', current)
 
     if (current) {

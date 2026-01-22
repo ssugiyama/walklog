@@ -88,7 +88,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   }, [item?.id])
 
   const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-  const [searchPath] = useQueryParam('path', withDefault(StringParam, null))
+  const [searchPath] = useQueryParam<string, string>('path', withDefault<string, string, string>(StringParam, null))
   
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback((field: string) => (event?: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +135,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   useEffect(() => {
     if (state.serial > 0) {
       if (state.idTokenExpired) {
-        (async () => {
+        void (async () => {
           await updateIdToken()
           handleSubmit()
         })()

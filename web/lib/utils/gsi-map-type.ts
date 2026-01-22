@@ -8,7 +8,7 @@ const createGsiMapType = (id: string, map: google.maps.Map) => {
     tileSize: new google.maps.Size(256, 256),
     minZoom: zoomMin,
     maxZoom: zoomMax,
-    getTile: (tileCoord, zoom, ownerDocument) => {
+    getTile: (tileCoord: google.maps.Point, zoom: number, ownerDocument: Document) => {
       const img = ownerDocument.createElement('img')
       img.id = 'gsi-map-layer-image'
       img.style.width = '256px'

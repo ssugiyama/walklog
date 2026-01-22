@@ -21,6 +21,7 @@ import { idToShowUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
 import type PolygonManager from '../utils/polygon-manager'
 import Link from 'next/link'
+import { LineString } from 'geojson'
 
 const RESIZE_INTERVAL = 500
 const GSI_MAP_TYPE = 'gsi'
@@ -66,9 +67,9 @@ const Map = (props) => {
   rc.cities = cities
   rc.searchPath = searchPath
   rc.autoGeolocation = mainState.autoGeolocation
-  const mapElemRef = useRef(null)
-  const downloadRef = useRef(null)
-  const uploadRef = useRef(null)
+  const mapElemRef = useRef<HTMLDivElement | null>(null)
+  const downloadRef = useRef<HTMLAnchorElement | null>(null)
+  const uploadRef = useRef<HTMLInputElement | null>(null)
   const [confirmInfo, setConfirmInfo] = useState<{ open: boolean, resolve?: (boolean) => void }>({ open: false })
   const searchParams = useSearchParams()
   const filter = searchParams.get('filter')
@@ -77,12 +78,12 @@ const Map = (props) => {
   rc.radius = radius
   rc.interceptLink = interceptLink
 
-  const addPoint = (lat, lng, append) => {
+  const addPoint = (lat: number, lng: number, append: boolean) => {
     const pt = new google.maps.LatLng(lat, lng)
     rc.pathManager.applyPath([pt], append)
   }
   const uploadPath = () => {
-    setTimeout(() => uploadRef.current.click(), 0)
+    setTimeout(() => void uploadRef.current.click(), 0)
   }
   const downloadPath = () => {
     const content = rc.pathManager.selectionAsGeoJSON()
@@ -91,13 +92,13 @@ const Map = (props) => {
     elem.href = window.URL.createObjectURL(blob)
     setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href) }, 0)
   }
-  const clearPaths = (retainTemporaryAndSelection) => {
+  const clearPaths = (retainTemporaryAndSelection: boolean) => {
     rc.pathManager.deleteAll(retainTemporaryAndSelection)
   }
   const deleteSelectedPath = () => {
     rc.pathManager.deleteSelection()
   }
-  const addPaths = (items) => {
+  const addPaths = (items: WalkT[]) => {
     items.forEach((item) => rc.pathManager.showPath(item.path, false, false, item))
   }
 
@@ -108,7 +109,7 @@ const Map = (props) => {
       setSearchPath(nextPath)
       if (nextPath) {
         const pair = rc.pathManager.searchPolyline(nextPath)
-        const item = pair && pair[1]
+        const item = pair?.[1]
         if (rc.autoGeolocation || item) {
           rc.clickedItem = item
           const content = '<span id="path-info-window-content">foo</span>'
@@ -129,11 +130,11 @@ const Map = (props) => {
     }
   }
 
-  const processUpload = (e1) => {
+  const processUpload = (e1: React.ChangeEvent<HTMLInputElement>) => {
     const file = e1.target.files[0]
     const reader = new FileReader()
     reader.addEventListener('loadend', (e2) => {
-      const obj = JSON.parse(e2.target.result.toString())
+      const obj = JSON.parse(e2.target.result.toString()) as LineString
       const { coordinates } = obj
       const pts = coordinates.map((item) => (new google.maps.LatLng(item[1], item[0])))
       const path = google.maps.geometry.encoding.encodePath(new google.maps.MVCArray(pts))
@@ -151,7 +152,7 @@ const Map = (props) => {
     }
   }
 
-  const addCity = (id) => {
+  const addCity = (id: string) => {
     const newCities = Array.from(new Set(rc.cities.split(/,/).filter((elm) => elm).concat(id))).join(',')
     setCities(newCities)
   }
@@ -182,7 +183,7 @@ const Map = (props) => {
     if (mapTypeIds.includes(GSI_MAP_TYPE)) {
       createGsiMapType(GSI_MAP_TYPE, rc.map)
     }
-    google.maps.event.addListener(rc.map, 'click', async (event) => {
+    google.maps.event.addListener(rc.map, 'click', async (event: google.maps.MapMouseEvent) => {
       if (['neighborhood', 'start', 'end'].includes(rc.filter)) {
         rc.distanceWidget.setCenter(event.latLng.toJSON())
       } else if (rc.filter === 'cities') {
@@ -198,8 +199,8 @@ const Map = (props) => {
     rc.pathManager = new PathManager({ map: rc.map, styles: rc.shapeStyles.polylines })
     google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged)
     google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged)
-    google.maps.event.addListener(rc.pathManager, 'drawfinish', async (path) => {
-      const append = await new Promise((resolve) => {
+    google.maps.event.addListener(rc.pathManager, 'drawfinish', async (path: google.maps.MVCArray<google.maps.LatLng>) => {
+      const append: boolean = await new Promise((resolve) => {
         if (rc.searchPath) {
           setConfirmInfo({ open: true, resolve })
         } else {
@@ -211,7 +212,7 @@ const Map = (props) => {
     })
     const { default: PolygonManager } = await import('../utils/polygon-manager')
     rc.polygonManager = new PolygonManager({ map: rc.map, styles: rc.shapeStyles.polygons, addCity })
-    google.maps.event.addListener(rc.polygonManager, 'polygon_deleted', (id) => {
+    google.maps.event.addListener(rc.polygonManager, 'polygon_deleted', (id: string) => {
       const citiesArray = rc.cities.split(/,/)
       const index = citiesArray.indexOf(id)
       if (index >= 0) {
@@ -223,7 +224,7 @@ const Map = (props) => {
 
     rc.pathInfoWindow = new google.maps.InfoWindow()
     google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {
-      let content
+      let content: string | React.ReactElement
       if (rc.autoGeolocation) {
         content = `geolocation at ${moment().format('HH:mm')}`
       } else {
@@ -301,12 +302,12 @@ const Map = (props) => {
       v: config.googleApiVersion,
       libraries: ['geometry', 'marker', 'elevation'],
     })
-    importLibrary('core').then(async () => {
+    void importLibrary('core').then(async () => {
       if (isMounted) {
         await initMap()
       }
     })
-    importLibrary('geocoding').then(() => { })
+    void importLibrary('geocoding').then(() => { })
     // clean up
     return () => {
       isMounted = false
@@ -360,8 +361,8 @@ const Map = (props) => {
     if (rc.filter === 'cities' && citiesChanges() && !rc.fetching) {
       rc.polygonManager.deleteAll()
       if (rc.cities) {
-        rc.fetching = true;
-        (async () => {
+        rc.fetching = true
+        void (async () => {
           const jcodes = rc.cities.split(/,/)
           const uncached: string[] = []
           jcodes.forEach((jcode) => {

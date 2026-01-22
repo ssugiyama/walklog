@@ -1,9 +1,9 @@
 'use client'
 import { useState, useContext, Dispatch } from 'react'
 import { createContext } from 'react'
-import { Path } from 'typescript'
 import type PathManager from '@/lib/utils/path-manager'
 import PolygonManager from './polygon-manager'
+import { WalkT } from '@/types'
 type MapState = {
   map: google.maps.Map | null
   pathManager: PathManager | null
@@ -16,7 +16,7 @@ type MapState = {
   uploadPath: () => void
   downloadPath: () => void,
   clearPaths: (retainTemporaryAndSelection: boolean) => void
-  addPaths: (items: Path[]) => void
+  addPaths: (items: WalkT[]) => void
   deleteSelectedPath: () => void
 }
 

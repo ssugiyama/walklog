@@ -2,7 +2,16 @@ import React from 'react'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts'
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  ResponsiveContainer, 
+  Tooltip,
+  TooltipContentProps,
+} from 'recharts'
 const { useRef, useEffect, useState } = React
 
 type ElevationRefs = {
@@ -20,7 +29,17 @@ const ElevationBox = () => {
   const mapLoaded = !!mapState.map
   const { map, elevationInfoWindow } = mapState
   
-  const handleTooltipChange = (active: boolean, payload: any[]) => {
+  interface CustomTooltipPayload {
+    payload: {
+      elevation: number
+      ocation: google.maps.LatLng
+      index: number
+    }
+  }
+
+  const handleTooltipChange = (props: TooltipContentProps<number, number>) => {
+    const active = props.active
+    const payload = props.payload as CustomTooltipPayload[] | undefined
     if (!refs.current.elevationResults || !elevationInfoWindow || !map) return
     
     if (!active || !payload?.length) {
@@ -57,7 +76,7 @@ const ElevationBox = () => {
       path,
       samples: 256,
     }
-    refs.current.elevator?.getElevationAlongPath(pathRequest, (results, status) => {
+    void refs.current.elevator?.getElevationAlongPath(pathRequest, (results, status) => {
       plotElevation(results, status)
     })
   }
@@ -92,12 +111,12 @@ const ElevationBox = () => {
             />
             <YAxis 
               tick={{ fontSize: 12 }}
-              tickFormatter={(value) => `${Math.round(value)}m`}
+              tickFormatter={(value: number) => `${Math.round(value)}m`}
             />
             <Tooltip
-              content={({ active, payload }: any) => {
+              content={(props: TooltipContentProps<number, number>): null => {
                 
-                handleTooltipChange(active ?? false, payload)
+                handleTooltipChange(props)
                 return null // カスタムツールチップは使わず、Google Maps InfoWindowを使用
               }}
             />

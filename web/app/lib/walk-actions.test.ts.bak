@@ -381,15 +381,15 @@ describe('updateItemAction', () => {
     formData = new Map()
   })
 
-  it('should return unauthorized error if uid is null', async () => {
+  it('should return unauthorized error if uid is null', () => {
     const mockGetUid = jest.fn().mockResolvedValue([null, false])
-    await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
+    expect(void updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
-  it('should return forbidden error if user is not admin and openUserMode is false', async () => {
+  it('should return forbidden error if user is not admin and openUserMode is false', () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
-    await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')  
+    expect(async () => await updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')  
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
@@ -674,17 +674,17 @@ describe('deleteItemAction', () => {
     prevState = { serial: 0, error: null, deleted: false, idTokenExpired: false }
   })
 
-  it('should return unauthorized error if uid is null', () => {
+  it('should return unauthorized error if uid is null', async () => {
     const mockGetUid = jest.fn().mockResolvedValue([null, false])
-    void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')  
+    expect(void deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')  
 
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
-  it('should return forbidden error if user is not admin and openUserMode is false', () => {
+  it('should return forbidden error if user is not admin and openUserMode is false', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
 
-    void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')  
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')  
 
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
@@ -692,14 +692,14 @@ describe('deleteItemAction', () => {
   it('should return not found error if walk does not exist', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue(null)
-    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404') 
+    expect(void (async () => await deleteItemAction(prevState, 1, mockGetUid))).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404') 
   })
 
   it('should return forbidden error if walk.uid does not match uid', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({ uid: 'otherUid' })
 
-    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden') 
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden') 
   })
 
   it('should delete the walk and set deleted to true', async () => {
@@ -724,7 +724,7 @@ describe('deleteItemAction', () => {
       uid: 'testUid',
       destroy: jest.fn().mockRejectedValue(new Error('Deletion failed')),
     })
-    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
+    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
   })
 })
 

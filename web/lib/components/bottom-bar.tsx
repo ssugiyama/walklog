@@ -142,8 +142,8 @@ const BottomBar = (props) => {
     )
   } else if (pathname === '/') {
     const searchFormChangeCBs = {
-      filter: (e) => setFilter(e.target.value),
-      radius: (e) => setRadius(e.target.value),
+      filter: (e: React.ChangeEvent<{ value: string }>) => setFilter(e.target.value),
+      radius: (e: React.ChangeEvent<{ value: number }>) => setRadius(e.target.value),
       cities: () => setCities(''),
     }
     controls = (

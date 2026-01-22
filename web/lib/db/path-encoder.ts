@@ -1,9 +1,9 @@
 /* eslint no-bitwise: 'off' */
-function encodeFloat(f: number) {
+function encodeFloat(f: number): number[] {
   let n = Math.round(f * 100000)
   n <<= 1
   if (n < 0) n = -n - 1
-  const ar = []
+  const ar: number[] = []
   do {
     const k = n & 0x1F
     n >>= 5
@@ -27,7 +27,7 @@ export const encode = (path: [number, number][]) => {
 }
 
 export const decode = (str: string) => {
-  const fs = []
+  const fs: number[] = []
   const buf = Buffer.from(str, 'ascii')
   let n = 0; let
     j = 0
@@ -44,11 +44,11 @@ export const decode = (str: string) => {
       j += 1
     }
   }
-  const points = []
+  const points: [number, number][] = []
   let p1 = 0
   let p2 = 0
-  let f1
-  let f2
+  let f1: number
+  let f2: number
   while ((f1 = fs.shift()) !== undefined) {
     f2 = fs.shift()
     p1 += f1

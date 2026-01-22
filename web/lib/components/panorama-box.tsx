@@ -13,6 +13,7 @@ import Box from '@mui/material/Box'
 import { useMapContext } from '../utils/map-context'
 import { useData } from '../utils/data-context'
 import { useMainContext } from '../utils/main-context'
+import { WalkT } from '@/types'
 
 type PanoramaRefs = {
   panorama?: google.maps.StreetViewPanorama | null
@@ -31,21 +32,21 @@ const PanoramaBox = () => {
   const mapLoaded = !!mapState.map
   const bodyRef = useRef<HTMLElement>(null)
   const refs = useRef<PanoramaRefs>({})
-  const handleOverlayChange = (e, toggled) => {
+  const handleOverlayChange = (e: React.ChangeEvent<HTMLInputElement>, toggled: boolean) => {
     dispatchMain({ type: 'SET_OVERLAY', payload: toggled })
   }
-  const interpolatePoints = (pt1, pt2, r) => (
+  const interpolatePoints = (pt1: google.maps.LatLng, pt2: google.maps.LatLng, r: number) => (
     { lat: r * pt2.lat() + (1 - r) * pt1.lat(), lng: r * pt2.lng() + (1 - r) * pt1.lng() }
   )
 
-  const getPanoramaPointsAndHeadings = (path) => {
+  const getPanoramaPointsAndHeadings = (path: google.maps.LatLng[]) => {
     if (!path) return null
-    const pph = []
+    const pph: Array<[google.maps.LatLng, number]> = []
     const count = path.length
     let way = 0
     let dsum = 0
-    let pt2; let
-      h
+    let pt2: google.maps.LatLng 
+    let h: number
     for (let i = 0; i < count - 1; i += 1) {
       const pt1 = path[i]
       pt2 = path[i + 1]
@@ -75,7 +76,7 @@ const PanoramaBox = () => {
       location: pt,
       radius: 50,
     }
-    refs.current.streetViewService.getPanorama(request, (data, status) => {
+    void refs.current.streetViewService.getPanorama(request, (data, status) => {
       if (status === google.maps.StreetViewStatus.OK) {
         pnrm.setPano(data.location.pano)
         pnrm.setPov({ heading, pitch: 0 })
@@ -87,10 +88,10 @@ const PanoramaBox = () => {
     google.maps.event.trigger(pnrm, 'resize')
   }
 
-  const setStreetView = (pnrm) => {
+  const setStreetView = (pnrm: google.maps.StreetViewPanorama | null) => {
     if (mapState.map) mapState.map.setStreetView(pnrm)
   }
-  const updatePath = (item) => {
+  const updatePath = (item: WalkT | null) => {
     if (!mapLoaded) return
     if (!item) {
       const pnrm = overlay ? mapState.map.getStreetView() : refs.current.panorama
@@ -145,7 +146,7 @@ const PanoramaBox = () => {
     showPanorama()
   }, [panoramaIndex])
 
-  const createPanoramaIndexButtonClickCB = (d) => () => (
+  const createPanoramaIndexButtonClickCB = (d: number) => () => (
     dispatchMain({ type: 'SET_PANORAMA_INDEX', payload: panoramaIndex + d })
   )
   const panoramaIndexButtonClickCBs = {

@@ -49,9 +49,9 @@ const orderOptionsWithNearest = [
 ]
 
 const currentYear = (new Date()).getFullYear()
-const years = []
+const years: string[] = []
 for (let y = currentYear; y >= 1997; y -= 1) {
-  years.push(y)
+  years.push(y.toString())
 }
 
 const SearchForm = () => {
@@ -79,23 +79,23 @@ const SearchForm = () => {
   const searchParams = useSearchParams()
 
   const handleChange = {
-    user: useCallback((e) => {
+    user: useCallback((e: React.ChangeEvent<{ value: string }>) => {
       setUser(e.target.value)
     }, [setUser]),
-    month: useCallback((e) => {
+    month: useCallback((e: React.ChangeEvent<{ value: string }>) => {
       setMonth(e.target.value)
     }, [setMonth]),
-    year: useCallback((e) => {
+    year: useCallback((e: React.ChangeEvent<{ value: string }>) => {
       setYear(e.target.value)
     }, [setYear]),
-    order: useCallback((e) => {
+    order: useCallback((e: React.ChangeEvent<{ value: string }>) => {
       setOrder(e.target.value)
     }, [setOrder]),
   }
-  const handleLimitCommited = useCallback((value) => {
+  const handleLimitCommited = useCallback((value: number) => {
     setLimit(value)
   }, [setLimit])
-  const handleFilterChange = useCallback((e) => {
+  const handleFilterChange = useCallback((e: React.ChangeEvent<{ value: string }>) => {
     const value = e.target.value
     const params = new URLSearchParams(searchParams.toString())
     params.set('filter', value)

@@ -1,10 +1,14 @@
+type PathManagerOptions = {
+  map?: google.maps.Map
+}
+
 export default class PolygonManager extends google.maps.MVCObject {
   private cache: { [key: string]: string }
   private polygons: { [key: string]: google.maps.Polygon }
   private map: google.maps.Map
   private styles: google.maps.PolygonOptions
 
-  constructor(optOptions) {
+  constructor(optOptions: PathManagerOptions | null = null) {
     super()
     this.polygons = {}
     this.cache = {}
@@ -20,7 +24,7 @@ export default class PolygonManager extends google.maps.MVCObject {
     return this.cache[id]
   }
 
-  addPolygon(id, str) {
+  addPolygon(id: string, str: string) {
     this.addCache(id, str)
     const paths = str.split(' ').map((element) => google.maps.geometry.encoding.decodePath(element))
     const pg = new google.maps.Polygon({})
@@ -34,7 +38,7 @@ export default class PolygonManager extends google.maps.MVCObject {
     return pg
   }
 
-  deletePolygon(id, pg) {
+  deletePolygon(id: string, pg: google.maps.Polygon) {
     pg.setMap(null)
     delete this.polygons[id]
     google.maps.event.trigger(this, 'polygon_deleted', id)

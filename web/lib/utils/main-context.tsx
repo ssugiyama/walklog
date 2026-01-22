@@ -36,7 +36,7 @@ const initialMainState: MainState = {
   isDirty: false,
 }
 
-const mainReducer = (state, action: MainAction) => {
+const mainReducer = (state: MainState, action: MainAction) => {
   switch (action.type) {
   case 'TOGGLE_VIEW':
     return { ...state, mode: state.mode === 'map' ? 'content' : 'map' }

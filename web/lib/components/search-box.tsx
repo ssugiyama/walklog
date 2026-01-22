@@ -21,6 +21,8 @@ import { useRouter } from 'next/navigation'
 import { idToShowUrl } from '../utils/meta-utils'
 import { useData } from '../utils/data-context'
 import { useUserContext } from '../utils/user-context'
+import { UserT } from '@/types'
+
 const SearchBox = () => {
   const router = useRouter()
   const { users } = useUserContext()
@@ -29,7 +31,7 @@ const SearchBox = () => {
   const [showDistance, setShowDistance] = useState(true)
   const searchParams = useSearchParams()
   const filter = searchParams.get('filter') || ''
-  const handleShowDistance = useCallback((e) => {
+  const handleShowDistance = useCallback((e: React.ChangeEvent<{ value: string }>) => {
     setShowDistance(e.target.value === 'true')  
   }, [])
   useEffect(() => {
@@ -50,7 +52,7 @@ const SearchBox = () => {
     return `?${params.toString()}`
   }, [searchParams, offset])
 
-  const userObjs = {}
+  const userObjs: Record<string, UserT> = {}
   users.forEach((u) => { userObjs[u.uid] = u })
   const sxCell = {
     padding: 1,

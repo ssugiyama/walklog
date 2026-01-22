@@ -42,25 +42,25 @@ const ToolBox = (props) => {
   const [mainState, dispatchMain] = useMainContext()
   const [mapState] = useMapContext()
   const pathManager = mapState.pathManager
-  const [selectedPath] = useQueryParam('path', withDefault(StringParam, null))
+  const [selectedPath] = useQueryParam<string, string>('path', withDefault<string, string, string>(StringParam, null))
   const autoGeolocation = mainState.autoGeolocation
   const [location, setLocation] = useState('')
   const geocoder = useRef<google.maps.Geocoder>(null)
-  const length = pathManager?.get('length') ?? 0
+  const length: number = pathManager?.get('length') as number ?? 0
   const config = useConfig()
   const appVersion = `v${config.appVersion}`
   const { map, marker, addPoint, downloadPath, uploadPath, clearPaths } = mapState
   const [confirmInfo, setConfirmInfo] = useState<ConfirmInfo>({ open: false })
-  const showMarker = (pos) => {
+  const showMarker = (pos: GeolocationPosition) => {
     marker.position = { lat: pos.coords.latitude, lng: pos.coords.longitude }
     marker.map = map
     map.setCenter(marker.position)
   }
-  const addCurrentPosition = (pos, append) => {
+  const addCurrentPosition = (pos: GeolocationPosition, append: boolean) => {
     setConfirmInfo({ open: false })
     addPoint(pos.coords.latitude, pos.coords.longitude, append)
   }
-  const getCurrentPosition = (onSuccess, onFailure) => {
+  const getCurrentPosition = (onSuccess: (pos: GeolocationPosition) => void, onFailure?: () => void) => {
     navigator.geolocation.getCurrentPosition((pos) => {
       onSuccess(pos)
     }, () => {
@@ -70,7 +70,7 @@ const ToolBox = (props) => {
   useEffect(() => {
     if (autoGeolocation) {
       const intervalId = setInterval(() => {
-        getCurrentPosition((pos) => {
+        getCurrentPosition((pos: GeolocationPosition) => {
           addCurrentPosition(pos, true)
         }, () => window.alert('Unable to retrieve your location'))
       }, AUTO_GEOLOCATION_INTERVAL)
@@ -105,7 +105,7 @@ const ToolBox = (props) => {
 
   const currentLocationCB = useCallback(() => {
     if (navigator.geolocation) {
-      getCurrentPosition(async (pos) => {
+      getCurrentPosition((pos) => {
         showMarker(pos)
       }, () => {
         window.alert('Unable to retrieve your location')
@@ -113,15 +113,15 @@ const ToolBox = (props) => {
     }
   }, [marker, map])
 
-  const locationChangeCB = useCallback((e) => setLocation(e.target.value), [])
-  const submitLocationCB = useCallback(async (e) => {
+  const locationChangeCB = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value), [])
+  const submitLocationCB = useCallback(async (e: React.FocusEvent | React.KeyboardEvent) => {
     if (!location) return
-    if (e.charCode && e.charCode !== 13) return
+    if (e.type === 'keydown' && (e as React.KeyboardEvent).charCode !== 13) return
     if (!geocoder.current) {
       await google.maps.importLibrary('geocoding')
       geocoder.current = new google.maps.Geocoder()
     }
-    geocoder.current.geocode({ address: location }, (results, status) => {
+    void geocoder.current.geocode({ address: location }, (results, status) => {
       if (status === google.maps.GeocoderStatus.OK) {
         marker.position = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() }
         marker.map = map
@@ -227,7 +227,7 @@ const ToolBox = (props) => {
             variant="standard"
             onChange={locationChangeCB}
             onBlur={submitLocationCB}
-            onKeyPress={submitLocationCB}
+            onKeyDown={submitLocationCB}
           />
         </ListItem>
         <ListItem>
