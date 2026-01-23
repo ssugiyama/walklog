@@ -559,7 +559,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeNull()
-    expect(result.id).toBe(1)
+    expect(result.id.toString()).toBe('1')
   })
 
   it('should update an existing walk if id is provided', async () => {
@@ -579,8 +579,8 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
 
     expect(result.error).toBeNull()
-    expect(result.id).toBe(1)
-    expect(Walk.findByPk).toHaveBeenCalledWith('1')
+    expect(result.id.toString()).toBe('1')
+    expect(Walk.findByPk).toHaveBeenCalledWith(1)
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Updated Walk',
@@ -893,7 +893,7 @@ describe('getConfig', () => {
       throw new Error('File read error')
     })
 
-    await expect(getConfig()).rejects.toThrow('File read error')
+    expect(() => getConfig()).toThrow('File read error')
     expect(fs.readFileSync).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
   })
 })

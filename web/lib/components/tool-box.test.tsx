@@ -221,7 +221,7 @@ describe('ToolBox Component', () => {
     // Type a location and press enter
     const locationInput = screen.getByPlaceholderText('location...')
     fireEvent.change(locationInput, { target: { value: 'Tokyo' } })
-    fireEvent.keyPress(locationInput, { key: 'Enter', charCode: 13 })
+    fireEvent.keyDown(locationInput, { key: 'Enter', charCode: 13 })
     
     // Verify the geocoder was called
 
