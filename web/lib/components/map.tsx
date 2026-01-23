@@ -130,8 +130,8 @@ const Map = (props) => {
     }
   }
 
-  const processUpload = (e1: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e1.target.files[0]
+  const processUpload = (e1: Event) => {
+    const file = (e1.target as HTMLInputElement).files[0]
     const reader = new FileReader()
     reader.addEventListener('loadend', (e2) => {
       const obj = JSON.parse(e2.target.result.toString()) as LineString
@@ -199,7 +199,7 @@ const Map = (props) => {
     rc.pathManager = new PathManager({ map: rc.map, styles: rc.shapeStyles.polylines })
     google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged)
     google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged)
-    google.maps.event.addListener(rc.pathManager, 'drawfinish', async (path: google.maps.MVCArray<google.maps.LatLng>) => {
+    google.maps.event.addListener(rc.pathManager, 'drawfinish', async (path: google.maps.LatLng[]) => {
       const append: boolean = await new Promise((resolve) => {
         if (rc.searchPath) {
           setConfirmInfo({ open: true, resolve })

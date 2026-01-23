@@ -35,7 +35,7 @@ const ConfirmModal = (props: ConfirmModalProps) => {
           actions ?
             actions.map((action) => (
               <Button
-                key={action.value}
+                key={action.value.toString()}
                 onClick={() => resolve(action.value)}
               >
                 {action.label}

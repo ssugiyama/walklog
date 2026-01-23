@@ -6,7 +6,7 @@ global.TextDecoder = util.TextDecoder
 import { sequelize, Walk, Area, SRID } from '@/lib/db/models'
 import { Op } from 'sequelize'
 import '@testing-library/jest-dom'
-import fs from 'fs'
+import fs from 'fs/promises'
 import admin from 'firebase-admin'
 
 jest.mock('firebase-admin', () => {
@@ -20,9 +20,9 @@ jest.mock('firebase-admin', () => {
   }
 })
 
-jest.mock('fs', () => ({
-  writeFileSync: jest.fn(),
-  readFileSync: jest.fn(),
+jest.mock('fs/promises', () => ({
+  writeFile: jest.fn(),
+  readFile: jest.fn(),
 }))
 
 import {
@@ -50,8 +50,6 @@ jest.mock('sequelize', () => {
     },
   }
 })
-
-
 
 jest.mock('next/cache', () => ({
   unstable_cacheTag: jest.fn(),
@@ -90,7 +88,6 @@ jest.mock('nanoid', () => {
     nanoid: jest.fn(() => 'mocked-nanoid'),
   }
 })
-
 
 describe('searchInternalAction', () => {
   beforeEach(() => {
@@ -640,7 +637,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
 
     expect(result.error).toBeNull()
-    expect(fs.writeFileSync).toHaveBeenCalled()
+    expect(fs.writeFile).toHaveBeenCalled()
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         image: expect.any(String),
@@ -858,7 +855,7 @@ describe('getConfig', () => {
     const mockTheme = { palette: {} }
     const mockFirebaseConfig = { key: 'value' }
     const mockPackageJson = { version: '1.0.0' };
-    (fs.readFileSync as jest.Mock).mockImplementation((path) => {
+    (fs.readFile as jest.Mock).mockImplementation(async (path) => { // eslint-disable-line @typescript-eslint/require-await
       if (path === './default-shape-styles.json') {
         return Buffer.from(JSON.stringify(mockShapeStyles))
       }
@@ -889,11 +886,9 @@ describe('getConfig', () => {
   })
 
   it('should throw an error if reading the file fails', async () => {
-    (fs.readFileSync as jest.Mock).mockImplementation(() => {
-      throw new Error('File read error')
-    })
+    (fs.readFile as jest.Mock).mockRejectedValue(new Error('File read error'))
 
-    expect(() => getConfig()).toThrow('File read error')
-    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
+    await expect(getConfig()).rejects.toThrow('File read error')
+    expect(fs.readFile).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
   })
 })

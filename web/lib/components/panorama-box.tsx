@@ -18,7 +18,7 @@ import { WalkT } from '@/types'
 type PanoramaRefs = {
   panorama?: google.maps.StreetViewPanorama | null
   streetViewService?: google.maps.StreetViewService | null
-  panoramaPointsAndHeadings?: Array<[google.maps.LatLng, number]> | null
+  panoramaPointsAndHeadings?: Array<[google.maps.LatLng|google.maps.LatLngLiteral, number]> | null
 }
 
 const PANORAMA_INTERVAL = 50
@@ -41,7 +41,7 @@ const PanoramaBox = () => {
 
   const getPanoramaPointsAndHeadings = (path: google.maps.LatLng[]) => {
     if (!path) return null
-    const pph: Array<[google.maps.LatLng, number]> = []
+    const pph: Array<[google.maps.LatLng | google.maps.LatLngLiteral, number]> = []
     const count = path.length
     let way = 0
     let dsum = 0

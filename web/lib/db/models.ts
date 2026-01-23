@@ -73,7 +73,7 @@ export class Walk extends Model<InferAttributes<Walk>, InferCreationAttributes<W
 
   static getPathExtent(path: string): Extent{
     const points = decode(path)
-    return points.reduce((pv, cv) => {
+    return points.reduce((pv: Extent, cv) => {
       if (pv.xmax === undefined || pv.xmax < cv[0]) [pv.xmax] = cv
       if (pv.xmin === undefined || pv.xmin > cv[0]) [pv.xmin] = cv
       if (pv.ymax === undefined || pv.ymax < cv[1]) [, pv.ymax] = cv

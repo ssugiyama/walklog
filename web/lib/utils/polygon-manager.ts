@@ -1,5 +1,7 @@
 type PathManagerOptions = {
   map?: google.maps.Map
+  styles?: google.maps.PolygonOptions
+  addCity?: (id: string) => void
 }
 
 export default class PolygonManager extends google.maps.MVCObject {

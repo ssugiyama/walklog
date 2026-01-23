@@ -20,7 +20,7 @@ import url from 'url'
 import path from 'path'
 import { nanoid } from 'nanoid'
 import { cookies } from 'next/headers'
-import fs from 'fs'
+import fs from 'fs/promises'
 import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 import { notFound, unauthorized, forbidden } from 'next/navigation'
@@ -34,33 +34,33 @@ const getKeys = <T extends {[key: string]: unknown}>(obj: T): (keyof T)[] => {
 
 let firebaseConfig: admin.AppOptions | null = null
 
-const loadFirebaseConfig = () => {
-  const content = fs.readFileSync(process.env.FIREBASE_CONFIG)
+const loadFirebaseConfig = async () => {
+  const content = await fs.readFile(process.env.FIREBASE_CONFIG)
   firebaseConfig = JSON.parse(content.toString()) as admin.AppOptions
   if (admin.apps.length === 0) {
     admin.initializeApp({ ...firebaseConfig, credential: admin.credential.applicationDefault() })
   }
 }
 
-const getPackageVersion = (): string => {
-  const content = fs.readFileSync('./package.json')
+const getPackageVersion = async (): Promise<string> => {
+  const content = await fs.readFile('./package.json')
   console.warn(content.toString())
   const packageJson = JSON.parse(content.toString()) as { version: string }
   return packageJson.version
 }
 
-export const getConfig = (): ConfigT => {
+export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
-  const shapeStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
+  const shapeStylesContent = await fs.readFile(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
   const shapeStyles = JSON.parse(shapeStylesContent.toString()) as ShapeStyles
-  const themeContent = fs.readFileSync(process.env.THEME_JSON ?? './default-theme.json')
+  const themeContent = await fs.readFile(process.env.THEME_JSON ?? './default-theme.json')
   const theme = JSON.parse(themeContent.toString()) as Theme
-  if (!firebaseConfig) loadFirebaseConfig()
+  if (!firebaseConfig) await loadFirebaseConfig()
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
     openUserMode: !!process.env.OPEN_USER_MODE,
-    appVersion: getPackageVersion(),
+    appVersion: await getPackageVersion(),
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
     defaultRadius: 500,
@@ -99,7 +99,7 @@ const getUid = async (state: BaseState): Promise<GetUidResponse> => {
     if ((error as FirebaseError).code === 'auth/id-token-expired') {
       state.idTokenExpired = true
     } else {
-      state.error = (error as Error).message
+      state.error = error as Error
     }
     return [null, false]
   }
@@ -261,7 +261,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
   const condition = { [Op.and]: where }
   const result = await Walk.findAndCountAll({
     attributes,
-    order: [order],
+    order: [order] as Sequelize.OrderItem[],
     where: condition,
     offset,
     limit,
@@ -374,10 +374,11 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
     return state
   }
 
+  const d = new Date(date)
   const props: WalkAttributes = {
     title,
     comment,
-    date,
+    date: d,
     draft,
     uid,
   }
@@ -399,7 +400,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
         await blob.save(buffer) // await を追加
         props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
       } else {
-        fs.writeFileSync(`public/${filePath}`, buffer)
+        await fs.writeFile(`public/${filePath}`, buffer)
         props.image = filePath
       }
     } catch (error) {

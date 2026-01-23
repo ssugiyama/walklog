@@ -34,8 +34,9 @@ export type WalkT = {
 export type BaseState = {
   serial?: number
   idTokenExpired?: boolean
-  error?: string | null
+  error?: Error | null
 }
+
 export type SearchState = BaseState & {
   rows: WalkT[]
   count: number

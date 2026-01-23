@@ -84,7 +84,7 @@ const ToolBox = (props) => {
     if (!autoGeolocation && navigator.geolocation) {
       getCurrentPosition(async (pos) => {
         dispatchMain({ type: 'OPEN_SNACKBAR', payload: 'start following your location' })
-        const append = await new Promise((resolve) => {
+        const append: boolean = await new Promise((resolve) => {
           if (selectedPath) {
             setConfirmInfo({ open: true, resolve })
           } else {

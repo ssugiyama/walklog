@@ -31,7 +31,7 @@ const SearchBox = () => {
   const [showDistance, setShowDistance] = useState(true)
   const searchParams = useSearchParams()
   const filter = searchParams.get('filter') || ''
-  const handleShowDistance = useCallback((e: React.ChangeEvent<{ value: string }>) => {
+  const handleShowDistance = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setShowDistance(e.target.value === 'true')  
   }, [])
   useEffect(() => {
@@ -114,7 +114,7 @@ const SearchBox = () => {
               {
                 rows.length > 0 && (filter === 'hausdorff' || filter === 'frechet') ?
                   (
-                    <Select value={showDistance} onChange={handleShowDistance}>
+                    <Select value={showDistance.toString()} onChange={handleShowDistance}>
                       <MenuItem value="true"><Typography variant="body2">distance</Typography></MenuItem>
                       <MenuItem value="false"><Typography variant="body2">length</Typography></MenuItem>
                     </Select>

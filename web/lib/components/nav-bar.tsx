@@ -45,12 +45,12 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   }
   const accountMenuCloseCB = useCallback(handleMenuClose(setAccountAnchorEl), [])
 
-  const handleLogin = useCallback(() => {
+  const handleLogin = useCallback((_ev: React.MouseEvent<HTMLLIElement>) => {
     signInWithPopup(getAuth(), provider.current).catch((error: Error) => {
       dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
     })
   }, [])
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback((_ev: React.MouseEvent<HTMLLIElement>) => {
     signOut(getAuth()).catch((error: Error) => {
       dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
     })
@@ -67,7 +67,7 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const closeAllMenus = () => {
     setAccountAnchorEl(null)
   }
-  const EndMenuItem = useCallback((prps: React.ComponentProps<typeof MenuItem>) => {
+  const EndMenuItem = useCallback((prps: React.ComponentProps<typeof MenuItem> & { component?: typeof Link, href?: string }) => {
     const { onClick, children } = prps
     const cpProps = { ...prps }
     delete cpProps.onClick

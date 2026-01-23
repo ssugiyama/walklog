@@ -7,8 +7,11 @@ const ConfigContext = createContext<ConfigT | null>(null)
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<ConfigT | null>(null)
   useEffect(() => {
-    const config = getConfig()
-    setConfig(config)
+    const fetchConfig = async () => {
+      const config = await getConfig()
+      setConfig(config)
+    }
+    void fetchConfig()
   }, [])
   return (
     <ConfigContext.Provider value={config}>

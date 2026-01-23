@@ -125,7 +125,7 @@ export default class PathManager extends google.maps.MVCObject {
     if (pl === this.current) {
       return
     }
-    const key = PathManager.pathToHash(pl.getPath())
+    const key = PathManager.pathToHash(pl.getPath().getArray())
     pl.setMap(null)
     delete this.polylines[key]
   }
@@ -209,7 +209,7 @@ export default class PathManager extends google.maps.MVCObject {
   addPolyline(pl: google.maps.Polyline, item?: WalkT | null) {
     pl.setOptions(item ? this.styles.normal : this.styles.new)
     pl.setMap(this.map)
-    const key = PathManager.pathToHash(pl.getPath())
+    const key = PathManager.pathToHash(pl.getPath().getArray())
     this.polylines[key] = [pl, item]
     google.maps.event.addListener(pl, 'click', (event: google.maps.MapMouseEvent) => {
       this.lastClickLatLng = event.latLng
