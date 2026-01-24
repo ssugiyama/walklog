@@ -318,7 +318,6 @@ describe('getItemInternalAction', () => {
   })
 })
 
-
 describe('getItemAction', () => {
   let prevState
 

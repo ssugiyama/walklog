@@ -489,4 +489,3 @@ export const getUsersAction = async (): Promise<UserT[]> => {
     return { uid, displayName, photoURL, admin }
   })
 }
-
