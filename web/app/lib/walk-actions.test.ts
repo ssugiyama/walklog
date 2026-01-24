@@ -581,7 +581,7 @@ describe('updateItemAction', () => {
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Updated Walk',
-        date: '2023-05-15',
+        date: new Date('2023-05-15'),
         draft: false,
         uid: 'testUid',
       }),
@@ -606,7 +606,7 @@ describe('updateItemAction', () => {
     expect(Walk.create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'New Walk',
-        date: '2023-05-15',
+        date: new Date('2023-05-15'),
         draft: true,
         uid: 'testUid',
       }),
