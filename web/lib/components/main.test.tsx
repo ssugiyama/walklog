@@ -181,7 +181,7 @@ describe('Main Component', () => {
     navigator.share = originalShare
   })
 
-  test('snackbar closes after a timeout', async () => {
+  test('snackbar closes after a timeout', () => {
     jest.useFakeTimers()
     const { dispatchMain } = renderWithProviders(
       <Main>

@@ -6,7 +6,7 @@ global.TextDecoder = util.TextDecoder
 import { sequelize, Walk, Area, SRID } from '@/lib/db/models'
 import { Op } from 'sequelize'
 import '@testing-library/jest-dom'
-import fs from 'fs'
+import fs from 'fs/promises'
 import admin from 'firebase-admin'
 
 jest.mock('firebase-admin', () => {
@@ -20,9 +20,9 @@ jest.mock('firebase-admin', () => {
   }
 })
 
-jest.mock('fs', () => ({
-  writeFileSync: jest.fn(),
-  readFileSync: jest.fn(),
+jest.mock('fs/promises', () => ({
+  writeFile: jest.fn(),
+  readFile: jest.fn(),
 }))
 
 import {
@@ -50,8 +50,6 @@ jest.mock('sequelize', () => {
     },
   }
 })
-
-
 
 jest.mock('next/cache', () => ({
   unstable_cacheTag: jest.fn(),
@@ -90,7 +88,6 @@ jest.mock('nanoid', () => {
     nanoid: jest.fn(() => 'mocked-nanoid'),
   }
 })
-
 
 describe('searchInternalAction', () => {
   beforeEach(() => {
@@ -321,7 +318,6 @@ describe('getItemInternalAction', () => {
   })
 })
 
-
 describe('getItemAction', () => {
   let prevState
 
@@ -383,13 +379,13 @@ describe('updateItemAction', () => {
 
   it('should return unauthorized error if uid is null', async () => {
     const mockGetUid = jest.fn().mockResolvedValue([null, false])
-    expect(async () => await updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
+    await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
   it('should return forbidden error if user is not admin and openUserMode is false', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
-    expect(async () => await updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')  
+    await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')  
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
@@ -539,7 +535,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeNull()
-    expect(result.id).toBe('1')
+    expect(result.id).toBe(1)
   })
 
   it('should pass validation without image file', async () => {
@@ -559,7 +555,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
     
     expect(result.error).toBeNull()
-    expect(result.id).toBe('1')
+    expect(result.id.toString()).toBe('1')
   })
 
   it('should update an existing walk if id is provided', async () => {
@@ -579,12 +575,12 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
 
     expect(result.error).toBeNull()
-    expect(result.id).toBe('1')
-    expect(Walk.findByPk).toHaveBeenCalledWith('1')
+    expect(result.id.toString()).toBe('1')
+    expect(Walk.findByPk).toHaveBeenCalledWith(1)
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Updated Walk',
-        date: '2023-05-15',
+        date: new Date('2023-05-15'),
         draft: false,
         uid: 'testUid',
       }),
@@ -609,7 +605,7 @@ describe('updateItemAction', () => {
     expect(Walk.create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'New Walk',
-        date: '2023-05-15',
+        date: new Date('2023-05-15'),
         draft: true,
         uid: 'testUid',
       }),
@@ -640,7 +636,7 @@ describe('updateItemAction', () => {
     const result = await updateItemAction(prevState, formData, mockGetUid)
 
     expect(result.error).toBeNull()
-    expect(fs.writeFileSync).toHaveBeenCalled()
+    expect(fs.writeFile).toHaveBeenCalled()
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         image: expect.any(String),
@@ -674,17 +670,17 @@ describe('deleteItemAction', () => {
     prevState = { serial: 0, error: null, deleted: false, idTokenExpired: false }
   })
 
-  it('should return unauthorized error if uid is null', async () => {
+  it('should return unauthorized error if uid is null', () => {
     const mockGetUid = jest.fn().mockResolvedValue([null, false])
-    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')  
+    void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')  
 
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
 
-  it('should return forbidden error if user is not admin and openUserMode is false', async () => {
+  it('should return forbidden error if user is not admin and openUserMode is false', () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
 
-    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')  
+    void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')  
 
     expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
   })
@@ -692,14 +688,14 @@ describe('deleteItemAction', () => {
   it('should return not found error if walk does not exist', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue(null)
-    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404') 
+    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404') 
   })
 
   it('should return forbidden error if walk.uid does not match uid', async () => {
     const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
     (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({ uid: 'otherUid' })
 
-    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden') 
+    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden') 
   })
 
   it('should delete the walk and set deleted to true', async () => {
@@ -724,7 +720,7 @@ describe('deleteItemAction', () => {
       uid: 'testUid',
       destroy: jest.fn().mockRejectedValue(new Error('Deletion failed')),
     })
-    expect(async () => await deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
+    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
   })
 })
 
@@ -858,7 +854,7 @@ describe('getConfig', () => {
     const mockTheme = { palette: {} }
     const mockFirebaseConfig = { key: 'value' }
     const mockPackageJson = { version: '1.0.0' };
-    (fs.readFileSync as jest.Mock).mockImplementation((path) => {
+    (fs.readFile as jest.Mock).mockImplementation(async (path) => { // eslint-disable-line @typescript-eslint/require-await
       if (path === './default-shape-styles.json') {
         return Buffer.from(JSON.stringify(mockShapeStyles))
       }
@@ -889,11 +885,9 @@ describe('getConfig', () => {
   })
 
   it('should throw an error if reading the file fails', async () => {
-    (fs.readFileSync as jest.Mock).mockImplementation(() => {
-      throw new Error('File read error')
-    })
+    (fs.readFile as jest.Mock).mockRejectedValue(new Error('File read error'))
 
     await expect(getConfig()).rejects.toThrow('File read error')
-    expect(fs.readFileSync).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
+    expect(fs.readFile).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
   })
 })

@@ -12,15 +12,16 @@ type ImageUploaderProps = {
   onChange?: (ev: React.ChangeEvent<HTMLInputElement>) => void
   onClear?: () => void
 }
+
 const ImageUploader = ({ name, label, defaultValue, onChange, onClear }: ImageUploaderProps) => {
   const [imageUrl, setImageUrl] = useState(defaultValue)
-  const fileInputRef = useRef(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     setImageUrl(defaultValue)
   }, [defaultValue])
 
-  const handleChange = (ev1) => {
+  const handleChange = (ev1: React.ChangeEvent<HTMLInputElement>) => {
     const file = ev1.target.files[0]
     const reader = new FileReader()
     reader.addEventListener('loadend', (ev2) => {

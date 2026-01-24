@@ -12,7 +12,7 @@ export const sequelize = new Sequelize(
     omitNull: false,
     attributeBehavior: 'unsafe-legacy',
     dialect: 'postgres',
-    dialectModule: pg,
+    dialectModule: pg as object,
   })
 
 export const EARTH_RADIUS = 6370986
@@ -41,6 +41,13 @@ type MultiPolygonJson = {
   }
 }
 
+type Extent = {
+  xmax?: number
+  xmin?: number
+  ymax?: number
+  ymin?: number
+}
+
 export class Walk extends Model<InferAttributes<Walk>, InferCreationAttributes<Walk>> {
   declare id: CreationOptional<number>
   declare date: Date
@@ -64,9 +71,9 @@ export class Walk extends Model<InferAttributes<Walk>, InferCreationAttributes<W
     return wkx.Geometry.parseGeoJSON(json).toEwkt()
   }
 
-  static getPathExtent(path: string) {
+  static getPathExtent(path: string): Extent{
     const points = decode(path)
-    return points.reduce((pv, cv) => {
+    return points.reduce((pv: Extent, cv) => {
       if (pv.xmax === undefined || pv.xmax < cv[0]) [pv.xmax] = cv
       if (pv.xmin === undefined || pv.xmin > cv[0]) [pv.xmin] = cv
       if (pv.ymax === undefined || pv.ymax < cv[1]) [, pv.ymax] = cv
@@ -75,12 +82,12 @@ export class Walk extends Model<InferAttributes<Walk>, InferCreationAttributes<W
     }, {})
   }
 
-  static getStartPoint(path: string) {
+  static getStartPoint(path: string): [number, number] {
     const points = decode(path)
     return points[0]
   }
 
-  static getEndPoint(path: string) {
+  static getEndPoint(path: string): [number, number] {
     const points = decode(path)
     return points[points.length - 1]
   }

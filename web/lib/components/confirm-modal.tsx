@@ -6,7 +6,18 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 
-const ConfirmModal = (props) => {
+type ConfirmModalProps = {
+  open: boolean
+  title: string
+  text: string
+  resolve: (value: boolean) => void
+  actions?: {
+    label: string
+    value: boolean
+  }[]
+}
+
+const ConfirmModal = (props: ConfirmModalProps) => {
   const {
     open, title, resolve, text, actions,
   } = props
@@ -24,7 +35,7 @@ const ConfirmModal = (props) => {
           actions ?
             actions.map((action) => (
               <Button
-                key={action.value}
+                key={action.value.toString()}
                 onClick={() => resolve(action.value)}
               >
                 {action.label}

@@ -55,6 +55,7 @@ export default [
       'jsx-quotes': ['error', 'prefer-double'],
       'comma-dangle': ['error', 'always-multiline'],
       'indent': ['error', 2],
+      'no-multiple-empty-lines': ['error', { max: 1 }],
       // TypeScript-specific rules
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',

@@ -35,7 +35,6 @@ export default function RootLayout({
   )
 }
 
-
 export const metadata: Metadata = {
   title: {
     template: `%s | ${process.env.SITE_NAME ?? 'Walklog'}`,

@@ -44,7 +44,7 @@ const BottomBar = (props) => {
   const [data] = useData()
   const pathname = usePathname()
   const params = useParams()
-  const id = params.id
+  const id = params.id as string
   const item = data.current
 
   const sxBottomBarGroup = {
@@ -142,8 +142,8 @@ const BottomBar = (props) => {
     )
   } else if (pathname === '/') {
     const searchFormChangeCBs = {
-      filter: (e) => setFilter(e.target.value),
-      radius: (e) => setRadius(e.target.value),
+      filter: (e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value),
+      radius: (e: React.ChangeEvent<HTMLInputElement>) => setRadius(Number(e.target.value)),
       cities: () => setCities(''),
     }
     controls = (
@@ -164,14 +164,14 @@ const BottomBar = (props) => {
           {['neighborhood', 'start', 'end'].includes(filter) &&
             (
               <Tooltip title="radius" placement="top">
-                <Select value={radius} onChange={searchFormChangeCBs.radius} variant="standard">
-                  <MenuItem value={1000}>1km</MenuItem>
-                  <MenuItem value={500}>500m</MenuItem>
-                  <MenuItem value={250}>250m</MenuItem>
-                  <MenuItem value={100}>100m</MenuItem>
+                <Select value={radius.toString()} onChange={searchFormChangeCBs.radius} variant="standard">
+                  <MenuItem value={'1000'}>1km</MenuItem>
+                  <MenuItem value={'500'}>500m</MenuItem>
+                  <MenuItem value={'250'}>250m</MenuItem>
+                  <MenuItem value={'100'}>100m</MenuItem>
                   {
                     [1000, 500, 250, 100].some((r) => r === radius) ? null :
-                      (<MenuItem value={radius}>{`${Math.round(radius)}m`}</MenuItem>)
+                      (<MenuItem value={radius.toString()}>{`${Math.round(radius)}m`}</MenuItem>)
                   }
                 </Select>
               </Tooltip>

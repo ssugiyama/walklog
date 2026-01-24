@@ -36,7 +36,7 @@ const initialMainState: MainState = {
   isDirty: false,
 }
 
-const mainReducer = (state, action: MainAction) => {
+const mainReducer = (state: MainState, action: MainAction) => {
   switch (action.type) {
   case 'TOGGLE_VIEW':
     return { ...state, mode: state.mode === 'map' ? 'content' : 'map' }
@@ -82,7 +82,7 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
     }
   }, [mainState.isDirty]) 
 
-  const interceptLink = useCallback((ev: MouseEvent) => {
+  const interceptLink = useCallback((ev: MouseEvent<HTMLButtonElement|HTMLAnchorElement|HTMLLIElement>) => {
     if (mainState.isDirty) {
       const confirmed = window.confirm(MESSAGE_ON_LEAVE)
       if (confirmed) {
@@ -103,7 +103,7 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
 }
 
 export function useMainContext() {
-  return useContext<[MainState, Dispatch<MainAction>, MouseEventHandler<HTMLButtonElement|HTMLAnchorElement>]>(MainContext)
+  return useContext<[MainState, Dispatch<MainAction>, MouseEventHandler<HTMLButtonElement|HTMLAnchorElement|HTMLLIElement>]>(MainContext)
 }
 
 export default MainContext

@@ -1,7 +1,7 @@
 import ItemFetcher from '@/lib/utils/item-fetcher'
 import WalkEditor from '@/lib/components/walk-editor'
 
-export default async function Page() {
+export default function Page() {
   return (
     <>
       <ItemFetcher />

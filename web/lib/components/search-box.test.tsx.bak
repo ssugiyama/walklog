@@ -22,16 +22,15 @@ jest.mock('../utils/data-context', () => ({
 }))
 
 jest.mock('../utils/map-context', () => ({
-  useMapContext: jest.fn(() => ([
-    {
-      pathManager: {},
-    },
-  ])),
+  useMapContext: () => ({
+    pathManager: {},
+  }),
 }))
 
 jest.mock('../utils/config', () => ({
-  useConfig: jest.fn(() => ({})),
+  useConfig: () => ({}),
 }))
+
 
 jest.mock('@/lib/components/search-form', () => function SearchForm() {
   return (<div data-testid="search-form">Search Form</div>)

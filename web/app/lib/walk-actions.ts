@@ -2,45 +2,60 @@
 
 import Sequelize from 'sequelize'
 import { sequelize, Walk, Area, EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH, WalkAttributes } from '../../lib/db/models'
-import { CityParams, CityT, SearchProps, UserT, SearchState, GetItemState, DeleteItemState, UpdateItemState, ConfigT } from '@/types'
+import { 
+  CityParams, 
+  CityT, 
+  SearchProps, 
+  UserT, 
+  BaseState,
+  SearchState, 
+  GetItemState, 
+  DeleteItemState, 
+  UpdateItemState, 
+  ConfigT,
+  ShapeStyles,
+} from '@/types'
 import admin from 'firebase-admin'
 import url from 'url'
 import path from 'path'
 import { nanoid } from 'nanoid'
 import { cookies } from 'next/headers'
-import fs from 'fs'
+import fs from 'fs/promises'
 import { unstable_cacheTag as cacheTag } from 'next/cache'
 import { revalidateTag } from 'next/cache'
 import { notFound, unauthorized, forbidden } from 'next/navigation'
+import { Theme } from '@mui/material'
+import { FirebaseError } from 'firebase/app'
+import { ValueOf } from 'next/dist/shared/lib/constants'
 
 const getKeys = <T extends {[key: string]: unknown}>(obj: T): (keyof T)[] => {
   return Object.keys(obj)
 }
 
-let firebaseConfig
+let firebaseConfig: admin.AppOptions | null = null
 
-const loadFirebaseConfig = () => {
-  const content = fs.readFileSync(process.env.FIREBASE_CONFIG)
-  firebaseConfig = JSON.parse(content.toString())
+const loadFirebaseConfig = async () => {
+  const content = await fs.readFile(process.env.FIREBASE_CONFIG)
+  firebaseConfig = JSON.parse(content.toString()) as admin.AppOptions
   if (admin.apps.length === 0) {
     admin.initializeApp({ ...firebaseConfig, credential: admin.credential.applicationDefault() })
   }
 }
 
-const getPackageVersion = async () => {
-  const content = fs.readFileSync('./package.json')
+const getPackageVersion = async (): Promise<string> => {
+  const content = await fs.readFile('./package.json')
   console.warn(content.toString())
-  const packageJson = JSON.parse(content.toString())
+  const packageJson = JSON.parse(content.toString()) as { version: string }
   return packageJson.version
 }
 
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
-  const shapeStylesContent = fs.readFileSync(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
-  const shapeStyles = JSON.parse(shapeStylesContent.toString())
-  const themeContent = fs.readFileSync(process.env.THEME_JSON ?? './default-theme.json')
-  const theme = JSON.parse(themeContent.toString())
-  if (!firebaseConfig) loadFirebaseConfig()
+  const shapeStylesContent = await fs.readFile(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
+  const shapeStyles = JSON.parse(shapeStylesContent.toString()) as ShapeStyles
+  const themeContent = await fs.readFile(process.env.THEME_JSON ?? './default-theme.json')
+  const theme = JSON.parse(themeContent.toString()) as Theme
+  if (!firebaseConfig) await loadFirebaseConfig()
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
@@ -64,7 +79,12 @@ const SEARCH_CACHE_TAG = 'searchTag'
 const openUserMode: boolean = !!process.env.OPEN_USER_MODE
 const firebaseStorage: boolean = !!process.env.FIREBASE_STORAGE
 
-const getUid = async (state) => {
+type GetUidResponse = [
+  string | null,
+  boolean
+]
+
+const getUid = async (state: BaseState): Promise<GetUidResponse> => {
   const cookieStore = await cookies()
   state.idTokenExpired = false
   const idToken = cookieStore.get('idToken')
@@ -76,10 +96,10 @@ const getUid = async (state) => {
       .verifyIdToken(idToken.value)
     return [claim?.uid, claim?.admin ?? false]
   } catch (error) {
-    if (error.code === 'auth/id-token-expired') {
+    if ((error as FirebaseError).code === 'auth/id-token-expired') {
       state.idTokenExpired = true
     } else {
-      state.error = error.message
+      state.error = error as Error
     }
     return [null, false]
   }
@@ -106,7 +126,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
   }
 
   const where = []
-  const order = orderHash[props.order ?? 'newest_first']
+  const order: ValueOf<typeof orderHash> = orderHash[props.order as keyof typeof orderHash ?? 'newest_first']
 
   if (props.date) {
     where.push({ date: props.date })
@@ -131,7 +151,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     const center = Walk.getPoint(longitude, latitude)
     const lb = Walk.getPoint(longitude - dlon, latitude - dlat)
     const rt = Walk.getPoint(longitude + dlon, latitude + dlat)
-    let target
+    let target: Sequelize.Utils.Col | Sequelize.Utils.Fn 
     switch (props.filter) {
     case 'neighborhood':
       target = sequelize.col('path')
@@ -241,7 +261,7 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
   const condition = { [Op.and]: where }
   const result = await Walk.findAndCountAll({
     attributes,
-    order: [order],
+    order: [order] as Sequelize.OrderItem[],
     where: condition,
     offset,
     limit,
@@ -299,7 +319,7 @@ const getFilename = (uid: string, date: string, file: File) => {
 
 // Manual validation replaces Zod schema for better error message control
 
-export const updateItemAction = async (prevState: UpdateItemState, formData, _getUid = getUid): Promise<typeof prevState> => {
+export const updateItemAction = async (prevState: UpdateItemState, formData: FormData, _getUid: typeof getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.id = null
   state.serial++
@@ -314,12 +334,12 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   }
 
   // Extract form data
-  const id = formData.get('id')
-  const date = formData.get('date')
-  const title = formData.get('title')
-  const comment = formData.get('comment')
-  const image = formData.get('image')
-  const walkPath = formData.get('path')
+  const id = Number(formData.get('id'))
+  const date = formData.get('date') as string
+  const title = formData.get('title') as string
+  const comment = formData.get('comment') as string
+  const image = formData.get('image') as File | null
+  const walkPath = formData.get('path') as string
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
 
@@ -354,10 +374,11 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
     return state
   }
 
+  const d = new Date(date)
   const props: WalkAttributes = {
     title,
     comment,
-    date,
+    date: d,
     draft,
     uid,
   }
@@ -379,12 +400,12 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
         await blob.save(buffer) // await を追加
         props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
       } else {
-        fs.writeFileSync(`public/${filePath}`, buffer)
+        await fs.writeFile(`public/${filePath}`, buffer)
         props.image = filePath
       }
     } catch (error) {
       console.error('updateItemAction image error', error)
-      state.error = error
+      state.error = error as Error
       state.id = null
       return state
     }
@@ -399,7 +420,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
       state.id = id
     } catch (error) {
       console.error('updateItemAction error', error)
-      state.error = error
+      state.error = error as Error
       state.id = null
       return state
     }
@@ -409,7 +430,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
       state.id = walk?.id
     } catch (error) {
       console.error('updateItemAction create error', error)
-      state.error = error
+      state.error = error as Error
       state.id = null
       return state
     }
@@ -418,7 +439,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData, _ge
   return state
 }
 
-export const deleteItemAction = async (prevState: DeleteItemState, id: number, _getUid = getUid): Promise<typeof prevState> => {
+export const deleteItemAction = async (prevState: DeleteItemState, id: number, _getUid: typeof getUid = getUid): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.deleted = false
   state.serial++
@@ -447,7 +468,7 @@ export const deleteItemAction = async (prevState: DeleteItemState, id: number, _
 
 export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
   'use cache'
-  let where
+  let where: Sequelize.WhereOptions
   if (params.jcodes) {
     where = { jcode: { [Op.in]: params.jcodes } }
   } else {
@@ -464,8 +485,7 @@ export const getUsersAction = async (): Promise<UserT[]> => {
   const userResult = await admin.auth().listUsers(1000)
   return userResult.users.map((user) => {
     const { uid, displayName, photoURL } = user
-    const admin = user.customClaims?.admin || false
+    const admin: boolean = user.customClaims?.admin as boolean || false
     return { uid, displayName, photoURL, admin }
   })
 }
-

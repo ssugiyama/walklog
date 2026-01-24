@@ -31,33 +31,30 @@ export type WalkT = {
   stale?: boolean
 }
 
-export type SearchState ={
+export type BaseState = {
   serial?: number
+  idTokenExpired?: boolean
+  error?: Error | null
+}
+
+export type SearchState = BaseState & {
   rows: WalkT[]
   count: number
   offset?: number
-  idTokenExpired?: boolean
   index?: number
   append?: boolean
 }
 
-export type GetItemState = {
-  idTokenExpired?: boolean
+export type GetItemState = BaseState & {
   current?: WalkT | null
-  serial?: number
 }
 
-export type UpdateItemState = {
+export type UpdateItemState = BaseState & {
   id?: number
-  error?: Error | null
-  idTokenExpired?: boolean
-  serial?: number
 }
 
-export type DeleteItemState = {
+export type DeleteItemState = BaseState & {
   deleted?: boolean
-  idTokenExpired?: boolean
-  serial?: number
 }
 
 export type CityParams = {

@@ -21,6 +21,8 @@ import { useRouter } from 'next/navigation'
 import { idToShowUrl } from '../utils/meta-utils'
 import { useData } from '../utils/data-context'
 import { useUserContext } from '../utils/user-context'
+import { UserT } from '@/types'
+
 const SearchBox = () => {
   const router = useRouter()
   const { users } = useUserContext()
@@ -29,7 +31,7 @@ const SearchBox = () => {
   const [showDistance, setShowDistance] = useState(true)
   const searchParams = useSearchParams()
   const filter = searchParams.get('filter') || ''
-  const handleShowDistance = useCallback((e) => {
+  const handleShowDistance = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setShowDistance(e.target.value === 'true')  
   }, [])
   useEffect(() => {
@@ -50,7 +52,7 @@ const SearchBox = () => {
     return `?${params.toString()}`
   }, [searchParams, offset])
 
-  const userObjs = {}
+  const userObjs: Record<string, UserT> = {}
   users.forEach((u) => { userObjs[u.uid] = u })
   const sxCell = {
     padding: 1,
@@ -112,7 +114,7 @@ const SearchBox = () => {
               {
                 rows.length > 0 && (filter === 'hausdorff' || filter === 'frechet') ?
                   (
-                    <Select value={showDistance} onChange={handleShowDistance}>
+                    <Select value={showDistance.toString()} onChange={handleShowDistance}>
                       <MenuItem value="true"><Typography variant="body2">distance</Typography></MenuItem>
                       <MenuItem value="false"><Typography variant="body2">length</Typography></MenuItem>
                     </Select>

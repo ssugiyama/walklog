@@ -48,7 +48,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
   }, [currentUser])
   
   useEffect(() => {
-    (async () => {
+    void (async () => {
       setUsers(await getUsersAction())
     })()
   }, [])
@@ -56,7 +56,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     if (currentUser === undefined) {
       return
     }
-    (async () => {
+    void (async () => {
       await updateIdToken()
     })()
   }, [currentUser])

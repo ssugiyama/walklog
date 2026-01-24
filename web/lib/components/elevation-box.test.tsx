@@ -130,7 +130,7 @@ describe('ElevationBox', () => {
     })
   })
 
-  it('handles elevation service error gracefully', async () => {
+  it('handles elevation service error gracefully', () => {
     mockElevationService.getElevationAlongPath.mockImplementation((request, callback) => {
       callback([], 'ERROR')
     });

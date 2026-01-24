@@ -94,7 +94,7 @@ describe('NavBar', () => {
     expect(screen.getByText('login with Google')).toBeInTheDocument()
   })
 
-  it('displays logout option when a user is logged in', async () => {
+  it('displays logout option when a user is logged in', () => {
     (useUserContext as jest.Mock).mockReturnValue({
       currentUser: { displayName: 'Test User', photoURL: 'test-url' },
       setCurrentUser: mockSetCurrentUser,
