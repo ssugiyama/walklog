@@ -30,7 +30,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
-    "recharts": "^3.6.0",
+    "recharts": "^3.7.0",
     "sequelize": "^6.37.7",
     "serialize-query-params": "^2.0.4",
     "terra-draw": "^1.23.1",
