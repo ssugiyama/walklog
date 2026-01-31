@@ -94,7 +94,7 @@ const ItemBox = () => {
   }
   const prevUrl = data.prevId && idToShowUrl(data.prevId, searchParams)
   useEffect(() => {
-    if (deleteState.serial > 0) {
+    if (deleteState && deleteState.serial > 0) {
       if (deleteState.idTokenExpired) {
         startTransition(async () => {
           await updateIdToken()
