@@ -25,7 +25,7 @@ const ImageUploader = ({ name, label, defaultValue, onChange, onClear }: ImageUp
     const file = ev1.target.files[0]
     const reader = new FileReader()
     reader.addEventListener('loadend', (ev2) => {
-      setImageUrl(ev2.target.result.toString())
+      setImageUrl(ev2.target.result as string)
     })
     if (onChange) {
       onChange(ev1)

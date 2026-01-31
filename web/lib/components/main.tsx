@@ -43,20 +43,22 @@ const Main = ({
     createTheme(config.theme), 
   [config.theme])
   const toggleViewCB = useCallback(() => dispatchMain({ type: 'TOGGLE_VIEW' }), [])
-  const shareCB = useCallback(async () => {
-    try {
-      const origin = window.location.origin
-      const url = origin + (current ? idToShowUrl(current.id) : '/?' + window.location.search)
-      const text = document.title
-      if (navigator.share) {
-        await navigator.share({ url, text })
-      } else {
-        await navigator.clipboard.writeText(`${text} ${url}`)
-        dispatchMain({ type: 'OPEN_SNACKBAR', payload: 'copied to clipboard' })
+  const shareCB = useCallback((): void => {
+    void (async () => {
+      try {
+        const origin = window.location.origin
+        const url = origin + (current ? idToShowUrl(current.id) : '/?' + window.location.search)
+        const text = document.title
+        if (navigator.share) {
+          await navigator.share({ url, text })
+        } else {
+          await navigator.clipboard.writeText(`${text} ${url}`)
+          dispatchMain({ type: 'OPEN_SNACKBAR', payload: 'copied to clipboard' })
+        }
+      } catch (error) {
+        console.error(error)
       }
-    } catch (error) {
-      console.error(error)
-    }
+    })()
   }, [current])
   const fabStyles = useMemo(() => ({
     position: 'absolute',

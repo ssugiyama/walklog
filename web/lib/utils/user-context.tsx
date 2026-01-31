@@ -16,7 +16,7 @@ const initialState: UserContextT = {
   idToken: null,
   currentUser: null,
   setCurrentUser: () => {},
-  updateIdToken: () => Promise.resolve(),
+  updateIdToken: async () => Promise.resolve(),
 }
 const UserContext = createContext(initialState)
 

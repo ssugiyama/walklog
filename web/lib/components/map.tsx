@@ -134,7 +134,7 @@ const Map = (props) => {
     const file = (e1.target as HTMLInputElement).files[0]
     const reader = new FileReader()
     reader.addEventListener('loadend', (e2) => {
-      const obj = JSON.parse(e2.target.result.toString()) as LineString
+      const obj = JSON.parse(e2.target.result as string) as LineString
       const { coordinates } = obj
       const pts = coordinates.map((item) => (new google.maps.LatLng(item[1], item[0])))
       const path = google.maps.geometry.encoding.encodePath(new google.maps.MVCArray(pts))

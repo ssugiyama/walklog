@@ -116,7 +116,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   }, [dispatchMain, setInputs])
 
   const handleSubmit = useCallback(() => {
-    startTransition(async () => {
+    startTransition(() => {
       const formData = new FormData()
       formData.append('date', inputs.date)
       formData.append('title', inputs.title)
@@ -128,7 +128,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       if (mode === 'update' && item?.id) {
         formData.append('id', item.id.toString())
       }
-      await formAction(formData)
+      formAction(formData)
     })
   }, [inputs, searchPath, item, mode, formAction])
   

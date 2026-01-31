@@ -53,8 +53,8 @@ export function Searcher() {
       props.offset = current
       props.limit = props.limit - current
     }
-    startTransition(async () => {
-      await dispatchSearch(props)
+    startTransition(() => {
+      dispatchSearch(props)
     })
   }, [searchParams, idToken])
 

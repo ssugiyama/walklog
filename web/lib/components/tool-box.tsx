@@ -82,16 +82,18 @@ const ToolBox = (props) => {
   }, [autoGeolocation])
   const toggleRecordCB = useCallback(() => {
     if (!autoGeolocation && navigator.geolocation) {
-      getCurrentPosition(async (pos) => {
-        dispatchMain({ type: 'OPEN_SNACKBAR', payload: 'start following your location' })
-        const append: boolean = await new Promise((resolve) => {
-          if (selectedPath) {
-            setConfirmInfo({ open: true, resolve })
-          } else {
-            resolve(false)
-          }
-        })
-        addCurrentPosition(pos, append)
+      getCurrentPosition((pos) => {
+        void (async () => {
+          dispatchMain({ type: 'OPEN_SNACKBAR', payload: 'start following your location' })
+          const append: boolean = await new Promise((resolve) => {
+            if (selectedPath) {
+              setConfirmInfo({ open: true, resolve })
+            } else {
+              resolve(false)
+            }
+          })
+          addCurrentPosition(pos, append)
+        })()
       }, () => {
         window.alert('Unable to retrieve your location')
       })
@@ -114,22 +116,24 @@ const ToolBox = (props) => {
   }, [marker, map])
 
   const locationChangeCB = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value), [])
-  const submitLocationCB = useCallback(async (e: React.FocusEvent | React.KeyboardEvent) => {
-    if (!location) return
-    if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return
-    if (!geocoder.current) {
-      await google.maps.importLibrary('geocoding')
-      geocoder.current = new google.maps.Geocoder()
-    }
-    void geocoder.current.geocode({ address: location }, (results, status) => {
-      if (status === google.maps.GeocoderStatus.OK) {
-        marker.position = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() }
-        marker.map = map
-        map.setCenter(marker.position)
-      } else {
-        window.alert(`Geocode was not successful for the following reason: ${status}`)
+  const submitLocationCB = useCallback((e: React.FocusEvent | React.KeyboardEvent) => {
+    void (async () => {
+      if (!location) return
+      if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return
+      if (!geocoder.current) {
+        await google.maps.importLibrary('geocoding')
+        geocoder.current = new google.maps.Geocoder()
       }
-    })
+      void geocoder.current.geocode({ address: location }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK) {
+          marker.position = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() }
+          marker.map = map
+          map.setCenter(marker.position)
+        } else {
+          window.alert(`Geocode was not successful for the following reason: ${status}`)
+        }
+      })
+    })()
   }, [location])
 
   const closeButtonStyle: React.CSSProperties = {

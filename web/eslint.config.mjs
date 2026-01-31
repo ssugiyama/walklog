@@ -42,7 +42,7 @@ export default [
       },
     },
     rules: {
-      ...tseslint.configs.recommended.rules,
+      ...tseslint.configs['recommended-type-checked'].rules,
       'camelcase': ['error', {
         properties: 'never',
       }],
@@ -56,25 +56,11 @@ export default [
       'comma-dangle': ['error', 'always-multiline'],
       'indent': ['error', 2],
       'no-multiple-empty-lines': ['error', { max: 1 }],
-      // TypeScript-specific rules
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^_',
       }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/prefer-optional-chain': 'warn',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      // Disable strict rules that require strictNullChecks
-      '@typescript-eslint/strict-boolean-expressions': 'off',
-      '@typescript-eslint/prefer-nullish-coalescing': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'warn',
-      '@typescript-eslint/no-unsafe-member-access': 'warn',
-      '@typescript-eslint/no-unsafe-call': 'warn',
-      '@typescript-eslint/no-unsafe-return': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-      '@typescript-eslint/require-await': 'warn',
     },
   },
   {
@@ -127,7 +113,6 @@ export default [
   {
     files: ['**/*.test.{ts,tsx}', '**/__mocks__/**'],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
