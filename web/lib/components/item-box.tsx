@@ -102,7 +102,7 @@ const ItemBox = () => {
         })
       }
     }
-  }, [deleteState.serial])
+  }, [deleteState?.serial])
 
   const sxImageBox = {
     float: { xs: 'none', sm: 'left' },
