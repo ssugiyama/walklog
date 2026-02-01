@@ -585,7 +585,7 @@ describe('updateItemAction', () => {
         uid: 'testUid',
       }),
     )
-    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
+    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
   })
 
   it('should create a new walk if id is not provided', async () => {
@@ -611,7 +611,7 @@ describe('updateItemAction', () => {
       }),
       { fields: expect.any(Array) },
     )
-    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
+    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
   })
 
   it('should handle image upload and update the walk', async () => {
@@ -710,7 +710,7 @@ describe('deleteItemAction', () => {
 
     expect(result.deleted).toBe(true)
     expect(mockDestroy).toHaveBeenCalled()
-    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
+    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
   })
 
   it('should handle errors during deletion', async () => {

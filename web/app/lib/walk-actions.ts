@@ -435,7 +435,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
       return state
     }
   }
-  revalidateTag(SEARCH_CACHE_TAG)
+  revalidateTag(SEARCH_CACHE_TAG, 'max')
   return state
 }
 
@@ -462,7 +462,7 @@ export const deleteItemAction = async (prevState: DeleteItemState, id: number, _
   }
   await walk.destroy()
   state.deleted = true
-  revalidateTag(SEARCH_CACHE_TAG)
+  revalidateTag(SEARCH_CACHE_TAG, 'max')
   return state
 }
 
