@@ -146,8 +146,16 @@ const SearchBox = () => {
                     )
                   }
                 </TableCell>
-                <TableCell sx={sxCell}><MuiLink href={idToShowUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.date}</MuiLink></TableCell>
-                <TableCell sx={sxCell}><MuiLink href={idToShowUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.title}</MuiLink></TableCell>
+                <TableCell sx={sxCell}>
+                  <Link href={idToShowUrl(item.id, searchParams)}>
+                    <MuiLink color="primary" underline="hover">{item.date}</MuiLink>
+                  </Link>
+                </TableCell>
+                <TableCell sx={sxCell}>
+                  <Link href={idToShowUrl(item.id, searchParams)}>
+                    <MuiLink color="primary" underline="hover">{item.title}</MuiLink>
+                  </Link>
+                </TableCell>
                 <TableCell sx={sxCell}>
                   {
                     showDistance && (filter === 'hausdorff' || filter === 'frechet')  ?
@@ -163,18 +171,17 @@ const SearchBox = () => {
       {
         offset > 0 &&
         (
-          <Button
-            variant="outlined"
-            sx={{ width: 'calc(100% - 20px)', m: 1 }}
-            color="primary"
-            component={Link}
-            href={moreUrl}
-            scroll={false}
-          >
-            <ExpandMoreIcon sx={{ mr: 1 }} />
-            {' '}
-            more
-          </Button>
+          <Link href={moreUrl} scroll={false}>
+            <Button
+              variant="outlined"
+              sx={{ width: 'calc(100% - 20px)', m: 1 }}
+              color="primary"
+            >
+              <ExpandMoreIcon sx={{ mr: 1 }} />
+              {' '}
+              more
+            </Button>
+          </Link>
         )
       }
     </Paper>

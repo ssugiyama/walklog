@@ -223,14 +223,13 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           </FormGroup>
         </form>
         <Box sx={{ marginTop: 1, textAlign: 'right' }}>
-          <Button 
-            color="primary"
-            component={Link}
-            href={cancelUrl}
-            onClick={interceptLink}
-          >
-            cancel
-          </Button>
+          <Link href={cancelUrl} onClick={interceptLink}>
+            <Button 
+              color="primary"
+            >
+              cancel
+            </Button>
+          </Link>
           <Button 
             data-testid="submit-button" 
             disabled={isPending} 

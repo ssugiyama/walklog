@@ -119,11 +119,29 @@ const ItemBox = () => {
   return itemWillRender && 
     <Box data-testid="ItemBox">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
-        <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary" component={Link} href={upUrl}><ListIcon /></Fab>
-        <IconButton disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBackIcon /></IconButton>
-        <IconButton disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForwardIcon /></IconButton>
+        <Link href={upUrl}>
+          <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary"><ListIcon /></Fab>
+        </Link>
+        {prevUrl ? (
+          <Link href={prevUrl}>
+            <IconButton size="large"><NavigationArrowBackIcon /></IconButton>
+          </Link>
+        ) : (
+          <IconButton disabled size="large"><NavigationArrowBackIcon /></IconButton>
+        )}
+        {nextUrl ? (
+          <Link href={nextUrl}>
+            <IconButton size="large"><NavigationArrowForwardIcon /></IconButton>
+          </Link>
+        ) : (
+          <IconButton disabled size="large"><NavigationArrowForwardIcon /></IconButton>
+        )}
         {
-          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton component={Link} href={idToEditUrl(item?.id, searchParams)} size="large" data-testid="edit-button"><EditIcon /></IconButton>) : null
+          currentUser && item.uid && currentUser.uid === item.uid ? (
+            <Link href={idToEditUrl(item?.id, searchParams)}>
+              <IconButton size="large" data-testid="edit-button"><EditIcon /></IconButton>
+            </Link>
+          ) : null
         }
         {
           currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
