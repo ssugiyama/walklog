@@ -59,14 +59,14 @@ jest.mock('@/lib/utils/config', () => ({
 // Mock clipboard API
 Object.defineProperty(navigator, 'clipboard', {
   value: {
-    writeText: jest.fn().mockImplementation(async () => Promise.resolve()),
+    writeText: jest.fn().mockResolvedValue(undefined),
   },
   writable: true,
 })
 
 // Mock share API
 Object.defineProperty(navigator, 'share', {
-  value: jest.fn().mockImplementation(async () => Promise.resolve()),
+  value: jest.fn().mockResolvedValue(undefined),
   writable: true,
 })
 

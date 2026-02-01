@@ -96,9 +96,11 @@ const ItemBox = () => {
   useEffect(() => {
     if (deleteState && deleteState.serial > 0) {
       if (deleteState.idTokenExpired) {
-        startTransition(async () => {
-          await updateIdToken()
-          dispatchDelete(item?.id)
+        startTransition(() => {
+          void (async () => {
+            await updateIdToken()
+            dispatchDelete(item?.id)
+          })()
         })
       }
     }

@@ -6,7 +6,7 @@ import React, {
 import { createRoot } from 'react-dom/client'
 import { Box, Button } from '@mui/material'
 import moment from 'moment'
-import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal'
+import ConfirmModal, { APPEND_PATH_CONFIRM_INFO, ConfirmInfo } from './confirm-modal'
 import createGsiMapType from '../utils/gsi-map-type'
 import { useConfig } from '../utils/config'
 import { useSearchParams } from 'next/navigation'
@@ -70,7 +70,7 @@ const Map = (props) => {
   const mapElemRef = useRef<HTMLDivElement | null>(null)
   const downloadRef = useRef<HTMLAnchorElement | null>(null)
   const uploadRef = useRef<HTMLInputElement | null>(null)
-  const [confirmInfo, setConfirmInfo] = useState<{ open: boolean, resolve?: (boolean) => void }>({ open: false })
+  const [confirmInfo, setConfirmInfo] = useState<ConfirmInfo>({ open: false })
   const searchParams = useSearchParams()
   const filter = searchParams.get('filter')
   rc.filter = filter

@@ -25,18 +25,13 @@ import {
 } from '@mui/material'
 import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
-import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal'
+import ConfirmModal, { APPEND_PATH_CONFIRM_INFO, ConfirmInfo } from './confirm-modal'
 import { useConfig } from '../utils/config'
 import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 import { withDefault } from 'serialize-query-params/dist/withDefault'
 import { StringParam } from 'serialize-query-params/dist/params'
 
 const AUTO_GEOLOCATION_INTERVAL = 60000
-
-type ConfirmInfo = {
-  open: boolean
-  resolve?: (append: boolean) => void
-}
 
 const ToolBox = (props) => {
   const [mainState, dispatchMain] = useMainContext()
@@ -118,7 +113,7 @@ const ToolBox = (props) => {
   const locationChangeCB = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value), [])
   const submitLocationCB = useCallback((e: React.FocusEvent | React.KeyboardEvent) => {
     void (async () => {
-      if (!location) return
+      if (!location || !map || !marker) return
       if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return
       if (!geocoder.current) {
         await google.maps.importLibrary('geocoding')
@@ -134,7 +129,7 @@ const ToolBox = (props) => {
         }
       })
     })()
-  }, [location])
+  }, [location, map, marker])
 
   const closeButtonStyle: React.CSSProperties = {
     position: 'fixed',
