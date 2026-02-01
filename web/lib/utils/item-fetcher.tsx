@@ -34,8 +34,8 @@ export function ItemFetcher() {
       newData.current = data.rows[index]
       setData(newData)
     } else {
-      startTransition(async () => {
-        await dispatchGetItem(id)
+      startTransition(() => {
+        dispatchGetItem(id)
       })
     }
   }, [id, idToken])

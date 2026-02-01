@@ -73,9 +73,9 @@ const ItemBox = () => {
   const [isPending, startTransition] = useTransition()
   const [deleteState, dispatchDelete] = useActionState(deleteItemAction, initialDeleteState)
   const handleDelete = useCallback(() => {
-    startTransition(async () => {
+    startTransition(() => {
       if (window.confirm('Are you sure to delete?')) {
-        await dispatchDelete(item?.id)
+        dispatchDelete(item?.id)
       }
     })
   }, [item?.id])
@@ -94,15 +94,17 @@ const ItemBox = () => {
   }
   const prevUrl = data.prevId && idToShowUrl(data.prevId, searchParams)
   useEffect(() => {
-    if (deleteState.serial > 0) {
+    if (deleteState && deleteState.serial > 0) {
       if (deleteState.idTokenExpired) {
-        startTransition(async () => {
-          await updateIdToken()
-          await dispatchDelete(item?.id)
+        startTransition(() => {
+          void (async () => {
+            await updateIdToken()
+            dispatchDelete(item?.id)
+          })()
         })
       }
     }
-  }, [deleteState.serial])
+  }, [deleteState?.serial])
 
   const sxImageBox = {
     float: { xs: 'none', sm: 'left' },

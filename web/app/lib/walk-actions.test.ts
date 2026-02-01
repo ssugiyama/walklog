@@ -14,7 +14,7 @@ jest.mock('firebase-admin', () => {
     apps: [null],
     initializeApp: jest.fn(),
     auth: jest.fn(() => ({
-      verifyIdToken: jest.fn(() => Promise.resolve({ uid: 'testUserId' })),
+      verifyIdToken: jest.fn().mockResolvedValue({ uid: 'testUserId' }),
       listUsers: jest.fn().mockResolvedValue({ users: [1, 2] }),
     })),
   }

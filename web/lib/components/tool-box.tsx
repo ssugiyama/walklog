@@ -25,18 +25,13 @@ import {
 } from '@mui/material'
 import { useMapContext } from '../utils/map-context'
 import { useMainContext } from '../utils/main-context'
-import ConfirmModal, { APPEND_PATH_CONFIRM_INFO } from './confirm-modal'
+import ConfirmModal, { APPEND_PATH_CONFIRM_INFO, ConfirmInfo } from './confirm-modal'
 import { useConfig } from '../utils/config'
 import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 import { withDefault } from 'serialize-query-params/dist/withDefault'
 import { StringParam } from 'serialize-query-params/dist/params'
 
 const AUTO_GEOLOCATION_INTERVAL = 60000
-
-type ConfirmInfo = {
-  open: boolean
-  resolve?: (append: boolean) => void
-}
 
 const ToolBox = (props) => {
   const [mainState, dispatchMain] = useMainContext()
@@ -82,16 +77,18 @@ const ToolBox = (props) => {
   }, [autoGeolocation])
   const toggleRecordCB = useCallback(() => {
     if (!autoGeolocation && navigator.geolocation) {
-      getCurrentPosition(async (pos) => {
-        dispatchMain({ type: 'OPEN_SNACKBAR', payload: 'start following your location' })
-        const append: boolean = await new Promise((resolve) => {
-          if (selectedPath) {
-            setConfirmInfo({ open: true, resolve })
-          } else {
-            resolve(false)
-          }
-        })
-        addCurrentPosition(pos, append)
+      getCurrentPosition((pos) => {
+        void (async () => {
+          dispatchMain({ type: 'OPEN_SNACKBAR', payload: 'start following your location' })
+          const append: boolean = await new Promise((resolve) => {
+            if (selectedPath) {
+              setConfirmInfo({ open: true, resolve })
+            } else {
+              resolve(false)
+            }
+          })
+          addCurrentPosition(pos, append)
+        })()
       }, () => {
         window.alert('Unable to retrieve your location')
       })
@@ -114,23 +111,25 @@ const ToolBox = (props) => {
   }, [marker, map])
 
   const locationChangeCB = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value), [])
-  const submitLocationCB = useCallback(async (e: React.FocusEvent | React.KeyboardEvent) => {
-    if (!location) return
-    if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return
-    if (!geocoder.current) {
-      await google.maps.importLibrary('geocoding')
-      geocoder.current = new google.maps.Geocoder()
-    }
-    void geocoder.current.geocode({ address: location }, (results, status) => {
-      if (status === google.maps.GeocoderStatus.OK) {
-        marker.position = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() }
-        marker.map = map
-        map.setCenter(marker.position)
-      } else {
-        window.alert(`Geocode was not successful for the following reason: ${status}`)
+  const submitLocationCB = useCallback((e: React.FocusEvent | React.KeyboardEvent) => {
+    void (async () => {
+      if (!location || !map || !marker) return
+      if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return
+      if (!geocoder.current) {
+        await google.maps.importLibrary('geocoding')
+        geocoder.current = new google.maps.Geocoder()
       }
-    })
-  }, [location])
+      void geocoder.current.geocode({ address: location }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK) {
+          marker.position = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() }
+          marker.map = map
+          map.setCenter(marker.position)
+        } else {
+          window.alert(`Geocode was not successful for the following reason: ${status}`)
+        }
+      })
+    })()
+  }, [location, map, marker])
 
   const closeButtonStyle: React.CSSProperties = {
     position: 'fixed',
