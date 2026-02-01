@@ -231,12 +231,14 @@ const Map = (props) => {
         const item = rc.clickedItem
         const url = idToShowUrl(item.id, searchParams)
         content = (
-          <Button component={Link} href={url} onClick={rc.interceptLink}>
-            {item.date}
-            :
-            {' '}
-            {item.title}
-          </Button>
+          <Link href={url} onClick={rc.interceptLink}>
+            <Button>
+              {item.date}
+              :
+              {' '}
+              {item.title}
+            </Button>
+          </Link>
         )
       }
       const root = createRoot(document.getElementById('path-info-window-content'))

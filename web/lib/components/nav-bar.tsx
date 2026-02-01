@@ -28,7 +28,7 @@ import { useSearchParams } from 'next/navigation'
 
 const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const searchParams = useSearchParams()
-  const [mainState, dispatchMain, interceptLink] = useMainContext()
+  const [mainState, dispatchMain] = useMainContext()
   const { overlay } = mainState
   const config = useConfig()
   const provider = useRef<GoogleAuthProvider | null>(null)
@@ -68,21 +68,25 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
     setAccountAnchorEl(null)
   }
   const EndMenuItem = useCallback((prps: React.ComponentProps<typeof MenuItem> & { component?: typeof Link, href?: string }) => {
-    const { onClick, children } = prps
-    const cpProps = { ...prps }
-    delete cpProps.onClick
-    return (
+    const { onClick, children, component, href, ...otherProps } = prps
+    const menuItem = (
       <MenuItem
         onClick={(ev) => {
           closeAllMenus()
           if (onClick) onClick(ev)
           return true
         }}
-        {...cpProps}
+        {...otherProps}
       >
         {children}
       </MenuItem>
     )
+    
+    if (component === Link && href) {
+      return <Link href={href}>{menuItem}</Link>
+    }
+    
+    return menuItem
   }, [])
 
   return (
@@ -117,7 +121,7 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
               </MenuItem>
             ),
             (<Divider key="divider" />),
-            (<EndMenuItem key="new walk" component={Link} href={`/new?${searchParams.toString()}`} onClick={interceptLink}>new walk...</EndMenuItem>),
+            (<EndMenuItem key="new walk" component={Link} href={`/new?${searchParams.toString()}`}>new walk...</EndMenuItem>),
             (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>),
           ] : [<EndMenuItem key="login" onClick={handleLogin}>login with Google</EndMenuItem>]
         }

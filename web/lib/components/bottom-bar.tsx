@@ -110,7 +110,9 @@ const BottomBar = (props) => {
     controls = (
       <Box sx={sxBottomBarGroupBody}>
         <Tooltip title="cancel" placement="top">
-          <IconButton data-testid="cancel-button" component={Link} href={cancelUrl} onClick={interceptLink} size="large"><NavigationCancel /></IconButton>
+          <Link href={cancelUrl} onClick={interceptLink}>
+            <IconButton data-testid="cancel-button" size="large"><NavigationCancel /></IconButton>
+          </Link>
         </Tooltip>
       </Box>
     )
@@ -131,11 +133,23 @@ const BottomBar = (props) => {
       <div key="item">
         <Box sx={sxBottomBarGroupBody}>
           <Tooltip title="prev" placement="top">
-            <IconButton data-testid="prev-button" disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBack /></IconButton>
+            {prevUrl ? (
+              <Link href={prevUrl}>
+                <IconButton data-testid="prev-button" size="large"><NavigationArrowBack /></IconButton>
+              </Link>
+            ) : (
+              <IconButton data-testid="prev-button" disabled size="large"><NavigationArrowBack /></IconButton>
+            )}
           </Tooltip>
           <Typography variant="body1" sx={{ display: 'inline', flexShrink: 1 }} noWrap>{title}</Typography>
           <Tooltip title="next" placement="top">
-            <IconButton data-testid="next-button" disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForward /></IconButton>
+            {nextUrl ? (
+              <Link href={nextUrl}>
+                <IconButton data-testid="next-button" size="large"><NavigationArrowForward /></IconButton>
+              </Link>
+            ) : (
+              <IconButton data-testid="next-button" disabled size="large"><NavigationArrowForward /></IconButton>
+            )}
           </Tooltip>
         </Box>
       </div>
@@ -189,7 +203,9 @@ const BottomBar = (props) => {
     controls = (
       <Box sx={sxBottomBarGroupBody}>
         <Tooltip title="home" placement="top">
-          <IconButton data-testid="home-button" component={Link} href="/" size="large"><Home /></IconButton>
+          <Link href="/">
+            <IconButton data-testid="home-button" size="large"><Home /></IconButton>
+          </Link>
         </Tooltip>
       </Box>
     )

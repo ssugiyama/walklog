@@ -8,7 +8,9 @@ import Fab from '@mui/material/Fab'
 export default function Error({error}: {error?: Error}) {
   return (
     <Paper sx={{ width: '100%', textAlign: 'center', padding: 2, minHeight: 100 }}>
-      <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary" component={Link} href="/"><ListIcon /></Fab>
+      <Link href="/">
+        <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary"><ListIcon /></Fab>
+      </Link>
       <Typography variant="h6">Error</Typography>
       <Typography variant="body1">{error?.message}</Typography>
     </Paper>
