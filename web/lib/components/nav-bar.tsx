@@ -28,7 +28,7 @@ import { useSearchParams } from 'next/navigation'
 
 const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const searchParams = useSearchParams()
-  const [mainState, dispatchMain, interceptLink] = useMainContext()
+  const [mainState, dispatchMain] = useMainContext()
   const { overlay } = mainState
   const config = useConfig()
   const provider = useRef<GoogleAuthProvider | null>(null)
