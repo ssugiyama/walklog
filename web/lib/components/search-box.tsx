@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import MuiLink from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
 import TableHead from '@mui/material/TableHead'
@@ -14,7 +15,6 @@ import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Box from '@mui/material/Box'
 import Avatar from '@mui/material/Avatar'
-import MuiLink from '@mui/material/Link'
 import SearchForm from './search-form'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
@@ -146,16 +146,8 @@ const SearchBox = () => {
                     )
                   }
                 </TableCell>
-                <TableCell sx={sxCell}>
-                  <Link href={idToShowUrl(item.id, searchParams)}>
-                    <MuiLink color="primary" underline="hover">{item.date}</MuiLink>
-                  </Link>
-                </TableCell>
-                <TableCell sx={sxCell}>
-                  <Link href={idToShowUrl(item.id, searchParams)}>
-                    <MuiLink color="primary" underline="hover">{item.title}</MuiLink>
-                  </Link>
-                </TableCell>
+                <TableCell sx={sxCell}><MuiLink href={idToShowUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.date}</MuiLink></TableCell>
+                <TableCell sx={sxCell}><MuiLink href={idToShowUrl(item.id, searchParams)} component={Link} color="primary" underline="hover">{item.title}</MuiLink></TableCell>
                 <TableCell sx={sxCell}>
                   {
                     showDistance && (filter === 'hausdorff' || filter === 'frechet')  ?
@@ -171,17 +163,17 @@ const SearchBox = () => {
       {
         offset > 0 &&
         (
-          <Link href={moreUrl} scroll={false}>
-            <Button
-              variant="outlined"
-              sx={{ width: 'calc(100% - 20px)', m: 1 }}
-              color="primary"
-            >
-              <ExpandMoreIcon sx={{ mr: 1 }} />
-              {' '}
-              more
-            </Button>
-          </Link>
+          <Button
+            variant="outlined"
+            sx={{ width: 'calc(100% - 20px)', m: 1 }}
+            color="primary"
+            component={Link} 
+            href={moreUrl}
+          >
+            <ExpandMoreIcon sx={{ mr: 1 }} />
+            {' '}
+            more
+          </Button>
         )
       }
     </Paper>
