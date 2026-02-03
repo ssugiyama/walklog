@@ -214,12 +214,10 @@ const SearchForm = () => {
 
       </AccordionDetails>
       <AccordionActions>
-        <Link href="/">
-          <Button variant="outlined" color="primary">
-            <RefreshIcon sx={{ marginRight: 1 }} />
-              reset
-          </Button>
-        </Link>
+        <Button variant="outlined" color="primary" component={Link} href="/">
+          <RefreshIcon sx={{ marginRight: 1 }} />
+            reset
+        </Button>
       </AccordionActions>
     </Accordion>
   )
