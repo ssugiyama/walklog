@@ -59,7 +59,7 @@ Copy the environment template and configure:
 
 ```bash
 cp .env.example .env
-cp web/.env.examples web/.env
+cp web/.env.example web/.env
 ```
 
 Edit `.env` with your configuration:
