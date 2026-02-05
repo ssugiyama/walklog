@@ -852,8 +852,7 @@ describe('getConfig', () => {
   it('should return the correct configuration object', async () => {
     const mockShapeStyles = { style: 'mockStyle' }
     const mockTheme = { palette: {} }
-    const mockFirebaseConfig = { key: 'value' }
-    const mockPackageJson = { version: '1.0.0' };
+    const mockFirebaseConfig = { key: 'value' };
     (fs.readFile as jest.Mock).mockImplementation(async (path) => { // eslint-disable-line @typescript-eslint/require-await
       if (path === './default-shape-styles.json') {
         return Buffer.from(JSON.stringify(mockShapeStyles))
@@ -861,18 +860,15 @@ describe('getConfig', () => {
       if (path === './default-theme.json') {
         return Buffer.from(JSON.stringify(mockTheme))
       }
-      if (path === './package.json') {
-        return Buffer.from(JSON.stringify(mockPackageJson))
-      }
       return Buffer.from(JSON.stringify(mockFirebaseConfig))
     })
+    process.env.APP_VERSION = '1.2.3'
     const result = await getConfig()
-
     expect(result).toEqual({
       googleApiKey: process.env.GOOGLE_API_KEY,
       googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
       openUserMode: false,
-      appVersion: '1.0.0',
+      appVersion: '1.2.3',
       defaultCenter: process.env.DEFAULT_CENTER,
       defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
       defaultRadius: 500,

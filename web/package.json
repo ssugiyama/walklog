@@ -1,5 +1,4 @@
 {
-  "version": "0.9.3",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "NODE_ENV=production next build",

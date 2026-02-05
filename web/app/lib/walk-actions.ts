@@ -42,13 +42,6 @@ const loadFirebaseConfig = async () => {
   }
 }
 
-const getPackageVersion = async (): Promise<string> => {
-  const content = await fs.readFile('./package.json')
-  console.warn(content.toString())
-  const packageJson = JSON.parse(content.toString()) as { version: string }
-  return packageJson.version
-}
-
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
   const shapeStylesContent = await fs.readFile(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
@@ -60,7 +53,7 @@ export const getConfig = async (): Promise<ConfigT> => {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
     openUserMode: !!process.env.OPEN_USER_MODE,
-    appVersion: await getPackageVersion(),
+    appVersion: process.env.APP_VERSION || 'dev',
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
     defaultRadius: 500,
