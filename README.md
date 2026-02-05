@@ -59,7 +59,6 @@ Copy the environment template and configure:
 
 ```bash
 cp .env.example .env
-cp web/.env.example web/.env
 ```
 
 Edit `.env` with your configuration:
@@ -70,7 +69,7 @@ POSTGRES_USER=walklog
 POSTGRES_PASSWORD=walklog
 ```
 
-Edit `web/.env` with your configuration:
+Edit `web/.env` or add `web/.env.local` with your configuration:
 
 ```bash
 SITE_NAME=Walklog
