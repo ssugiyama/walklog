@@ -1,6 +1,4 @@
 .next/**
 .env.*
-!.env.example
-.env
 coverage/**
 node_modules/**
