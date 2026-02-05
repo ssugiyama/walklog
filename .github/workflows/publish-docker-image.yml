@@ -46,7 +46,9 @@ jobs:
           labels: ${{ steps.web_meta.outputs.labels }}
         env:
           NODE_ENV: production
-      
+        build-args: |
+          APP_VERSION=${{ github.event.release.tag_name }}
+          
       - name: Generate artifact attestation for Web
         uses: actions/attest-build-provenance@v3
         with:
