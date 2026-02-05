@@ -3,7 +3,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-
+    inputs:
+      app_version:
+        type: string
+        required: false
+        description: 'App version'
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository }}
@@ -44,11 +48,11 @@ jobs:
           push: true
           tags: ${{ steps.web_meta.outputs.tags }}
           labels: ${{ steps.web_meta.outputs.labels }}
+          build-args: |
+            APP_VERSION=${{ github.event.release.tag_name || inputs.app_version }}
         env:
           NODE_ENV: production
-        build-args: |
-          APP_VERSION=${{ github.event.release.tag_name }}
-          
+
       - name: Generate artifact attestation for Web
         uses: actions/attest-build-provenance@v3
         with:
