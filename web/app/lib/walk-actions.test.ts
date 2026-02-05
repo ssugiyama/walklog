@@ -860,9 +860,6 @@ describe('getConfig', () => {
       if (path === './default-theme.json') {
         return Buffer.from(JSON.stringify(mockTheme))
       }
-      if (path === './package.json') {
-        return Buffer.from(JSON.stringify(mockPackageJson))
-      }
       return Buffer.from(JSON.stringify(mockFirebaseConfig))
     })
     process.env.APP_VERSION = '1.2.3'
