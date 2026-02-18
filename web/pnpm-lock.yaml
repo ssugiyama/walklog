@@ -110,8 +110,8 @@ importers:
         specifier: ^9.39.2
         version: 9.39.2
       '@googlemaps/jest-mocks':
-        specifier: ^2.22.6
-        version: 2.22.6
+        specifier: ^2.22.8
+        version: 2.22.8
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1
@@ -767,8 +767,8 @@ packages:
     resolution: {integrity: sha512-n2FjE7NAOYyshogdc7KQOl/VZb4sneqPjWouSyia9CMDdMhRX5+RIbqalNmC7LOLzuLAN89VlF2HvG8na9G+zQ==}
     engines: {node: '>=14'}
 
-  '@googlemaps/jest-mocks@2.22.6':
-    resolution: {integrity: sha512-t3n0l03OdGPEUCfWVC1a4xGgcE21+58tGdNsIjGWsTbsaMZBOfCxwTHvzmAx/H0dyPeKZ4uWmtahsyUQIcGInA==}
+  '@googlemaps/jest-mocks@2.22.8':
+    resolution: {integrity: sha512-r0Gh5F/KpDWVgnyQQYTkFbldxY9XUU4FPxv6Gs8nulvbEPR1fvnbTUXEzJp2O1h0RyK2VJLh1jk0mDwhUneFjQ==}
 
   '@googlemaps/js-api-loader@2.0.2':
     resolution: {integrity: sha512-bKVuTqatS8Jven5aFqVB7rCHF1VFEzpzyi0ruzO0GUR+A7m9oMqMgtnmpANj7kMYEvvhty8Fk7TnJ1MKjWHu+Q==}
@@ -5273,7 +5273,7 @@ snapshots:
       - supports-color
     optional: true
 
-  '@googlemaps/jest-mocks@2.22.6': {}
+  '@googlemaps/jest-mocks@2.22.8': {}
 
   '@googlemaps/js-api-loader@2.0.2':
     dependencies:
