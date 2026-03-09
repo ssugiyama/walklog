@@ -36,7 +36,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Web
         id: web_meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web
 
@@ -62,7 +62,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for DB
         id: db_meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-db
 
