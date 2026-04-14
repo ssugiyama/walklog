@@ -42,7 +42,7 @@ jobs:
 
       - name: Build and push Web Docker image
         id: web_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: web
           push: true
@@ -68,7 +68,7 @@ jobs:
 
       - name: Build and push DB Docker image
         id: db_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: db
           push: true
