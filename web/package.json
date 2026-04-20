@@ -14,7 +14,7 @@
     "@googlemaps/js-api-loader": "^2.0.2",
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.9",
-    "@mui/material-nextjs": "^7.3.7",
+    "@mui/material-nextjs": "^9.0.0",
     "@types/google.maps": "^3.58.1",
     "@types/node": "^24.10.1",
     "@types/react": "19.2.7",
