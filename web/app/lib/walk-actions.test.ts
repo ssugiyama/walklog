@@ -52,7 +52,7 @@ jest.mock('sequelize', () => {
 })
 
 jest.mock('next/cache', () => ({
-  unstable_cacheTag: jest.fn(),
+  cacheTag: jest.fn(),
   revalidateTag: jest.fn(),
 }))
 

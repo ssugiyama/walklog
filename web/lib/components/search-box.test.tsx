@@ -33,7 +33,7 @@ jest.mock('../utils/config', () => ({
   useConfig: jest.fn(() => ({})),
 }))
 
-jest.mock('@/lib/components/search-form', () => function SearchForm() {
+jest.mock('./search-form', () => function SearchForm() {
   return (<div data-testid="search-form">Search Form</div>)
 })
 

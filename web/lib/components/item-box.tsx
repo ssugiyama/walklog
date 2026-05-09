@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useTransition, useActionState 
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import Paper from '@mui/material/Paper'
-import IconButton from '@mui/material/IconButton'
+import { IconButton } from '@mui/material'
 import Fab from '@mui/material/Fab'
 import NavigationArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import NavigationArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -120,15 +120,15 @@ const ItemBox = () => {
     <Box data-testid="ItemBox">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
         <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary" component={Link} href={upUrl}><ListIcon /></Fab>
-        <IconButton disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBackIcon /></IconButton>
-        <IconButton disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForwardIcon /></IconButton>
+        <IconButton nativeButton={false} disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBackIcon /></IconButton>
+        <IconButton nativeButton={false} disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForwardIcon /></IconButton>
         {
           currentUser && item.uid && currentUser.uid === item.uid ? (
-            <IconButton size="large" data-testid="edit-button" component={Link} href={idToEditUrl(item?.id, searchParams)}><EditIcon /></IconButton>
+            <IconButton nativeButton={false} size="large" data-testid="edit-button" component={Link} href={idToEditUrl(item?.id, searchParams)}><EditIcon /></IconButton>
           ) : null
         }
         {
-          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
+          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton nativeButton={false} disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
         }
         <Typography variant="h6" sx={{ fontSize: '100%' }}>{title ?? 'not found'}</Typography>
         <Box sx={{ textAlign: 'right' }}>

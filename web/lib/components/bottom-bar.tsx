@@ -1,6 +1,5 @@
 import React from 'react'
 import Tooltip from '@mui/material/Tooltip'
-import IconButton from '@mui/material/IconButton'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import NavigationRefresh from '@mui/icons-material/Block'
@@ -20,6 +19,7 @@ import { useSearchParams, usePathname, useParams } from 'next/navigation'
 import { useConfig } from '../utils/config'
 import { useQueryParam, StringParam, withDefault, NumberParam } from 'use-query-params'
 import { useMainContext } from '../utils/main-context'
+import IconButton from '@mui/material/IconButton'
 
 const BottomBar = (props) => {
   const config = useConfig()
@@ -110,7 +110,7 @@ const BottomBar = (props) => {
     controls = (
       <Box sx={sxBottomBarGroupBody}>
         <Tooltip title="cancel" placement="top">
-          <IconButton data-testid="cancel-button" component={Link} href={cancelUrl} onClick={interceptLink} size="large"><NavigationCancel /></IconButton>
+          <IconButton nativeButton={false} data-testid="cancel-button" component={Link} href={cancelUrl} onClick={interceptLink} size="large"><NavigationCancel /></IconButton>
         </Tooltip>
       </Box>
     )
@@ -131,11 +131,11 @@ const BottomBar = (props) => {
       <div key="item">
         <Box sx={sxBottomBarGroupBody}>
           <Tooltip title="prev" placement="top">
-            <IconButton data-testid="prev-button" disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBack /></IconButton>
+            <IconButton nativeButton={false} data-testid="prev-button" disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBack /></IconButton>
           </Tooltip>
           <Typography variant="body1" sx={{ display: 'inline', flexShrink: 1 }} noWrap>{title}</Typography>
           <Tooltip title="next" placement="top">
-            <IconButton data-testid="next-button" disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForward /></IconButton>
+            <IconButton nativeButton={false} data-testid="next-button" disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForward /></IconButton>
           </Tooltip>
         </Box>
       </div>
@@ -179,7 +179,7 @@ const BottomBar = (props) => {
           {filter === 'cities' &&
             (
               <Tooltip title="clear cities" placement="top">
-                <IconButton onClick={searchFormChangeCBs.cities} size="large"><NavigationRefresh /></IconButton>
+                <IconButton nativeButton={false} onClick={searchFormChangeCBs.cities} size="large"><NavigationRefresh /></IconButton>
               </Tooltip>
             )}
         </Box>
@@ -189,7 +189,7 @@ const BottomBar = (props) => {
     controls = (
       <Box sx={sxBottomBarGroupBody}>
         <Tooltip title="home" placement="top">
-          <IconButton data-testid="home-button" component={Link} href="/" size="large"><Home /></IconButton>
+          <IconButton nativeButton={false} data-testid="home-button" component={Link} href="/" size="large"><Home /></IconButton>
         </Tooltip>
       </Box>
     )

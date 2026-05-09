@@ -128,7 +128,7 @@ const Main = ({
                 paddingLeft: toolBoxOpened ? 8 : 'calc(env(safe-area-inset-left) + 8px)',
                 paddingRight: 'calc(env(safe-area-inset-right) + 8px)',
               }}>
-                <Box paddingBottom={5} mx="auto">
+                <Box sx={{ paddingBottom: 5, mx: 'auto' }}>
                   {children}
                 </Box>
               </Box>

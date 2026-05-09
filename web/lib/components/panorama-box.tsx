@@ -1,7 +1,6 @@
 import React, {
   useRef, useEffect, useCallback,
 } from 'react'
-import IconButton from '@mui/material/IconButton'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Typography from '@mui/material/Typography'
 import Switch from '@mui/material/Switch'
@@ -14,6 +13,7 @@ import { useMapContext } from '../utils/map-context'
 import { useData } from '../utils/data-context'
 import { useMainContext } from '../utils/main-context'
 import { WalkT } from '@/types'
+import IconButton from '@mui/material/IconButton'
 
 type PanoramaRefs = {
   panorama?: google.maps.StreetViewPanorama | null
@@ -171,7 +171,7 @@ const PanoramaBox = () => {
       <Box data-testid="panorama-box" sx={{ width: '100%', height: '30vh', display: overlay ? 'none' : 'block' }} ref={bodyRef} />
       <Box sx={{
         display: 'flex',
-        flextDirection: 'row',
+        flexDirection: 'row',
         width: '100%',
         textAlign: 'center',
         height: 36,

@@ -23,7 +23,7 @@ const config = {
   collectCoverage: true,
   coverageReporters: ['text', 'lcov', 'json', 'html'],
   coverageDirectory: '<rootDir>/coverage',
-  testEnvironment: 'jest-fixed-jsdom',
+  testEnvironment: 'jsdom',
 }
 
 module.exports = config

@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { NumberField as BaseNumberField } from '@base-ui/react/number-field'
-import IconButton from '@mui/material/IconButton'
+import { IconButton } from '@mui/material'
 import FormControl from '@mui/material/FormControl'
 import Input from '@mui/material/Input'
 import InputAdornment from '@mui/material/InputAdornment'
