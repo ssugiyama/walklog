@@ -6,7 +6,7 @@ const ContentBox = (props) => (
     data-testid="ContentBox"
     {...props}
   >
-    <Box paddingBottom={5} mx="auto">
+    <Box sx={{ paddingBottom: 5, mx: 'auto' }}>
     </Box>
   </Box>
 )

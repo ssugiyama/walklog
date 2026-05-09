@@ -1,10 +1,8 @@
-import React, {
-  useEffect, useState, useCallback, useRef,
-} from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
-import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
+import { IconButton } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
@@ -13,9 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import Link from 'next/link'
 import { useConfig } from '../utils/config'
 import { useUserContext } from '../utils/user-context'
-import {
-  initializeApp,
-} from 'firebase/app'
+import { initializeApp } from 'firebase/app'
 import {
   getAuth,
   GoogleAuthProvider,
@@ -32,18 +28,30 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const { overlay } = mainState
   const config = useConfig()
   const provider = useRef<GoogleAuthProvider | null>(null)
-  const [accountAnchorEl, setAccountAnchorEl] = useState<HTMLElement | null>(null)
+  const [accountAnchorEl, setAccountAnchorEl] = useState<HTMLElement | null>(
+    null,
+  )
   const { currentUser, setCurrentUser } = useUserContext()
-  const handleMenuOpen = (setter: typeof setAccountAnchorEl) => (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation()
-    setter(event.currentTarget)
-  }
-  const accountMenuOpenCB = useCallback(handleMenuOpen(setAccountAnchorEl), [])
-  const handleMenuClose = (setter: typeof setAccountAnchorEl) => (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation()
-    setter(null)
-  }
-  const accountMenuCloseCB = useCallback(handleMenuClose(setAccountAnchorEl), [])
+  const handleMenuOpen =
+        (setter: typeof setAccountAnchorEl) =>
+          (event: React.MouseEvent<HTMLElement>) => {
+            event.stopPropagation()
+            setter(event.currentTarget)
+          }
+  const accountMenuOpenCB = useCallback(
+    handleMenuOpen(setAccountAnchorEl),
+    [],
+  )
+  const handleMenuClose =
+        (setter: typeof setAccountAnchorEl) =>
+          (event: React.MouseEvent<HTMLElement>) => {
+            event.stopPropagation()
+            setter(null)
+          }
+  const accountMenuCloseCB = useCallback(
+    handleMenuClose(setAccountAnchorEl),
+    [],
+  )
 
   const handleLogin = useCallback((_ev: React.MouseEvent<HTMLLIElement>) => {
     signInWithPopup(getAuth(), provider.current).catch((error: Error) => {
@@ -67,23 +75,31 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const closeAllMenus = () => {
     setAccountAnchorEl(null)
   }
-  const EndMenuItem = useCallback((prps: React.ComponentProps<typeof MenuItem> & { component?: typeof Link, href?: string }) => {
-    const { onClick, children } = prps
-    const cpProps = { ...prps }
-    delete cpProps.onClick
-    return (
-      <MenuItem
-        onClick={(ev) => {
-          closeAllMenus()
-          if (onClick) onClick(ev)
-          return true
-        }}
-        {...cpProps}
-      >
-        {children}
-      </MenuItem>
-    )
-  }, [])
+  const EndMenuItem = useCallback(
+    (
+      prps: React.ComponentProps<typeof MenuItem> & {
+                component?: typeof Link;
+                href?: string;
+            },
+    ) => {
+      const { onClick, children } = prps
+      const cpProps = { ...prps }
+      delete cpProps.onClick
+      return (
+        <MenuItem
+          onClick={(ev) => {
+            closeAllMenus()
+            if (onClick) onClick(ev)
+            return true
+          }}
+          {...cpProps}
+        >
+          {children}
+        </MenuItem>
+      )
+    },
+    [],
+  )
 
   return (
     <AppBar position="static" enableColorOnDark {...props}>
@@ -99,9 +115,32 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
         >
           <MenuIcon />
         </IconButton>
-        <Typography variant="h5" component="a" color="inherit" sx={{ flex: 1, cursor: 'pointer' }} onClick={() => { window.location.href = '/' }}>Walklog</Typography>
-        <IconButton onClick={accountMenuOpenCB} color="inherit" size="large" data-testid="account-button">
-          {currentUser ? <img alt="user profile" style={{ width: 24, borderRadius: '50%' }} src={currentUser.photoURL} /> : <AccountCircleIcon />}
+        <Typography
+          variant="h5"
+          component="a"
+          color="inherit"
+          sx={{ flex: 1, cursor: 'pointer' }}
+          onClick={() => {
+            window.location.href = '/'
+          }}
+        >
+                    Walklog
+        </Typography>
+        <IconButton
+          onClick={accountMenuOpenCB}
+          color="inherit"
+          size="large"
+          data-testid="account-button"
+        >
+          {currentUser ? (
+            <img
+              alt="user profile"
+              style={{ width: 24, borderRadius: '50%' }}
+              src={currentUser.photoURL}
+            />
+          ) : (
+            <AccountCircleIcon />
+          )}
         </IconButton>
       </Toolbar>
       <Menu
@@ -109,18 +148,29 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
         open={Boolean(accountAnchorEl)}
         onClose={accountMenuCloseCB}
       >
-        {
-          currentUser ? [
-            (
-              <MenuItem key="label" disabled>
-                Logged in as {currentUser.displayName}
-              </MenuItem>
-            ),
-            (<Divider key="divider" />),
-            (<EndMenuItem key="new walk" component={Link} href={`/new?${searchParams.toString()}`} onClick={interceptLink}>new walk...</EndMenuItem>),
-            (<EndMenuItem key="logout" onClick={handleLogout}>logout</EndMenuItem>),
-          ] : [<EndMenuItem key="login" onClick={handleLogin}>login with Google</EndMenuItem>]
-        }
+        {currentUser
+          ? [
+            <MenuItem key="label" disabled>
+                              Logged in as {currentUser.displayName}
+            </MenuItem>,
+            <Divider key="divider" />,
+            <EndMenuItem
+              key="new walk"
+              component={Link}
+              href={`/new?${searchParams.toString()}`}
+              onClick={interceptLink}
+            >
+                              new walk...
+            </EndMenuItem>,
+            <EndMenuItem key="logout" onClick={handleLogout}>
+                              logout
+            </EndMenuItem>,
+          ]
+          : [
+            <EndMenuItem key="login" onClick={handleLogin}>
+                              login with Google
+            </EndMenuItem>,
+          ]}
       </Menu>
     </AppBar>
   )
