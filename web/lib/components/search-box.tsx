@@ -73,7 +73,7 @@ const SearchBox = () => {
   return (
     <Paper sx={{ p: 1 }} data-testid="SearchBox">
       <SearchForm />
-      <Box display="flex" sx={{ m: 1 }}>
+      <Box sx={{ m: 1, display: 'flex' }}>
         <Typography variant="body1" sx={{ display: 'inline-block' }}>
           {
             (() => {
