@@ -15,7 +15,7 @@ export const sequelize = new Sequelize(
     dialectModule: pg as object,
     dialectOptions: {
       ssl: process.env.DB_SSL === 'true' ? {
-        required: process.env.DB_SSL === 'true',
+        required: true,
         rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
         ca: process.env.DB_SSL_CA ? Buffer.from(process.env.DB_SSL_CA, 'base64').toString('utf-8') : undefined,
         key: process.env.DB_SSL_KEY ? Buffer.from(process.env.DB_SSL_KEY, 'base64').toString('utf-8') : undefined,
