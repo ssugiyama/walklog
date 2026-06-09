@@ -117,6 +117,11 @@ THEME_COLOR="#3874cb"
 | `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
 | `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
 | `DB_URL` | PostgreSQL connection string | Yes *|
+| `DB_SSL` | Enable SSL for the DB connection (`true`/`false`) | No |
+| `DB_SSL_REJECT_UNAUTHORIZED` | Reject unauthorized/self-signed certificates (`false` to allow) | No |
+| `DB_SSL_CA` | Base64-encoded SSL CA certificate (PEM) | No |
+| `DB_SSL_KEY` | Base64-encoded SSL client key (PEM) | No |
+| `DB_SSL_CERT` | Base64-encoded SSL client certificate (PEM) | No |
 | `APP_VERSION` | Version string | No |
 
 * if using docker, **DB_URL** is provided as an environment variable.
