@@ -1,0 +1,272 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.areas": {
+      "name": "areas",
+      "schema": "",
+      "columns": {
+        "gid": {
+          "name": "gid",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "jcode": {
+          "name": "jcode",
+          "type": "varchar(254)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ken": {
+          "name": "ken",
+          "type": "varchar(254)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sicho": {
+          "name": "sicho",
+          "type": "varchar(254)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gun": {
+          "name": "gun",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "seirei": {
+          "name": "seirei",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sikuchoson": {
+          "name": "sikuchoson",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city_eng": {
+          "name": "city_eng",
+          "type": "varchar(254)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "p_num": {
+          "name": "p_num",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "h_num": {
+          "name": "h_num",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shape_leng": {
+          "name": "shape_leng",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shape_area": {
+          "name": "shape_area",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "the_geom": {
+          "name": "the_geom",
+          "type": "geometry(MultiPolygon,4326)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "areas_the_geom_idx": {
+          "name": "areas_the_geom_idx",
+          "columns": [
+            {
+              "expression": "the_geom",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gist_geometry_ops_2d",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.walks": {
+      "name": "walks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "length": {
+          "name": "length",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "draft": {
+          "name": "draft",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "path": {
+          "name": "path",
+          "type": "geometry",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "uid": {
+          "name": "uid",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "walks_date": {
+          "name": "walks_date",
+          "columns": [
+            {
+              "expression": "date",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "date_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "walks_draft": {
+          "name": "walks_draft",
+          "columns": [
+            {
+              "expression": "draft",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "bool_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "walks_path": {
+          "name": "walks_path",
+          "columns": [
+            {
+              "expression": "path",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gist_geometry_ops_2d",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "enforce_dims_path": {
+          "name": "enforce_dims_path",
+          "value": "st_ndims(path) = 2"
+        },
+        "enforce_geotype_path": {
+          "name": "enforce_geotype_path",
+          "value": "(geometrytype(path) = 'LINESTRING'::text) OR (path IS NULL)"
+        },
+        "enforce_srid_path": {
+          "name": "enforce_srid_path",
+          "value": "st_srid(path) = 4326"
+        }
+      },
+      "policies": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {}
+  }
+}

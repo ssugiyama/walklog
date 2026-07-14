@@ -1,19 +1,21 @@
 'use server'
 
-import Sequelize from 'sequelize'
-import { sequelize, Walk, Area, EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH, WalkAttributes } from '../../lib/db/models'
-import { 
-  CityParams, 
-  CityT, 
-  SearchProps, 
-  UserT, 
+import { db } from '../../lib/drizzle/db'
+import { walks, areas, coordinatesToWKT } from '../../lib/drizzle/schema'
+import { sql, and, or, inArray, eq, asc, desc, getColumns, SQL } from 'drizzle-orm'
+import {
+  CityParams,
+  CityT,
+  SearchProps,
+  UserT,
   BaseState,
-  SearchState, 
-  GetItemState, 
-  DeleteItemState, 
-  UpdateItemState, 
+  SearchState,
+  GetItemState,
+  DeleteItemState,
+  UpdateItemState,
   ConfigT,
   ShapeStyles,
+  WalkT,
 } from '@/types'
 import admin from 'firebase-admin'
 import url from 'url'
@@ -27,9 +29,41 @@ import { notFound, unauthorized, forbidden } from 'next/navigation'
 import { Theme } from '@mui/material'
 import { FirebaseError } from 'firebase/app'
 import { ValueOf } from 'next/dist/shared/lib/constants'
+import {
+  EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH,
+  getPoint, decodePath, getPathExtent, getStartPoint, getEndPoint, encodedPath,
+  encodeMultipolygon,
+} from '../../lib/utils/geo-utils'
+import moment from 'moment'
+import { decode } from '@/lib/utils/path-encoder'
 
-const getKeys = <T extends {[key: string]: unknown}>(obj: T): (keyof T)[] => {
-  return Object.keys(obj)
+type WalkSelectAttributes = typeof walks.$inferSelect & {
+  distance?: number
+}
+
+type WalkInsertAttributes = typeof walks.$inferInsert
+type AreaAttributes = typeof areas.$inferSelect
+
+const asWalkT = (walk: WalkSelectAttributes, includePath: boolean = false): WalkT => {
+  return {
+    id: walk.id,
+    date: walk.date ? moment(walk.date).format('YYYY-MM-DD') : null,
+    title: walk.title,
+    comment: walk.comment,
+    draft: walk.draft,
+    image: walk.image,
+    length: walk.length,
+    path: (includePath && walk.path) ? encodedPath(walk.path) : null,
+    distance: walk.distance,
+    uid: walk.uid,
+  }
+}
+
+const asCityT = (area: AreaAttributes): CityT => {
+  return {
+    jcode: area.jcode,
+    theGeom: encodeMultipolygon(area.theGeom),
+  }
 }
 
 let firebaseConfig: admin.AppOptions | null = null
@@ -65,8 +99,6 @@ export const getConfig = async (): Promise<ConfigT> => {
   }
 }
 
-const { Op } = Sequelize
-
 const SEARCH_CACHE_TAG = 'searchTag'
 
 const openUserMode: boolean = !!process.env.OPEN_USER_MODE
@@ -101,37 +133,37 @@ const getUid = async (state: BaseState): Promise<GetUidResponse> => {
 export const searchInternalAction = async (props: SearchProps, uid: string): Promise<SearchState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
-  const attributes: Array<string | [string, string]> = ['id', 'date', 'title', 'image', 'comment', 'path', 'length', 'uid', 'draft']
+  const selectColumns = { ...getColumns(walks), distance: sql<number>`0 as distance` }
   const state: SearchState = {
     count: 0,
     rows: [],
   }
   const orderHash = {
-    newest_first: ['date', 'desc'],
-    oldest_first: 'date',
-    longest_first: ['length', 'desc'],
-    shortest_first: 'length',
-    easternmost_first: [sequelize.fn('st_xmax', sequelize.col('path')), 'desc'],
-    westernmost_first: sequelize.fn('st_xmin', sequelize.col('path')),
-    southernmost_first: sequelize.fn('st_ymin', sequelize.col('path')),
-    northernmost_first: [sequelize.fn('st_ymax', sequelize.col('path')), 'desc'],
-    nearest_first: sequelize.literal('distance'),
+    newest_first: desc(walks.date),
+    oldest_first: asc(walks.date),
+    longest_first: desc(walks.length),
+    shortest_first: asc(walks.length),
+    easternmost_first: sql`st_xmax(${walks.path}) desc`,
+    westernmost_first: sql`st_xmin(${walks.path}) asc`,
+    southernmost_first: sql`st_ymin(${walks.path}) asc`,
+    northernmost_first: sql`st_ymax(${walks.path}) desc`,
+    nearest_first: sql`distance asc`,
   }
 
-  const where = []
+  const where: SQL[] = []
   const order: ValueOf<typeof orderHash> = orderHash[props.order as keyof typeof orderHash ?? 'newest_first']
 
   if (props.date) {
-    where.push({ date: props.date })
+    where.push(eq(walks.date, props.date))
   }
   if (props.user) {
-    where.push({ uid: props.user })
+    where.push(eq(walks.uid, props.user))
   }
   if (props.year) {
-    where.push(sequelize.where(sequelize.fn('date_part', 'year', sequelize.col('date')), parseInt(props.year, 10)))
+    where.push(sql`EXTRACT(YEAR FROM ${walks.date}) = ${parseInt(props.year, 10)}`)
   }
   if (props.month) {
-    where.push(sequelize.where(sequelize.fn('date_part', 'month', sequelize.col('date')), parseInt(props.month, 10)))
+    where.push(sql`EXTRACT(MONTH FROM ${walks.date}) = ${parseInt(props.month, 10)}`)
   }
   if (['neighborhood', 'start', 'end'].includes(props.filter)) {
     const c = props.center.split(/,/)
@@ -141,48 +173,40 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     const dlat = (radius * 180) / Math.PI / EARTH_RADIUS
     const mlat = latitude > 0 ? latitude + dlat : latitude - dlat
     const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
-    const center = Walk.getPoint(longitude, latitude)
-    const lb = Walk.getPoint(longitude - dlon, latitude - dlat)
-    const rt = Walk.getPoint(longitude + dlon, latitude + dlat)
-    let target: Sequelize.Utils.Col | Sequelize.Utils.Fn 
+    const center = getPoint(longitude, latitude)
+    const lb = getPoint(longitude - dlon, latitude - dlat)
+    const rt = getPoint(longitude + dlon, latitude + dlat)
+    let target
     switch (props.filter) {
     case 'neighborhood':
-      target = sequelize.col('path')
+      target = walks.path
       break
     case 'start':
-      target = sequelize.fn('st_startpoint', sequelize.col('path'))
+      target = sql`st_startpoint(${walks.path})`
       break
     default:
-      target = sequelize.fn('st_endpoint', sequelize.col('path'))
+      target = sql`st_endpoint(${walks.path})`
       break
     }
-    where.push(sequelize.where(sequelize.fn('st_makebox2d', lb, rt), {
-      [Op.overlap]: target,
-    }))
-    where.push(sequelize.where(sequelize.fn('st_distance', target, center, true), {
-      [Op.lte]: radius,
-    }))
+    where.push(sql`st_makebox2d(${lb}, ${rt}) && ${target}`)
+    where.push(sql`st_distance(${target}, ${center}, true) <= ${radius}`)
   } else if (props.filter === 'cities') {
     if (!props.cities) {
       state.count = 0
       state.rows = []
       return state
     }
-    const cities = (props.cities).split(/,/).map((elm) => `'${elm}'`).join(',')
-    where.push(sequelize.literal(`EXISTS (SELECT * FROM areas WHERE jcode IN (${cities}) AND path && the_geom AND ST_Intersects(path, the_geom))`))
+    const cities = (props.cities).split(/,/)
+    where.push(sql`EXISTS (SELECT * FROM areas WHERE jcode IN ${cities} AND path && the_geom AND ST_Intersects(path, the_geom))`)
   } else if (props.filter === 'crossing') {
     if (!props.path) {
       state.count = 0
       state.rows = []
       return state
     }
-    const linestring = Walk.decodePath(props.path)
-    where.push({
-      path: {
-        [Op.overlap]: linestring,
-      },
-    })
-    where.push(sequelize.fn('ST_Intersects', sequelize.col('path'), linestring))
+    const linestring = decodePath(props.path)
+    where.push(sql`${walks.path} && ${linestring}`)
+    where.push(sql`ST_Intersects(${walks.path}, ${linestring})`)
   } else if (props.filter === 'hausdorff') {
     if (!props.path) {
       state.count = 0
@@ -190,23 +214,20 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       return state
     }
     const maxDistance = props.max_distance ?? 4000
-    const linestring = Walk.decodePath(props.path)
-    const extent = Walk.getPathExtent(props.path)
+    const linestring = decodePath(props.path)
+    const extent = getPathExtent(props.path)
     const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
     const mlat = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin - dlat))
     const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
-    const lb = Walk.getPoint(extent.xmin - dlon, extent.ymin - dlat)
-    const rt = Walk.getPoint(extent.xmax + dlon, extent.ymax + dlat)
+    const lb = getPoint(extent.xmin - dlon, extent.ymin - dlat)
+    const rt = getPoint(extent.xmax + dlon, extent.ymax + dlat)
 
-    attributes.push([`ST_HausdorffDistance(ST_Transform(path, ${SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance'])
-    where.push(sequelize.fn('ST_Within', sequelize.col('path'), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', lb, rt), SRID)))
-    where.push(sequelize.where(sequelize.fn(
-      'ST_HausdorffDistance',
-      sequelize.fn('ST_Transform', sequelize.col('path'), SRID_FOR_SIMILAR_SEARCH),
-      sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), SRID_FOR_SIMILAR_SEARCH),
-    ), {
-      [Op.lt]: maxDistance,
-    }))
+    selectColumns.distance = sql<number>`ST_HausdorffDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`  
+    where.push(sql`ST_Within(${walks.path}, ST_SetSRID(ST_MakeBox2d(${lb}, ${rt}), ${SRID}))`)
+    where.push(sql`ST_HausdorffDistance(
+      ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
+      ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
+    ) <= ${maxDistance}`)
   } else if (props.filter === 'frechet') {
     if (!props.path) {
       state.count = 0
@@ -214,9 +235,9 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       return state
     }
     const maxDistance = props.max_distance ?? 4000
-    const linestring = Walk.decodePath(props.path)
-    const sp = Walk.getStartPoint(props.path)
-    const ep = Walk.getEndPoint(props.path)
+    const linestring = decodePath(props.path)
+    const sp = getStartPoint(props.path)
+    const ep = getEndPoint(props.path)
     const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
     const mlat = Math.max(
       Math.abs(sp[1] + dlat),
@@ -225,44 +246,36 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       Math.abs(ep[1] - dlat),
     )
     const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
-    const slb = Walk.getPoint(sp[0] - dlon, sp[1] - dlat)
-    const srt = Walk.getPoint(sp[0] + dlon, sp[1] + dlat)
-    const elb = Walk.getPoint(ep[0] - dlon, ep[1] - dlat)
-    const ert = Walk.getPoint(ep[0] + dlon, ep[1] + dlat)
+    const slb = getPoint(sp[0] - dlon, sp[1] - dlat)
+    const srt = getPoint(sp[0] + dlon, sp[1] + dlat)
+    const elb = getPoint(ep[0] - dlon, ep[1] - dlat)
+    const ert = getPoint(ep[0] + dlon, ep[1] + dlat)
 
-    attributes.push([`ST_FrechetDistance(ST_Transform(path, ${SRID_FOR_SIMILAR_SEARCH}), ST_Transform('${linestring}'::Geometry, ${SRID_FOR_SIMILAR_SEARCH}))/1000`, 'distance'])
-    where.push(sequelize.fn('ST_Within', sequelize.fn('ST_StartPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', slb, srt), SRID)))
-    where.push(sequelize.fn('ST_Within', sequelize.fn('ST_EndPoint', sequelize.col('path')), sequelize.fn('ST_SetSRID', sequelize.fn('ST_MakeBox2d', elb, ert), SRID)))
-    where.push(sequelize.where(sequelize.fn(
-      'ST_FrechetDistance',
-      sequelize.fn('ST_Transform', sequelize.col('path'), SRID_FOR_SIMILAR_SEARCH),
-      sequelize.fn('ST_Transform', sequelize.fn('st_geomfromtext', linestring), SRID_FOR_SIMILAR_SEARCH),
-    ), {
-      [Op.lt]: maxDistance,
-    }))
+    selectColumns.distance = sql<number>`ST_FrechetDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`  
+    where.push(sql`ST_Within(ST_StartPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${slb}, ${srt}), ${SRID}))`)
+    where.push(sql`ST_Within(ST_EndPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${elb}, ${ert}), ${SRID}))`)
+    where.push(sql`ST_FrechetDistance(
+      ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
+      ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
+    ) <= ${maxDistance}`)
   }
 
   if (uid !== null) {
-    where.push({ [Op.or]: [{ draft: false }, { uid }] })
+    where.push(or(eq(walks.draft, false), eq(walks.uid, uid)))
   } else {
-    where.push({ draft: false })
+    where.push(eq(walks.draft, false))
   }
 
   const limit = props.limit ?? 20
   const offset = props.offset ?? 0
+  
+  const condition = and(...where)
+  const result = await db.select(selectColumns).from(walks).where(condition).orderBy(order).limit(limit).offset(offset)
+  const count = await db.$count(walks, condition)
 
-  const condition = { [Op.and]: where }
-  const result = await Walk.findAndCountAll({
-    attributes,
-    order: [order] as Sequelize.OrderItem[],
-    where: condition,
-    offset,
-    limit,
-  })
-
-  state.count = result.count
-  state.offset = result.count > offset + limit ? offset + limit : 0
-  state.rows = result.rows.map((row) => row.asObject(true))
+  state.count = count
+  state.offset = count > offset + limit ? offset + limit : 0
+  state.rows = result.map((walk) => asWalkT(walk, true))
   return state
 }
 
@@ -282,12 +295,12 @@ export const getItemInternalAction = async (id: number, uid: string): Promise<Ge
   cacheTag(SEARCH_CACHE_TAG)
   const state: GetItemState = {}
 
-  const walk = await Walk.findByPk(id)
+  const walk = await db.select().from(walks).where(eq(walks.id, id)).limit(1).then((rows) => rows[0])
   if (!walk) {
     return state
   }
-  
-  state.current = (!walk.draft || walk.uid === uid) ? walk.asObject(true) : null
+
+  state.current = (!walk.draft || walk.uid === uid) ? asWalkT(walk, true) : null
   return state
 }
 
@@ -338,19 +351,19 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
 
   // Manual validation to ensure consistent error messages
   const validationErrors = []
-  
+
   if (!date || date.trim() === '') {
     validationErrors.push('Date is required')
   }
-  
+
   if (!title || title.trim() === '') {
     validationErrors.push('Title is required')
   }
-  
+
   if (!walkPath || walkPath.trim() === '') {
     validationErrors.push('Path is required')
   }
-  
+
   // Image validation
   if (image && image.size > 0) {
     if (!image.type) {
@@ -361,23 +374,23 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
       validationErrors.push('Image size must be 2MB or less')
     }
   }
-  
+
   if (validationErrors.length > 0) {
     state.error = new Error(validationErrors.join(', '))
     return state
   }
 
   const d = new Date(date)
-  const props: WalkAttributes = {
+  const props: Partial<WalkInsertAttributes>  = {
     title,
     comment,
-    date: d,
+    date: d.toISOString(),
     draft,
     uid,
   }
   if (walkPath !== '') {
-    props.path = Walk.decodePath(walkPath)
-    props.length = sequelize.literal(`ST_LENGTH('${props.path}', true)/1000`)
+    props.path = decode(walkPath)
+    props.length = sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
   }
   if (willDeleteImage) {
     props.image = null
@@ -404,12 +417,13 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
     }
   }
   if (id) {
-    const walk = await Walk.findByPk(id)
+    const walk = await db.select().from(walks).where(eq(walks.id, id)).limit(1).then((rows) => rows[0])
     if (walk.uid !== uid) {
       forbidden()
     }
     try {
-      await walk.update(props)
+      props.updatedAt = sql<string>`now()` as unknown as string
+      await db.update(walks).set(props).where(eq(walks.id, id))
       state.id = id
     } catch (error) {
       console.error('updateItemAction error', error)
@@ -419,7 +433,9 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
     }
   } else {
     try {
-      const walk = await Walk.create(props, { fields: getKeys(props) })
+      props.createdAt = sql<string>`now()` as unknown as string
+      props.updatedAt = sql<string>`now()` as unknown as string
+      const walk = await db.insert(walks).values(props as WalkInsertAttributes).returning({ id: walks.id }).then((rows) => rows[0])
       state.id = walk?.id
     } catch (error) {
       console.error('updateItemAction create error', error)
@@ -446,14 +462,14 @@ export const deleteItemAction = async (prevState: DeleteItemState, id: number, _
     forbidden()
   }
 
-  const walk = await Walk.findByPk(id)
+  const walk = await db.select().from(walks).where(eq(walks.id, id)).limit(1).then((rows) => rows[0])
   if (!walk) {
     notFound()
   }
   if (walk.uid !== uid) {
     forbidden()
   }
-  await walk.destroy()
+  await db.delete(walks).where(eq(walks.id, id))
   state.deleted = true
   revalidateTag(SEARCH_CACHE_TAG, 'max')
   return state
@@ -461,16 +477,14 @@ export const deleteItemAction = async (prevState: DeleteItemState, id: number, _
 
 export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
   'use cache'
-  let where: Sequelize.WhereOptions
+  let where: SQL
   if (params.jcodes) {
-    where = { jcode: { [Op.in]: params.jcodes } }
+    where = inArray(areas.jcode, params.jcodes)
   } else {
-    where = sequelize.fn('st_contains', sequelize.col('the_geom'), sequelize.fn('st_setsrid', sequelize.fn('st_point', params.longitude, params.latitude), SRID))
+    where = sql`st_contains(${areas.theGeom}, st_setsrid(st_point(${params.longitude}, ${params.latitude}), ${SRID}))`
   }
-  const result = await Area.findAll({
-    where,
-  })
-  return result.map((obj) => obj.asObject())
+  const result = (await db.select().from(areas).where(where).then((rows) => rows.map((area) => asCityT(area))))
+  return result
 }
 
 export const getUsersAction = async (): Promise<UserT[]> => {
