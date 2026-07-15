@@ -9,15 +9,15 @@ import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 
 // Test configuration
 const TEST_TIMEOUT = 10000
-jest.setTimeout(TEST_TIMEOUT)
+vi.setTimeout(TEST_TIMEOUT)
 
 // Mock the Google Maps API
 const mockMap = {
-  setCenter: jest.fn(),
+  setCenter: vi.fn(),
 }
 
 const mockMarker = {
-  setMap: jest.fn(),
+  setMap: vi.fn(),
   set position(pos) {
     this._position = pos
   },
@@ -36,7 +36,7 @@ const mockMarker = {
 }
 
 const mockGeocoder = {
-  geocode: jest.fn(),
+  geocode: vi.fn(),
 }
 
 const mockMapContext = [
@@ -44,15 +44,15 @@ const mockMapContext = [
     map: mockMap,
     marker: mockMarker,
     pathManager: {
-      getEncodedSelection: jest.fn().mockReturnValue('mock_path'),
-      get: jest.fn().mockReturnValue(5.5),
-      set: jest.fn(),
-      startDraw: jest.fn(),
+      getEncodedSelection: vi.fn().mockReturnValue('mock_path'),
+      get: vi.fn().mockReturnValue(5.5),
+      set: vi.fn(),
+      startDraw: vi.fn(),
     },
-    downloadPath: jest.fn(),
-    uploadPath: jest.fn(),
-    clearPaths: jest.fn(),
-    addPoint: jest.fn(),
+    downloadPath: vi.fn(),
+    uploadPath: vi.fn(),
+    clearPaths: vi.fn(),
+    addPoint: vi.fn(),
   },
 ]
 
@@ -61,7 +61,7 @@ const mockMainContext = [
     autoGeolocation: false,
     toolBoxOpen: true,
   },
-  jest.fn(),
+  vi.fn(),
 ]
 
 const mockConfig = {
@@ -72,7 +72,7 @@ const mockConfig = {
 
 // Mock the geolocation API
 const mockGeolocation = {
-  getCurrentPosition: jest.fn().mockImplementation((success) => 
+  getCurrentPosition: vi.fn().mockImplementation((success) =>
     success({
       coords: {
         latitude: 35.6812,
@@ -85,8 +85,8 @@ const mockGeolocation = {
 // Mock the Google Maps libraries
 global.google = {
   maps: {
-    importLibrary: jest.fn().mockResolvedValue({}),
-    Geocoder: jest.fn().mockImplementation(() => mockGeocoder),
+    importLibrary: vi.fn().mockResolvedValue({}),
+    Geocoder: vi.fn().mockImplementation(() => mockGeocoder),
     GeocoderStatus: {
       OK: 'OK',
       ERROR: 'ERROR',
@@ -96,39 +96,39 @@ global.google = {
 
 // Setup for all tests
 beforeEach(() => {
-  jest.clearAllMocks()
+  vi.clearAllMocks()
   // Mock the geolocation API
   global.navigator.geolocation = mockGeolocation
 })
 
-jest.mock('@/lib/utils/map-context', () => ({
-  useMapContext: jest.fn().mockImplementation(() => mockMapContext),
+vi.mock('@/lib/utils/map-context', () => ({
+  useMapContext: vi.fn().mockImplementation(() => mockMapContext),
   MapContextProvider: ({ children }) => <div data-testid="map-provider">{children}</div>,
 }))
 
-jest.mock('@/lib/utils/main-context', () => ({
-  useMainContext: jest.fn().mockImplementation(() => mockMainContext),
+vi.mock('@/lib/utils/main-context', () => ({
+  useMainContext: vi.fn().mockImplementation(() => mockMainContext),
   MainContextProvider: ({ children }) => <div data-testid="main-provider">{children}</div>,
 }))
 
-jest.mock('@/lib/utils/config', () => ({
-  useConfig: jest.fn().mockImplementation(() => mockConfig),
+vi.mock('@/lib/utils/config', () => ({
+  useConfig: vi.fn().mockImplementation(() => mockConfig),
   ConfigProvider: ({ children }) => <div data-testid="config-provider">{children}</div>,
 }))
 
-jest.mock('use-query-params/dist/useQueryParam', () => ({
-  useQueryParam: jest.fn(() => ['mock-path', jest.fn()]),
+vi.mock('use-query-params/dist/useQueryParam', () => ({
+  useQueryParam: vi.fn(() => ['mock-path', vi.fn()]),
 }))
 
-jest.mock('serialize-query-params/dist/withDefault', () => ({
-  withDefault: jest.fn((param, _defaultValue) => param),
+vi.mock('serialize-query-params/dist/withDefault', () => ({
+  withDefault: vi.fn((param, _defaultValue) => param),
 }))
 
-jest.mock('serialize-query-params/dist/params', () => ({
+vi.mock('serialize-query-params/dist/params', () => ({
   StringParam: {},
 }))
 
-jest.mock('./confirm-modal', () => ({
+vi.mock('./confirm-modal', () => ({
   __esModule: true,
   default: ({ open, resolve }) => (
     <div data-testid="confirm-modal" data-open={open}>
@@ -152,7 +152,7 @@ describe('ToolBox Component', () => {
         </MainContextProvider>
       </ConfigProvider>,
     )
-    
+
     expect(screen.getByText('path')).toBeInTheDocument()
     expect(screen.getByText('move')).toBeInTheDocument()
     expect(screen.getByText('draw')).toBeInTheDocument()
@@ -176,13 +176,13 @@ describe('ToolBox Component', () => {
         </MainContextProvider>
       </ConfigProvider>,
     )
-    
+
     // Click the "here" button to get current location
     fireEvent.click(screen.getByText('here'))
-    
+
     // Verify the geolocation API was called
     expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled()
-    
+
     // Wait for the marker to be updated
     await waitFor(() => {
       expect(mockMarker.position).toEqual({
@@ -222,7 +222,7 @@ describe('ToolBox Component', () => {
     const locationInput = screen.getByPlaceholderText('location...')
     fireEvent.change(locationInput, { target: { value: 'Tokyo' } })
     fireEvent.keyDown(locationInput, { key: 'Enter', charCode: 13 })
-    
+
     // Verify the geocoder was called
 
     await waitFor(() => {
@@ -233,7 +233,7 @@ describe('ToolBox Component', () => {
     })
 
     // Check marker was updated
-    
+
     expect(mockMarker.position).toEqual({
       lat: 35.6812,
       lng: 139.7671,
@@ -252,13 +252,13 @@ describe('ToolBox Component', () => {
         </MainContextProvider>
       </ConfigProvider>,
     )
-    
+
     // Click the record button
     fireEvent.click(screen.getByText('record'))
-    
+
     // Verify geolocation API was called
     expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled()
-    
+
     // Verify dispatch was called to update autoGeolocation state
     await waitFor(() => {
       expect(mockMainContext[1]).toHaveBeenCalledWith({
@@ -278,10 +278,10 @@ describe('ToolBox Component', () => {
         </MainContextProvider>
       </ConfigProvider>,
     )
-    
+
     // Click the draw button
     fireEvent.click(screen.getByText('draw'))
-    
+
     // Verify pathManager.set was called with editable=true
     expect(mockMapContext[0].pathManager.startDraw).toHaveBeenCalled()
   })
@@ -296,18 +296,18 @@ describe('ToolBox Component', () => {
         </MainContextProvider>
       </ConfigProvider>,
     )
-    
+
     // Click the clear button
     fireEvent.click(screen.getByText('clear'))
-    
+
     // Verify clearPaths was called
     expect(mockMapContext[0].clearPaths).toHaveBeenCalled()
   })
 
   it('disables download buttons when no path is selected', () => {
     // Mock useQueryParam to return null (no selected path)
-    useQueryParam.mockReturnValueOnce([null, jest.fn()])
-    
+    useQueryParam.mockReturnValueOnce([null, vi.fn()])
+
     render(
       <ConfigProvider>
         <MainContextProvider>
@@ -317,10 +317,10 @@ describe('ToolBox Component', () => {
         </MainContextProvider>
       </ConfigProvider>,
     )
-    
+
     // Check that download buttons are disabled
     // Material-UI ListItemButton renders as a div with role="button"
-    const downloadButton = screen.getByText('download').closest('[role="button"]')    
+    const downloadButton = screen.getByText('download').closest('[role="button"]')
     expect(downloadButton).toHaveAttribute('aria-disabled', 'true')
   })
 })

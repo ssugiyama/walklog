@@ -6,65 +6,65 @@ import { useMainContext } from '../utils/main-context'
 import { useUserContext } from '../utils/user-context'
 import { useConfig } from '../utils/config'
 
-jest.mock('../utils/main-context', () => ({
-  useMainContext: jest.fn(),
+vi.mock('../utils/main-context', () => ({
+  useMainContext: vi.fn(),
 }))
 
-jest.mock('../utils/user-context', () => ({
-  useUserContext: jest.fn(),
+vi.mock('../utils/user-context', () => ({
+  useUserContext: vi.fn(),
 }))
 
-jest.mock('../utils/config', () => ({
-  useConfig: jest.fn(),
+vi.mock('../utils/config', () => ({
+  useConfig: vi.fn(),
 }))
 
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  GoogleAuthProvider: jest.fn(),
-  signInWithPopup: jest.fn(),
-  signOut: jest.fn(),
-  onAuthStateChanged: jest.fn(),
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(),
+  GoogleAuthProvider: vi.fn(),
+  signInWithPopup: vi.fn(),
+  signOut: vi.fn(),
+  onAuthStateChanged: vi.fn(),
 }))
 
-jest.mock('@/lib/components/walk-editor', () => function MockWalkEditor() {
+vi.mock('@/lib/components/walk-editor', () => function MockWalkEditor() {
   return <div data-testid="walk-editor">Walk Editor</div>
 })
 
-jest.mock('firebase/app', () => ({
-  initializeApp: jest.fn(),
+vi.mock('firebase/app', () => ({
+  initializeApp: vi.fn(),
 }))
 
-jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(() => ({
-    toString: jest.fn(() => 'param1=value1&param2=value2'),
+vi.mock('next/navigation', () => ({
+  useSearchParams: vi.fn(() => ({
+    toString: vi.fn(() => 'param1=value1&param2=value2'),
   })),
 }))
 
-jest.mock('use-query-params', () => ({
-  useQueryParam: jest.fn().mockReturnValue(['']),
-  StringParam: jest.fn(),
-  withDefault: jest.fn(),
+vi.mock('use-query-params', () => ({
+  useQueryParam: vi.fn().mockReturnValue(['']),
+  StringParam: vi.fn(),
+  withDefault: vi.fn(),
 }))
 describe('NavBar', () => {
-  const mockDispatchMain = jest.fn()
-  const mockPushWithGuard = jest.fn(() => jest.fn())
-  const mockSetCurrentUser = jest.fn()
+  const mockDispatchMain = vi.fn()
+  const mockPushWithGuard = vi.fn(() => vi.fn())
+  const mockSetCurrentUser = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as vi.Mock).mockReturnValue([
       { overlay: false, toolBoxOpened: false },
       mockDispatchMain,
       mockPushWithGuard,
     ]);
 
-    (useUserContext as jest.Mock).mockReturnValue({
+    (useUserContext as vi.Mock).mockReturnValue({
       currentUser: null,
       setCurrentUser: mockSetCurrentUser,
     });
 
-    (useConfig as jest.Mock).mockReturnValue({
+    (useConfig as vi.Mock).mockReturnValue({
       firebaseConfig: {},
     })
   })
@@ -95,7 +95,7 @@ describe('NavBar', () => {
   })
 
   it('displays logout option when a user is logged in', () => {
-    (useUserContext as jest.Mock).mockReturnValue({
+    (useUserContext as vi.Mock).mockReturnValue({
       currentUser: { displayName: 'Test User', photoURL: 'test-url' },
       setCurrentUser: mockSetCurrentUser,
     })

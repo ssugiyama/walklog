@@ -5,38 +5,38 @@ import { useMainContext } from '../utils/main-context'
 import { useData } from '../utils/data-context'
 import { useConfig } from '../utils/config'
 
-jest.mock('../utils/main-context', () => ({
-  useMainContext: jest.fn(),
+vi.mock('../utils/main-context', () => ({
+  useMainContext: vi.fn(),
 }))
 
-jest.mock('../utils/data-context', () => ({
-  useData: jest.fn(),
+vi.mock('../utils/data-context', () => ({
+  useData: vi.fn(),
 }))
 
-jest.mock('../utils/config', () => ({
-  useConfig: jest.fn(),
+vi.mock('../utils/config', () => ({
+  useConfig: vi.fn(),
 }))
 
-const mockUsePathname = jest.fn(() => '/show/1')
-const mockUseQueryParam = jest.fn(() => ['', jest.fn()])
+const mockUsePathname = vi.fn(() => '/show/1')
+const mockUseQueryParam = vi.fn(() => ['', vi.fn()])
 
-jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(() => new URLSearchParams()),
+vi.mock('next/navigation', () => ({
+  useSearchParams: vi.fn(() => new URLSearchParams()),
   usePathname: () => mockUsePathname(),
-  useParams: jest.fn(() => ({ id: '1' })),
-  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useParams: vi.fn(() => ({ id: '1' })),
+  useRouter: vi.fn(() => ({ push: vi.fn() })),
 }))
 
-jest.mock('use-query-params', () => ({
+vi.mock('use-query-params', () => ({
   useQueryParam: () => mockUseQueryParam(),
-  StringParam: jest.fn(),
-  withDefault: jest.fn((param, defaultValue) => [param, defaultValue]),
-  NumberParam: jest.fn(),
+  StringParam: vi.fn(),
+  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
+  NumberParam: vi.fn(),
 }))
 
 describe('BottomBar', () => {
-  const mockDispatchMain = jest.fn()
-  const mockPushWithGuard = jest.fn()
+  const mockDispatchMain = vi.fn()
+  const mockPushWithGuard = vi.fn()
   const mockData = {
     rows: [
       { id: 1, date: '2023-01-01', title: 'Walk 1', length: 5.0 },
@@ -48,14 +48,14 @@ describe('BottomBar', () => {
   const mockConfig = { defaultCenter: '35.6762,139.6503', defaultRadius: 500 }
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useMainContext as jest.Mock).mockReturnValue([
+    vi.clearAllMocks();
+    (useMainContext as vi.Mock).mockReturnValue([
       { overlay: false, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
     ]);
-    (useData as jest.Mock).mockReturnValue([mockData]);
-    (useConfig as jest.Mock).mockReturnValue(mockConfig)
+    (useData as vi.Mock).mockReturnValue([mockData]);
+    (useConfig as vi.Mock).mockReturnValue(mockConfig)
   })
 
   it('renders the BottomBar component', () => {
@@ -65,7 +65,7 @@ describe('BottomBar', () => {
 
   it('displays item controls when in show page with item data', () => {
     mockUsePathname.mockReturnValue('/show/1')
-    
+
     render(<BottomBar />)
     expect(screen.getByText('2023-01-01 : Walk 1 (5.0 km)')).toBeInTheDocument()
     expect(screen.getByTestId('prev-button')).toBeInTheDocument()
@@ -73,12 +73,12 @@ describe('BottomBar', () => {
   })
 
   it('displays overlay controls when overlay is active', () => {
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as vi.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
     ])
-    
+
     render(<BottomBar />)
     expect(screen.getByTestId('back-to-map-button')).toBeInTheDocument()
     expect(screen.getByTestId('forward-panorama-index-by-1-button')).toBeInTheDocument()
@@ -88,32 +88,32 @@ describe('BottomBar', () => {
 
   it('displays filter controls when on home page', () => {
     mockUsePathname.mockReturnValue('/')
-    
+
     render(<BottomBar />)
     expect(screen.getByTestId('filter-select')).toBeInTheDocument()
   })
 
   it('displays edit controls when on new or edit page', () => {
     mockUsePathname.mockReturnValue('/new')
-    
+
     render(<BottomBar />)
     expect(screen.getByTestId('cancel-button')).toBeInTheDocument()
   })
 
   it('displays home button as default when no specific page context', () => {
     mockUsePathname.mockReturnValue('/other')
-    
+
     render(<BottomBar />)
     expect(screen.getByTestId('home-button')).toBeInTheDocument()
   })
 
   it('dispatches the correct action when overlay button is clicked', () => {
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as vi.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
     ])
-    
+
     render(<BottomBar />)
     const overlayButton = screen.getByTestId('back-to-map-button')
     fireEvent.click(overlayButton)
@@ -121,14 +121,14 @@ describe('BottomBar', () => {
   })
 
   it('updates panorama index when panorama navigation buttons are clicked', () => {
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as vi.Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 5, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
     ])
-    
+
     render(<BottomBar />)
-    
+
     const forwardButton = screen.getByTestId('forward-panorama-index-by-1-button')
     fireEvent.click(forwardButton)
     expect(mockDispatchMain).toHaveBeenCalledWith({ type: 'SET_PANORAMA_INDEX', payload: 6 })
@@ -140,13 +140,13 @@ describe('BottomBar', () => {
 
   it('handles filter change in home page', () => {
     mockUsePathname.mockReturnValue('/')
-    
-    const mockSetFilter = jest.fn()
+
+    const mockSetFilter = vi.fn()
     mockUseQueryParam.mockImplementation(() => ['', mockSetFilter])
-    
+
     render(<BottomBar />)
     const filterSelect = screen.getByTestId('filter-select')
-    
+
     // Material-UIのSelectコンポーネントでは、inputにchangeイベントを発火させる
     const selectInput = filterSelect.querySelector('input')
     if (selectInput) {

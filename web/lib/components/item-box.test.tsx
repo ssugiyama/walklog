@@ -9,49 +9,49 @@ import { useConfig } from '../utils/config'
 import { useRouter } from 'next/navigation'
 import { useMainContext } from '../utils/main-context'
 
-jest.mock('@/app/lib/walk-actions', () => ({
-  deleteItemAction: jest.fn(),
+vi.mock('@/app/lib/walk-actions', () => ({
+  deleteItemAction: vi.fn(),
 }))
 
-jest.mock('@/lib/components/walk-editor', () => function MockWalkEditor() {
+vi.mock('@/lib/components/walk-editor', () => function MockWalkEditor() {
   return <div data-testid="walk-editor">Walk Editor</div>
 })
 
-jest.mock('../utils/data-context', () => ({
-  useData: jest.fn(),
+vi.mock('../utils/data-context', () => ({
+  useData: vi.fn(),
 }))
 
-jest.mock('./elevation-box', () => function MockElevationBox() {
+vi.mock('./elevation-box', () => function MockElevationBox() {
   return <div data-testid="elevation-box">Elevation Box</div>
 })
 
-jest.mock('./panorama-box', () => function MockPanoramaBox() {
+vi.mock('./panorama-box', () => function MockPanoramaBox() {
   return <div data-testid="panorama-box">Panorama Box</div>
 })
 
-jest.mock('../utils/user-context', () => ({
-  useUserContext: jest.fn(),
+vi.mock('../utils/user-context', () => ({
+  useUserContext: vi.fn(),
 }))
 
-jest.mock('../utils/main-context', () => ({
-  useMainContext: jest.fn(),
+vi.mock('../utils/main-context', () => ({
+  useMainContext: vi.fn(),
 }))
 
-jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(),
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useSearchParams: vi.fn(),
+  useRouter: vi.fn(),
 }))
 
-jest.mock('../utils/config', () => ({
-  useConfig: jest.fn(),
+vi.mock('../utils/config', () => ({
+  useConfig: vi.fn(),
 }))
 
 describe('ItemBox Component', () => {
-  const mockRouterPush = jest.fn()
+  const mockRouterPush = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useData as jest.Mock).mockReturnValue([
+    vi.clearAllMocks();
+    (useData as vi.Mock).mockReturnValue([
       {
         current: null,
         isPending: false,
@@ -61,25 +61,25 @@ describe('ItemBox Component', () => {
         offset: 0,
       },
     ]);
-    (useUserContext as jest.Mock).mockReturnValue({
+    (useUserContext as vi.Mock).mockReturnValue({
       users: [],
       currentUser: null,
     });
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as vi.Mock).mockReturnValue([
       {
         overlay: false,
         PanoramaIndex: 0,
         paroramaCount: 100,
       },
-      jest.fn(), // setOverlay
+      vi.fn(), // setOverlay
     ]);
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-    (useConfig as jest.Mock).mockReturnValue({});
-    (useRouter as jest.Mock).mockReturnValue({ push: mockRouterPush })
+    (useSearchParams as vi.Mock).mockReturnValue(new URLSearchParams());
+    (useConfig as vi.Mock).mockReturnValue({});
+    (useRouter as vi.Mock).mockReturnValue({ push: mockRouterPush })
   })
 
   it('renders loading state when data is pending', () => {
-    (useData as jest.Mock).mockReturnValue([
+    (useData as vi.Mock).mockReturnValue([
       { isPending: true },
     ])
 
@@ -88,7 +88,7 @@ describe('ItemBox Component', () => {
   })
 
   it('renders error state when there is an error', () => {
-    (useData as jest.Mock).mockReturnValue([
+    (useData as vi.Mock).mockReturnValue([
       { error: 'Test error' },
     ])
 
@@ -97,7 +97,7 @@ describe('ItemBox Component', () => {
   })
 
   it('renders item details when data is available', () => {
-    (useData as jest.Mock).mockReturnValue([
+    (useData as vi.Mock).mockReturnValue([
       {
         current: {
           date: '2023-01-01',
@@ -111,7 +111,7 @@ describe('ItemBox Component', () => {
         error: null,
       },
     ]);
-    (useUserContext as jest.Mock).mockReturnValue({
+    (useUserContext as vi.Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
     })
@@ -123,14 +123,14 @@ describe('ItemBox Component', () => {
   })
 
   it('calls handleEdit when edit button is clicked', () => {
-    (useData as jest.Mock).mockReturnValue([
+    (useData as vi.Mock).mockReturnValue([
       {
         current: { uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
     ]);
-    (useUserContext as jest.Mock).mockReturnValue({
+    (useUserContext as vi.Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
     })
@@ -146,15 +146,15 @@ describe('ItemBox Component', () => {
   })
 
   it('calls handleDelete when delete button is clicked', () => {
-    window.confirm = jest.fn(() => true);
-    (useData as jest.Mock).mockReturnValue([
+    window.confirm = vi.fn(() => true);
+    (useData as vi.Mock).mockReturnValue([
       {
         current: { id: 'item1', uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
     ]);
-    (useUserContext as jest.Mock).mockReturnValue({
+    (useUserContext as vi.Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
     })

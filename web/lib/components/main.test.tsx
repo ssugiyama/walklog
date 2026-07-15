@@ -16,64 +16,64 @@ const defaultData = {
 }
 
 // Mock dependencies
-jest.mock('@/lib/components/nav-bar', () => function MockNavBar() {
+vi.mock('@/lib/components/nav-bar', () => function MockNavBar() {
   return <div data-testid="nav-bar">Nav Bar</div>
 })
 
-jest.mock('@/lib/components/tool-box', () => function MockToolBox() {
+vi.mock('@/lib/components/tool-box', () => function MockToolBox() {
   return <div data-testid="tool-box">Tool Box</div>
 })
 
-jest.mock('@/lib/components/map', () => function MockMap() {
+vi.mock('@/lib/components/map', () => function MockMap() {
   return <div data-testid="map">Map Component</div>
 })
 
-jest.mock('@/lib/components/bottom-bar', () => function MockBottomBar() {
+vi.mock('@/lib/components/bottom-bar', () => function MockBottomBar() {
   return <div data-testid="bottom-bar">Bottom Bar</div>
 })
 
-jest.mock('@/lib/utils/data-context', () => ({
+vi.mock('@/lib/utils/data-context', () => ({
   DataProvider: ({ children }) => <div data-testid="data-provider">{children}</div>,
-  useData: jest.fn(() => defaultData),
+  useData: vi.fn(() => defaultData),
 }))
 
-jest.mock('@/lib/utils/map-context', () => ({
+vi.mock('@/lib/utils/map-context', () => ({
   MapContextProvider: ({ children }) => <div data-testid="map-context-provider">{children}</div>,
 }))
 
-jest.mock('use-query-params', () => ({
+vi.mock('use-query-params', () => ({
   QueryParamProvider: ({ children }) => <div data-testid="query-param-provider">{children}</div>,
 }))
 
-jest.mock('next-query-params/app', () => ({}))
+vi.mock('next-query-params/app', () => ({}))
 
-jest.mock('@/lib/utils/config', () => ({
-  useConfig: jest.fn(() => ({
+vi.mock('@/lib/utils/config', () => ({
+  useConfig: vi.fn(() => ({
     theme: {
       palette: {},
     },
   })),
-})) 
+}))
 
 // Mock clipboard API
 Object.defineProperty(navigator, 'clipboard', {
   value: {
-    writeText: jest.fn().mockResolvedValue(undefined),
+    writeText: vi.fn().mockResolvedValue(undefined),
   },
   writable: true,
 })
 
 // Mock share API
 Object.defineProperty(navigator, 'share', {
-  value: jest.fn().mockResolvedValue(undefined),
+  value: vi.fn().mockResolvedValue(undefined),
   writable: true,
 })
 
 // Wrapper for the component under test
 function renderWithProviders(ui, { mainState = defaultMainState, data = defaultData } = {}) {
-  const dispatchMain = jest.fn();
+  const dispatchMain = vi.fn();
 
-  (useData as jest.Mock).mockReturnValue([data])
+  (useData as vi.Mock).mockReturnValue([data])
   return {
     ...render(
       <DataProvider>
@@ -181,7 +181,7 @@ describe('Main Component', () => {
   })
 
   test('snackbar closes after a timeout', () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     const { dispatchMain } = renderWithProviders(
       <Main>
         <div>Test Content</div>
@@ -197,7 +197,7 @@ describe('Main Component', () => {
     fireEvent.click(document.body)
 
     act(() => {
-      jest.advanceTimersByTime(8000)
+      vi.advanceTimersByTime(8000)
     })
 
     // Check if the snackbar is removed from the document
@@ -205,7 +205,7 @@ describe('Main Component', () => {
     // Should dispatch the CLOSE_SNACKBAR action
     expect(dispatchMain).toHaveBeenCalledWith({ type: 'CLOSE_SNACKBAR' })
 
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   test('toolbox is rendered when toolBoxOpened is true', () => {

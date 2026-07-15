@@ -1,7 +1,7 @@
 /** @type {import('jest').Config} */
 const config = {
   rootDir: '.',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/vi.setup.js'],
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',

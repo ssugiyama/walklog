@@ -2,25 +2,25 @@ import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import WalkEditor from './walk-editor'
 
-const mockUpdateIdToken = jest.fn()
-const mockDeleteSelectedPath = jest.fn()
-const mockRouterPush = jest.fn()
-const mockSetData = jest.fn()
-const mockDispatchMain = jest.fn()
-const mockInterceptLink = jest.fn()
+const mockUpdateIdToken = vi.fn()
+const mockDeleteSelectedPath = vi.fn()
+const mockRouterPush = vi.fn()
+const mockSetData = vi.fn()
+const mockDispatchMain = vi.fn()
+const mockInterceptLink = vi.fn()
 const mockSearchParams = {
-  toString: jest.fn(() => 'param1=value1&param2=value2'),
+  toString: vi.fn(() => 'param1=value1&param2=value2'),
 }
 
 beforeAll(() => {
-  global.FormData = jest.fn(() => ({
-    append: jest.fn(),
-    get: jest.fn(),
-    entries: jest.fn(() => []),
+  global.FormData = vi.fn(() => ({
+    append: vi.fn(),
+    get: vi.fn(),
+    entries: vi.fn(() => []),
   }))
 })
 
-jest.mock('../utils/user-context', () => ({
+vi.mock('../utils/user-context', () => ({
   useUserContext: () => ({
     updateIdToken: mockUpdateIdToken,
     currentUser: { uid: 'test-uid' },
@@ -28,20 +28,20 @@ jest.mock('../utils/user-context', () => ({
   }),
 }))
 
-jest.mock('../utils/config', () => ({
+vi.mock('../utils/config', () => ({
   useConfig: () => ({
     openUserMode: true,
   }),
 }))
 
-jest.mock('../utils/data-context', () => ({
+vi.mock('../utils/data-context', () => ({
   useData: () => [
     { current: { id: '2', date: '2023-01-01', title: 'Test Walk', comment: 'Test comment', draft: true, path: 'test-path' } },
     mockSetData,
   ],
 }))
 
-jest.mock('../utils/map-context', () => ({
+vi.mock('../utils/map-context', () => ({
   useMapContext: () => ([
     {
       deleteSelectedPath: mockDeleteSelectedPath,
@@ -49,7 +49,7 @@ jest.mock('../utils/map-context', () => ({
   ]),
 }))
 
-jest.mock('../utils/main-context', () => ({
+vi.mock('../utils/main-context', () => ({
   useMainContext: () => ([
     {},
     mockDispatchMain,
@@ -57,41 +57,41 @@ jest.mock('../utils/main-context', () => ({
   ]),
 }))
 
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
   useSearchParams: () => mockSearchParams,
-  unauthorized: jest.fn(),
-  forbidden: jest.fn(),
+  unauthorized: vi.fn(),
+  forbidden: vi.fn(),
 }))
 
-jest.mock('@/app/lib/walk-actions', () => ({
-  updateItemAction: jest.fn().mockResolvedValue({}),
+vi.mock('@/app/lib/walk-actions', () => ({
+  updateItemAction: vi.fn().mockResolvedValue({}),
 }))
 
-jest.mock('use-query-params', () => ({
-  useQueryParam: jest.fn(() => ['test-path']),
-  StringParam: jest.fn(),
-  withDefault: jest.fn((param, defaultValue) => [param, defaultValue]),
+vi.mock('use-query-params', () => ({
+  useQueryParam: vi.fn(() => ['test-path']),
+  StringParam: vi.fn(),
+  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
 }))
 
-jest.mock('moment', () => {
-  const moment = jest.requireActual('moment')
+vi.mock('moment', () => {
+  const moment = vi.requireActual('moment')
   return {
     ...moment,
     __esModule: true,
     default: () => ({
-      format: jest.fn(() => '2023-01-01'),
+      format: vi.fn(() => '2023-01-01'),
     }),
   }
 })
 
 describe('WalkEditor update', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
-  
+
   it('renders WalkEditor with default props', () => {
     render(<WalkEditor mode="update" />)
     expect(screen.getByTestId('WalkEditor')).toBeInTheDocument()
@@ -111,7 +111,7 @@ describe('WalkEditor update', () => {
   it('submits the form when update button is clicked', () => {
     render(<WalkEditor mode="update" />)
     const submitButton = screen.getByTestId('submit-button')
-    
+
     fireEvent.click(submitButton)
     expect(submitButton).toBeInTheDocument()
   })
@@ -119,9 +119,9 @@ describe('WalkEditor update', () => {
   it('updates form data when input changes', () => {
     render(<WalkEditor mode="update" />)
     const titleInput = screen.getByLabelText('title')
-    
+
     fireEvent.change(titleInput, { target: { value: 'New Title' } })
-    
+
     expect(mockDispatchMain).toHaveBeenCalledWith({
       type: 'SET_IS_DIRTY',
       payload: true,
@@ -131,9 +131,9 @@ describe('WalkEditor update', () => {
 
 describe('WalkEditor create', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
-  
+
   it('renders WalkEditor with default props', () => {
     render(<WalkEditor mode="create" />)
     expect(screen.getByTestId('WalkEditor')).toBeInTheDocument()
@@ -143,7 +143,7 @@ describe('WalkEditor create', () => {
   it('submits the form when create button is clicked', () => {
     render(<WalkEditor mode="create" />)
     const submitButton = screen.getByTestId('submit-button')
-    
+
     fireEvent.click(submitButton)
     expect(submitButton).toBeInTheDocument()
   })
