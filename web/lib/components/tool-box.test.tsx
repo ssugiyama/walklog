@@ -9,7 +9,7 @@ import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 
 // Test configuration
 const TEST_TIMEOUT = 10000
-vi.setTimeout(TEST_TIMEOUT)
+vi.setConfig({ testTimeout: TEST_TIMEOUT })
 
 // Mock the Google Maps API
 const mockMap = {
@@ -86,7 +86,7 @@ const mockGeolocation = {
 global.google = {
   maps: {
     importLibrary: vi.fn().mockResolvedValue({}),
-    Geocoder: vi.fn().mockImplementation(() => mockGeocoder),
+    Geocoder: vi.fn().mockImplementation(function () { return mockGeocoder }),
     GeocoderStatus: {
       OK: 'OK',
       ERROR: 'ERROR',

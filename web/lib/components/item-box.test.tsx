@@ -13,21 +13,27 @@ vi.mock('@/app/lib/walk-actions', () => ({
   deleteItemAction: vi.fn(),
 }))
 
-vi.mock('@/lib/components/walk-editor', () => function MockWalkEditor() {
-  return <div data-testid="walk-editor">Walk Editor</div>
-})
+vi.mock('@/lib/components/walk-editor', () => ({
+  default: function MockWalkEditor() {
+    return <div data-testid="walk-editor">Walk Editor</div>
+  },
+}))
 
 vi.mock('../utils/data-context', () => ({
   useData: vi.fn(),
 }))
 
-vi.mock('./elevation-box', () => function MockElevationBox() {
-  return <div data-testid="elevation-box">Elevation Box</div>
-})
+vi.mock('./elevation-box', () => ({
+  default: function MockElevationBox() {
+    return <div data-testid="elevation-box">Elevation Box</div>
+  },
+}))
 
-vi.mock('./panorama-box', () => function MockPanoramaBox() {
-  return <div data-testid="panorama-box">Panorama Box</div>
-})
+vi.mock('./panorama-box', () => ({
+  default: function MockPanoramaBox() {
+    return <div data-testid="panorama-box">Panorama Box</div>
+  },
+}))
 
 vi.mock('../utils/user-context', () => ({
   useUserContext: vi.fn(),

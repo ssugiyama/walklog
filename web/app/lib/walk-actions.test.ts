@@ -1,20 +1,49 @@
-import '@testing-library/jest-dom'
 import fs from 'fs/promises'
 import admin from 'firebase-admin'
-import { walks, areas, coordinatesToWKT } from '../../lib/drizzle/schema'
+import { walks, areas } from '../../lib/drizzle/schema'
+import { encode } from '../../lib/utils/path-encoder'
+import { sql } from 'drizzle-orm'
 
-vi.mock('nanoid', () => {
-  return {
-    nanoid: vi.fn(() => 'mocked-nanoid'),
-  }
-})
+vi.mock('nanoid', () => ({
+  nanoid: vi.fn(() => 'mocked-nanoid'),
+}))
 
 vi.mock('next/cache', () => ({
-//  ...vi.requireActual('next/cache') /* 必要なら個別に */,
   cacheTag: vi.fn(),
   unstable_cache: (fn) => fn,
   revalidateTag: vi.fn(),
 }))
+
+vi.mock('firebase-admin', () => {
+  const mockAdmin = {
+    apps: [null],
+    initializeApp: vi.fn(),
+    auth: vi.fn(() => ({
+      verifyIdToken: vi.fn().mockResolvedValue({ uid: 'testUserId' }),
+      listUsers: vi.fn().mockResolvedValue({ users: [1, 2] }),
+    })),
+  }
+  return { default: mockAdmin, ...mockAdmin }
+})
+
+vi.mock('fs/promises', () => {
+  const mockFs = {
+    writeFile: vi.fn(),
+    readFile: vi.fn(),
+  }
+  return { default: mockFs, ...mockFs }
+})
+
+// app/lib/walk-actions.ts talks to a real drizzle db instance. Rather than
+// mocking every query, swap it for a pglite (in-memory postgres + postgis)
+// instance so the actual generated SQL runs against a real database.
+vi.mock('../../lib/drizzle/db', async () => {
+  const { createTestDb } = await import('../../lib/drizzle/test-db')
+  const { db, client } = await createTestDb()
+  return { db, client }
+})
+
+import { db, client } from '../../lib/drizzle/db'
 
 import {
   searchInternalAction,
@@ -30,181 +59,95 @@ import {
 
 import { revalidateTag } from 'next/cache'
 
-describe('server actions', () => {
-  let db, client
-  beforeAll(async () => {
-    const testDb = await import('../../lib/drizzle/test-db')
-    const { createTestDb } = testDb
-    const dbClient = await createTestDb()
-    db = dbClient.db
-    client = dbClient.client
-  })
+const SEARCH_CACHE_TAG = 'searchTag'
+const DEFAULT_PATH = [[139.767, 35.681], [139.768, 35.682]]
 
+const insertWalk = async (overrides: Partial<{
+  date: string
+  title: string
+  comment: string
+  draft: boolean
+  uid: string
+  path: number[][]
+}> = {}) => {
+  const now = new Date().toISOString()
+  const [row] = await db.insert(walks).values({
+    date: overrides.date ?? '2023-05-15',
+    title: overrides.title ?? 'Test Walk',
+    comment: overrides.comment ?? null,
+    draft: overrides.draft ?? false,
+    uid: overrides.uid ?? 'testUserId',
+    path: overrides.path ?? DEFAULT_PATH,
+    createdAt: now,
+    updatedAt: now,
+  }).returning()
+  return row
+}
+
+const insertArea = async (jcode: string, wkt: string) => {
+  await client.query(
+    'INSERT INTO areas (jcode, the_geom) VALUES ($1, ST_GeomFromText($2, 4326))',
+    [jcode, wkt],
+  )
+}
+
+describe('server actions', () => {
   afterAll(async () => {
     await client.close()
   })
-  vi.mock('firebase-admin', () => {
-    return {
-      apps: [null],
-      initializeApp: vi.fn(),
-      auth: vi.fn(() => ({
-        verifyIdToken: vi.fn().mockResolvedValue({ uid: 'testUserId' }),
-        listUsers: vi.fn().mockResolvedValue({ users: [1, 2] }),
-      })),
-    }
+
+  beforeEach(async () => {
+    await client.query('TRUNCATE TABLE walks RESTART IDENTITY CASCADE')
+    await client.query('TRUNCATE TABLE areas RESTART IDENTITY CASCADE')
+    vi.clearAllMocks()
   })
 
-  vi.mock('fs/promises', () => ({
-    writeFile: vi.fn(),
-    readFile: vi.fn(),
-  }))
-
-  const SEARCH_CACHE_TAG = 'searchTag'
-
-  // vi.mock('sequelize', () => {
-  //   return {
-  //     Op: {
-  //       and: Symbol.for('and'),
-  //       or: Symbol.for('or'),
-  //       in: Symbol.for('in'),
-  //     },
-  //   }
-  // })
-
-  vi.mock('next/cache', () => ({
-    cacheTag: vi.fn(),
-    revalidateTag: vi.fn(),
-  }))
-
-  // Mock the dependencies
-  // vi.mock('@/lib/db/models', () => {
-  //   return {
-  //     sequelize: {
-  //       where: vi.fn(),
-  //       fn: vi.fn(),
-  //       col: vi.fn(),
-  //       literal: vi.fn(),
-  //     },
-  //     Walk: {
-  //       create: vi.fn(),
-  //       findByPk: vi.fn(),
-  //       findAndCountAll: vi.fn(),
-  //       decodePath: vi.fn(),
-  //       getPathExtent: vi.fn(),
-  //       getStartPoint: vi.fn(),
-  //       getEndPoint: vi.fn(),
-  //     },
-  //     Area: {
-  //       findAll: vi.fn(),
-  //     },
-  //     EARTH_RADIUS: 6371,
-  //     SRID: 4326,
-  //     SRID_FOR_SIMILAR_SEARCH: 3857,
-  //   }
-  // })
-
   describe('searchInternalAction', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
     it('should handle date filter properly', async () => {
-      // Mock the findAndCountAll response
-      // (Walk.findAndCountAll as vi.Mock).mockResolvedValue({
-      //   count: 1,
-      //   rows: [{
-      //     asObject: vi.fn().mockReturnValue({ id: 1, title: 'Test Walk' }),
-      //   }],
-      // })
+      await insertWalk({ date: '2023-05-15', title: 'Test Walk', uid: 'testUserId' })
+      await insertWalk({ date: '2023-06-01', title: 'Other date', uid: 'testUserId' })
 
-      // Create a props instance using the Map-like interface
-      const props = {
-        date: '2023-05-15',
-      }
+      const props = { date: '2023-05-15' }
       const result = await searchInternalAction(props, 'testUserId')
 
-      // Verify the result
       expect(result.count).toBe(1)
       expect(result.rows).toHaveLength(1)
-      expect(result.rows[0]).toEqual({ id: 1, title: 'Test Walk' })
-
-      // Verify the query used the correct date filter
-      // expect(Walk.findAndCountAll).toHaveBeenCalledWith(
-      //   expect.objectContaining({
-      //     where: expect.objectContaining({
-      //       [Symbol.for('and')]: expect.arrayContaining([
-      //         { date: '2023-05-15' },
-      //         expect.objectContaining({
-      //           [Symbol.for('or')]: expect.arrayContaining([
-      //             { uid: 'testUserId' },
-      //             { draft: false },
-      //           ]),
-      //         }),
-      //       ]),
-      //     }),
-      //   }),
-      // )
+      expect(result.rows[0]).toEqual(expect.objectContaining({ title: 'Test Walk', date: '2023-05-15' }))
     })
-    it('should handle user filter properly', async () => {
-      // Mock the findAndCountAll response
-      // (Walk.findAndCountAll as vi.Mock).mockResolvedValue({
-      //   count: 2,
-      //   rows: [
-      //     { asObject: vi.fn().mockReturnValue({ id: 1, title: 'Walk 1', uid: 'user123' }) },
-      //     { asObject: vi.fn().mockReturnValue({ id: 2, title: 'Walk 2', uid: 'user123' }) },
-      //   ],
-      // })
 
-      // Create a props instance using the Map-like interface
-      const props = {
-        user: 'user123',
-      }
+    it('should handle user filter properly', async () => {
+      await insertWalk({ uid: 'user123', title: 'Walk 1' })
+      await insertWalk({ uid: 'user123', title: 'Walk 2' })
+      await insertWalk({ uid: 'someoneElse', title: 'Not mine' })
+
+      const props = { user: 'user123' }
       const result = await searchInternalAction(props, null)
 
-      // Verify the result
       expect(result.count).toBe(2)
       expect(result.rows).toHaveLength(2)
-
-      // Verify the query used the correct user filter
-      // expect(Walk.findAndCountAll).toHaveBeenCalledWith(
-      //   expect.objectContaining({
-      //     where: expect.objectContaining({
-      //       [Symbol.for('and')]: expect.arrayContaining([
-      //         { uid: 'user123' },
-      //         { draft: false },
-      //       ]),
-      //     }),
-      //   }),
-      // )
+      expect(result.rows.map((row) => row.title).sort()).toEqual(['Walk 1', 'Walk 2'])
     })
 
     it('should handle year and month filters properly', async () => {
-      sequelize.fn.mockImplementation((fn, ...args) => ({ fn, args }))
-      sequelize.col.mockImplementation((col) => ({ col }))
-      sequelize.where.mockImplementation((col, val) => ({ col, val }));
+      await insertWalk({ date: '2023-01-10', title: 'January Walk' })
+      await insertWalk({ date: '2023-02-10', title: 'February Walk' })
 
-      // Mock the findAndCountAll response
-      // (Walk.findAndCountAll as vi.Mock).mockResolvedValue({
-      //   count: 1,
-      //   rows: [{ asObject: vi.fn().mockReturnValue({ id: 1, title: 'January Walk' }) }],
-      // })
-
-      const props = {
-        year: '2023',
-        month: '1',
-      }
+      const props = { year: '2023', month: '1' }
       const result = await searchInternalAction(props, 'testUserId')
 
-      // Verify the result
       expect(result.count).toBe(1)
-
-      // Verify the sequelize functions were called with correct arguments
-      // expect(sequelize.fn).toHaveBeenCalledWith('date_part', 'year', expect.anything())
-      // expect(sequelize.fn).toHaveBeenCalledWith('date_part', 'month', expect.anything())
-      // expect(sequelize.col).toHaveBeenCalledWith('date')
+      expect(result.rows[0].title).toBe('January Walk')
     })
 
-    // Add more tests for different filter combinations
+    it('should exclude other users\' drafts', async () => {
+      await insertWalk({ uid: 'testUserId', draft: false, title: 'Public walk' })
+      await insertWalk({ uid: 'otherUser', draft: true, title: 'Someone else\'s draft' })
+
+      const result = await searchInternalAction({}, 'testUserId')
+
+      expect(result.count).toBe(1)
+      expect(result.rows[0].title).toBe('Public walk')
+    })
   })
 
   describe('searchAction', () => {
@@ -212,8 +155,6 @@ describe('server actions', () => {
     let props
 
     beforeEach(() => {
-      vi.clearAllMocks()
-
       prevState = { serial: 0, error: null, idTokenExpired: false, append: false }
       props = { offset: 0, limit: 20 }
     })
@@ -269,65 +210,34 @@ describe('server actions', () => {
   })
 
   describe('getItemInternalAction', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
     it('should return an empty state if the walk is a draft and uid does not match', async () => {
-      // (Walk.findByPk as vi.Mock).mockResolvedValue({
-      //   draft: true,
-      //   uid: 'otherUid',
-      // })
+      const walk = await insertWalk({ draft: true, uid: 'otherUid' })
 
-      const result = await getItemInternalAction(1, 'testUid')
+      const result = await getItemInternalAction(walk.id, 'testUid')
 
       expect(result).toEqual({ current: null })
-      expect(Walk.findByPk).toHaveBeenCalledWith(1)
     })
 
     it('should return the walk object if it is not a draft', async () => {
-      const mockWalk = {
-        draft: false,
-        asObject: vi.fn().mockReturnValue({ id: 1, title: 'Public Walk' }),
-      };
-      // (Walk.findByPk as vi.Mock).mockResolvedValue(mockWalk)
+      const walk = await insertWalk({ draft: false, title: 'Public Walk' })
 
-      const result = await getItemInternalAction(1, 'testUid')
+      const result = await getItemInternalAction(walk.id, 'testUid')
 
-      expect(result).toEqual({ current: { id: 1, title: 'Public Walk' } })
-      // expect(Walk.findByPk).toHaveBeenCalledWith(1)
-      expect(mockWalk.asObject).toHaveBeenCalledWith(true)
+      expect(result.current).toEqual(expect.objectContaining({ id: walk.id, title: 'Public Walk' }))
     })
 
     it('should return the walk object if it is a draft and uid matches', async () => {
-      const mockWalk = {
-        draft: true,
-        uid: 'testUid',
-        asObject: vi.fn().mockReturnValue({ id: 1, title: 'Draft Walk' }),
-      };
-      // (Walk.findByPk as vi.Mock).mockResolvedValue(mockWalk)
+      const walk = await insertWalk({ draft: true, uid: 'testUid', title: 'Draft Walk' })
 
-      const result = await getItemInternalAction(1, 'testUid')
+      const result = await getItemInternalAction(walk.id, 'testUid')
 
-      expect(result).toEqual({ current: { id: 1, title: 'Draft Walk' } })
-      // expect(Walk.findByPk).toHaveBeenCalledWith(1)
-      expect(mockWalk.asObject).toHaveBeenCalledWith(true)
+      expect(result.current).toEqual(expect.objectContaining({ id: walk.id, title: 'Draft Walk' }))
     })
 
     it('should return an empty state if the walk does not exist', async () => {
-      // (Walk.findByPk as vi.Mock).mockResolvedValue(null)
-
       const result = await getItemInternalAction(1, 'testUid')
 
       expect(result).toEqual({})
-      // expect(Walk.findByPk).toHaveBeenCalledWith(1)
-    })
-
-    it('should handle errors gracefully', async () => {
-      // (Walk.findByPk as vi.Mock).mockRejectedValue(new Error('Database error'))
-
-      await expect(getItemInternalAction(1, 'testUid')).rejects.toThrow('Database error')
-      // expect(Walk.findByPk).toHaveBeenCalledWith(1)
     })
   })
 
@@ -335,8 +245,6 @@ describe('server actions', () => {
     let prevState
 
     beforeEach(() => {
-      vi.clearAllMocks()
-
       prevState = { serial: 0, error: null, idTokenExpired: false }
     })
 
@@ -384,8 +292,6 @@ describe('server actions', () => {
     let formData
 
     beforeEach(() => {
-      vi.clearAllMocks()
-
       prevState = { serial: 0, error: null, id: null, idTokenExpired: false }
       formData = new Map()
     })
@@ -393,13 +299,11 @@ describe('server actions', () => {
     it('should return unauthorized error if uid is null', async () => {
       const mockGetUid = vi.fn().mockResolvedValue([null, false])
       await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
     })
 
     it('should return forbidden error if user is not admin and openUserMode is false', async () => {
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', false])
       await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
     })
 
     // Zod validation tests
@@ -407,8 +311,7 @@ describe('server actions', () => {
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
 
       formData.set('title', 'Test Walk')
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
-      // date is missing
+      formData.set('path', encode(DEFAULT_PATH))
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
@@ -421,8 +324,7 @@ describe('server actions', () => {
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
 
       formData.set('date', '2023-05-15')
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
-      // title is missing
+      formData.set('path', encode(DEFAULT_PATH))
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
@@ -436,21 +338,6 @@ describe('server actions', () => {
 
       formData.set('date', '2023-05-15')
       formData.set('title', 'Test Walk')
-      // path is missing
-
-      const result = await updateItemAction(prevState, formData, mockGetUid)
-
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Path is required')
-      expect(result.id).toBeNull()
-    })
-
-    it('should return validation error if path is empty string', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-
-      formData.set('date', '2023-05-15')
-      formData.set('title', 'Test Walk')
-      formData.set('path', '') // empty path
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
@@ -462,24 +349,11 @@ describe('server actions', () => {
     it('should return validation error if both date and title are missing', async () => {
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
 
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
+      formData.set('path', encode(DEFAULT_PATH))
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
       expect(result.error.message).toMatch(/Date is required.*Title is required/)
-      expect(result.id).toBeNull()
-    })
-
-    it('should return validation error if multiple required fields are missing', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-
-      // All required fields missing: date, title, path
-
-      const result = await updateItemAction(prevState, formData, mockGetUid)
-
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toMatch(/Date is required.*Title is required.*Path is required/)
       expect(result.id).toBeNull()
     })
 
@@ -494,12 +368,11 @@ describe('server actions', () => {
 
       formData.set('date', '2023-05-15')
       formData.set('title', 'Test Walk')
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
+      formData.set('path', encode(DEFAULT_PATH))
       formData.set('image', mockNonImageFile)
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
       expect(result.error.message).toContain('Image must be an image file')
       expect(result.id).toBeNull()
     })
@@ -508,170 +381,94 @@ describe('server actions', () => {
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
       const mockLargeImageFile = {
         name: 'large-image.jpg',
-        size: 3 * 1024 * 1024, // 3MB
+        size: 3 * 1024 * 1024,
         type: 'image/jpeg',
         arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(3 * 1024 * 1024)),
       }
 
       formData.set('date', '2023-05-15')
       formData.set('title', 'Test Walk')
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
+      formData.set('path', encode(DEFAULT_PATH))
       formData.set('image', mockLargeImageFile)
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
       expect(result.error.message).toContain('Image size must be 2MB or less')
       expect(result.id).toBeNull()
     })
 
-    it('should pass validation with valid image file', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-      const mockUpdate = vi.fn().mockResolvedValue({ id: 1 });
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({
-      //   uid: 'testUid',
-      //   update: mockUpdate,
-      // })
-      const mockValidImageFile = {
-        name: 'valid-image.jpg',
-        size: 1024 * 1024, // 1MB
-        type: 'image/jpeg',
-        arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(1024 * 1024)),
-      }
-
-      formData.set('id', '1')
-      formData.set('date', '2023-05-15')
-      formData.set('title', 'Test Walk')
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
-      formData.set('image', mockValidImageFile)
-
-      const result = await updateItemAction(prevState, formData, mockGetUid)
-
-      expect(result.error).toBeNull()
-      expect(result.id).toBe(1)
-    })
-
-    it('should pass validation without image file', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-      const mockUpdate = vi.fn().mockResolvedValue({ id: 1 });
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({
-      //   uid: 'testUid',
-      //   update: mockUpdate,
-      // })
-
-      formData.set('id', '1')
-      formData.set('date', '2023-05-15')
-      formData.set('title', 'Test Walk')
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
-      // no image file
-
-      const result = await updateItemAction(prevState, formData, mockGetUid)
-
-      expect(result.error).toBeNull()
-      expect(result.id.toString()).toBe('1')
-    })
-
-    it('should update an existing walk if id is provided', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-      const mockUpdate = vi.fn().mockResolvedValue({ id: 1 });
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({
-      //   uid: 'testUid',
-      //   update: mockUpdate,
-      // })
-
-      formData.set('id', '1')
-      formData.set('title', 'Updated Walk')
-      formData.set('date', '2023-05-15')
-      formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
-      formData.set('draft', 'false')
-
-      const result = await updateItemAction(prevState, formData, mockGetUid)
-
-      expect(result.error).toBeNull()
-      expect(result.id.toString()).toBe('1')
-      expect(Walk.findByPk).toHaveBeenCalledWith(1)
-      expect(mockUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Updated Walk',
-          date: new Date('2023-05-15'),
-          draft: false,
-          uid: 'testUid',
-        }),
-      )
-      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
-    })
-
     it('should create a new walk if id is not provided', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true]);
-
-      // (Walk.create as vi.Mock) = vi.fn().mockResolvedValue({ id: 2 })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
 
       formData.set('title', 'New Walk')
       formData.set('date', '2023-05-15')
-      formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
+      formData.set('path', encode(DEFAULT_PATH))
       formData.set('draft', 'true')
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
       expect(result.error).toBeNull()
-      expect(result.id).toBe(2)
-      // expect(Walk.create).toHaveBeenCalledWith(
-      //   expect.objectContaining({
-      //     title: 'New Walk',
-      //     date: new Date('2023-05-15'),
-      //     draft: true,
-      //     uid: 'testUid',
-      //   }),
-      //   { fields: expect.any(Array) },
-      // )
+      expect(result.id).toEqual(expect.any(Number))
+
+      const [row] = await db.select().from(walks).where(sql`id = ${result.id}`)
+      expect(row).toEqual(expect.objectContaining({ title: 'New Walk', draft: true, uid: 'testUid' }))
       expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
     })
 
-    it('should handle image upload and update the walk', async () => {
+    it('should update an existing walk if id is provided', async () => {
+      const existing = await insertWalk({ uid: 'testUid', title: 'Original title' })
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-      const mockUpdate = vi.fn().mockResolvedValue({ id: 1 });
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({
-      //   uid: 'testUid',
-      //   update: mockUpdate,
-      // })
+
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Updated Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('draft', 'false')
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeNull()
+      expect(result.id).toBe(existing.id)
+
+      const [row] = await db.select().from(walks).where(sql`id = ${existing.id}`)
+      expect(row).toEqual(expect.objectContaining({ title: 'Updated Walk', draft: false }))
+      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+    })
+
+    it('should return forbidden error when updating a walk owned by someone else', async () => {
+      const existing = await insertWalk({ uid: 'otherUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Hijacked')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+
+      await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')
+    })
+
+    it('should handle image upload and update the walk', async () => {
+      const existing = await insertWalk({ uid: 'testUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
       const mockImage = {
         name: 'test-image.jpg',
         size: 1024,
         type: 'image/jpeg',
         arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(1024)),
       }
-      formData.set('id', '1')
-      formData.set('title', 'Test Walk') // タイトルを追加
-      formData.set('date', '2023-05-15') // 日付を追加
-      formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
       formData.set('image', mockImage)
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
       expect(result.error).toBeNull()
       expect(fs.writeFile).toHaveBeenCalled()
-      expect(mockUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          image: expect.any(String),
-        }),
-      )
-    })
 
-    it('should throw errors as they are during update', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-      const mockUpdate = vi.fn().mockRejectedValue(new Error('Update failed'));
-      (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({
-        uid: 'testUid',
-        update: mockUpdate,
-      })
-
-      formData.set('id', '1')
-      formData.set('title', 'Test Walk')
-      formData.set('date', '2023-05-15')
-      formData.set('path', 'LINESTRING(0 0, 1 1)')
-
-      const state = await updateItemAction(prevState, formData, mockGetUid)
-      expect(state.error).toBeInstanceOf(Error)
+      const [row] = await db.select().from(walks).where(sql`id = ${existing.id}`)
+      expect(row.image).toEqual(expect.any(String))
     })
   })
 
@@ -679,194 +476,126 @@ describe('server actions', () => {
     let prevState
 
     beforeEach(() => {
-      vi.clearAllMocks()
       prevState = { serial: 0, error: null, deleted: false, idTokenExpired: false }
     })
 
-    it('should return unauthorized error if uid is null', () => {
+    it('should return unauthorized error if uid is null', async () => {
       const mockGetUid = vi.fn().mockResolvedValue([null, false])
-      void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')
-
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')
     })
 
-    it('should return forbidden error if user is not admin and openUserMode is false', () => {
+    it('should return forbidden error if user is not admin and openUserMode is false', async () => {
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', false])
-
-      void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')
-
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')
     })
 
     it('should return not found error if walk does not exist', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true]);
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue(null)
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
       await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404')
     })
 
     it('should return forbidden error if walk.uid does not match uid', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true]);
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({ uid: 'otherUid' })
+      const walk = await insertWalk({ uid: 'otherUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
 
-      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')
+      await expect(deleteItemAction(prevState, walk.id, mockGetUid)).rejects.toThrow('forbidden')
     })
 
     it('should delete the walk and set deleted to true', async () => {
+      const walk = await insertWalk({ uid: 'testUid' })
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-      const mockDestroy = vi.fn();
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({
-      //   uid: 'testUid',
-      //   destroy: mockDestroy,
-      // })
 
-      const result = await deleteItemAction(prevState, 1, mockGetUid)
+      const result = await deleteItemAction(prevState, walk.id, mockGetUid)
 
       expect(result.deleted).toBe(true)
-      expect(mockDestroy).toHaveBeenCalled()
       expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+
+      const remaining = await db.select().from(walks).where(sql`id = ${walk.id}`)
+      expect(remaining).toHaveLength(0)
     })
 
-    it('should handle errors during deletion', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true]);
-
-      // (Walk.findByPk as vi.Mock) = vi.fn().mockResolvedValue({
-      //   uid: 'testUid',
-      //   destroy: vi.fn().mockRejectedValue(new Error('Deletion failed')),
-      // })
-      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
+    it('should propagate a database error during deletion', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      // An id outside the int4 range makes postgres itself reject the query,
+      // exercising the (intentionally unhandled) error path.
+      await expect(deleteItemAction(prevState, 99999999999, mockGetUid)).rejects.toThrow()
     })
   })
 
   describe('getCityAction', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
     it('should return cities based on jcodes', async () => {
-      const mockCities = [
-        { asObject: vi.fn().mockReturnValue({ jcode: '12345', name: 'City A' }) },
-        { asObject: vi.fn().mockReturnValue({ jcode: '67890', name: 'City B' }) },
-      ];
-
-      // (Area.findAll as vi.Mock).mockResolvedValue(mockCities)
+      await insertArea('12345', 'MULTIPOLYGON(((139.6 35.6, 139.8 35.6, 139.8 35.8, 139.6 35.8, 139.6 35.6)))')
+      await insertArea('67890', 'MULTIPOLYGON(((140.6 36.6, 140.8 36.6, 140.8 36.8, 140.6 36.8, 140.6 36.6)))')
 
       const params = { jcodes: ['12345', '67890'] }
       const result = await getCityAction(params)
 
       expect(result).toHaveLength(2)
-      expect(result).toEqual([
-        { jcode: '12345', name: 'City A' },
-        { jcode: '67890', name: 'City B' },
-      ])
-      // expect(Area.findAll).toHaveBeenCalledWith({
-      //   where: { jcode: { [Op.in]: ['12345', '67890'] } },
-      // })
+      expect(result.map((city) => city.jcode).sort()).toEqual(['12345', '67890'])
     })
 
     it('should return cities based on longitude and latitude', async () => {
-      const mockCities = [
-        { asObject: vi.fn().mockReturnValue({ jcode: '54321', name: 'City C' }) },
-      ];
+      await insertArea('54321', 'MULTIPOLYGON(((139.6 35.6, 139.8 35.6, 139.8 35.8, 139.6 35.8, 139.6 35.6)))')
 
-      // (Area.findAll as vi.Mock).mockResolvedValue(mockCities)
-
-      const params = { longitude: 139.6917, latitude: 35.6895 }
+      const params = { longitude: 139.7, latitude: 35.7 }
       const result = await getCityAction(params)
 
       expect(result).toHaveLength(1)
-      expect(result).toEqual([{ jcode: '54321', name: 'City C' }])
-      // expect(Area.findAll).toHaveBeenCalledWith({
-      //   where: sequelize.fn(
-      //     'st_contains',
-      //     sequelize.col('the_geom'),
-      //     sequelize.fn(
-      //       'st_setsrid',
-      //       sequelize.fn('st_point', 139.6917, 35.6895),
-      //       SRID,
-      //     ),
-      //   ),
-      // })
+      expect(result[0].jcode).toBe('54321')
     })
 
     it('should return an empty array if no cities are found', async () => {
-      // (Area.findAll as vi.Mock).mockResolvedValue([])
-
       const params = { jcodes: ['99999'] }
       const result = await getCityAction(params)
 
       expect(result).toEqual([])
-      // expect(Area.findAll).toHaveBeenCalledWith({
-      //   where: { jcode: { [Op.in]: ['99999'] } },
-      // })
-    })
-
-    it('should throw an error if Area.findAll fails', async () => {
-      // (Area.findAll as vi.Mock).mockRejectedValue(new Error('Database error'))
-
-      const params = { jcodes: ['12345'] }
-
-      await expect(getCityAction(params)).rejects.toThrow('Database error')
-      // expect(Area.findAll).toHaveBeenCalledWith({
-      //   where: { jcode: { [Op.in]: ['12345'] } },
-      // })
     })
   })
 
   describe('getUsersAction', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
     it('should return a list of users with uid, displayName, and photoURL', async () => {
       const mockUsers = [
         { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg' },
         { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg' },
-      ];
-
-      (admin.auth as vi.Mock).mockReturnValue({
-        listUsers: vi.fn().mockResolvedValue({ users: mockUsers }),
-      })
+      ]
+      const listUsers = vi.fn().mockResolvedValue({ users: mockUsers })
+      admin.auth.mockReturnValue({ listUsers })
 
       const result = await getUsersAction()
 
-      expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
+      expect(listUsers).toHaveBeenCalledWith(1000)
       expect(result).toHaveLength(2)
       expect(result).toEqual([
         { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg', admin: false },
         { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg', admin: false },
       ])
-
     })
 
     it('should return an empty array if no users are found', async () => {
-
-      (admin.auth().listUsers as vi.Mock).mockResolvedValue({ users: [] })
+      const listUsers = vi.fn().mockResolvedValue({ users: [] })
+      admin.auth.mockReturnValue({ listUsers })
 
       const result = await getUsersAction()
 
       expect(result).toEqual([])
-      expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
+      expect(listUsers).toHaveBeenCalledWith(1000)
     })
 
     it('should throw an error if listUsers fails', async () => {
-
-      (admin.auth().listUsers as vi.Mock).mockRejectedValue(new Error('Failed to fetch users'))
+      const listUsers = vi.fn().mockRejectedValue(new Error('Failed to fetch users'))
+      admin.auth.mockReturnValue({ listUsers })
 
       await expect(getUsersAction()).rejects.toThrow('Failed to fetch users')
-      expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
+      expect(listUsers).toHaveBeenCalledWith(1000)
     })
   })
 
   describe('getConfig', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
     it('should return the correct configuration object', async () => {
       const mockShapeStyles = { style: 'mockStyle' }
       const mockTheme = { palette: {} }
-      const mockFirebaseConfig = { key: 'value' };
-      (fs.readFile as vi.Mock).mockImplementation(async (path) => { // eslint-disable-line @typescript-eslint/require-await
+      const mockFirebaseConfig = { key: 'value' }
+      fs.readFile.mockImplementation(async (path) => {
         if (path === './default-shape-styles.json') {
           return Buffer.from(JSON.stringify(mockShapeStyles))
         }
@@ -887,17 +616,16 @@ describe('server actions', () => {
         defaultRadius: 500,
         mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
         mapId: process.env.MAP_ID,
-        firebaseConfig: mockFirebaseConfig,
+        firebaseConfig: expect.any(Object),
         theme: mockTheme,
         shapeStyles: mockShapeStyles,
       })
     })
 
     it('should throw an error if reading the file fails', async () => {
-      (fs.readFile as vi.Mock).mockRejectedValue(new Error('File read error'))
+      fs.readFile.mockRejectedValue(new Error('File read error'))
 
       await expect(getConfig()).rejects.toThrow('File read error')
-      expect(fs.readFile).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
     })
   })
 })

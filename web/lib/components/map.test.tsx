@@ -58,22 +58,24 @@ vi.mock('@googlemaps/js-api-loader', () => ({
 
 vi.mock('terra-draw', () => {
   return {
-    TerraDraw: vi.fn().mockImplementation(() => ({
-      start: vi.fn(),
-      on: vi.fn(),
-      getSnapshotFeature: vi.fn(),
-      updateModeOptions: vi.fn(),
-      setMode: vi.fn(),
-      clear: vi.fn(),
-    })),
-    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(() => ({})),
-    TerraDrawLineStringMode: vi.fn().mockImplementation(() => ({})),
+    TerraDraw: vi.fn().mockImplementation(function () {
+      return {
+        start: vi.fn(),
+        on: vi.fn(),
+        getSnapshotFeature: vi.fn(),
+        updateModeOptions: vi.fn(),
+        setMode: vi.fn(),
+        clear: vi.fn(),
+      }
+    }),
+    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () { return {} }),
+    TerraDrawLineStringMode: vi.fn().mockImplementation(function () { return {} }),
   }
 })
 
 vi.mock('terra-draw-google-maps-adapter', () => {
   return {
-    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(() => ({})),
+    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () { return {} }),
   }
 })
 

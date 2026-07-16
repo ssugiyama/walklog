@@ -33,9 +33,11 @@ vi.mock('../utils/config', () => ({
   useConfig: vi.fn(() => ({})),
 }))
 
-vi.mock('./search-form', () => {
-  return (<div data-testid="search-form">Search Form</div>)
-})
+vi.mock('./search-form', () => ({
+  default: function MockSearchForm() {
+    return <div data-testid="search-form">Search Form</div>
+  },
+}))
 
 describe('SearchBox', () => {
   const mockRouterReplace = vi.fn()

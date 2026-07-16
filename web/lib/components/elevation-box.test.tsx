@@ -46,7 +46,7 @@ describe('ElevationBox', () => {
             decodePath: vi.fn(() => [{ lat: 35.6762, lng: 139.6503 }]),
           },
         },
-        ElevationService: vi.fn(() => mockElevationService),
+        ElevationService: vi.fn().mockImplementation(function () { return mockElevationService }),
         ElevationStatus: {
           OK: 'OK',
         },

@@ -16,21 +16,29 @@ const defaultData = {
 }
 
 // Mock dependencies
-vi.mock('@/lib/components/nav-bar', () => function MockNavBar() {
-  return <div data-testid="nav-bar">Nav Bar</div>
-})
+vi.mock('@/lib/components/nav-bar', () => ({
+  default: function MockNavBar() {
+    return <div data-testid="nav-bar">Nav Bar</div>
+  },
+}))
 
-vi.mock('@/lib/components/tool-box', () => function MockToolBox() {
-  return <div data-testid="tool-box">Tool Box</div>
-})
+vi.mock('@/lib/components/tool-box', () => ({
+  default: function MockToolBox() {
+    return <div data-testid="tool-box">Tool Box</div>
+  },
+}))
 
-vi.mock('@/lib/components/map', () => function MockMap() {
-  return <div data-testid="map">Map Component</div>
-})
+vi.mock('@/lib/components/map', () => ({
+  default: function MockMap() {
+    return <div data-testid="map">Map Component</div>
+  },
+}))
 
-vi.mock('@/lib/components/bottom-bar', () => function MockBottomBar() {
-  return <div data-testid="bottom-bar">Bottom Bar</div>
-})
+vi.mock('@/lib/components/bottom-bar', () => ({
+  default: function MockBottomBar() {
+    return <div data-testid="bottom-bar">Bottom Bar</div>
+  },
+}))
 
 vi.mock('@/lib/utils/data-context', () => ({
   DataProvider: ({ children }) => <div data-testid="data-provider">{children}</div>,
@@ -45,7 +53,7 @@ vi.mock('use-query-params', () => ({
   QueryParamProvider: ({ children }) => <div data-testid="query-param-provider">{children}</div>,
 }))
 
-vi.mock('next-query-params/app', () => ({}))
+vi.mock('next-query-params/app', () => ({ default: ({ children }) => children }))
 
 vi.mock('@/lib/utils/config', () => ({
   useConfig: vi.fn(() => ({

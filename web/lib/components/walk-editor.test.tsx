@@ -13,11 +13,13 @@ const mockSearchParams = {
 }
 
 beforeAll(() => {
-  global.FormData = vi.fn(() => ({
-    append: vi.fn(),
-    get: vi.fn(),
-    entries: vi.fn(() => []),
-  }))
+  global.FormData = vi.fn().mockImplementation(function () {
+    return {
+      append: vi.fn(),
+      get: vi.fn(),
+      entries: vi.fn(() => []),
+    }
+  })
 })
 
 vi.mock('../utils/user-context', () => ({
@@ -76,8 +78,8 @@ vi.mock('use-query-params', () => ({
   withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
 }))
 
-vi.mock('moment', () => {
-  const moment = vi.requireActual('moment')
+vi.mock('moment', async () => {
+  const moment = await vi.importActual('moment')
   return {
     ...moment,
     __esModule: true,
