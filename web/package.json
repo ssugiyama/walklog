@@ -6,6 +6,7 @@
     "start-in-docker": "node ./server.js",
     "test": "vitest run",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "migrate": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {

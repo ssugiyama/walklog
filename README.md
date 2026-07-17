@@ -149,13 +149,13 @@ GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
 #### Migrate DB
 
 ```bash
-docker-compose run --rm web sh -c 'npx sequelize-cli db:migrate --url $DB_URL'
+docker-compose run --rm web sh -c 'pnpm migrate'
 ```
 
 #### Setup Area Database
 
 ```bash
-docker-compose run -v /path/to/work_dir:/tmp --rm db manage-areas.sh -h db shapefile.shp
+docker-compose run -v /path/to/work_dir:/tmp --rm db manage-areas.sh -a -h db shapefile.shp
 ```
 
 #### Start Services
@@ -178,13 +178,13 @@ The application will be available at http://localhost:3000
 
 ```bash
 cd /path/to/work_dir/web
-npx sequelize-cli db:migrate --url postgres://user:password@host/db
+pnpm migrate
 ```
 
 #### Setup Area Database
 ```bash
 cd /path/to/work_dir
-/path/to/work_dir/db/manage-areas.sh shapefile.shp
+/path/to/work_dir/db/manage-areas.sh -a shapefile.shp
 ```
 
 #### Setup and Start Application

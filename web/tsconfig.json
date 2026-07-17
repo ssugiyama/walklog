@@ -6,6 +6,7 @@
       "dom.iterable",
       "esnext"
     ],
+    "types": ["vitest/globals", "google.maps"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
