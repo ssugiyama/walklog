@@ -5,7 +5,8 @@
     "start": "next start",
     "start-in-docker": "node ./server.js",
     "test": "vitest run",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",

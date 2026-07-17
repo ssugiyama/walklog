@@ -18,5 +18,6 @@ export default defineConfig({
     // boot its WASM postgres + postgis extension on a cold run.
     hookTimeout: 20000,
     testTimeout: 20000,
+    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.next/**', '**/out/**'],
   },
 })

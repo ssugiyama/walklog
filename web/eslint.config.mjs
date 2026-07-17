@@ -81,6 +81,7 @@ export default [
         React: 'readonly',
         JSX: 'readonly',
         NodeJS: 'readonly',
+        vi: 'readonly',
         ...globals.browser,
         ...globals.node,
         ...globals.jest,
@@ -112,6 +113,11 @@ export default [
   },
   {
     files: ['**/*.test.{ts,tsx}', '**/__mocks__/**'],
+    languageOptions: {
+      globals: {
+        vi: 'readonly',
+      },
+    },
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',

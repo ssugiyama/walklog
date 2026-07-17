@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 import admin from 'firebase-admin'
-import { walks, areas } from '../../lib/drizzle/schema'
+import { walks } from '../../lib/drizzle/schema'
 import { encode } from '../../lib/utils/path-encoder'
 import { sql } from 'drizzle-orm'
 
@@ -595,7 +595,7 @@ describe('server actions', () => {
       const mockShapeStyles = { style: 'mockStyle' }
       const mockTheme = { palette: {} }
       const mockFirebaseConfig = { key: 'value' }
-      fs.readFile.mockImplementation(async (path) => {
+      fs.readFile.mockImplementation((path) => {
         if (path === './default-shape-styles.json') {
           return Buffer.from(JSON.stringify(mockShapeStyles))
         }
