@@ -19,5 +19,11 @@ export default defineConfig({
     hookTimeout: 20000,
     testTimeout: 20000,
     exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.next/**', '**/out/**'],
+    coverage: {
+      // you can include other reporters, but 'json-summary' is required, json is recommended
+      reporter: ['text', 'json-summary', 'json'],
+      // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
+      reportOnFailure: true,
+    },
   },
 })
