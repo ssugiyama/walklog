@@ -128,7 +128,7 @@ const ItemBox = () => {
           ) : null
         }
         {
-          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton nativeButton={false} disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
+          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton nativeButton={true} disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
         }
         <Typography variant="h6" sx={{ fontSize: '100%' }}>{title ?? 'not found'}</Typography>
         <Box sx={{ textAlign: 'right' }}>

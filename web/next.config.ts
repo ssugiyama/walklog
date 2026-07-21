@@ -1,5 +1,4 @@
 const nextConfig = {
-  serverExternalPackages: ['sequelize'],
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',

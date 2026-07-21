@@ -2,13 +2,13 @@ import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import SearchForm from './search-form'
 
-jest.mock('../utils/config', () => ({
+vi.mock('../utils/config', () => ({
   useConfig: () => ({
     defaultCenter: [0, 0],
   }),
 }))
 
-jest.mock('../utils/user-context', () => ({
+vi.mock('../utils/user-context', () => ({
   useUserContext: () => ({
     users: [
       { uid: '1', displayName: 'User 1' },
@@ -17,7 +17,7 @@ jest.mock('../utils/user-context', () => ({
   }),
 }))
 
-jest.mock('../utils/map-context', () => ({
+vi.mock('../utils/map-context', () => ({
   useMapContext: () => ({
     state: {
       pathManager: {},
@@ -25,20 +25,20 @@ jest.mock('../utils/map-context', () => ({
   }),
 }))
 
-const mockRouterPush = jest.fn()
+const mockRouterPush = vi.fn()
 
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({
     push: mockRouterPush,
   }),
 }))
 
-jest.mock('use-query-params', () => ({
-  useQueryParam: jest.fn((key, defaultValue) => [defaultValue[1], jest.fn()]),
-  StringParam: jest.fn(),
-  withDefault: jest.fn((param, defaultValue) => [param, defaultValue]),
-  NumberParam: jest.fn(),
+vi.mock('use-query-params', () => ({
+  useQueryParam: vi.fn((key, defaultValue) => [defaultValue[1], vi.fn()]),
+  StringParam: vi.fn(),
+  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
+  NumberParam: vi.fn(),
 }))
 
 describe('SearchForm', () => {

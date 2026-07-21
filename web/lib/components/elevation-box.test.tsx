@@ -5,10 +5,11 @@ import ElevationBox from './elevation-box'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
-import { initialize } from '@googlemaps/jest-mocks'
+import { initialize, LatLng } from '@googlemaps/jest-mocks'
+import { Mock } from 'vitest'
 
 // Rechartsのモック
-jest.mock('recharts', () => ({
+vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }) => <div data-testid="responsive-container">{children}</div>,
   LineChart: ({ children }) => <div data-testid="line-chart">{children}</div>,
   Line: () => <div data-testid="line" />,
@@ -18,56 +19,57 @@ jest.mock('recharts', () => ({
   Tooltip: () => <div data-testid="tooltip" />,
 }))
 
-jest.mock('../utils/config', () => ({
-  useConfig: jest.fn(),
+vi.mock('../utils/config', () => ({
+  useConfig: vi.fn(),
 }))
 
-jest.mock('../utils/data-context', () => ({
-  useData: jest.fn(),
+vi.mock('../utils/data-context', () => ({
+  useData: vi.fn(),
 }))
 
-jest.mock('../utils/map-context', () => ({
-  useMapContext: jest.fn(),
+vi.mock('../utils/map-context', () => ({
+  useMapContext: vi.fn(),
 }))
 
 describe('ElevationBox', () => {
   const mockElevationService = {
-    getElevationAlongPath: jest.fn(),
+    getElevationAlongPath: vi.fn(),
   }
 
-  beforeEach(() => {
+  beforeAll(() => {
     initialize()
     global.google = {
       ...global.google,
       maps: {
         ...global.google.maps,
         geometry: {
+          ...global.google.maps.geometry,
           encoding: {
-            decodePath: jest.fn(() => [{ lat: 35.6762, lng: 139.6503 }]),
+            ...global.google.maps.geometry.encoding,
+            decodePath: vi.fn((_encodedPath: string) => [new LatLng(35.6762, 139.6503)]),
           },
         },
-        ElevationService: jest.fn(() => mockElevationService),
+        ElevationService: vi.fn().mockImplementation(function () { return mockElevationService }),
         ElevationStatus: {
           OK: 'OK',
-        },
-        LatLng: jest.fn((lat, lng) => ({ lat: () => lat, lng: () => lng })),
+        } as typeof google.maps.ElevationStatus,
       },
     }
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders null when no selectedItem is present', () => {
-    (useData as jest.Mock).mockReturnValue([{ current: null }]);
-    (useMapContext as jest.Mock).mockReturnValue([{ map: null }])
+    (useData as Mock).mockReturnValue([{ current: null }]);
+    (useMapContext as Mock).mockReturnValue([{ map: null }])
 
     const { container } = render(<ElevationBox />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders null when selectedItem is present but no chartData', () => {
-    (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as jest.Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
 
     const { container } = render(<ElevationBox />)
     expect(container.firstChild).toBeNull()
@@ -83,18 +85,18 @@ describe('ElevationBox', () => {
       callback(results, 'OK')
     });
 
-    (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as jest.Mock).mockReturnValue({ 
-      shapeStyles: { 
-        polylines: { 
-          current: { strokeColor: '#82ca9d' }, 
-        }, 
-      }, 
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue({
+      shapeStyles: {
+        polylines: {
+          current: { strokeColor: '#82ca9d' },
+        },
+      },
     })
 
     const { rerender } = render(<ElevationBox />)
-    
+
     // useEffectを再実行させるために再レンダリング
     rerender(<ElevationBox />)
 
@@ -118,9 +120,9 @@ describe('ElevationBox', () => {
       callback(results, 'OK')
     });
 
-    (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as jest.Mock).mockReturnValue(null)
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue(null)
 
     const { rerender } = render(<ElevationBox />)
     rerender(<ElevationBox />)
@@ -135,12 +137,12 @@ describe('ElevationBox', () => {
       callback([], 'ERROR')
     });
 
-    (useData as jest.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as jest.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as jest.Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
 
     const { container } = render(<ElevationBox />)
-    
+
     // エラー時は何も表示されない
     expect(container.firstChild).toBeNull()
   })

@@ -1,3 +1,5 @@
+import { Position } from 'geojson'
+
 /* eslint no-bitwise: 'off' */
 function encodeFloat(f: number): number[] {
   let n = Math.round(f * 100000)
@@ -16,7 +18,7 @@ function encodeFloat(f: number): number[] {
   return ar
 }
 
-export const encode = (path: [number, number][]) => {
+export const encode = (path: Position[]): string => {
   let prevx = 0
   let prevy = 0
   return path.map((point) => {

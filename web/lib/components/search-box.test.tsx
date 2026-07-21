@@ -4,52 +4,55 @@ import { useRouter } from 'next/navigation'
 import { useUserContext } from '../utils/user-context'
 import { useData } from '../utils/data-context'
 import SearchBox from './search-box'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
+import { Mock } from 'vitest'
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-  useSearchParams: jest.fn(() => ({
-    get: jest.fn((key) => (key === 'index' ? '0' : null)),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
+  useSearchParams: vi.fn(() => ({
+    get: vi.fn((key) => (key === 'index' ? '0' : null)),
   })),
 }))
 
-jest.mock('../utils/user-context', () => ({
-  useUserContext: jest.fn(),
+vi.mock('../utils/user-context', () => ({
+  useUserContext: vi.fn(),
 }))
 
-jest.mock('../utils/data-context', () => ({
-  useData: jest.fn(),
+vi.mock('../utils/data-context', () => ({
+  useData: vi.fn(),
 }))
 
-jest.mock('../utils/map-context', () => ({
-  useMapContext: jest.fn(() => ([
+vi.mock('../utils/map-context', () => ({
+  useMapContext: vi.fn(() => ([
     {
       pathManager: {},
     },
   ])),
 }))
 
-jest.mock('../utils/config', () => ({
-  useConfig: jest.fn(() => ({})),
+vi.mock('../utils/config', () => ({
+  useConfig: vi.fn(() => ({})),
 }))
 
-jest.mock('./search-form', () => function SearchForm() {
-  return (<div data-testid="search-form">Search Form</div>)
-})
+vi.mock('./search-form', () => ({
+  default: function MockSearchForm() {
+    return <div data-testid="search-form">Search Form</div>
+  },
+}))
 
 describe('SearchBox', () => {
-  const mockRouterReplace = jest.fn()
+  const mockRouterReplace = vi.fn()
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({
+    (useRouter as Mock).mockReturnValue({
       replace: mockRouterReplace,
     });
 
-    (useUserContext as jest.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       users: [],
     });
 
-    (useData as jest.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 0,
@@ -59,7 +62,7 @@ describe('SearchBox', () => {
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders the SearchBox component', () => {
@@ -71,7 +74,7 @@ describe('SearchBox', () => {
 
   it('calls router.replace when index is present in searchParams', () => {
     const mockRows = [{ id: 1, uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
-    (useData as jest.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 1,
@@ -90,7 +93,7 @@ describe('SearchBox', () => {
 
   it('displays the correct count when count is greater than 0', () => {
     const mockRows = [{ id: '1', uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
-    (useData as jest.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 1,

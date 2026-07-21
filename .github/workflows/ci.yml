@@ -1,4 +1,4 @@
-name: run test
+name: ci
 on: pull_request
 permissions:
   contents: read
@@ -21,12 +21,15 @@ jobs:
       with:
         version: 10
         run_install: true
+    - name: run typecheck
+      run: pnpm typecheck
     - name: run eslint
       run: pnpm lint
-    - name: run jest
-      uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
+    - name: run test
+      run: pnpm test
+    - name: Upload coverage report
+      if: always()
+      uses: davelosert/vitest-coverage-report-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        test-script: "pnpm test"
         working-directory: web
-        skip-step: install

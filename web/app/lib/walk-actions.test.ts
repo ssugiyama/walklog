@@ -1,29 +1,51 @@
-import util from 'util'
- 
-global.TextEncoder = util.TextEncoder
- 
-global.TextDecoder = util.TextDecoder
-import { sequelize, Walk, Area, SRID } from '@/lib/db/models'
-import { Op } from 'sequelize'
-import '@testing-library/jest-dom'
 import fs from 'fs/promises'
 import admin from 'firebase-admin'
+import { walks } from '../../lib/drizzle/schema'
+import { encode } from '../../lib/utils/path-encoder'
+import { sql } from 'drizzle-orm'
 
-jest.mock('firebase-admin', () => {
-  return {
+vi.mock('nanoid', () => ({
+  nanoid: vi.fn(() => 'mocked-nanoid'),
+}))
+
+vi.mock('next/cache', () => ({
+  cacheTag: vi.fn(),
+  unstable_cache: (fn) => fn,
+  revalidateTag: vi.fn(),
+}))
+
+vi.mock('firebase-admin', () => {
+  const mockAdmin = {
     apps: [null],
-    initializeApp: jest.fn(),
-    auth: jest.fn(() => ({
-      verifyIdToken: jest.fn().mockResolvedValue({ uid: 'testUserId' }),
-      listUsers: jest.fn().mockResolvedValue({ users: [1, 2] }),
+    initializeApp: vi.fn(),
+    auth: vi.fn(() => ({
+      verifyIdToken: vi.fn().mockResolvedValue({ uid: 'testUserId' }),
+      listUsers: vi.fn().mockResolvedValue({ users: [1, 2] }),
     })),
   }
+  return { default: mockAdmin, ...mockAdmin }
 })
 
-jest.mock('fs/promises', () => ({
-  writeFile: jest.fn(),
-  readFile: jest.fn(),
-}))
+vi.mock('fs/promises', () => {
+  const mockFs = {
+    writeFile: vi.fn(),
+    readFile: vi.fn(),
+  }
+  return { default: mockFs, ...mockFs }
+})
+
+// app/lib/walk-actions.ts talks to a real drizzle db instance. Rather than
+// mocking every query, swap it for a pglite (in-memory postgres + postgis)
+// instance so the actual generated SQL runs against a real database.
+vi.mock('../../lib/drizzle/db', async () => {
+  const { createTestDb } = await import('../../lib/drizzle/test-db')
+  const db = await createTestDb()
+  return { db }
+})
+
+import { db } from '../../lib/drizzle/db'
+
+const client = db.$client as unknown as PGlite
 
 import {
   searchInternalAction,
@@ -38,852 +60,576 @@ import {
 } from '@/app/lib/walk-actions'
 
 import { revalidateTag } from 'next/cache'
+import { Mock } from 'vitest'
+import { PGlite } from '@electric-sql/pglite'
 
 const SEARCH_CACHE_TAG = 'searchTag'
+const DEFAULT_PATH = [[139.767, 35.681], [139.768, 35.682]]
 
-jest.mock('sequelize', () => {
-  return {
-    Op: {
-      and: Symbol.for('and'),
-      or: Symbol.for('or'),
-      in: Symbol.for('in'),
-    },
-  }
-})
+const insertWalk = async (overrides: Partial<{
+  date: string
+  title: string
+  comment: string
+  draft: boolean
+  uid: string
+  path: number[][]
+}> = {}) => {
+  const now = new Date().toISOString()
+  const [row] = await db.insert(walks).values({
+    date: overrides.date ?? '2023-05-15',
+    title: overrides.title ?? 'Test Walk',
+    comment: overrides.comment ?? null,
+    draft: overrides.draft ?? false,
+    uid: overrides.uid ?? 'testUserId',
+    path: overrides.path ?? DEFAULT_PATH,
+    createdAt: now,
+    updatedAt: now,
+  }).returning()
+  return row
+}
 
-jest.mock('next/cache', () => ({
-  cacheTag: jest.fn(),
-  revalidateTag: jest.fn(),
-}))
+const insertArea = async (jcode: string, wkt: string) => {
+  await (client as unknown as PGlite).query(
+    'INSERT INTO areas (jcode, the_geom) VALUES ($1, ST_GeomFromText($2, 4326))',
+    [jcode, wkt],
+  )
+}
 
-// Mock the dependencies
-jest.mock('@/lib/db/models', () => {
-  return {
-    sequelize: {
-      where: jest.fn(),
-      fn: jest.fn(),
-      col: jest.fn(),
-      literal: jest.fn(),
-    },
-    Walk: {
-      create: jest.fn(),
-      findByPk: jest.fn(),
-      findAndCountAll: jest.fn(),
-      decodePath: jest.fn(),
-      getPathExtent: jest.fn(),
-      getStartPoint: jest.fn(),
-      getEndPoint: jest.fn(),
-    },
-    Area: {
-      findAll: jest.fn(),
-    },
-    EARTH_RADIUS: 6371,
-    SRID: 4326,
-    SRID_FOR_SIMILAR_SEARCH: 3857,
-  }
-})
-
-jest.mock('nanoid', () => {
-  return {
-    nanoid: jest.fn(() => 'mocked-nanoid'),
-  }
-})
-
-describe('searchInternalAction', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
+describe('server actions', () => {
+  afterAll(async () => {
+    await (client as unknown as PGlite).close()
   })
 
-  it('should handle date filter properly', async () => {
+  beforeEach(async () => {
+    await (client as unknown as PGlite).query('TRUNCATE TABLE walks RESTART IDENTITY CASCADE')
+    await (client as unknown as PGlite).query('TRUNCATE TABLE areas RESTART IDENTITY CASCADE')
+    vi.clearAllMocks()
+  })
 
-    // Mock the findAndCountAll response
-    (Walk.findAndCountAll as jest.Mock).mockResolvedValue({
-      count: 1,
-      rows: [{
-        asObject: jest.fn().mockReturnValue({ id: 1, title: 'Test Walk' }),
-      }],
+  describe('searchInternalAction', () => {
+    it('should handle date filter properly', async () => {
+      await insertWalk({ date: '2023-05-15', title: 'Test Walk', uid: 'testUserId' })
+      await insertWalk({ date: '2023-06-01', title: 'Other date', uid: 'testUserId' })
+
+      const props = { date: '2023-05-15' }
+      const result = await searchInternalAction(props, 'testUserId')
+
+      expect(result.count).toBe(1)
+      expect(result.rows).toHaveLength(1)
+      expect(result.rows[0]).toEqual(expect.objectContaining({ title: 'Test Walk', date: '2023-05-15' }))
     })
 
-    // Create a props instance using the Map-like interface
-    const props = {
-      date: '2023-05-15',
-    }
-    const result = await searchInternalAction(props, 'testUserId')
+    it('should handle user filter properly', async () => {
+      await insertWalk({ uid: 'user123', title: 'Walk 1' })
+      await insertWalk({ uid: 'user123', title: 'Walk 2' })
+      await insertWalk({ uid: 'someoneElse', title: 'Not mine' })
 
-    // Verify the result
-    expect(result.count).toBe(1)
-    expect(result.rows).toHaveLength(1)
-    expect(result.rows[0]).toEqual({ id: 1, title: 'Test Walk' })
+      const props = { user: 'user123' }
+      const result = await searchInternalAction(props, null)
 
-    // Verify the query used the correct date filter
-    expect(Walk.findAndCountAll).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          [Symbol.for('and')]: expect.arrayContaining([
-            { date: '2023-05-15' },
-            expect.objectContaining({
-              [Symbol.for('or')]: expect.arrayContaining([
-                { uid: 'testUserId' },
-                { draft: false },
-              ]),
-            }),
-          ]),
-        }),
-      }),
-    )
-  })
-  it('should handle user filter properly', async () => {
-    // Mock the findAndCountAll response
-    (Walk.findAndCountAll as jest.Mock).mockResolvedValue({
-      count: 2,
-      rows: [
-        { asObject: jest.fn().mockReturnValue({ id: 1, title: 'Walk 1', uid: 'user123' }) },
-        { asObject: jest.fn().mockReturnValue({ id: 2, title: 'Walk 2', uid: 'user123' }) },
-      ],
+      expect(result.count).toBe(2)
+      expect(result.rows).toHaveLength(2)
+      expect(result.rows.map((row) => row.title).sort()).toEqual(['Walk 1', 'Walk 2'])
     })
 
-    // Create a props instance using the Map-like interface
-    const props = {
-      user: 'user123',
-    }
-    const result = await searchInternalAction(props, null)
+    it('should handle year and month filters properly', async () => {
+      await insertWalk({ date: '2023-01-10', title: 'January Walk' })
+      await insertWalk({ date: '2023-02-10', title: 'February Walk' })
 
-    // Verify the result
-    expect(result.count).toBe(2)
-    expect(result.rows).toHaveLength(2)
+      const props = { year: '2023', month: '1' }
+      const result = await searchInternalAction(props, 'testUserId')
 
-    // Verify the query used the correct user filter
-    expect(Walk.findAndCountAll).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          [Symbol.for('and')]: expect.arrayContaining([
-            { uid: 'user123' },
-            { draft: false },
-          ]),
-        }),
-      }),
-    )
-  })
-
-  it('should handle year and month filters properly', async () => {
-    sequelize.fn.mockImplementation((fn, ...args) => ({ fn, args }))
-    sequelize.col.mockImplementation((col) => ({ col }))
-    sequelize.where.mockImplementation((col, val) => ({ col, val }));
-
-    // Mock the findAndCountAll response
-    (Walk.findAndCountAll as jest.Mock).mockResolvedValue({
-      count: 1,
-      rows: [{ asObject: jest.fn().mockReturnValue({ id: 1, title: 'January Walk' }) }],
+      expect(result.count).toBe(1)
+      expect(result.rows[0].title).toBe('January Walk')
     })
 
-    const props = {
-      year: '2023',
-      month: '1',
-    }
-    const result = await searchInternalAction(props, 'testUserId')
+    it('should exclude other users\' drafts', async () => {
+      await insertWalk({ uid: 'testUserId', draft: false, title: 'Public walk' })
+      await insertWalk({ uid: 'otherUser', draft: true, title: 'Someone else\'s draft' })
 
-    // Verify the result
-    expect(result.count).toBe(1)
+      const result = await searchInternalAction({}, 'testUserId')
 
-    // Verify the sequelize functions were called with correct arguments
-    expect(sequelize.fn).toHaveBeenCalledWith('date_part', 'year', expect.anything())
-    expect(sequelize.fn).toHaveBeenCalledWith('date_part', 'month', expect.anything())
-    expect(sequelize.col).toHaveBeenCalledWith('date')
-  })
-
-  // Add more tests for different filter combinations
-})
-
-describe('searchAction', () => {
-  let prevState
-  let props
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-
-    prevState = { serial: 0, error: null, idTokenExpired: false, append: false }
-    props = { offset: 0, limit: 20 }
-  })
-
-  it('should increment the serial number and reset error/idTokenExpired', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid'])
-    const mockSearchInternalAction = jest.fn().mockResolvedValue({ count: 0, rows: [] })
-
-    const result = await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
-
-    expect(result.serial).toBe(1)
-    expect(result.idTokenExpired).toBe(false)
-  })
-
-  it('should set append to true if offset is greater than 0', async () => {
-    props.offset = 10
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid'])
-    const mockSearchInternalAction = jest.fn().mockResolvedValue({ count: 0, rows: [] })
-
-    const result = await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
-
-    expect(result.append).toBe(true)
-  })
-
-  it('should call getUid and searchInternalAction with correct arguments', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid'])
-    const mockSearchInternalAction = jest.fn().mockResolvedValue({ count: 0, rows: [] })
-
-    await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
-
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-    expect(mockSearchInternalAction).toHaveBeenCalledWith(props, 'testUid')
-  })
-
-  it('should merge the new state returned by searchInternalAction', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid'])
-    const mockSearchInternalAction = jest.fn().mockResolvedValue({ count: 5, rows: [{ id: 1, title: 'Test Walk' }] })
-
-    const result = await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
-
-    expect(result.count).toBe(5)
-    expect(result.rows).toEqual([{ id: 1, title: 'Test Walk' }])
-  })
-
-  it('should handle errors gracefully', async () => {
-    const mockGetUid = jest.fn().mockRejectedValue(new Error('Failed to get UID'))
-    const mockSearchInternalAction = jest.fn().mockResolvedValue({ count: 0, rows: [] })
-
-    await expect(searchAction(prevState, props, mockGetUid, mockSearchInternalAction)).rejects.toThrow('Failed to get UID')
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-    expect(mockSearchInternalAction).not.toHaveBeenCalled()
-  })
-})
-
-describe('getItemInternalAction', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  it('should return an empty state if the walk is a draft and uid does not match', async () => {
-    (Walk.findByPk as jest.Mock).mockResolvedValue({
-      draft: true,
-      uid: 'otherUid',
-    })
-
-    const result = await getItemInternalAction(1, 'testUid')
-
-    expect(result).toEqual({ current: null })
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
-  })
-
-  it('should return the walk object if it is not a draft', async () => {
-    const mockWalk = {
-      draft: false,
-      asObject: jest.fn().mockReturnValue({ id: 1, title: 'Public Walk' }),
-    };
-    (Walk.findByPk as jest.Mock).mockResolvedValue(mockWalk)
-
-    const result = await getItemInternalAction(1, 'testUid')
-
-    expect(result).toEqual({ current: { id: 1, title: 'Public Walk' } })
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
-    expect(mockWalk.asObject).toHaveBeenCalledWith(true)
-  })
-
-  it('should return the walk object if it is a draft and uid matches', async () => {
-    const mockWalk = {
-      draft: true,
-      uid: 'testUid',
-      asObject: jest.fn().mockReturnValue({ id: 1, title: 'Draft Walk' }),
-    };
-    (Walk.findByPk as jest.Mock).mockResolvedValue(mockWalk)
-
-    const result = await getItemInternalAction(1, 'testUid')
-
-    expect(result).toEqual({ current: { id: 1, title: 'Draft Walk' } })
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
-    expect(mockWalk.asObject).toHaveBeenCalledWith(true)
-  })
-
-  it('should return an empty state if the walk does not exist', async () => {
-    (Walk.findByPk as jest.Mock).mockResolvedValue(null)
-
-    const result = await getItemInternalAction(1, 'testUid')
-
-    expect(result).toEqual({})
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
-  })
-
-  it('should handle errors gracefully', async () => {
-    (Walk.findByPk as jest.Mock).mockRejectedValue(new Error('Database error'))
-
-    await expect(getItemInternalAction(1, 'testUid')).rejects.toThrow('Database error')
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
-  })
-})
-
-describe('getItemAction', () => {
-  let prevState
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-
-    prevState = { serial: 0, error: null, idTokenExpired: false }
-  })
-
-  it('should increment the serial number and reset error/idTokenExpired', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid'])
-    const mockGetItemInternalActionMock = jest.fn().mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
-
-    const result = await getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)
-
-    expect(result.serial).toBe(1)
-    expect(result.idTokenExpired).toBe(false)
-  })
-
-  it('should call getUid and getItemInternalAction with correct arguments', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid'])
-    const mockGetItemInternalActionMock = jest.fn().mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
-
-    await getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)
-
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-    expect(mockGetItemInternalActionMock).toHaveBeenCalledWith(1, 'testUid')
-  })
-
-  it('should merge the new state returned by getItemInternalAction', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid'])
-    const mockGetItemInternalActionMock = jest.fn().mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
-
-    const result = await getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)
-
-    expect(result.current).toEqual({ id: 1, title: 'Test Walk' })
-  })
-
-  it('should handle errors gracefully', async () => {
-    const mockGetUid = jest.fn().mockRejectedValue(new Error('Failed to get UID'))
-    const mockGetItemInternalActionMock = jest.fn().mockResolvedValue({})
-
-    await expect(getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)).rejects.toThrow('Failed to get UID')
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-    expect(mockGetItemInternalActionMock).not.toHaveBeenCalled()
-  })
-})
-
-describe('updateItemAction', () => {
-  let prevState
-  let formData
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-
-    prevState = { serial: 0, error: null, id: null, idTokenExpired: false }
-    formData = new Map()
-  })
-
-  it('should return unauthorized error if uid is null', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue([null, false])
-    await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-  })
-
-  it('should return forbidden error if user is not admin and openUserMode is false', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
-    await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')  
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-  })
-
-  // Zod validation tests
-  it('should return validation error if date is missing', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    
-    formData.set('title', 'Test Walk')
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    // date is missing
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Date is required')
-    expect(result.id).toBeNull()
-  })
-
-  it('should return validation error if title is missing', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    
-    formData.set('date', '2023-05-15')
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    // title is missing
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Title is required')
-    expect(result.id).toBeNull()
-  })
-
-  it('should return validation error if path is missing', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    
-    formData.set('date', '2023-05-15')
-    formData.set('title', 'Test Walk')
-    // path is missing
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Path is required')
-    expect(result.id).toBeNull()
-  })
-
-  it('should return validation error if path is empty string', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    
-    formData.set('date', '2023-05-15')
-    formData.set('title', 'Test Walk')
-    formData.set('path', '') // empty path
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Path is required')
-    expect(result.id).toBeNull()
-  })
-
-  it('should return validation error if both date and title are missing', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toMatch(/Date is required.*Title is required/)
-    expect(result.id).toBeNull()
-  })
-
-  it('should return validation error if multiple required fields are missing', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    
-    // All required fields missing: date, title, path
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toMatch(/Date is required.*Title is required.*Path is required/)
-    expect(result.id).toBeNull()
-  })
-
-  it('should return validation error if image is not an image file', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockNonImageFile = {
-      name: 'document.pdf',
-      size: 1024,
-      type: 'application/pdf',
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
-    }
-    
-    formData.set('date', '2023-05-15')
-    formData.set('title', 'Test Walk')
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    formData.set('image', mockNonImageFile)
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Image must be an image file')
-    expect(result.id).toBeNull()
-  })
-
-  it('should return validation error if image size exceeds 2MB', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockLargeImageFile = {
-      name: 'large-image.jpg',
-      size: 3 * 1024 * 1024, // 3MB
-      type: 'image/jpeg',
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(3 * 1024 * 1024)),
-    }
-    
-    formData.set('date', '2023-05-15')
-    formData.set('title', 'Test Walk')
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    formData.set('image', mockLargeImageFile)
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeInstanceOf(Error)
-    expect(result.error.message).toContain('Image size must be 2MB or less')
-    expect(result.id).toBeNull()
-  })
-
-  it('should pass validation with valid image file', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockUpdate = jest.fn().mockResolvedValue({ id: 1 });
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-      uid: 'testUid',
-      update: mockUpdate,
-    })
-    const mockValidImageFile = {
-      name: 'valid-image.jpg',
-      size: 1024 * 1024, // 1MB
-      type: 'image/jpeg',
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024 * 1024)),
-    }
-    
-    formData.set('id', '1')
-    formData.set('date', '2023-05-15')
-    formData.set('title', 'Test Walk')
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    formData.set('image', mockValidImageFile)
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeNull()
-    expect(result.id).toBe(1)
-  })
-
-  it('should pass validation without image file', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockUpdate = jest.fn().mockResolvedValue({ id: 1 });
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-      uid: 'testUid',
-      update: mockUpdate,
-    })
-    
-    formData.set('id', '1')
-    formData.set('date', '2023-05-15')
-    formData.set('title', 'Test Walk')
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    // no image file
-    
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-    
-    expect(result.error).toBeNull()
-    expect(result.id.toString()).toBe('1')
-  })
-
-  it('should update an existing walk if id is provided', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockUpdate = jest.fn().mockResolvedValue({ id: 1 });
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-      uid: 'testUid',
-      update: mockUpdate,
-    })
-
-    formData.set('id', '1')
-    formData.set('title', 'Updated Walk')
-    formData.set('date', '2023-05-15')
-    formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
-    formData.set('draft', 'false')
-
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-
-    expect(result.error).toBeNull()
-    expect(result.id.toString()).toBe('1')
-    expect(Walk.findByPk).toHaveBeenCalledWith(1)
-    expect(mockUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Updated Walk',
-        date: new Date('2023-05-15'),
-        draft: false,
-        uid: 'testUid',
-      }),
-    )
-    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
-  })
-
-  it('should create a new walk if id is not provided', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
-
-    (Walk.create as jest.Mock) = jest.fn().mockResolvedValue({ id: 2 })
-
-    formData.set('title', 'New Walk')
-    formData.set('date', '2023-05-15')
-    formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
-    formData.set('draft', 'true')
-
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-
-    expect(result.error).toBeNull()
-    expect(result.id).toBe(2)
-    expect(Walk.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'New Walk',
-        date: new Date('2023-05-15'),
-        draft: true,
-        uid: 'testUid',
-      }),
-      { fields: expect.any(Array) },
-    )
-    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
-  })
-
-  it('should handle image upload and update the walk', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockUpdate = jest.fn().mockResolvedValue({ id: 1 });
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-      uid: 'testUid',
-      update: mockUpdate,
-    })
-    const mockImage = {
-      name: 'test-image.jpg',
-      size: 1024,
-      type: 'image/jpeg',
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
-    }
-    formData.set('id', '1')
-    formData.set('title', 'Test Walk') // タイトルを追加
-    formData.set('date', '2023-05-15') // 日付を追加
-    formData.set('path', 'LINESTRING(0 0, 1 1)') // パスを追加
-    formData.set('image', mockImage)
-
-    const result = await updateItemAction(prevState, formData, mockGetUid)
-
-    expect(result.error).toBeNull()
-    expect(fs.writeFile).toHaveBeenCalled()
-    expect(mockUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        image: expect.any(String),
-      }),
-    )
-  })
-
-  it('should throw errors as they are during update', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockUpdate = jest.fn().mockRejectedValue(new Error('Update failed'));
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-      uid: 'testUid',
-      update: mockUpdate,
-    })
-
-    formData.set('id', '1')
-    formData.set('title', 'Test Walk')
-    formData.set('date', '2023-05-15')
-    formData.set('path', 'LINESTRING(0 0, 1 1)')
-    
-    const state = await updateItemAction(prevState, formData, mockGetUid)
-    expect(state.error).toBeInstanceOf(Error)
-  })
-})
-
-describe('deleteItemAction', () => {
-  let prevState
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-    prevState = { serial: 0, error: null, deleted: false, idTokenExpired: false }
-  })
-
-  it('should return unauthorized error if uid is null', () => {
-    const mockGetUid = jest.fn().mockResolvedValue([null, false])
-    void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')  
-
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-  })
-
-  it('should return forbidden error if user is not admin and openUserMode is false', () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', false])
-
-    void expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')  
-
-    expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
-  })
-
-  it('should return not found error if walk does not exist', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue(null)
-    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404') 
-  })
-
-  it('should return forbidden error if walk.uid does not match uid', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({ uid: 'otherUid' })
-
-    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden') 
-  })
-
-  it('should delete the walk and set deleted to true', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true])
-    const mockDestroy = jest.fn();
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-      uid: 'testUid',
-      destroy: mockDestroy,
-    })
-
-    const result = await deleteItemAction(prevState, 1, mockGetUid)
-
-    expect(result.deleted).toBe(true)
-    expect(mockDestroy).toHaveBeenCalled()
-    expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
-  })
-
-  it('should handle errors during deletion', async () => {
-    const mockGetUid = jest.fn().mockResolvedValue(['testUid', true]);
-
-    (Walk.findByPk as jest.Mock) = jest.fn().mockResolvedValue({
-      uid: 'testUid',
-      destroy: jest.fn().mockRejectedValue(new Error('Deletion failed')),
-    })
-    await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('Deletion failed')
-  })
-})
-
-describe('getCityAction', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  it('should return cities based on jcodes', async () => {
-    const mockCities = [
-      { asObject: jest.fn().mockReturnValue({ jcode: '12345', name: 'City A' }) },
-      { asObject: jest.fn().mockReturnValue({ jcode: '67890', name: 'City B' }) },
-    ];
-
-    (Area.findAll as jest.Mock).mockResolvedValue(mockCities)
-
-    const params = { jcodes: ['12345', '67890'] }
-    const result = await getCityAction(params)
-
-    expect(result).toHaveLength(2)
-    expect(result).toEqual([
-      { jcode: '12345', name: 'City A' },
-      { jcode: '67890', name: 'City B' },
-    ])
-    expect(Area.findAll).toHaveBeenCalledWith({
-      where: { jcode: { [Op.in]: ['12345', '67890'] } },
+      expect(result.count).toBe(1)
+      expect(result.rows[0].title).toBe('Public walk')
     })
   })
 
-  it('should return cities based on longitude and latitude', async () => {
-    const mockCities = [
-      { asObject: jest.fn().mockReturnValue({ jcode: '54321', name: 'City C' }) },
-    ];
+  describe('searchAction', () => {
+    let prevState
+    let props
 
-    (Area.findAll as jest.Mock).mockResolvedValue(mockCities)
+    beforeEach(() => {
+      prevState = { serial: 0, error: null, idTokenExpired: false, append: false }
+      props = { offset: 0, limit: 20 }
+    })
 
-    const params = { longitude: 139.6917, latitude: 35.6895 }
-    const result = await getCityAction(params)
+    it('should increment the serial number and reset error/idTokenExpired', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockSearchInternalAction = vi.fn().mockResolvedValue({ count: 0, rows: [] })
 
-    expect(result).toHaveLength(1)
-    expect(result).toEqual([{ jcode: '54321', name: 'City C' }])
-    expect(Area.findAll).toHaveBeenCalledWith({
-      where: sequelize.fn(
-        'st_contains',
-        sequelize.col('the_geom'),
-        sequelize.fn(
-          'st_setsrid',
-          sequelize.fn('st_point', 139.6917, 35.6895),
-          SRID,
-        ),
-      ),
+      const result = await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
+
+      expect(result.serial).toBe(1)
+      expect(result.idTokenExpired).toBe(false)
+    })
+
+    it('should set append to true if offset is greater than 0', async () => {
+      props.offset = 10
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockSearchInternalAction = vi.fn().mockResolvedValue({ count: 0, rows: [] })
+
+      const result = await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
+
+      expect(result.append).toBe(true)
+    })
+
+    it('should call getUid and searchInternalAction with correct arguments', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockSearchInternalAction = vi.fn().mockResolvedValue({ count: 0, rows: [] })
+
+      await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
+
+      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockSearchInternalAction).toHaveBeenCalledWith(props, 'testUid')
+    })
+
+    it('should merge the new state returned by searchInternalAction', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockSearchInternalAction = vi.fn().mockResolvedValue({ count: 5, rows: [{ id: 1, title: 'Test Walk' }] })
+
+      const result = await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
+
+      expect(result.count).toBe(5)
+      expect(result.rows).toEqual([{ id: 1, title: 'Test Walk' }])
+    })
+
+    it('should handle errors gracefully', async () => {
+      const mockGetUid = vi.fn().mockRejectedValue(new Error('Failed to get UID'))
+      const mockSearchInternalAction = vi.fn().mockResolvedValue({ count: 0, rows: [] })
+
+      await expect(searchAction(prevState, props, mockGetUid, mockSearchInternalAction)).rejects.toThrow('Failed to get UID')
+      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockSearchInternalAction).not.toHaveBeenCalled()
     })
   })
 
-  it('should return an empty array if no cities are found', async () => {
-    (Area.findAll as jest.Mock).mockResolvedValue([])
+  describe('getItemInternalAction', () => {
+    it('should return an empty state if the walk is a draft and uid does not match', async () => {
+      const walk = await insertWalk({ draft: true, uid: 'otherUid' })
 
-    const params = { jcodes: ['99999'] }
-    const result = await getCityAction(params)
+      const result = await getItemInternalAction(walk.id, 'testUid')
 
-    expect(result).toEqual([])
-    expect(Area.findAll).toHaveBeenCalledWith({
-      where: { jcode: { [Op.in]: ['99999'] } },
+      expect(result).toEqual({ current: null })
+    })
+
+    it('should return the walk object if it is not a draft', async () => {
+      const walk = await insertWalk({ draft: false, title: 'Public Walk' })
+
+      const result = await getItemInternalAction(walk.id, 'testUid')
+
+      expect(result.current).toEqual(expect.objectContaining({ id: walk.id, title: 'Public Walk' }))
+    })
+
+    it('should return the walk object if it is a draft and uid matches', async () => {
+      const walk = await insertWalk({ draft: true, uid: 'testUid', title: 'Draft Walk' })
+
+      const result = await getItemInternalAction(walk.id, 'testUid')
+
+      expect(result.current).toEqual(expect.objectContaining({ id: walk.id, title: 'Draft Walk' }))
+    })
+
+    it('should return an empty state if the walk does not exist', async () => {
+      const result = await getItemInternalAction(1, 'testUid')
+
+      expect(result).toEqual({})
     })
   })
 
-  it('should throw an error if Area.findAll fails', async () => {
-    (Area.findAll as jest.Mock).mockRejectedValue(new Error('Database error'))
+  describe('getItemAction', () => {
+    let prevState
 
-    const params = { jcodes: ['12345'] }
-
-    await expect(getCityAction(params)).rejects.toThrow('Database error')
-    expect(Area.findAll).toHaveBeenCalledWith({
-      where: { jcode: { [Op.in]: ['12345'] } },
-    })
-  })
-})
-
-describe('getUsersAction', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  it('should return a list of users with uid, displayName, and photoURL', async () => {
-    const mockUsers = [
-      { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg' },
-      { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg' },
-    ];
-
-    (admin.auth as jest.Mock).mockReturnValue({
-      listUsers: jest.fn().mockResolvedValue({ users: mockUsers }),
+    beforeEach(() => {
+      prevState = { serial: 0, error: null, idTokenExpired: false }
     })
 
-    const result = await getUsersAction()
+    it('should increment the serial number and reset error/idTokenExpired', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetItemInternalActionMock = vi.fn().mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
 
-    expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
-    expect(result).toHaveLength(2)
-    expect(result).toEqual([
-      { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg', admin: false },
-      { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg', admin: false },
-    ])
+      const result = await getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)
 
+      expect(result.serial).toBe(1)
+      expect(result.idTokenExpired).toBe(false)
+    })
+
+    it('should call getUid and getItemInternalAction with correct arguments', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetItemInternalActionMock = vi.fn().mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
+
+      await getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)
+
+      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockGetItemInternalActionMock).toHaveBeenCalledWith(1, 'testUid')
+    })
+
+    it('should merge the new state returned by getItemInternalAction', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetItemInternalActionMock = vi.fn().mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
+
+      const result = await getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)
+
+      expect(result.current).toEqual({ id: 1, title: 'Test Walk' })
+    })
+
+    it('should handle errors gracefully', async () => {
+      const mockGetUid = vi.fn().mockRejectedValue(new Error('Failed to get UID'))
+      const mockGetItemInternalActionMock = vi.fn().mockResolvedValue({})
+
+      await expect(getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock)).rejects.toThrow('Failed to get UID')
+      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockGetItemInternalActionMock).not.toHaveBeenCalled()
+    })
   })
 
-  it('should return an empty array if no users are found', async () => {
+  describe('updateItemAction', () => {
+    let prevState
+    let formData
 
-    (admin.auth().listUsers as jest.Mock).mockResolvedValue({ users: [] })
+    beforeEach(() => {
+      prevState = { serial: 0, error: null, id: null, idTokenExpired: false }
+      formData = new Map()
+    })
 
-    const result = await getUsersAction()
+    it('should return unauthorized error if uid is null', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue([null, false])
+      await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('unauthorized')
+    })
 
-    expect(result).toEqual([])
-    expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
-  })
+    it('should return forbidden error if user is not admin and openUserMode is false', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', false])
+      await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')
+    })
 
-  it('should throw an error if listUsers fails', async () => {
+    // Zod validation tests
+    it('should return validation error if date is missing', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
 
-    (admin.auth().listUsers as jest.Mock).mockRejectedValue(new Error('Failed to fetch users'))
+      formData.set('title', 'Test Walk')
+      formData.set('path', encode(DEFAULT_PATH))
 
-    await expect(getUsersAction()).rejects.toThrow('Failed to fetch users')
-    expect(admin.auth().listUsers).toHaveBeenCalledWith(1000)
-  })
-})
+      const result = await updateItemAction(prevState, formData, mockGetUid)
 
-describe('getConfig', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toContain('Date is required')
+      expect(result.id).toBeNull()
+    })
 
-  it('should return the correct configuration object', async () => {
-    const mockShapeStyles = { style: 'mockStyle' }
-    const mockTheme = { palette: {} }
-    const mockFirebaseConfig = { key: 'value' };
-    (fs.readFile as jest.Mock).mockImplementation(async (path) => { // eslint-disable-line @typescript-eslint/require-await
-      if (path === './default-shape-styles.json') {
-        return Buffer.from(JSON.stringify(mockShapeStyles))
+    it('should return validation error if title is missing', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toContain('Title is required')
+      expect(result.id).toBeNull()
+    })
+
+    it('should return validation error if path is missing', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      formData.set('date', '2023-05-15')
+      formData.set('title', 'Test Walk')
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toContain('Path is required')
+      expect(result.id).toBeNull()
+    })
+
+    it('should return validation error if both date and title are missing', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      formData.set('path', encode(DEFAULT_PATH))
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error.message).toMatch(/Date is required.*Title is required/)
+      expect(result.id).toBeNull()
+    })
+
+    it('should return validation error if image is not an image file', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockNonImageFile = {
+        name: 'document.pdf',
+        size: 1024,
+        type: 'application/pdf',
+        arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(1024)),
       }
-      if (path === './default-theme.json') {
-        return Buffer.from(JSON.stringify(mockTheme))
-      }
-      return Buffer.from(JSON.stringify(mockFirebaseConfig))
+
+      formData.set('date', '2023-05-15')
+      formData.set('title', 'Test Walk')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', mockNonImageFile)
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error.message).toContain('Image must be an image file')
+      expect(result.id).toBeNull()
     })
-    process.env.APP_VERSION = '1.2.3'
-    const result = await getConfig()
-    expect(result).toEqual({
-      googleApiKey: process.env.GOOGLE_API_KEY,
-      googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
-      openUserMode: false,
-      appVersion: '1.2.3',
-      defaultCenter: process.env.DEFAULT_CENTER,
-      defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
-      defaultRadius: 500,
-      mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
-      mapId: process.env.MAP_ID,
-      firebaseConfig: mockFirebaseConfig,
-      theme: mockTheme,
-      shapeStyles: mockShapeStyles,
+
+    it('should return validation error if image size exceeds 2MB', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockLargeImageFile = {
+        name: 'large-image.jpg',
+        size: 3 * 1024 * 1024,
+        type: 'image/jpeg',
+        arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(3 * 1024 * 1024)),
+      }
+
+      formData.set('date', '2023-05-15')
+      formData.set('title', 'Test Walk')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', mockLargeImageFile)
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error.message).toContain('Image size must be 2MB or less')
+      expect(result.id).toBeNull()
+    })
+
+    it('should create a new walk if id is not provided', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      formData.set('title', 'New Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('draft', 'true')
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeNull()
+      expect(result.id).toEqual(expect.any(Number))
+
+      const [row] = await db.select().from(walks).where(sql`id = ${result.id}`)
+      expect(row).toEqual(expect.objectContaining({ title: 'New Walk', draft: true, uid: 'testUid' }))
+      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+    })
+
+    it('should update an existing walk if id is provided', async () => {
+      const existing = await insertWalk({ uid: 'testUid', title: 'Original title' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Updated Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('draft', 'false')
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeNull()
+      expect(result.id).toBe(existing.id)
+
+      const [row] = await db.select().from(walks).where(sql`id = ${existing.id}`)
+      expect(row).toEqual(expect.objectContaining({ title: 'Updated Walk', draft: false }))
+      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+    })
+
+    it('should return forbidden error when updating a walk owned by someone else', async () => {
+      const existing = await insertWalk({ uid: 'otherUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Hijacked')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+
+      await expect(updateItemAction(prevState, formData, mockGetUid)).rejects.toThrow('forbidden')
+    })
+
+    it('should handle image upload and update the walk', async () => {
+      const existing = await insertWalk({ uid: 'testUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockImage = {
+        name: 'test-image.jpg',
+        size: 1024,
+        type: 'image/jpeg',
+        arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(1024)),
+      }
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', mockImage)
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeNull()
+      expect(fs.writeFile).toHaveBeenCalled()
+
+      const [row] = await db.select().from(walks).where(sql`id = ${existing.id}`)
+      expect(row.image).toEqual(expect.any(String))
     })
   })
 
-  it('should throw an error if reading the file fails', async () => {
-    (fs.readFile as jest.Mock).mockRejectedValue(new Error('File read error'))
+  describe('deleteItemAction', () => {
+    let prevState
 
-    await expect(getConfig()).rejects.toThrow('File read error')
-    expect(fs.readFile).toHaveBeenCalledWith(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
+    beforeEach(() => {
+      prevState = { serial: 0, error: null, deleted: false, idTokenExpired: false }
+    })
+
+    it('should return unauthorized error if uid is null', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue([null, false])
+      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('unauthorized')
+    })
+
+    it('should return forbidden error if user is not admin and openUserMode is false', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', false])
+      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('forbidden')
+    })
+
+    it('should return not found error if walk does not exist', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow('NEXT_HTTP_ERROR_FALLBACK;404')
+    })
+
+    it('should return forbidden error if walk.uid does not match uid', async () => {
+      const walk = await insertWalk({ uid: 'otherUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      await expect(deleteItemAction(prevState, walk.id, mockGetUid)).rejects.toThrow('forbidden')
+    })
+
+    it('should delete the walk and set deleted to true', async () => {
+      const walk = await insertWalk({ uid: 'testUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+
+      const result = await deleteItemAction(prevState, walk.id, mockGetUid)
+
+      expect(result.deleted).toBe(true)
+      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+
+      const remaining = await db.select().from(walks).where(sql`id = ${walk.id}`)
+      expect(remaining).toHaveLength(0)
+    })
+
+    it('should propagate a database error during deletion', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      // An id outside the int4 range makes postgres itself reject the query,
+      // exercising the (intentionally unhandled) error path.
+      await expect(deleteItemAction(prevState, 99999999999, mockGetUid)).rejects.toThrow()
+    })
+  })
+
+  describe('getCityAction', () => {
+    it('should return cities based on jcodes', async () => {
+      await insertArea('12345', 'MULTIPOLYGON(((139.6 35.6, 139.8 35.6, 139.8 35.8, 139.6 35.8, 139.6 35.6)))')
+      await insertArea('67890', 'MULTIPOLYGON(((140.6 36.6, 140.8 36.6, 140.8 36.8, 140.6 36.8, 140.6 36.6)))')
+
+      const params = { jcodes: ['12345', '67890'] }
+      const result = await getCityAction(params)
+
+      expect(result).toHaveLength(2)
+      expect(result.map((city) => city.jcode).sort()).toEqual(['12345', '67890'])
+    })
+
+    it('should return cities based on longitude and latitude', async () => {
+      await insertArea('54321', 'MULTIPOLYGON(((139.6 35.6, 139.8 35.6, 139.8 35.8, 139.6 35.8, 139.6 35.6)))')
+
+      const params = { longitude: 139.7, latitude: 35.7 }
+      const result = await getCityAction(params)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].jcode).toBe('54321')
+    })
+
+    it('should return an empty array if no cities are found', async () => {
+      const params = { jcodes: ['99999'] }
+      const result = await getCityAction(params)
+
+      expect(result).toEqual([])
+    })
+  })
+
+  describe('getUsersAction', () => {
+    it('should return a list of users with uid, displayName, and photoURL', async () => {
+      const mockUsers = [
+        { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg' },
+        { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg' },
+      ]
+      const listUsers = vi.fn().mockResolvedValue({ users: mockUsers });
+      (admin.auth as Mock).mockReturnValue({ listUsers })
+
+      const result = await getUsersAction()
+
+      expect(listUsers).toHaveBeenCalledWith(1000)
+      expect(result).toHaveLength(2)
+      expect(result).toEqual([
+        { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg', admin: false },
+        { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg', admin: false },
+      ])
+    })
+
+    it('should return an empty array if no users are found', async () => {
+      const listUsers = vi.fn().mockResolvedValue({ users: [] });
+      (admin.auth as Mock).mockReturnValue({ listUsers })
+
+      const result = await getUsersAction()
+
+      expect(result).toEqual([])
+      expect(listUsers).toHaveBeenCalledWith(1000)
+    })
+
+    it('should throw an error if listUsers fails', async () => {
+      const listUsers = vi.fn().mockRejectedValue(new Error('Failed to fetch users'));
+      (admin.auth as Mock).mockReturnValue({ listUsers })
+
+      await expect(getUsersAction()).rejects.toThrow('Failed to fetch users')
+      expect(listUsers).toHaveBeenCalledWith(1000)
+    })
+  })
+
+  describe('getConfig', () => {
+    it('should return the correct configuration object', async () => {
+      const mockShapeStyles = { style: 'mockStyle' }
+      const mockTheme = { palette: {} }
+      const mockFirebaseConfig = { key: 'value' };
+      (fs.readFile as Mock).mockImplementation((path) => {
+        if (path === './default-shape-styles.json') {
+          return Buffer.from(JSON.stringify(mockShapeStyles))
+        }
+        if (path === './default-theme.json') {
+          return Buffer.from(JSON.stringify(mockTheme))
+        }
+        return Buffer.from(JSON.stringify(mockFirebaseConfig))
+      })
+      process.env.APP_VERSION = '1.2.3'
+      const result = await getConfig()
+      expect(result).toEqual({
+        googleApiKey: process.env.GOOGLE_API_KEY,
+        googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
+        openUserMode: false,
+        appVersion: '1.2.3',
+        defaultCenter: process.env.DEFAULT_CENTER,
+        defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
+        defaultRadius: 500,
+        mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
+        mapId: process.env.MAP_ID,
+        firebaseConfig: expect.any(Object),
+        theme: mockTheme,
+        shapeStyles: mockShapeStyles,
+      })
+    })
+
+    it('should throw an error if reading the file fails', async () => {
+      (fs.readFile as Mock).mockRejectedValue(new Error('File read error'))
+
+      await expect(getConfig()).rejects.toThrow('File read error')
+    })
   })
 })

@@ -4,38 +4,42 @@ import PanoramaBox from './panorama-box'
 import { useMainContext } from '../utils/main-context'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
-import { initialize } from '@googlemaps/jest-mocks'
+import { initialize, LatLng } from '@googlemaps/jest-mocks'
+import { Mock } from 'vitest'
 
-jest.mock('../utils/main-context', () => ({
-  useMainContext: jest.fn(),
+vi.mock('../utils/main-context', () => ({
+  useMainContext: vi.fn(),
 }))
 
-jest.mock('../utils/data-context', () => ({
-  useData: jest.fn(),
+vi.mock('../utils/data-context', () => ({
+  useData: vi.fn(),
 }))
 
-jest.mock('../utils/map-context', () => ({
-  useMapContext: jest.fn(),
+vi.mock('../utils/map-context', () => ({
+  useMapContext: vi.fn(),
 }))
 
 describe('PanoramaBox', () => {
-  const mockDispatchMain = jest.fn()
-  const mockSetStreetView = jest.fn()
+  const mockDispatchMain = vi.fn()
+  const mockSetStreetView = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     initialize()
     google.maps.geometry = {
+      ...global.google.maps.geometry,
       encoding: {
-        decodePath: jest.fn(() => [{ lat: jest.fn(() => 0), lng: jest.fn(() => 0) }, { lat: jest.fn(() => 1), lng: jest.fn(() => 1) }]),
+        ...global.google.maps.geometry.encoding,
+        decodePath: vi.fn((_encodedPath: string) => [ new LatLng(0, 0), new LatLng(1, 1) ]),
       },
       spherical: {
-        computeHeading: jest.fn(() => 0),
-        computeDistanceBetween: jest.fn(() => 1000),
+        ...global.google.maps.geometry.spherical,
+        computeHeading: vi.fn(() => 0),
+        computeDistanceBetween: vi.fn(() => 1000),
       },
     };
 
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       {
         overlay: false,
         panoramaIndex: 0,
@@ -44,15 +48,15 @@ describe('PanoramaBox', () => {
       mockDispatchMain,
     ]);
 
-    (useData as jest.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       { current: { path: 'encodedPath' } },
     ]);
 
-    (useMapContext as jest.Mock).mockReturnValue([
+    (useMapContext as Mock).mockReturnValue([
       {
         map: {
           setStreetView: mockSetStreetView,
-          getStreetView: jest.fn(() => ({ setPosition: jest.fn(), setPov: jest.fn() })),
+          getStreetView: vi.fn(() => ({ setPosition: vi.fn(), setPov: vi.fn() })),
         },
       },
     ])
@@ -91,7 +95,7 @@ describe('PanoramaBox', () => {
   })
 
   it('does not render panorama box when overlay is true', () => {
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       {
         overlay: true,
         panoramaIndex: 0,

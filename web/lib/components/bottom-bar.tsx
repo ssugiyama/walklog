@@ -179,7 +179,7 @@ const BottomBar = (props) => {
           {filter === 'cities' &&
             (
               <Tooltip title="clear cities" placement="top">
-                <IconButton nativeButton={false} onClick={searchFormChangeCBs.cities} size="large"><NavigationRefresh /></IconButton>
+                <IconButton nativeButton={true} onClick={searchFormChangeCBs.cities} size="large"><NavigationRefresh /></IconButton>
               </Tooltip>
             )}
         </Box>

@@ -7,91 +7,94 @@ import { useMapContext } from '../utils/map-context'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { initialize } from '@googlemaps/jest-mocks'
+import { Mock } from 'vitest'
 
-jest.mock('../utils/main-context', () => ({
-  useMainContext: jest.fn(),
+vi.mock('../utils/main-context', () => ({
+  useMainContext: vi.fn(),
 }))
 
-jest.mock('../utils/map-context', () => ({
-  useMapContext: jest.fn(),
+vi.mock('../utils/map-context', () => ({
+  useMapContext: vi.fn(),
 }))
 
-jest.mock('../utils/config', () => ({
-  useConfig: jest.fn(),
+vi.mock('../utils/config', () => ({
+  useConfig: vi.fn(),
 }))
 
-jest.mock('../utils/data-context', () => ({
-  useData: jest.fn(),
+vi.mock('../utils/data-context', () => ({
+  useData: vi.fn(),
 }))
 
-jest.mock('@/app/lib/walk-actions', () => ({
-  getCityAction: jest.fn().mockReturnValue(
+vi.mock('@/app/lib/walk-actions', () => ({
+  getCityAction: vi.fn().mockReturnValue(
     [
       {
         jcode: '123',
-        theGeom: jest.fn(),
+        theGeom: vi.fn(),
       },
     ],
   ),
 }))
 
-jest.mock('use-query-params', () => ({
-  useQueryParam: jest.fn(() => ['', jest.fn()]),
-  StringParam: jest.fn(),
-  withDefault: jest.fn((param, defaultValue) => [param, defaultValue]),
-  NumberParam: jest.fn(),
+vi.mock('use-query-params', () => ({
+  useQueryParam: vi.fn(() => ['', vi.fn()]),
+  StringParam: vi.fn(),
+  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
+  NumberParam: vi.fn(),
 }))
 
-jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(() => new URLSearchParams({ filter: 'cities', cities: '123' })),
-  usePathname: jest.fn(() => '/show/1'),
-  useRouter: jest.fn(() => ({
-    push: jest.fn(),
-    replace: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useSearchParams: vi.fn(() => new URLSearchParams({ filter: 'cities', cities: '123' })),
+  usePathname: vi.fn(() => '/show/1'),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
   })),
 }))
 
-jest.mock('@googlemaps/js-api-loader', () => ({
-  setOptions: jest.fn(),
-  importLibrary: jest.fn().mockResolvedValue(true),
+vi.mock('@googlemaps/js-api-loader', () => ({
+  setOptions: vi.fn(),
+  importLibrary: vi.fn().mockResolvedValue(true),
 }))
 
-jest.mock('terra-draw', () => {
+vi.mock('terra-draw', () => {
   return {
-    TerraDraw: jest.fn().mockImplementation(() => ({
-      start: jest.fn(),
-      on: jest.fn(),
-      getSnapshotFeature: jest.fn(),
-      updateModeOptions: jest.fn(),
-      setMode: jest.fn(),
-      clear: jest.fn(),
-    })),
-    TerraDrawGoogleMapsAdapter: jest.fn().mockImplementation(() => ({})),
-    TerraDrawLineStringMode: jest.fn().mockImplementation(() => ({})),
+    TerraDraw: vi.fn().mockImplementation(function () {
+      return {
+        start: vi.fn(),
+        on: vi.fn(),
+        getSnapshotFeature: vi.fn(),
+        updateModeOptions: vi.fn(),
+        setMode: vi.fn(),
+        clear: vi.fn(),
+      }
+    }),
+    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () { return {} }),
+    TerraDrawLineStringMode: vi.fn().mockImplementation(function () { return {} }),
   }
 })
 
-jest.mock('terra-draw-google-maps-adapter', () => {
+vi.mock('terra-draw-google-maps-adapter', () => {
   return {
-    TerraDrawGoogleMapsAdapter: jest.fn().mockImplementation(() => ({})),
+    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () { return {} }),
   }
 })
 
 describe('Map Component', () => {
-  const mockSetState = jest.fn()
+  const mockSetState = vi.fn()
   beforeEach(() => {
     initialize();
-    (useMainContext as jest.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       { autoGeolocation: false, mode: 'default' },
-      jest.fn(),
+      vi.fn(),
     ]);
 
-    (useMapContext as jest.Mock).mockReturnValue([
+    (useMapContext as Mock).mockReturnValue([
       {},
       mockSetState,
     ]);
 
-    (useConfig as jest.Mock).mockReturnValue({
+    (useConfig as Mock).mockReturnValue({
       defaultCenter: '35.6895,139.6917',
       defaultRadius: 1000,
       shapeStyles: { polylines: { new: {} }, polygons: {}, circle: {}, marker: {} },
@@ -99,11 +102,13 @@ describe('Map Component', () => {
       mapId: 'test-map-id',
     });
 
-    (useData as jest.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       { rows: [], current: null },
     ])
     google.maps.MapTypeControlStyle = {
+      DEFAULT: 0,
       DROPDOWN_MENU: 1,
+      HORIZONTAL_BAR: 2,
     }
   })
 
