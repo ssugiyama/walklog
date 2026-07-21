@@ -1,4 +1,4 @@
-name: run test
+name: ci
 on: pull_request
 permissions:
   contents: read
@@ -21,6 +21,8 @@ jobs:
       with:
         version: 10
         run_install: true
+    - name: run typecheck
+      run: pnpm typecheck
     - name: run eslint
       run: pnpm lint
     - name: run jest
