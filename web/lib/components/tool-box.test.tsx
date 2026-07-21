@@ -91,7 +91,7 @@ global.google = {
     Geocoder: vi.fn().mockImplementation(function () { return mockGeocoder }),
     GeocoderStatus: {
       OK: 'OK',
-    },
+    } as typeof google.maps.GeocoderStatus,
   },
 }
 

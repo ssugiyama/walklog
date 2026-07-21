@@ -52,7 +52,7 @@ describe('ElevationBox', () => {
         ElevationService: vi.fn().mockImplementation(function () { return mockElevationService }),
         ElevationStatus: {
           OK: 'OK',
-        },
+        } as typeof google.maps.ElevationStatus,
       },
     }
     vi.clearAllMocks()
