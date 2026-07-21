@@ -37,22 +37,6 @@ class MockFileReader extends FileReader {
       }, 0)
     })
   }
-
-  // readAsText(_file: Blob) {
-  //   queueMicrotask(() => {
-  //     Object.defineProperty(this, 'result', {
-  //       value: 'mocked test',
-  //       writable: false,
-  //     })
-  //     Object.defineProperty(this, 'readyState', {
-  //       value: 2,
-  //       writable: false,
-  //     })
-  //     const event = new Event('load')
-  //     this.onload?.(event as ProgressEvent<FileReader>)
-  //     this.dispatchEvent(event)
-  //   })
-  // }
 }
 
 beforeEach(() => {
@@ -62,7 +46,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals()
 })
-
 
 // グローバルなFileReaderをモック
 global.FileReader = MockFileReader
