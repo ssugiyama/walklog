@@ -66,13 +66,5 @@
     "typescript": "^5.8.3",
     "vitest": "^4.1.10"
   },
-  "packageManager": "pnpm@10.20.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@firebase/util",
-      "protobufjs",
-      "sharp",
-      "unrs-resolver"
-    ]
-  }
+  "packageManager": "pnpm@11.15.1"
 }
