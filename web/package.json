@@ -4,7 +4,7 @@
     "build": "NODE_ENV=production next build",
     "start": "next start",
     "start-in-docker": "node ./server.js",
-    "test": "vitest run",
+    "test": "vitest run --coverage.enabled true",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "migrate": "drizzle-kit generate && drizzle-kit migrate"

@@ -28,6 +28,7 @@ jobs:
     - name: run test
       run: pnpm test
     - name: Upload coverage report
+      if: always()
       uses: davelosert/vitest-coverage-report-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
