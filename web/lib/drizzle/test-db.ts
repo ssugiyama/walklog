@@ -9,5 +9,5 @@ export async function createTestDb() {
   await client.exec('CREATE EXTENSION IF NOT EXISTS postgis;')
   const db = drizzlePglite({ client, relations })
   await migrate(db, { migrationsFolder: './lib/drizzle/migrations' })
-  return { db, client }
+  return db
 }

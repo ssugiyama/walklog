@@ -11,6 +11,6 @@ const options = {
   } : false,
 }
 
-export const client = postgres(process.env.DB_URL, options)
+const client = postgres(process.env.DB_URL, options)
 
 export const db = drizzle({ client, relations })

@@ -3,6 +3,7 @@ import '@testing-library/jest-dom'
 import Main from '@/lib/components/main'
 import MainContext from '@/lib/utils/main-context'
 import { DataProvider, useData } from '@/lib/utils/data-context'
+import { Mock } from 'vitest'
 
 const defaultMainState = {
   mode: 'map',
@@ -81,7 +82,7 @@ Object.defineProperty(navigator, 'share', {
 function renderWithProviders(ui, { mainState = defaultMainState, data = defaultData } = {}) {
   const dispatchMain = vi.fn();
 
-  (useData as vi.Mock).mockReturnValue([data])
+  (useData as Mock).mockReturnValue([data])
   return {
     ...render(
       <DataProvider>

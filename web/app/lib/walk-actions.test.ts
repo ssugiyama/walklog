@@ -39,11 +39,13 @@ vi.mock('fs/promises', () => {
 // instance so the actual generated SQL runs against a real database.
 vi.mock('../../lib/drizzle/db', async () => {
   const { createTestDb } = await import('../../lib/drizzle/test-db')
-  const { db, client } = await createTestDb()
-  return { db, client }
+  const db = await createTestDb()
+  return { db }
 })
 
-import { db, client } from '../../lib/drizzle/db'
+import { db } from '../../lib/drizzle/db'
+
+const client = db.$client as unknown as PGlite
 
 import {
   searchInternalAction,
@@ -58,6 +60,8 @@ import {
 } from '@/app/lib/walk-actions'
 
 import { revalidateTag } from 'next/cache'
+import { Mock } from 'vitest'
+import { PGlite } from '@electric-sql/pglite'
 
 const SEARCH_CACHE_TAG = 'searchTag'
 const DEFAULT_PATH = [[139.767, 35.681], [139.768, 35.682]]
@@ -85,7 +89,7 @@ const insertWalk = async (overrides: Partial<{
 }
 
 const insertArea = async (jcode: string, wkt: string) => {
-  await client.query(
+  await (client as unknown as PGlite).query(
     'INSERT INTO areas (jcode, the_geom) VALUES ($1, ST_GeomFromText($2, 4326))',
     [jcode, wkt],
   )
@@ -93,12 +97,12 @@ const insertArea = async (jcode: string, wkt: string) => {
 
 describe('server actions', () => {
   afterAll(async () => {
-    await client.close()
+    await (client as unknown as PGlite).close()
   })
 
   beforeEach(async () => {
-    await client.query('TRUNCATE TABLE walks RESTART IDENTITY CASCADE')
-    await client.query('TRUNCATE TABLE areas RESTART IDENTITY CASCADE')
+    await (client as unknown as PGlite).query('TRUNCATE TABLE walks RESTART IDENTITY CASCADE')
+    await (client as unknown as PGlite).query('TRUNCATE TABLE areas RESTART IDENTITY CASCADE')
     vi.clearAllMocks()
   })
 
@@ -558,8 +562,8 @@ describe('server actions', () => {
         { uid: 'user1', displayName: 'User One', photoURL: 'http://example.com/user1.jpg' },
         { uid: 'user2', displayName: 'User Two', photoURL: 'http://example.com/user2.jpg' },
       ]
-      const listUsers = vi.fn().mockResolvedValue({ users: mockUsers })
-      admin.auth.mockReturnValue({ listUsers })
+      const listUsers = vi.fn().mockResolvedValue({ users: mockUsers });
+      (admin.auth as Mock).mockReturnValue({ listUsers })
 
       const result = await getUsersAction()
 
@@ -572,8 +576,8 @@ describe('server actions', () => {
     })
 
     it('should return an empty array if no users are found', async () => {
-      const listUsers = vi.fn().mockResolvedValue({ users: [] })
-      admin.auth.mockReturnValue({ listUsers })
+      const listUsers = vi.fn().mockResolvedValue({ users: [] });
+      (admin.auth as Mock).mockReturnValue({ listUsers })
 
       const result = await getUsersAction()
 
@@ -582,8 +586,8 @@ describe('server actions', () => {
     })
 
     it('should throw an error if listUsers fails', async () => {
-      const listUsers = vi.fn().mockRejectedValue(new Error('Failed to fetch users'))
-      admin.auth.mockReturnValue({ listUsers })
+      const listUsers = vi.fn().mockRejectedValue(new Error('Failed to fetch users'));
+      (admin.auth as Mock).mockReturnValue({ listUsers })
 
       await expect(getUsersAction()).rejects.toThrow('Failed to fetch users')
       expect(listUsers).toHaveBeenCalledWith(1000)
@@ -594,8 +598,8 @@ describe('server actions', () => {
     it('should return the correct configuration object', async () => {
       const mockShapeStyles = { style: 'mockStyle' }
       const mockTheme = { palette: {} }
-      const mockFirebaseConfig = { key: 'value' }
-      fs.readFile.mockImplementation((path) => {
+      const mockFirebaseConfig = { key: 'value' };
+      (fs.readFile as Mock).mockImplementation((path) => {
         if (path === './default-shape-styles.json') {
           return Buffer.from(JSON.stringify(mockShapeStyles))
         }
@@ -623,7 +627,7 @@ describe('server actions', () => {
     })
 
     it('should throw an error if reading the file fails', async () => {
-      fs.readFile.mockRejectedValue(new Error('File read error'))
+      (fs.readFile as Mock).mockRejectedValue(new Error('File read error'))
 
       await expect(getConfig()).rejects.toThrow('File read error')
     })

@@ -5,6 +5,7 @@ import { useUserContext } from '../utils/user-context'
 import { useData } from '../utils/data-context'
 import SearchBox from './search-box'
 import '@testing-library/jest-dom/vitest'
+import { Mock } from 'vitest'
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
@@ -43,15 +44,15 @@ describe('SearchBox', () => {
   const mockRouterReplace = vi.fn()
 
   beforeEach(() => {
-    (useRouter as vi.Mock).mockReturnValue({
+    (useRouter as Mock).mockReturnValue({
       replace: mockRouterReplace,
     });
 
-    (useUserContext as vi.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       users: [],
     });
 
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 0,
@@ -73,7 +74,7 @@ describe('SearchBox', () => {
 
   it('calls router.replace when index is present in searchParams', () => {
     const mockRows = [{ id: 1, uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 1,
@@ -92,7 +93,7 @@ describe('SearchBox', () => {
 
   it('displays the correct count when count is greater than 0', () => {
     const mockRows = [{ id: '1', uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 1,

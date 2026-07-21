@@ -4,6 +4,7 @@ import BottomBar from './bottom-bar'
 import { useMainContext } from '../utils/main-context'
 import { useData } from '../utils/data-context'
 import { useConfig } from '../utils/config'
+import { Mock } from 'vitest'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -49,13 +50,13 @@ describe('BottomBar', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       { overlay: false, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
     ]);
-    (useData as vi.Mock).mockReturnValue([mockData]);
-    (useConfig as vi.Mock).mockReturnValue(mockConfig)
+    (useData as Mock).mockReturnValue([mockData]);
+    (useConfig as Mock).mockReturnValue(mockConfig)
   })
 
   it('renders the BottomBar component', () => {
@@ -73,7 +74,7 @@ describe('BottomBar', () => {
   })
 
   it('displays overlay controls when overlay is active', () => {
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
@@ -108,7 +109,7 @@ describe('BottomBar', () => {
   })
 
   it('dispatches the correct action when overlay button is clicked', () => {
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
@@ -121,7 +122,7 @@ describe('BottomBar', () => {
   })
 
   it('updates panorama index when panorama navigation buttons are clicked', () => {
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 5, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,

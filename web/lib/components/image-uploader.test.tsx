@@ -4,9 +4,7 @@ import '@testing-library/jest-dom'
 import ImageUploader from './image-uploader'
 
 // FileReaderのモック
-class MockFileReader {
-  result = null
-  onload = null
+class MockFileReader extends FileReader {
 
   addEventListener = vi.fn((event, handler) => {
     if (event === 'loadend') {
@@ -14,18 +12,57 @@ class MockFileReader {
     }
   })
 
-  readAsDataURL = vi.fn(() => {
-    // 模擬的な画像データURL
-    this.result = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XmMwjwyJUJWE'
+  constructor() {
+    super()
+    Object.defineProperty(this, 'result', {
+      value: null,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    })
+  }
 
-    // 非同期でイベントを発火
-    setTimeout(() => {
-      if (this.onload) {
-        this.onload({ target: { result: this.result } })
-      }
-    }, 0)
-  })
+  readAsDataURL(_file: Blob) {
+    queueMicrotask(() => {
+      Object.defineProperty(this, 'result', {
+        value: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XmMwjwyJUJWE',
+        writable: false,
+      })
+      Object.defineProperty(this, 'readyState', {
+        value: 2,
+        writable: false,
+      })
+      setTimeout(() => {
+        this.onload?.({ target: this } as unknown as ProgressEvent<FileReader>)
+      }, 0)
+    })
+  }
+
+  // readAsText(_file: Blob) {
+  //   queueMicrotask(() => {
+  //     Object.defineProperty(this, 'result', {
+  //       value: 'mocked test',
+  //       writable: false,
+  //     })
+  //     Object.defineProperty(this, 'readyState', {
+  //       value: 2,
+  //       writable: false,
+  //     })
+  //     const event = new Event('load')
+  //     this.onload?.(event as ProgressEvent<FileReader>)
+  //     this.dispatchEvent(event)
+  //   })
+  // }
 }
+
+beforeEach(() => {
+  vi.stubGlobal('FileReader', MockFileReader)
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
 
 // グローバルなFileReaderをモック
 global.FileReader = MockFileReader

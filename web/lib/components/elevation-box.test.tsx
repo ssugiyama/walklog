@@ -5,7 +5,8 @@ import ElevationBox from './elevation-box'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
-import { initialize } from '@googlemaps/jest-mocks'
+import { initialize, LatLng } from '@googlemaps/jest-mocks'
+import { Mock } from 'vitest'
 
 // Rechartsのモック
 vi.mock('recharts', () => ({
@@ -35,39 +36,40 @@ describe('ElevationBox', () => {
     getElevationAlongPath: vi.fn(),
   }
 
-  beforeEach(() => {
+  beforeAll(() => {
     initialize()
     global.google = {
       ...global.google,
       maps: {
         ...global.google.maps,
         geometry: {
+          ...global.google.maps.geometry,
           encoding: {
-            decodePath: vi.fn(() => [{ lat: 35.6762, lng: 139.6503 }]),
+            ...global.google.maps.geometry.encoding,
+            decodePath: vi.fn((_encodedPath: string) => [new LatLng(35.6762, 139.6503)]),
           },
         },
         ElevationService: vi.fn().mockImplementation(function () { return mockElevationService }),
         ElevationStatus: {
           OK: 'OK',
         },
-        LatLng: vi.fn((lat, lng) => ({ lat: () => lat, lng: () => lng })),
       },
     }
     vi.clearAllMocks()
   })
 
   it('renders null when no selectedItem is present', () => {
-    (useData as vi.Mock).mockReturnValue([{ current: null }]);
-    (useMapContext as vi.Mock).mockReturnValue([{ map: null }])
+    (useData as Mock).mockReturnValue([{ current: null }]);
+    (useMapContext as Mock).mockReturnValue([{ map: null }])
 
     const { container } = render(<ElevationBox />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders null when selectedItem is present but no chartData', () => {
-    (useData as vi.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as vi.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as vi.Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
 
     const { container } = render(<ElevationBox />)
     expect(container.firstChild).toBeNull()
@@ -83,9 +85,9 @@ describe('ElevationBox', () => {
       callback(results, 'OK')
     });
 
-    (useData as vi.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as vi.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as vi.Mock).mockReturnValue({
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue({
       shapeStyles: {
         polylines: {
           current: { strokeColor: '#82ca9d' },
@@ -118,9 +120,9 @@ describe('ElevationBox', () => {
       callback(results, 'OK')
     });
 
-    (useData as vi.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as vi.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as vi.Mock).mockReturnValue(null)
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue(null)
 
     const { rerender } = render(<ElevationBox />)
     rerender(<ElevationBox />)
@@ -135,9 +137,9 @@ describe('ElevationBox', () => {
       callback([], 'ERROR')
     });
 
-    (useData as vi.Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
-    (useMapContext as vi.Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
-    (useConfig as vi.Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
+    (useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }]);
+    (useMapContext as Mock).mockReturnValue([{ map: {}, elevationInfoWindow: {} }]);
+    (useConfig as Mock).mockReturnValue({ shapeStyles: { polylines: { current: { strokeColor: '#000000' } } } })
 
     const { container } = render(<ElevationBox />)
 

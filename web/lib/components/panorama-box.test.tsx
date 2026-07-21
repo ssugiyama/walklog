@@ -4,7 +4,8 @@ import PanoramaBox from './panorama-box'
 import { useMainContext } from '../utils/main-context'
 import { useData } from '../utils/data-context'
 import { useMapContext } from '../utils/map-context'
-import { initialize } from '@googlemaps/jest-mocks'
+import { initialize, LatLng } from '@googlemaps/jest-mocks'
+import { Mock } from 'vitest'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -26,16 +27,19 @@ describe('PanoramaBox', () => {
     vi.clearAllMocks()
     initialize()
     google.maps.geometry = {
+      ...global.google.maps.geometry,
       encoding: {
-        decodePath: vi.fn(() => [{ lat: vi.fn(() => 0), lng: vi.fn(() => 0) }, { lat: vi.fn(() => 1), lng: vi.fn(() => 1) }]),
+        ...global.google.maps.geometry.encoding,
+        decodePath: vi.fn((_encodedPath: string) => [ new LatLng(0, 0), new LatLng(1, 1) ]),
       },
       spherical: {
+        ...global.google.maps.geometry.spherical,
         computeHeading: vi.fn(() => 0),
         computeDistanceBetween: vi.fn(() => 1000),
       },
     };
 
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       {
         overlay: false,
         panoramaIndex: 0,
@@ -44,11 +48,11 @@ describe('PanoramaBox', () => {
       mockDispatchMain,
     ]);
 
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       { current: { path: 'encodedPath' } },
     ]);
 
-    (useMapContext as vi.Mock).mockReturnValue([
+    (useMapContext as Mock).mockReturnValue([
       {
         map: {
           setStreetView: mockSetStreetView,
@@ -91,7 +95,7 @@ describe('PanoramaBox', () => {
   })
 
   it('does not render panorama box when overlay is true', () => {
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       {
         overlay: true,
         panoramaIndex: 0,

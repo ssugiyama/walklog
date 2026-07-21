@@ -6,6 +6,7 @@ import { MainContextProvider } from '@/lib/utils/main-context'
 import { MapContextProvider } from '@/lib/utils/map-context'
 import { ConfigProvider } from '@/lib/utils/config'
 import { useQueryParam } from 'use-query-params/dist/useQueryParam'
+import { Mock } from 'vitest'
 
 // Test configuration
 const TEST_TIMEOUT = 10000
@@ -85,11 +86,11 @@ const mockGeolocation = {
 // Mock the Google Maps libraries
 global.google = {
   maps: {
+    ...global.google?.maps,
     importLibrary: vi.fn().mockResolvedValue({}),
     Geocoder: vi.fn().mockImplementation(function () { return mockGeocoder }),
     GeocoderStatus: {
       OK: 'OK',
-      ERROR: 'ERROR',
     },
   },
 }
@@ -98,7 +99,10 @@ global.google = {
 beforeEach(() => {
   vi.clearAllMocks()
   // Mock the geolocation API
-  global.navigator.geolocation = mockGeolocation
+  Object.defineProperty(global.navigator, 'geolocation', {
+    value: mockGeolocation,
+    writable: true,
+  })
 })
 
 vi.mock('@/lib/utils/map-context', () => ({
@@ -306,7 +310,7 @@ describe('ToolBox Component', () => {
 
   it('disables download buttons when no path is selected', () => {
     // Mock useQueryParam to return null (no selected path)
-    useQueryParam.mockReturnValueOnce([null, vi.fn()])
+    (useQueryParam as Mock).mockReturnValueOnce([null, vi.fn()])
 
     render(
       <ConfigProvider>

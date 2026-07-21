@@ -7,6 +7,7 @@ import { useMapContext } from '../utils/map-context'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { initialize } from '@googlemaps/jest-mocks'
+import { Mock } from 'vitest'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -83,17 +84,17 @@ describe('Map Component', () => {
   const mockSetState = vi.fn()
   beforeEach(() => {
     initialize();
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       { autoGeolocation: false, mode: 'default' },
       vi.fn(),
     ]);
 
-    (useMapContext as vi.Mock).mockReturnValue([
+    (useMapContext as Mock).mockReturnValue([
       {},
       mockSetState,
     ]);
 
-    (useConfig as vi.Mock).mockReturnValue({
+    (useConfig as Mock).mockReturnValue({
       defaultCenter: '35.6895,139.6917',
       defaultRadius: 1000,
       shapeStyles: { polylines: { new: {} }, polygons: {}, circle: {}, marker: {} },
@@ -101,11 +102,13 @@ describe('Map Component', () => {
       mapId: 'test-map-id',
     });
 
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       { rows: [], current: null },
     ])
     google.maps.MapTypeControlStyle = {
+      DEFAULT: 0,
       DROPDOWN_MENU: 1,
+      HORIZONTAL_BAR: 2,
     }
   })
 

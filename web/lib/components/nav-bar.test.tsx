@@ -5,6 +5,7 @@ import NavBar from './nav-bar'
 import { useMainContext } from '../utils/main-context'
 import { useUserContext } from '../utils/user-context'
 import { useConfig } from '../utils/config'
+import { Mock } from 'vitest'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -53,18 +54,18 @@ describe('NavBar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       { overlay: false, toolBoxOpened: false },
       mockDispatchMain,
       mockPushWithGuard,
     ]);
 
-    (useUserContext as vi.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       currentUser: null,
       setCurrentUser: mockSetCurrentUser,
     });
 
-    (useConfig as vi.Mock).mockReturnValue({
+    (useConfig as Mock).mockReturnValue({
       firebaseConfig: {},
     })
   })
@@ -95,7 +96,7 @@ describe('NavBar', () => {
   })
 
   it('displays logout option when a user is logged in', () => {
-    (useUserContext as vi.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       currentUser: { displayName: 'Test User', photoURL: 'test-url' },
       setCurrentUser: mockSetCurrentUser,
     })

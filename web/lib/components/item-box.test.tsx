@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation'
 import { useConfig } from '../utils/config'
 import { useRouter } from 'next/navigation'
 import { useMainContext } from '../utils/main-context'
+import { Mock } from 'vitest'
 
 vi.mock('@/app/lib/walk-actions', () => ({
   deleteItemAction: vi.fn(),
@@ -57,21 +58,20 @@ describe('ItemBox Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         current: null,
         isPending: false,
         error: null,
         nextId: null,
         prevId: null,
-        offset: 0,
       },
     ]);
-    (useUserContext as vi.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       users: [],
       currentUser: null,
     });
-    (useMainContext as vi.Mock).mockReturnValue([
+    (useMainContext as Mock).mockReturnValue([
       {
         overlay: false,
         PanoramaIndex: 0,
@@ -79,13 +79,13 @@ describe('ItemBox Component', () => {
       },
       vi.fn(), // setOverlay
     ]);
-    (useSearchParams as vi.Mock).mockReturnValue(new URLSearchParams());
-    (useConfig as vi.Mock).mockReturnValue({});
-    (useRouter as vi.Mock).mockReturnValue({ push: mockRouterPush })
+    (useSearchParams as Mock).mockReturnValue(new URLSearchParams());
+    (useConfig as Mock).mockReturnValue({});
+    (useRouter as Mock).mockReturnValue({ push: mockRouterPush })
   })
 
   it('renders loading state when data is pending', () => {
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       { isPending: true },
     ])
 
@@ -94,7 +94,7 @@ describe('ItemBox Component', () => {
   })
 
   it('renders error state when there is an error', () => {
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       { error: 'Test error' },
     ])
 
@@ -103,7 +103,7 @@ describe('ItemBox Component', () => {
   })
 
   it('renders item details when data is available', () => {
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         current: {
           date: '2023-01-01',
@@ -117,7 +117,7 @@ describe('ItemBox Component', () => {
         error: null,
       },
     ]);
-    (useUserContext as vi.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
     })
@@ -129,14 +129,14 @@ describe('ItemBox Component', () => {
   })
 
   it('calls handleEdit when edit button is clicked', () => {
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         current: { uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
     ]);
-    (useUserContext as vi.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
     })
@@ -153,14 +153,14 @@ describe('ItemBox Component', () => {
 
   it('calls handleDelete when delete button is clicked', () => {
     window.confirm = vi.fn(() => true);
-    (useData as vi.Mock).mockReturnValue([
+    (useData as Mock).mockReturnValue([
       {
         current: { id: 'item1', uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
     ]);
-    (useUserContext as vi.Mock).mockReturnValue({
+    (useUserContext as Mock).mockReturnValue({
       users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
       currentUser: { uid: 'user1' },
     })
