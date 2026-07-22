@@ -1,11 +1,10 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import ImageUploader from './image-uploader'
 
 // FileReaderのモック
 class MockFileReader extends FileReader {
-
   addEventListener = vi.fn((event, handler) => {
     if (event === 'loadend') {
       this.onload = handler
@@ -25,7 +24,8 @@ class MockFileReader extends FileReader {
   readAsDataURL(_file: Blob) {
     queueMicrotask(() => {
       Object.defineProperty(this, 'result', {
-        value: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XmMwjwyJUJWE',
+        value:
+          'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XmMwjwyJUJWE',
         writable: false,
       })
       Object.defineProperty(this, 'readyState', {
@@ -67,7 +67,9 @@ describe('ImageUploader', () => {
     expect(screen.getByText('Image')).toBeInTheDocument()
     expect(screen.getByText('select...')).toBeInTheDocument()
     expect(screen.getByText('clear')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'select...' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'select...' }),
+    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'clear' })).toBeInTheDocument()
   })
 
@@ -102,7 +104,9 @@ describe('ImageUploader', () => {
     // FileReaderの処理が完了するまで待機
     await waitFor(() => {
       const imageContainer = screen.getByText('Image').nextSibling.firstChild
-      expect(imageContainer).toHaveStyle('background-image: url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XmMwjwyJUJWE)')
+      expect(imageContainer).toHaveStyle(
+        'background-image: url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XmMwjwyJUJWE)',
+      )
       // triggers clear event
       expect(handleChange).toHaveBeenCalled()
     })
@@ -111,7 +115,13 @@ describe('ImageUploader', () => {
   it('handles clear button click', () => {
     const imageUrl = 'https://example.com/image.jpg'
     const handleClear = vi.fn()
-    render(<ImageUploader {...defaultProps} defaultValue={imageUrl} onClear={handleClear} />)
+    render(
+      <ImageUploader
+        {...defaultProps}
+        defaultValue={imageUrl}
+        onClear={handleClear}
+      />,
+    )
 
     // 最初は画像が表示されている
     let imageContainer = screen.getByText('Image').nextSibling.firstChild
@@ -130,7 +140,9 @@ describe('ImageUploader', () => {
   })
 
   it('updates image when value prop changes', () => {
-    const { rerender } = render(<ImageUploader {...defaultProps} defaultValue={null} />)
+    const { rerender } = render(
+      <ImageUploader {...defaultProps} defaultValue={null} />,
+    )
 
     // 最初は画像なし
     let imageContainer = screen.getByText('Image').nextSibling.firstChild

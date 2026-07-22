@@ -1,11 +1,11 @@
-import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
-import PanoramaBox from './panorama-box'
-import { useMainContext } from '../utils/main-context'
-import { useData } from '../utils/data-context'
-import { useMapContext } from '../utils/map-context'
 import { initialize, LatLng } from '@googlemaps/jest-mocks'
+import { fireEvent, render, screen } from '@testing-library/react'
+import React from 'react'
 import { Mock } from 'vitest'
+import { useData } from '../utils/data-context'
+import { useMainContext } from '../utils/main-context'
+import { useMapContext } from '../utils/map-context'
+import PanoramaBox from './panorama-box'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -30,33 +30,37 @@ describe('PanoramaBox', () => {
       ...global.google.maps.geometry,
       encoding: {
         ...global.google.maps.geometry.encoding,
-        decodePath: vi.fn((_encodedPath: string) => [ new LatLng(0, 0), new LatLng(1, 1) ]),
+        decodePath: vi.fn((_encodedPath: string) => [
+          new LatLng(0, 0),
+          new LatLng(1, 1),
+        ]),
       },
       spherical: {
         ...global.google.maps.geometry.spherical,
         computeHeading: vi.fn(() => 0),
         computeDistanceBetween: vi.fn(() => 1000),
       },
-    };
+    }
 
-    (useMainContext as Mock).mockReturnValue([
+    ;(useMainContext as Mock).mockReturnValue([
       {
         overlay: false,
         panoramaIndex: 0,
         panoramaCount: 10,
       },
       mockDispatchMain,
-    ]);
+    ])
 
-    (useData as Mock).mockReturnValue([
-      { current: { path: 'encodedPath' } },
-    ]);
+    ;(useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }])
 
-    (useMapContext as Mock).mockReturnValue([
+    ;(useMapContext as Mock).mockReturnValue([
       {
         map: {
           setStreetView: mockSetStreetView,
-          getStreetView: vi.fn(() => ({ setPosition: vi.fn(), setPov: vi.fn() })),
+          getStreetView: vi.fn(() => ({
+            setPosition: vi.fn(),
+            setPov: vi.fn(),
+          })),
         },
       },
     ])
@@ -73,7 +77,10 @@ describe('PanoramaBox', () => {
     render(<PanoramaBox />)
     const overlaySwitch = screen.getByLabelText('overlay')
     fireEvent.click(overlaySwitch)
-    expect(mockDispatchMain).toHaveBeenCalledWith({ type: 'SET_OVERLAY', payload: true })
+    expect(mockDispatchMain).toHaveBeenCalledWith({
+      type: 'SET_OVERLAY',
+      payload: true,
+    })
   })
 
   it('handles panorama index button clicks', () => {
@@ -82,10 +89,16 @@ describe('PanoramaBox', () => {
     const backButton = screen.getByTestId('backward-1-button')
 
     fireEvent.click(forwardButton)
-    expect(mockDispatchMain).toHaveBeenCalledWith({ type: 'SET_PANORAMA_INDEX', payload: 1 })
+    expect(mockDispatchMain).toHaveBeenCalledWith({
+      type: 'SET_PANORAMA_INDEX',
+      payload: 1,
+    })
 
     fireEvent.click(backButton)
-    expect(mockDispatchMain).toHaveBeenCalledWith({ type: 'SET_PANORAMA_INDEX', payload: -1 })
+    expect(mockDispatchMain).toHaveBeenCalledWith({
+      type: 'SET_PANORAMA_INDEX',
+      payload: -1,
+    })
   })
 
   it('renders the panorama box when overlay is false', () => {
@@ -95,7 +108,7 @@ describe('PanoramaBox', () => {
   })
 
   it('does not render panorama box when overlay is true', () => {
-    (useMainContext as Mock).mockReturnValue([
+    ;(useMainContext as Mock).mockReturnValue([
       {
         overlay: true,
         panoramaIndex: 0,

@@ -1,16 +1,13 @@
 'use client'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter'
 import React, { Suspense } from 'react'
 import { DataProvider } from '../../lib/utils/data-context'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter'
-import Main from './main'
-import { UserContextProvider } from '../../lib/utils/user-context'
 import { MainContextProvider } from '../../lib/utils/main-context'
+import { UserContextProvider } from '../../lib/utils/user-context'
 import { ConfigProvider } from '../utils/config'
-const Body = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => {
+import Main from './main'
+
+const Body = ({ children }: { children: React.ReactNode }) => {
   return (
     <AppRouterCacheProvider>
       <ConfigProvider>
@@ -18,9 +15,7 @@ const Body = ({
           <Suspense>
             <DataProvider>
               <MainContextProvider>
-                <Main>
-                  {children}
-                </Main>
+                <Main>{children}</Main>
               </MainContextProvider>
             </DataProvider>
           </Suspense>

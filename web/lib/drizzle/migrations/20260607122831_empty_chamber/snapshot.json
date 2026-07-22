@@ -1,8 +1,6 @@
 {
   "id": "00000000-0000-0000-0000-000000000000",
-  "prevIds": [
-    ""
-  ],
+  "prevIds": [""],
   "version": "8",
   "dialect": "postgres",
   "ddl": [
@@ -13,9 +11,7 @@
       "entityType": "tables"
     },
     {
-      "columns": [
-        "gid"
-      ],
+      "columns": ["gid"],
       "nameExplicit": false,
       "name": "areas_pkey",
       "schema": "public",
@@ -222,9 +218,7 @@
       "entityType": "tables"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "walks_pkey",
       "schema": "public",

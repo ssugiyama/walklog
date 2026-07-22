@@ -1,5 +1,5 @@
 /* eslint new-cap: 'off' */
-import { WalkT } from '@/types'
+
 import jsSHA1 from 'jssha/dist/sha1'
 import {
   GeoJSONStoreFeatures,
@@ -9,6 +9,7 @@ import {
   TerraDrawLineStringMode,
 } from 'terra-draw'
 import { TerraDrawGoogleMapsAdapter } from 'terra-draw-google-maps-adapter'
+import { WalkT } from '@/types'
 
 type PathManagerOptions = {
   map?: google.maps.Map
@@ -33,7 +34,7 @@ export default class PathManager extends google.maps.MVCObject {
     selected: google.maps.PolylineOptions
     current: google.maps.PolylineOptions
   }
-  
+
   constructor(optOptions: PathManagerOptions | null = null) {
     super()
     const options = optOptions ?? {}
@@ -41,11 +42,15 @@ export default class PathManager extends google.maps.MVCObject {
     this.map = options.map
     this.styles = options.styles
     this.draw = new TerraDraw({
-      adapter: new TerraDrawGoogleMapsAdapter({ map: this.map, lib: google.maps, coordinatePrecision: 9 }),
+      adapter: new TerraDrawGoogleMapsAdapter({
+        map: this.map,
+        lib: google.maps,
+        coordinatePrecision: 9,
+      }),
       modes: [
         new TerraDrawLineStringMode({
           editable: true,
-          styles: { 
+          styles: {
             lineStringColor: this.styles.new.strokeColor as HexColor,
             lineStringWidth: this.styles.new.strokeWeight,
           },
@@ -55,18 +60,22 @@ export default class PathManager extends google.maps.MVCObject {
     })
 
     this.draw.on('ready', () => {
-      this.draw.on('finish', (id: string, context: { action: string, mode: string }) => {
-        if (context.action !== 'draw') return
-        const feature: GeoJSONStoreFeatures<GeoJSONStoreGeometries> = this.draw.getSnapshotFeature(id)
-        if (feature?.geometry.type === 'LineString') {
-          const path: google.maps.LatLng[] = feature.geometry.coordinates.map(
-            (coord: number[]) => new google.maps.LatLng(coord[1], coord[0]),
-          )
-          this.draw.clear()
-          this.draw.stop()
-          google.maps.event.trigger(this, 'drawfinish', path)
-        }
-      })
+      this.draw.on(
+        'finish',
+        (id: string, context: { action: string; mode: string }) => {
+          if (context.action !== 'draw') return
+          const feature: GeoJSONStoreFeatures<GeoJSONStoreGeometries> =
+            this.draw.getSnapshotFeature(id)
+          if (feature?.geometry.type === 'LineString') {
+            const path: google.maps.LatLng[] = feature.geometry.coordinates.map(
+              (coord: number[]) => new google.maps.LatLng(coord[1], coord[0]),
+            )
+            this.draw.clear()
+            this.draw.stop()
+            google.maps.event.trigger(this, 'drawfinish', path)
+          }
+        },
+      )
     })
     this.set('length', 0)
     this.set('prevSelection', null)
@@ -112,7 +121,10 @@ export default class PathManager extends google.maps.MVCObject {
 
   static pathToHash(path: string | google.maps.LatLng[] | null): string | null {
     if (!path) return null
-    const key = typeof path === 'string' ? path : google.maps.geometry.encoding.encodePath(path)
+    const key =
+      typeof path === 'string'
+        ? path
+        : google.maps.geometry.encoding.encodePath(path)
     const obj = new jsSHA1('SHA-1', 'TEXT')
     obj.update(key)
     return obj.getHash('B64')
@@ -156,12 +168,19 @@ export default class PathManager extends google.maps.MVCObject {
     })
   }
 
-  searchPolyline(path: string | google.maps.LatLng[]): [google.maps.Polyline, WalkT | null] | null {
+  searchPolyline(
+    path: string | google.maps.LatLng[],
+  ): [google.maps.Polyline, WalkT | null] | null {
     const key = PathManager.pathToHash(path)
     return this.polylines[key]
   }
 
-  showPath(path: string | google.maps.LatLng[], select = false, current = false, item: WalkT | null = null) {
+  showPath(
+    path: string | google.maps.LatLng[],
+    select = false,
+    current = false,
+    item: WalkT | null = null,
+  ) {
     const pair = this.searchPolyline(path)
     let pl = pair?.[0]
     if (typeof path === 'string') {
@@ -211,14 +230,18 @@ export default class PathManager extends google.maps.MVCObject {
     pl.setMap(this.map)
     const key = PathManager.pathToHash(pl.getPath().getArray())
     this.polylines[key] = [pl, item]
-    google.maps.event.addListener(pl, 'click', (event: google.maps.MapMouseEvent) => {
-      this.lastClickLatLng = event.latLng
-      if (pl.getEditable()) {
-        pl.setEditable(false)
-      } else {
-        this.set('selection', pl === this.selection ? null : pl)
-      }
-    })
+    google.maps.event.addListener(
+      pl,
+      'click',
+      (event: google.maps.MapMouseEvent) => {
+        this.lastClickLatLng = event.latLng
+        if (pl.getEditable()) {
+          pl.setEditable(false)
+        } else {
+          this.set('selection', pl === this.selection ? null : pl)
+        }
+      },
+    )
     const deleteNode = (mev: google.maps.PolyMouseEvent) => {
       if (mev.vertex !== null) {
         pl.getPath().removeAt(mev.vertex)
@@ -236,7 +259,9 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   getPolylineStyle(pl: google.maps.Polyline) {
-    const pair = this.searchPolyline(google.maps.geometry.encoding.encodePath(pl.getPath()))
+    const pair = this.searchPolyline(
+      google.maps.geometry.encoding.encodePath(pl.getPath()),
+    )
     let style = pair?.[1] ? { ...this.styles.normal } : { ...this.styles.new }
     if (pl === this.current) {
       style = Object.assign(style, this.styles.current)
@@ -248,7 +273,9 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   selection_changed() {
-    const prevSelection = this.get('prevSelection') as google.maps.Polyline | null
+    const prevSelection = this.get(
+      'prevSelection',
+    ) as google.maps.Polyline | null
     if (prevSelection) {
       prevSelection.setOptions(this.getPolylineStyle(prevSelection))
       prevSelection.setEditable(false)
@@ -298,7 +325,11 @@ export default class PathManager extends google.maps.MVCObject {
 
   updateLength() {
     if (this.selection) {
-      this.set('length', google.maps.geometry.spherical.computeLength(this.selection.getPath()) / 1000)
+      this.set(
+        'length',
+        google.maps.geometry.spherical.computeLength(this.selection.getPath()) /
+          1000,
+      )
     } else {
       this.set('length', 0)
     }
@@ -308,7 +339,10 @@ export default class PathManager extends google.maps.MVCObject {
     if (this.selection) {
       return JSON.stringify({
         type: 'LineString',
-        coordinates: this.selection.getPath().getArray().map((p) => [p.lng(), p.lat()]),
+        coordinates: this.selection
+          .getPath()
+          .getArray()
+          .map((p) => [p.lng(), p.lat()]),
       })
     }
     return ''

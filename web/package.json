@@ -5,7 +5,7 @@
     "start": "next start",
     "start-in-docker": "node ./server.js",
     "test": "vitest run --coverage.enabled true",
-    "lint": "eslint",
+    "lint": "biome check",
     "typecheck": "tsc --noEmit",
     "migrate": "drizzle-kit generate && drizzle-kit migrate"
   },
@@ -38,6 +38,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.4",
     "@electric-sql/pglite": "^0.5.4",
     "@electric-sql/pglite-postgis": "^0.2.4",
     "@eslint/eslintrc": "^3.3.5",
@@ -57,9 +58,6 @@
     "@vitest/coverage-v8": "^4.1.10",
     "@vitest/ui": "^4.1.10",
     "drizzle-kit": "1.0.0-rc.4",
-    "eslint": "9.39.2",
-    "eslint-config-next": "16.1.6",
-    "eslint-config-prettier": "^10.1.8",
     "globals": "^17.7.0",
     "jsdom": "^29.1.1",
     "postgis": "link:@electric-sql/pglite/postgis",

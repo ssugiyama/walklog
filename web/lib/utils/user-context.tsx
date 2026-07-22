@@ -1,9 +1,15 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
-import { createContext, useContext } from 'react'
-import { getUsersAction } from '../../app/lib/walk-actions'
-import { UserT } from '@/types'
 import { User as FirebaseUser } from 'firebase/auth'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+import { UserT } from '@/types'
+import { getUsersAction } from '../../app/lib/walk-actions'
+
 type UserContextT = {
   users: UserT[]
   idToken: string | null
@@ -20,8 +26,14 @@ const initialState: UserContextT = {
 }
 const UserContext = createContext(initialState)
 
-export function UserContextProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null | undefined>(undefined)
+export function UserContextProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [currentUser, setCurrentUser] = useState<
+    FirebaseUser | null | undefined
+  >(undefined)
   const getCookieValue = (name: string) => {
     if (typeof document === 'undefined') return ''
     const value = `; ${document.cookie}`
@@ -32,7 +44,7 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
   const initialIdToken = getCookieValue('idToken')
   const [idToken, setIdToken] = useState(initialIdToken)
   const [users, setUsers] = useState<UserT[]>([])
-  
+
   const updateIdToken = useCallback(async () => {
     if (!currentUser) {
       const secure = location.protocol === 'https:' ? '; secure' : ''
@@ -40,13 +52,13 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
       setIdToken('')
       return
     }
-    const newIdToken = await currentUser?.getIdToken() ?? ''
+    const newIdToken = (await currentUser?.getIdToken()) ?? ''
     const secure = location.protocol === 'https:' ? '; secure' : ''
     // Max-Ageを1時間に設定してトークンの有効期限を管理
     document.cookie = `idToken=${newIdToken}; path=/; samesite=strict${secure};`
     setIdToken(newIdToken)
   }, [currentUser])
-  
+
   useEffect(() => {
     void (async () => {
       setUsers(await getUsersAction())
@@ -61,13 +73,15 @@ export function UserContextProvider({ children }: { children: React.ReactNode })
     })()
   }, [currentUser])
   return (
-    <UserContext.Provider value={{
-      users,
-      currentUser,
-      setCurrentUser,
-      idToken,
-      updateIdToken,
-    }}>
+    <UserContext.Provider
+      value={{
+        users,
+        currentUser,
+        setCurrentUser,
+        idToken,
+        updateIdToken,
+      }}
+    >
       {children}
     </UserContext.Provider>
   )

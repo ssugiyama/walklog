@@ -1,11 +1,11 @@
+import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import NavBar from './nav-bar'
+import { Mock } from 'vitest'
+import { useConfig } from '../utils/config'
 import { useMainContext } from '../utils/main-context'
 import { useUserContext } from '../utils/user-context'
-import { useConfig } from '../utils/config'
-import { Mock } from 'vitest'
+import NavBar from './nav-bar'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -27,9 +27,13 @@ vi.mock('firebase/auth', () => ({
   onAuthStateChanged: vi.fn(),
 }))
 
-vi.mock('@/lib/components/walk-editor', () => function MockWalkEditor() {
-  return <div data-testid="walk-editor">Walk Editor</div>
-})
+vi.mock(
+  '@/lib/components/walk-editor',
+  () =>
+    function MockWalkEditor() {
+      return <div data-testid="walk-editor">Walk Editor</div>
+    },
+)
 
 vi.mock('firebase/app', () => ({
   initializeApp: vi.fn(),
@@ -52,20 +56,20 @@ describe('NavBar', () => {
   const mockSetCurrentUser = vi.fn()
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks()
 
-    (useMainContext as Mock).mockReturnValue([
+    ;(useMainContext as Mock).mockReturnValue([
       { overlay: false, toolBoxOpened: false },
       mockDispatchMain,
       mockPushWithGuard,
-    ]);
+    ])
 
-    (useUserContext as Mock).mockReturnValue({
+    ;(useUserContext as Mock).mockReturnValue({
       currentUser: null,
       setCurrentUser: mockSetCurrentUser,
-    });
+    })
 
-    (useConfig as Mock).mockReturnValue({
+    ;(useConfig as Mock).mockReturnValue({
       firebaseConfig: {},
     })
   })
@@ -96,7 +100,7 @@ describe('NavBar', () => {
   })
 
   it('displays logout option when a user is logged in', () => {
-    (useUserContext as Mock).mockReturnValue({
+    ;(useUserContext as Mock).mockReturnValue({
       currentUser: { displayName: 'Test User', photoURL: 'test-url' },
       setCurrentUser: mockSetCurrentUser,
     })

@@ -1,36 +1,44 @@
 'use client'
-import React, {
-  useActionState, useEffect, useCallback, useState,
-  startTransition,
-} from 'react'
-import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
-import Paper from '@mui/material/Paper'
-import FormGroup from '@mui/material/FormGroup'
+import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import TextField from '@mui/material/TextField'
+import FormGroup from '@mui/material/FormGroup'
+import Paper from '@mui/material/Paper'
 import Switch from '@mui/material/Switch'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import ImageUploader from './image-uploader'
-import { useData } from '../utils/data-context'
+import moment from 'moment'
+import Link from 'next/link'
+import {
+  forbidden,
+  unauthorized,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
+import React, {
+  startTransition,
+  useActionState,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
+import { StringParam, useQueryParam, withDefault } from 'use-query-params'
 import { updateItemAction } from '@/app/lib/walk-actions'
-import { useQueryParam, StringParam, withDefault } from 'use-query-params'
-import { unauthorized, forbidden, useRouter, useSearchParams } from 'next/navigation'
-import { useUserContext } from '../utils/user-context'
-import { idToShowUrl } from '../utils/meta-utils'
 import { WalkT } from '@/types'
 import { useConfig } from '../utils/config'
-import moment from 'moment'
+import { useData } from '../utils/data-context'
 import { useMainContext } from '../utils/main-context'
-import Link from 'next/link'
+import { idToShowUrl } from '../utils/meta-utils'
+import { useUserContext } from '../utils/user-context'
+import ImageUploader from './image-uploader'
 
 type WalkFields = {
-  date: string;
-  title: string;
-  comment: string;
-  image: File | string |null;
-  will_delete_image: string;
-  draft: boolean;
+  date: string
+  title: string
+  comment: string
+  image: File | string | null
+  will_delete_image: string
+  draft: boolean
 }
 const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const searchParams = useSearchParams()
@@ -67,7 +75,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       title: '',
       comment: '',
       image: null,
-      draft: true,      
+      draft: true,
     }
   }
 
@@ -87,33 +95,42 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     }
   }, [item?.id])
 
-  const [state, formAction, isPending] = useActionState(updateItemAction, initialState)
-  const [searchPath] = useQueryParam<string, string>('path', withDefault<string, string, string>(StringParam, null))
-  
+  const [state, formAction, isPending] = useActionState(
+    updateItemAction,
+    initialState,
+  )
+  const [searchPath] = useQueryParam<string, string>(
+    'path',
+    withDefault<string, string, string>(StringParam, null),
+  )
+
   // フォーム入力の変更ハンドラー
-  const handleInputChange = useCallback((field: string) => (event?: React.ChangeEvent<HTMLInputElement>) => {
-    const changes: Partial<WalkFields> = {}
-    switch (field) {
-    case 'draft':
-      changes.draft = event.target.checked
-      break
-    case 'will_delete_image':
-      changes.image = null
-      changes.will_delete_image = 'true'
-      break
-    case 'image':
-      changes.image = event.target.files ? event.target.files[0] : null
-      changes.will_delete_image = ''
-      break
-    default:
-      changes[field] = event.target.value
-    } 
-    setInputs(prev => ({
-      ...prev,
-      ...changes,
-    }))
-    dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
-  }, [dispatchMain, setInputs])
+  const handleInputChange = useCallback(
+    (field: string) => (event?: React.ChangeEvent<HTMLInputElement>) => {
+      const changes: Partial<WalkFields> = {}
+      switch (field) {
+        case 'draft':
+          changes.draft = event.target.checked
+          break
+        case 'will_delete_image':
+          changes.image = null
+          changes.will_delete_image = 'true'
+          break
+        case 'image':
+          changes.image = event.target.files ? event.target.files[0] : null
+          changes.will_delete_image = ''
+          break
+        default:
+          changes[field] = event.target.value
+      }
+      setInputs((prev) => ({
+        ...prev,
+        ...changes,
+      }))
+      dispatchMain({ type: 'SET_IS_DIRTY', payload: true })
+    },
+    [dispatchMain, setInputs],
+  )
 
   const handleSubmit = useCallback(() => {
     startTransition(() => {
@@ -131,7 +148,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       formAction(formData)
     })
   }, [inputs, searchPath, item, mode, formAction])
-  
+
   useEffect(() => {
     if (state.serial > 0) {
       if (state.idTokenExpired) {
@@ -142,7 +159,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       } else if (state.id) {
         // フォーム送信が成功したらdirtyフラグをリセット
         dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
-        
+
         if (mode === 'update') {
           const index = data.rows.findIndex((row) => row?.id === item.id)
           if (index >= 0) {
@@ -154,7 +171,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       }
     }
   }, [state?.serial])
-  
+
   if (currentUser === null) {
     unauthorized()
   }
@@ -166,34 +183,39 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     forbidden()
   }
 
-  const cancelUrl = mode === 'update' ? idToShowUrl(item.id, searchParams) : `/?${searchParams.toString()}`
+  const cancelUrl =
+    mode === 'update'
+      ? idToShowUrl(item.id, searchParams)
+      : `/?${searchParams.toString()}`
 
   return (
     <Box data-testid="WalkEditor">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
-        <Typography variant="body1" color="error" >{state?.error?.message}</Typography>
+        <Typography variant="body1" color="error">
+          {state?.error?.message}
+        </Typography>
         <form name="walk-form">
           <FormGroup row>
-            <TextField 
-              type="date" 
-              name="date" 
+            <TextField
+              type="date"
+              name="date"
               value={inputs.date}
               onChange={handleInputChange('date')}
-              variant="standard" 
-              label="date" 
-              fullWidth 
+              variant="standard"
+              label="date"
+              fullWidth
             />
-            <TextField 
+            <TextField
               value={inputs.title}
               onChange={handleInputChange('title')}
-              name="title" 
-              label="title" 
-              variant="standard" 
-              fullWidth 
+              name="title"
+              label="title"
+              variant="standard"
+              fullWidth
             />
-            <ImageUploader 
-              label="image" 
-              name="image" 
+            <ImageUploader
+              label="image"
+              name="image"
               defaultValue={item?.image}
               onChange={handleInputChange('image')}
               onClear={handleInputChange('will_delete_image')}
@@ -211,11 +233,11 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
             />
             <FormControlLabel
               control={
-                <Switch 
-                  checked={inputs.draft} 
+                <Switch
+                  checked={inputs.draft}
                   onChange={handleInputChange('draft')}
-                  value="true" 
-                  name="draft" 
+                  value="true"
+                  name="draft"
                 />
               }
               label="draft?"
@@ -223,18 +245,18 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           </FormGroup>
         </form>
         <Box sx={{ marginTop: 1, textAlign: 'right' }}>
-          <Button 
+          <Button
             color="primary"
-            component={Link} 
-            href={cancelUrl} 
+            component={Link}
+            href={cancelUrl}
             onClick={interceptLink}
           >
             cancel
           </Button>
-          <Button 
-            data-testid="submit-button" 
-            disabled={isPending} 
-            onClick={handleSubmit} 
+          <Button
+            data-testid="submit-button"
+            disabled={isPending}
+            onClick={handleSubmit}
             color="secondary"
           >
             {isPending ? 'Uploading...' : mode}

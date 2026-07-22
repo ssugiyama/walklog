@@ -28,7 +28,9 @@ export default class PolygonManager extends google.maps.MVCObject {
 
   addPolygon(id: string, str: string) {
     this.addCache(id, str)
-    const paths = str.split(' ').map((element) => google.maps.geometry.encoding.decodePath(element))
+    const paths = str
+      .split(' ')
+      .map((element) => google.maps.geometry.encoding.decodePath(element))
     const pg = new google.maps.Polygon({})
     pg.setPaths(paths)
     pg.setOptions(this.styles)

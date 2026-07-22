@@ -1,8 +1,8 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
-import { useUserContext } from '../utils/user-context'
+import React from 'react'
 import { useData } from '../utils/data-context'
+import { useUserContext } from '../utils/user-context'
 import SearchBox from './search-box'
 import '@testing-library/jest-dom/vitest'
 import { Mock } from 'vitest'
@@ -23,11 +23,11 @@ vi.mock('../utils/data-context', () => ({
 }))
 
 vi.mock('../utils/map-context', () => ({
-  useMapContext: vi.fn(() => ([
+  useMapContext: vi.fn(() => [
     {
       pathManager: {},
     },
-  ])),
+  ]),
 }))
 
 vi.mock('../utils/config', () => ({
@@ -44,15 +44,15 @@ describe('SearchBox', () => {
   const mockRouterReplace = vi.fn()
 
   beforeEach(() => {
-    (useRouter as Mock).mockReturnValue({
+    ;(useRouter as Mock).mockReturnValue({
       replace: mockRouterReplace,
-    });
+    })
 
-    (useUserContext as Mock).mockReturnValue({
+    ;(useUserContext as Mock).mockReturnValue({
       users: [],
-    });
+    })
 
-    (useData as Mock).mockReturnValue([
+    ;(useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 0,
@@ -66,15 +66,21 @@ describe('SearchBox', () => {
   })
 
   it('renders the SearchBox component', () => {
-    render(
-      <SearchBox />,
-    )
+    render(<SearchBox />)
     expect(screen.getByTestId('SearchBox')).toBeInTheDocument()
   })
 
   it('calls router.replace when index is present in searchParams', () => {
-    const mockRows = [{ id: 1, uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
-    (useData as Mock).mockReturnValue([
+    const mockRows = [
+      {
+        id: 1,
+        uid: 'user1',
+        date: '2023-01-01',
+        title: 'Test Walk',
+        length: 5,
+      },
+    ]
+    ;(useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 1,
@@ -83,7 +89,9 @@ describe('SearchBox', () => {
     ])
 
     render(<SearchBox />)
-    expect(mockRouterReplace).toHaveBeenCalledWith(expect.stringContaining('/show/1'))
+    expect(mockRouterReplace).toHaveBeenCalledWith(
+      expect.stringContaining('/show/1'),
+    )
   })
 
   it('displays "No results" when count is 0', () => {
@@ -92,8 +100,16 @@ describe('SearchBox', () => {
   })
 
   it('displays the correct count when count is greater than 0', () => {
-    const mockRows = [{ id: '1', uid: 'user1', date: '2023-01-01', title: 'Test Walk', length: 5 }];
-    (useData as Mock).mockReturnValue([
+    const mockRows = [
+      {
+        id: '1',
+        uid: 'user1',
+        date: '2023-01-01',
+        title: 'Test Walk',
+        length: 5,
+      },
+    ]
+    ;(useData as Mock).mockReturnValue([
       {
         offset: 0,
         count: 1,

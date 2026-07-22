@@ -1,26 +1,26 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
-import AppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
-import Menu from '@mui/material/Menu'
-import { IconButton } from '@mui/material'
-import MenuItem from '@mui/material/MenuItem'
-import Divider from '@mui/material/Divider'
-import Typography from '@mui/material/Typography'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import MenuIcon from '@mui/icons-material/Menu'
-import Link from 'next/link'
-import { useConfig } from '../utils/config'
-import { useUserContext } from '../utils/user-context'
+import { IconButton } from '@mui/material'
+import AppBar from '@mui/material/AppBar'
+import Divider from '@mui/material/Divider'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
 import { initializeApp } from 'firebase/app'
 import {
-  getAuth,
   GoogleAuthProvider,
+  getAuth,
   onAuthStateChanged,
   signInWithPopup,
   signOut,
 } from 'firebase/auth'
-import { useMainContext } from '../utils/main-context'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useConfig } from '../utils/config'
+import { useMainContext } from '../utils/main-context'
+import { useUserContext } from '../utils/user-context'
 
 const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const searchParams = useSearchParams()
@@ -33,21 +33,18 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   )
   const { currentUser, setCurrentUser } = useUserContext()
   const handleMenuOpen =
-        (setter: typeof setAccountAnchorEl) =>
-          (event: React.MouseEvent<HTMLElement>) => {
-            event.stopPropagation()
-            setter(event.currentTarget)
-          }
-  const accountMenuOpenCB = useCallback(
-    handleMenuOpen(setAccountAnchorEl),
-    [],
-  )
+    (setter: typeof setAccountAnchorEl) =>
+    (event: React.MouseEvent<HTMLElement>) => {
+      event.stopPropagation()
+      setter(event.currentTarget)
+    }
+  const accountMenuOpenCB = useCallback(handleMenuOpen(setAccountAnchorEl), [])
   const handleMenuClose =
-        (setter: typeof setAccountAnchorEl) =>
-          (event: React.MouseEvent<HTMLElement>) => {
-            event.stopPropagation()
-            setter(null)
-          }
+    (setter: typeof setAccountAnchorEl) =>
+    (event: React.MouseEvent<HTMLElement>) => {
+      event.stopPropagation()
+      setter(null)
+    }
   const accountMenuCloseCB = useCallback(
     handleMenuClose(setAccountAnchorEl),
     [],
@@ -78,9 +75,9 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const EndMenuItem = useCallback(
     (
       prps: React.ComponentProps<typeof MenuItem> & {
-                component?: typeof Link;
-                href?: string;
-            },
+        component?: typeof Link
+        href?: string
+      },
     ) => {
       const { onClick, children } = prps
       const cpProps = { ...prps }
@@ -124,7 +121,7 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
             window.location.href = '/'
           }}
         >
-                    Walklog
+          Walklog
         </Typography>
         <IconButton
           onClick={accountMenuOpenCB}
@@ -150,27 +147,27 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
       >
         {currentUser
           ? [
-            <MenuItem key="label" disabled>
-                              Logged in as {currentUser.displayName}
-            </MenuItem>,
-            <Divider key="divider" />,
-            <EndMenuItem
-              key="new walk"
-              component={Link}
-              href={`/new?${searchParams.toString()}`}
-              onClick={interceptLink}
-            >
-                              new walk...
-            </EndMenuItem>,
-            <EndMenuItem key="logout" onClick={handleLogout}>
-                              logout
-            </EndMenuItem>,
-          ]
+              <MenuItem key="label" disabled>
+                Logged in as {currentUser.displayName}
+              </MenuItem>,
+              <Divider key="divider" />,
+              <EndMenuItem
+                key="new walk"
+                component={Link}
+                href={`/new?${searchParams.toString()}`}
+                onClick={interceptLink}
+              >
+                new walk...
+              </EndMenuItem>,
+              <EndMenuItem key="logout" onClick={handleLogout}>
+                logout
+              </EndMenuItem>,
+            ]
           : [
-            <EndMenuItem key="login" onClick={handleLogin}>
-                              login with Google
-            </EndMenuItem>,
-          ]}
+              <EndMenuItem key="login" onClick={handleLogin}>
+                login with Google
+              </EndMenuItem>,
+            ]}
       </Menu>
     </AppBar>
   )

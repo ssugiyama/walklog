@@ -1,27 +1,33 @@
 'use client'
 
-import React, {
-  useRef, useEffect, useState, MouseEventHandler,
-} from 'react'
-import { createRoot } from 'react-dom/client'
+import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 import { Box, Button } from '@mui/material'
+import { LineString } from 'geojson'
 import moment from 'moment'
-import ConfirmModal, { APPEND_PATH_CONFIRM_INFO, ConfirmInfo } from './confirm-modal'
-import createGsiMapType from '../utils/gsi-map-type'
-import { useConfig } from '../utils/config'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useQueryParam, StringParam, withDefault, NumberParam } from 'use-query-params'
-import { getCityAction } from '../../app/lib/walk-actions'
-import { useData } from '../utils/data-context'
-import { useMapContext } from '../utils/map-context'
-import { useMainContext } from '../utils/main-context'
-import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
+import React, { MouseEventHandler, useEffect, useRef, useState } from 'react'
+import { createRoot } from 'react-dom/client'
+import {
+  NumberParam,
+  StringParam,
+  useQueryParam,
+  withDefault,
+} from 'use-query-params'
 import { ShapeStyles, WalkT } from '@/types'
+import { getCityAction } from '../../app/lib/walk-actions'
+import { useConfig } from '../utils/config'
+import { useData } from '../utils/data-context'
+import createGsiMapType from '../utils/gsi-map-type'
+import { useMainContext } from '../utils/main-context'
+import { useMapContext } from '../utils/map-context'
 import { idToShowUrl } from '../utils/meta-utils'
 import type PathManager from '../utils/path-manager'
 import type PolygonManager from '../utils/polygon-manager'
-import Link from 'next/link'
-import { LineString } from 'geojson'
+import ConfirmModal, {
+  APPEND_PATH_CONFIRM_INFO,
+  ConfirmInfo,
+} from './confirm-modal'
 
 const RESIZE_INTERVAL = 500
 const GSI_MAP_TYPE = 'gsi'
@@ -44,22 +50,34 @@ type MapRefs = {
   radius?: number
   fetching?: boolean
   searchCenter?: string
-  clickedItem?: WalkT,
+  clickedItem?: WalkT
   resizeIntervalID?: NodeJS.Timeout | null
   elevationInfoWindow?: google.maps.InfoWindow
   marker?: google.maps.marker.AdvancedMarkerElement
-  interceptLink?: MouseEventHandler<HTMLButtonElement|HTMLAnchorElement>
+  interceptLink?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
   initialized: boolean
 }
 
-const Map = (props) => {
+const GMap = (props) => {
   const [mainState, dispatchMain, interceptLink] = useMainContext()
   const [, setMapState] = useMapContext()
   const config = useConfig()
-  const [searchPath, setSearchPath] = useQueryParam('path', withDefault(StringParam, ''))
-  const [searchCenter, setSearchCenter] = useQueryParam('center', withDefault(StringParam, config.defaultCenter))
-  const [radius, setRadius] = useQueryParam('radius', withDefault(NumberParam, config.defaultRadius))
-  const [cities, setCities] = useQueryParam('cities', withDefault(StringParam, ''))
+  const [searchPath, setSearchPath] = useQueryParam(
+    'path',
+    withDefault(StringParam, ''),
+  )
+  const [searchCenter, setSearchCenter] = useQueryParam(
+    'center',
+    withDefault(StringParam, config.defaultCenter),
+  )
+  const [radius, setRadius] = useQueryParam(
+    'radius',
+    withDefault(NumberParam, config.defaultRadius),
+  )
+  const [cities, setCities] = useQueryParam(
+    'cities',
+    withDefault(StringParam, ''),
+  )
   const [data] = useData()
   const { rows, current } = data
   const refs = useRef<MapRefs>({ initialized: false })
@@ -90,7 +108,10 @@ const Map = (props) => {
     const blob = new Blob([content], { type: 'application/json' })
     const elem = downloadRef.current
     elem.href = window.URL.createObjectURL(blob)
-    setTimeout(() => { elem.click(); window.URL.revokeObjectURL(elem.href) }, 0)
+    setTimeout(() => {
+      elem.click()
+      window.URL.revokeObjectURL(elem.href)
+    }, 0)
   }
   const clearPaths = (retainTemporaryAndSelection: boolean) => {
     rc.pathManager.deleteAll(retainTemporaryAndSelection)
@@ -99,7 +120,9 @@ const Map = (props) => {
     rc.pathManager.deleteSelection()
   }
   const addPaths = (items: WalkT[]) => {
-    items.forEach((item) => rc.pathManager.showPath(item.path, false, false, item))
+    items.forEach((item) =>
+      rc.pathManager.showPath(item.path, false, false, item),
+    )
   }
 
   const pathChanged = () => {
@@ -115,9 +138,9 @@ const Map = (props) => {
           const content = '<span id="path-info-window-content">foo</span>'
           rc.pathInfoWindow.setContent(content)
           rc.pathInfoWindow.open(rc.map)
-          const pos = rc.autoGeolocation ?
-            rc.pathManager.lastAppendLatLng() :
-            rc.pathManager.getLastClickLatLng()
+          const pos = rc.autoGeolocation
+            ? rc.pathManager.lastAppendLatLng()
+            : rc.pathManager.getLastClickLatLng()
           if (pos) rc.pathInfoWindow.setPosition(pos)
         } else {
           rc.pathInfoWindow.close()
@@ -136,8 +159,12 @@ const Map = (props) => {
     reader.addEventListener('loadend', (e2) => {
       const obj = JSON.parse(e2.target.result as string) as LineString
       const { coordinates } = obj
-      const pts = coordinates.map((item) => (new google.maps.LatLng(item[1], item[0])))
-      const path = google.maps.geometry.encoding.encodePath(new google.maps.MVCArray(pts))
+      const pts = coordinates.map(
+        (item) => new google.maps.LatLng(item[1], item[0]),
+      )
+      const path = google.maps.geometry.encoding.encodePath(
+        new google.maps.MVCArray(pts),
+      )
       setSearchPath(path)
     })
     reader.readAsText(file)
@@ -153,7 +180,14 @@ const Map = (props) => {
   }
 
   const addCity = (id: string) => {
-    const newCities = Array.from(new Set(rc.cities.split(/,/).filter((elm) => elm).concat(id))).join(',')
+    const newCities = Array.from(
+      new Set(
+        rc.cities
+          .split(/,/)
+          .filter((elm) => elm)
+          .concat(id),
+      ),
+    ).join(',')
     setCities(newCities)
   }
 
@@ -183,44 +217,70 @@ const Map = (props) => {
     if (mapTypeIds.includes(GSI_MAP_TYPE)) {
       createGsiMapType(GSI_MAP_TYPE, rc.map)
     }
-    google.maps.event.addListener(rc.map, 'click', async (event: google.maps.MapMouseEvent) => {
-      if (['neighborhood', 'start', 'end'].includes(rc.filter)) {
-        rc.distanceWidget.setCenter(event.latLng.toJSON())
-      } else if (rc.filter === 'cities') {
-        const response = await getCityAction({ latitude: event.latLng.lat(), longitude: event.latLng.lng() })
-        rc.polygonManager.addCache(response[0].jcode, response[0].theGeom)
-        addCity(response[0].jcode)
-      }
-    })
+    google.maps.event.addListener(
+      rc.map,
+      'click',
+      async (event: google.maps.MapMouseEvent) => {
+        if (['neighborhood', 'start', 'end'].includes(rc.filter)) {
+          rc.distanceWidget.setCenter(event.latLng.toJSON())
+        } else if (rc.filter === 'cities') {
+          const response = await getCityAction({
+            latitude: event.latLng.lat(),
+            longitude: event.latLng.lng(),
+          })
+          rc.polygonManager.addCache(response[0].jcode, response[0].theGeom)
+          addCity(response[0].jcode)
+        }
+      },
+    )
     google.maps.event.addListener(rc.map, 'tilesloaded', () => {
       google.maps.event.clearListeners(rc.map, 'tilesloaded')
     })
     const { default: PathManager } = await import('../utils/path-manager')
-    rc.pathManager = new PathManager({ map: rc.map, styles: rc.shapeStyles.polylines })
+    rc.pathManager = new PathManager({
+      map: rc.map,
+      styles: rc.shapeStyles.polylines,
+    })
     google.maps.event.addListener(rc.pathManager, 'length_changed', pathChanged)
-    google.maps.event.addListener(rc.pathManager, 'selection_changed', pathChanged)
-    google.maps.event.addListener(rc.pathManager, 'drawfinish', async (path: google.maps.LatLng[]) => {
-      const append: boolean = await new Promise((resolve) => {
-        if (rc.searchPath) {
-          setConfirmInfo({ open: true, resolve })
-        } else {
-          resolve(false)
-        }
-      })
-      setConfirmInfo({ open: false })
-      rc.pathManager.applyPath(path, append)
-    })
+    google.maps.event.addListener(
+      rc.pathManager,
+      'selection_changed',
+      pathChanged,
+    )
+    google.maps.event.addListener(
+      rc.pathManager,
+      'drawfinish',
+      async (path: google.maps.LatLng[]) => {
+        const append: boolean = await new Promise((resolve) => {
+          if (rc.searchPath) {
+            setConfirmInfo({ open: true, resolve })
+          } else {
+            resolve(false)
+          }
+        })
+        setConfirmInfo({ open: false })
+        rc.pathManager.applyPath(path, append)
+      },
+    )
     const { default: PolygonManager } = await import('../utils/polygon-manager')
-    rc.polygonManager = new PolygonManager({ map: rc.map, styles: rc.shapeStyles.polygons, addCity })
-    google.maps.event.addListener(rc.polygonManager, 'polygon_deleted', (id: string) => {
-      const citiesArray = rc.cities.split(/,/)
-      const index = citiesArray.indexOf(id)
-      if (index >= 0) {
-        citiesArray.splice(index, 1)
-        const newCities = citiesArray.join(',')
-        setCities(newCities)
-      }
+    rc.polygonManager = new PolygonManager({
+      map: rc.map,
+      styles: rc.shapeStyles.polygons,
+      addCity,
     })
+    google.maps.event.addListener(
+      rc.polygonManager,
+      'polygon_deleted',
+      (id: string) => {
+        const citiesArray = rc.cities.split(/,/)
+        const index = citiesArray.indexOf(id)
+        if (index >= 0) {
+          citiesArray.splice(index, 1)
+          const newCities = citiesArray.join(',')
+          setCities(newCities)
+        }
+      },
+    )
 
     rc.pathInfoWindow = new google.maps.InfoWindow()
     google.maps.event.addListener(rc.pathInfoWindow, 'domready', () => {
@@ -232,15 +292,13 @@ const Map = (props) => {
         const url = idToShowUrl(item.id, searchParams)
         content = (
           <Button component={Link} href={url} onClick={rc.interceptLink}>
-
-            {item.date}
-            :
-            {' '}
-            {item.title}
+            {item.date}: {item.title}
           </Button>
         )
       }
-      const root = createRoot(document.getElementById('path-info-window-content'))
+      const root = createRoot(
+        document.getElementById('path-info-window-content'),
+      )
       root.render(content)
     })
     google.maps.event.addListener(rc.pathInfoWindow, 'closeclick', () => {
@@ -294,11 +352,13 @@ const Map = (props) => {
     rc.initialized = true
   }
 
-  useEffect(() => { if (rc.initialized) pathChanged() }, [rc.autoGeolocation])
+  useEffect(() => {
+    if (rc.initialized) pathChanged()
+  }, [rc.autoGeolocation])
 
   useEffect(() => {
     let isMounted = true
-    setOptions({ 
+    setOptions({
       key: config.googleApiKey,
       v: config.googleApiVersion,
       libraries: ['geometry', 'marker', 'elevation'],
@@ -308,7 +368,7 @@ const Map = (props) => {
         await initMap()
       }
     })
-    void importLibrary('geocoding').then(() => { })
+    void importLibrary('geocoding').then(() => {})
     // clean up
     return () => {
       isMounted = false
@@ -324,8 +384,7 @@ const Map = (props) => {
   }
   useEffect(() => {
     if (!rc.initialized) return
-    if (searchPath &&
-      searchPath !== rc.pathManager.getEncodedSelection()) {
+    if (searchPath && searchPath !== rc.pathManager.getEncodedSelection()) {
       rc.pathManager.showPath(searchPath, true)
     }
   }, [searchPath, rc.initialized])
@@ -336,8 +395,7 @@ const Map = (props) => {
   }, [rows, rc.initialized])
   useEffect(() => {
     if (!rc.initialized) return
-    if (current &&
-      current.path !== rc.pathManager.getEncodedCurrent()) {
+    if (current && current.path !== rc.pathManager.getEncodedCurrent()) {
       rc.pathManager.showPath(current.path, false, true, current)
     } else if (!current) {
       rc.pathManager.set('current', null)
@@ -387,7 +445,6 @@ const Map = (props) => {
     } else {
       rc.polygonManager.hideAll()
     }
-
   }, [filter, cities, rc.initialized])
 
   return (
@@ -400,7 +457,14 @@ const Map = (props) => {
         }}
         {...props}
       />
-      <a ref={downloadRef} style={{ display: 'none' }} download="walklog.json" href="#dummy">download</a>
+      <a
+        ref={downloadRef}
+        style={{ display: 'none' }}
+        download="walklog.json"
+        href="#dummy"
+      >
+        download
+      </a>
       <input ref={uploadRef} type="file" style={{ display: 'none' }} />
       <ConfirmModal
         {...APPEND_PATH_CONFIRM_INFO}
@@ -411,4 +475,4 @@ const Map = (props) => {
   )
 }
 
-export default Map
+export default GMap

@@ -1,12 +1,12 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import ToolBox from '@/lib/components/tool-box'
-import { MainContextProvider } from '@/lib/utils/main-context'
-import { MapContextProvider } from '@/lib/utils/map-context'
-import { ConfigProvider } from '@/lib/utils/config'
 import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 import { Mock } from 'vitest'
+import ToolBox from '@/lib/components/tool-box'
+import { ConfigProvider } from '@/lib/utils/config'
+import { MainContextProvider } from '@/lib/utils/main-context'
+import { MapContextProvider } from '@/lib/utils/map-context'
 
 // Test configuration
 const TEST_TIMEOUT = 10000
@@ -88,7 +88,9 @@ global.google = {
   maps: {
     ...global.google?.maps,
     importLibrary: vi.fn().mockResolvedValue({}),
-    Geocoder: vi.fn().mockImplementation(function () { return mockGeocoder }),
+    Geocoder: vi.fn().mockImplementation(function () {
+      return mockGeocoder
+    }),
     GeocoderStatus: {
       OK: 'OK',
     } as typeof google.maps.GeocoderStatus,
@@ -107,17 +109,23 @@ beforeEach(() => {
 
 vi.mock('@/lib/utils/map-context', () => ({
   useMapContext: vi.fn().mockImplementation(() => mockMapContext),
-  MapContextProvider: ({ children }) => <div data-testid="map-provider">{children}</div>,
+  MapContextProvider: ({ children }) => (
+    <div data-testid="map-provider">{children}</div>
+  ),
 }))
 
 vi.mock('@/lib/utils/main-context', () => ({
   useMainContext: vi.fn().mockImplementation(() => mockMainContext),
-  MainContextProvider: ({ children }) => <div data-testid="main-provider">{children}</div>,
+  MainContextProvider: ({ children }) => (
+    <div data-testid="main-provider">{children}</div>
+  ),
 }))
 
 vi.mock('@/lib/utils/config', () => ({
   useConfig: vi.fn().mockImplementation(() => mockConfig),
-  ConfigProvider: ({ children }) => <div data-testid="config-provider">{children}</div>,
+  ConfigProvider: ({ children }) => (
+    <div data-testid="config-provider">{children}</div>
+  ),
 }))
 
 vi.mock('use-query-params/dist/useQueryParam', () => ({
@@ -201,16 +209,19 @@ describe('ToolBox Component', () => {
   it('handles location search', async () => {
     // Mock successful geocode response
     mockGeocoder.geocode.mockImplementation((request, callback) => {
-      callback([
-        {
-          geometry: {
-            location: {
-              lat: () => 35.6812,
-              lng: () => 139.7671,
+      callback(
+        [
+          {
+            geometry: {
+              location: {
+                lat: () => 35.6812,
+                lng: () => 139.7671,
+              },
             },
           },
-        },
-      ], 'OK')
+        ],
+        'OK',
+      )
     })
     render(
       <ConfigProvider>
@@ -310,7 +321,7 @@ describe('ToolBox Component', () => {
 
   it('disables download buttons when no path is selected', () => {
     // Mock useQueryParam to return null (no selected path)
-    (useQueryParam as Mock).mockReturnValueOnce([null, vi.fn()])
+    ;(useQueryParam as Mock).mockReturnValueOnce([null, vi.fn()])
 
     render(
       <ConfigProvider>
@@ -324,7 +335,9 @@ describe('ToolBox Component', () => {
 
     // Check that download buttons are disabled
     // Material-UI ListItemButton renders as a div with role="button"
-    const downloadButton = screen.getByText('download').closest('[role="button"]')
+    const downloadButton = screen
+      .getByText('download')
+      .closest('[role="button"]')
     expect(downloadButton).toHaveAttribute('aria-disabled', 'true')
   })
 })

@@ -15,19 +15,15 @@ const callFB = async (isAdmin, uid) => {
   }
 }
 
-program
-  .command('add <uid>')
-  .action(async (uid) => {
-    await callFB(true, uid)
-    process.exit(0)
-  })
+program.command('add <uid>').action(async (uid) => {
+  await callFB(true, uid)
+  process.exit(0)
+})
 
-program
-  .command('rm <uid>')
-  .action(async (uid) => {
-    await callFB(false, uid)
-    process.exit(0)
-  })
+program.command('rm <uid>').action(async (uid) => {
+  await callFB(false, uid)
+  process.exit(0)
+})
 
 program.on('command:*', () => {
   program.outputHelp()

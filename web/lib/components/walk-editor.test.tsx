@@ -1,5 +1,5 @@
+import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
 import WalkEditor from './walk-editor'
 
 const mockUpdateIdToken = vi.fn()
@@ -38,25 +38,30 @@ vi.mock('../utils/config', () => ({
 
 vi.mock('../utils/data-context', () => ({
   useData: () => [
-    { current: { id: '2', date: '2023-01-01', title: 'Test Walk', comment: 'Test comment', draft: true, path: 'test-path' } },
+    {
+      current: {
+        id: '2',
+        date: '2023-01-01',
+        title: 'Test Walk',
+        comment: 'Test comment',
+        draft: true,
+        path: 'test-path',
+      },
+    },
     mockSetData,
   ],
 }))
 
 vi.mock('../utils/map-context', () => ({
-  useMapContext: () => ([
+  useMapContext: () => [
     {
       deleteSelectedPath: mockDeleteSelectedPath,
     },
-  ]),
+  ],
 }))
 
 vi.mock('../utils/main-context', () => ({
-  useMainContext: () => ([
-    {},
-    mockDispatchMain,
-    mockInterceptLink,
-  ]),
+  useMainContext: () => [{}, mockDispatchMain, mockInterceptLink],
 }))
 
 vi.mock('next/navigation', () => ({

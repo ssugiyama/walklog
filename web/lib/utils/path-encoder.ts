@@ -7,7 +7,7 @@ function encodeFloat(f: number): number[] {
   if (n < 0) n = -n - 1
   const ar: number[] = []
   do {
-    const k = n & 0x1F
+    const k = n & 0x1f
     n >>= 5
     ar.push(k)
   } while (n > 0)
@@ -21,23 +21,27 @@ function encodeFloat(f: number): number[] {
 export const encode = (path: Position[]): string => {
   let prevx = 0
   let prevy = 0
-  return path.map((point) => {
-    const ar = encodeFloat(point[1] - prevy).concat(encodeFloat(point[0] - prevx));
-    [prevx, prevy] = point
-    return Buffer.from(ar).toString('ascii')
-  }).join('')
+  return path
+    .map((point) => {
+      const ar = encodeFloat(point[1] - prevy).concat(
+        encodeFloat(point[0] - prevx),
+      )
+      ;[prevx, prevy] = point
+      return Buffer.from(ar).toString('ascii')
+    })
+    .join('')
 }
 
 export const decode = (str: string) => {
   const fs: number[] = []
   const buf = Buffer.from(str, 'ascii')
-  let n = 0; let
-    j = 0
+  let n = 0
+  let j = 0
   for (let i = 0; i < buf.length; i += 1) {
     let k = buf[i] - 63
-    const isLast = ((k & 0x20) === 0)
+    const isLast = (k & 0x20) === 0
     k &= 0x1f
-    n |= (k << (j * 5))
+    n |= k << (j * 5)
     if (isLast) {
       fs.push(((n >> 1) * (1 - 2 * (n & 1)) - (n & 1)) / 100000.0)
       j = 0

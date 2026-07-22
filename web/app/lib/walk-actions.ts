@@ -1,41 +1,57 @@
 'use server'
 
-import { db } from '../../lib/drizzle/db'
-import { walks, areas, coordinatesToWKT } from '../../lib/drizzle/schema'
-import { sql, and, or, inArray, eq, asc, desc, getColumns, SQL } from 'drizzle-orm'
+import { Theme } from '@mui/material'
 import {
+  and,
+  asc,
+  desc,
+  eq,
+  getColumns,
+  inArray,
+  or,
+  SQL,
+  sql,
+} from 'drizzle-orm'
+import { FirebaseError } from 'firebase/app'
+import admin from 'firebase-admin'
+import fs from 'fs/promises'
+import moment from 'moment'
+import { nanoid } from 'nanoid'
+import { cacheTag, revalidateTag } from 'next/cache'
+import { ValueOf } from 'next/dist/shared/lib/constants'
+import { cookies } from 'next/headers'
+import { forbidden, notFound, unauthorized } from 'next/navigation'
+import path from 'path'
+import url from 'url'
+import { decode } from '@/lib/utils/path-encoder'
+import {
+  BaseState,
   CityParams,
   CityT,
-  SearchProps,
-  UserT,
-  BaseState,
-  SearchState,
-  GetItemState,
-  DeleteItemState,
-  UpdateItemState,
   ConfigT,
+  DeleteItemState,
+  GetItemState,
+  SearchProps,
+  SearchState,
   ShapeStyles,
+  UpdateItemState,
+  UserT,
   WalkT,
 } from '@/types'
-import admin from 'firebase-admin'
-import url from 'url'
-import path from 'path'
-import { nanoid } from 'nanoid'
-import { cookies } from 'next/headers'
-import fs from 'fs/promises'
-import { cacheTag } from 'next/cache'
-import { revalidateTag } from 'next/cache'
-import { notFound, unauthorized, forbidden } from 'next/navigation'
-import { Theme } from '@mui/material'
-import { FirebaseError } from 'firebase/app'
-import { ValueOf } from 'next/dist/shared/lib/constants'
+import { db } from '../../lib/drizzle/db'
+import { areas, coordinatesToWKT, walks } from '../../lib/drizzle/schema'
 import {
-  EARTH_RADIUS, SRID, SRID_FOR_SIMILAR_SEARCH,
-  getPoint, decodePath, getPathExtent, getStartPoint, getEndPoint, encodedPath,
+  decodePath,
+  EARTH_RADIUS,
+  encodedPath,
   encodeMultipolygon,
+  getEndPoint,
+  getPathExtent,
+  getPoint,
+  getStartPoint,
+  SRID,
+  SRID_FOR_SIMILAR_SEARCH,
 } from '../../lib/utils/geo-utils'
-import moment from 'moment'
-import { decode } from '@/lib/utils/path-encoder'
 
 type WalkSelectAttributes = typeof walks.$inferSelect & {
   distance?: number
@@ -44,7 +60,10 @@ type WalkSelectAttributes = typeof walks.$inferSelect & {
 type WalkInsertAttributes = typeof walks.$inferInsert
 type AreaAttributes = typeof areas.$inferSelect
 
-const asWalkT = (walk: WalkSelectAttributes, includePath: boolean = false): WalkT => {
+const asWalkT = (
+  walk: WalkSelectAttributes,
+  includePath: boolean = false,
+): WalkT => {
   return {
     id: walk.id,
     date: walk.date ? moment(walk.date).format('YYYY-MM-DD') : null,
@@ -53,7 +72,7 @@ const asWalkT = (walk: WalkSelectAttributes, includePath: boolean = false): Walk
     draft: walk.draft,
     image: walk.image,
     length: walk.length,
-    path: (includePath && walk.path) ? encodedPath(walk.path) : null,
+    path: includePath && walk.path ? encodedPath(walk.path) : null,
     distance: walk.distance,
     uid: walk.uid,
   }
@@ -72,15 +91,22 @@ const loadFirebaseConfig = async () => {
   const content = await fs.readFile(process.env.FIREBASE_CONFIG)
   firebaseConfig = JSON.parse(content.toString()) as admin.AppOptions
   if (admin.apps.length === 0) {
-    admin.initializeApp({ ...firebaseConfig, credential: admin.credential.applicationDefault() })
+    admin.initializeApp({
+      ...firebaseConfig,
+      credential: admin.credential.applicationDefault(),
+    })
   }
 }
 
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
-  const shapeStylesContent = await fs.readFile(process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json')
+  const shapeStylesContent = await fs.readFile(
+    process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json',
+  )
   const shapeStyles = JSON.parse(shapeStylesContent.toString()) as ShapeStyles
-  const themeContent = await fs.readFile(process.env.THEME_JSON ?? './default-theme.json')
+  const themeContent = await fs.readFile(
+    process.env.THEME_JSON ?? './default-theme.json',
+  )
   const theme = JSON.parse(themeContent.toString()) as Theme
   if (!firebaseConfig) await loadFirebaseConfig()
   return {
@@ -104,10 +130,7 @@ const SEARCH_CACHE_TAG = 'searchTag'
 const openUserMode: boolean = !!process.env.OPEN_USER_MODE
 const firebaseStorage: boolean = !!process.env.FIREBASE_STORAGE
 
-type GetUidResponse = [
-  string | null,
-  boolean
-]
+type GetUidResponse = [string | null, boolean]
 
 const getUid = async (state: BaseState): Promise<GetUidResponse> => {
   const cookieStore = await cookies()
@@ -117,8 +140,7 @@ const getUid = async (state: BaseState): Promise<GetUidResponse> => {
     return [null, false]
   }
   try {
-    const claim = await admin.auth()
-      .verifyIdToken(idToken.value)
+    const claim = await admin.auth().verifyIdToken(idToken.value)
     return [claim?.uid, claim?.admin ?? false]
   } catch (error) {
     if ((error as FirebaseError).code === 'auth/id-token-expired') {
@@ -130,10 +152,16 @@ const getUid = async (state: BaseState): Promise<GetUidResponse> => {
   }
 }
 
-export const searchInternalAction = async (props: SearchProps, uid: string): Promise<SearchState> => {
+export const searchInternalAction = async (
+  props: SearchProps,
+  uid: string,
+): Promise<SearchState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
-  const selectColumns = { ...getColumns(walks), distance: sql<number>`0 as distance` }
+  const selectColumns = {
+    ...getColumns(walks),
+    distance: sql<number>`0 as distance`,
+  }
   const state: SearchState = {
     count: 0,
     rows: [],
@@ -151,7 +179,8 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
   }
 
   const where: SQL[] = []
-  const order: ValueOf<typeof orderHash> = orderHash[props.order as keyof typeof orderHash ?? 'newest_first']
+  const order: ValueOf<typeof orderHash> =
+    orderHash[(props.order as keyof typeof orderHash) ?? 'newest_first']
 
   if (props.date) {
     where.push(eq(walks.date, props.date))
@@ -160,10 +189,14 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     where.push(eq(walks.uid, props.user))
   }
   if (props.year) {
-    where.push(sql`EXTRACT(YEAR FROM ${walks.date}) = ${parseInt(props.year, 10)}`)
+    where.push(
+      sql`EXTRACT(YEAR FROM ${walks.date}) = ${parseInt(props.year, 10)}`,
+    )
   }
   if (props.month) {
-    where.push(sql`EXTRACT(MONTH FROM ${walks.date}) = ${parseInt(props.month, 10)}`)
+    where.push(
+      sql`EXTRACT(MONTH FROM ${walks.date}) = ${parseInt(props.month, 10)}`,
+    )
   }
   if (['neighborhood', 'start', 'end'].includes(props.filter)) {
     const c = props.center.split(/,/)
@@ -178,15 +211,15 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     const rt = getPoint(longitude + dlon, latitude + dlat)
     let target
     switch (props.filter) {
-    case 'neighborhood':
-      target = walks.path
-      break
-    case 'start':
-      target = sql`st_startpoint(${walks.path})`
-      break
-    default:
-      target = sql`st_endpoint(${walks.path})`
-      break
+      case 'neighborhood':
+        target = walks.path
+        break
+      case 'start':
+        target = sql`st_startpoint(${walks.path})`
+        break
+      default:
+        target = sql`st_endpoint(${walks.path})`
+        break
     }
     where.push(sql`st_makebox2d(${lb}, ${rt}) && ${target}`)
     where.push(sql`st_distance(${target}, ${center}, true) <= ${radius}`)
@@ -196,8 +229,10 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
       state.rows = []
       return state
     }
-    const cities = (props.cities).split(/,/)
-    where.push(sql`EXISTS (SELECT * FROM areas WHERE jcode IN ${cities} AND path && the_geom AND ST_Intersects(path, the_geom))`)
+    const cities = props.cities.split(/,/)
+    where.push(
+      sql`EXISTS (SELECT * FROM areas WHERE jcode IN ${cities} AND path && the_geom AND ST_Intersects(path, the_geom))`,
+    )
   } else if (props.filter === 'crossing') {
     if (!props.path) {
       state.count = 0
@@ -217,13 +252,18 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     const linestring = decodePath(props.path)
     const extent = getPathExtent(props.path)
     const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
-    const mlat = Math.max(Math.abs(extent.ymax + dlat), Math.abs(extent.ymin - dlat))
+    const mlat = Math.max(
+      Math.abs(extent.ymax + dlat),
+      Math.abs(extent.ymin - dlat),
+    )
     const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
     const lb = getPoint(extent.xmin - dlon, extent.ymin - dlat)
     const rt = getPoint(extent.xmax + dlon, extent.ymax + dlat)
 
-    selectColumns.distance = sql<number>`ST_HausdorffDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`  
-    where.push(sql`ST_Within(${walks.path}, ST_SetSRID(ST_MakeBox2d(${lb}, ${rt}), ${SRID}))`)
+    selectColumns.distance = sql<number>`ST_HausdorffDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`
+    where.push(
+      sql`ST_Within(${walks.path}, ST_SetSRID(ST_MakeBox2d(${lb}, ${rt}), ${SRID}))`,
+    )
     where.push(sql`ST_HausdorffDistance(
       ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
       ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
@@ -251,9 +291,13 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
     const elb = getPoint(ep[0] - dlon, ep[1] - dlat)
     const ert = getPoint(ep[0] + dlon, ep[1] + dlat)
 
-    selectColumns.distance = sql<number>`ST_FrechetDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`  
-    where.push(sql`ST_Within(ST_StartPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${slb}, ${srt}), ${SRID}))`)
-    where.push(sql`ST_Within(ST_EndPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${elb}, ${ert}), ${SRID}))`)
+    selectColumns.distance = sql<number>`ST_FrechetDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`
+    where.push(
+      sql`ST_Within(ST_StartPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${slb}, ${srt}), ${SRID}))`,
+    )
+    where.push(
+      sql`ST_Within(ST_EndPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${elb}, ${ert}), ${SRID}))`,
+    )
     where.push(sql`ST_FrechetDistance(
       ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
       ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
@@ -268,9 +312,15 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
 
   const limit = props.limit ?? 20
   const offset = props.offset ?? 0
-  
+
   const condition = and(...where)
-  const result = await db.select(selectColumns).from(walks).where(condition).orderBy(order).limit(limit).offset(offset)
+  const result = await db
+    .select(selectColumns)
+    .from(walks)
+    .where(condition)
+    .orderBy(order)
+    .limit(limit)
+    .offset(offset)
   const count = await db.$count(walks, condition)
 
   state.count = count
@@ -279,32 +329,50 @@ export const searchInternalAction = async (props: SearchProps, uid: string): Pro
   return state
 }
 
-export const searchAction = async (prevState: SearchState, props: SearchProps, _getUid = getUid, _searchInternalAction = searchInternalAction): Promise<typeof prevState> => {
+export const searchAction = async (
+  prevState: SearchState,
+  props: SearchProps,
+  _getUid = getUid,
+  _searchInternalAction = searchInternalAction,
+): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
-  state.append = (props.offset > 0)
+  state.append = props.offset > 0
 
   const [uid] = await _getUid(state)
   const newState = await _searchInternalAction(props, uid)
   return Object.assign({ ...state }, newState)
 }
 
-export const getItemInternalAction = async (id: number, uid: string): Promise<GetItemState> => {
+export const getItemInternalAction = async (
+  id: number,
+  uid: string,
+): Promise<GetItemState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
   const state: GetItemState = {}
 
-  const walk = await db.select().from(walks).where(eq(walks.id, id)).limit(1).then((rows) => rows[0])
+  const walk = await db
+    .select()
+    .from(walks)
+    .where(eq(walks.id, id))
+    .limit(1)
+    .then((rows) => rows[0])
   if (!walk) {
     return state
   }
 
-  state.current = (!walk.draft || walk.uid === uid) ? asWalkT(walk, true) : null
+  state.current = !walk.draft || walk.uid === uid ? asWalkT(walk, true) : null
   return state
 }
 
-export const getItemAction = async (prevState: GetItemState, id: number, _getUid = getUid, _getItemInternalAction = getItemInternalAction): Promise<GetItemState> => {
+export const getItemAction = async (
+  prevState: GetItemState,
+  id: number,
+  _getUid = getUid,
+  _getItemInternalAction = getItemInternalAction,
+): Promise<GetItemState> => {
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
@@ -325,7 +393,11 @@ const getFilename = (uid: string, date: string, file: File) => {
 
 // Manual validation replaces Zod schema for better error message control
 
-export const updateItemAction = async (prevState: UpdateItemState, formData: FormData, _getUid: typeof getUid = getUid): Promise<typeof prevState> => {
+export const updateItemAction = async (
+  prevState: UpdateItemState,
+  formData: FormData,
+  _getUid: typeof getUid = getUid,
+): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.id = null
   state.serial++
@@ -347,7 +419,8 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
   const image = formData.get('image') as File | null
   const walkPath = formData.get('path') as string
   const draft = formData.get('draft') === 'true' ? true : false
-  const willDeleteImage = formData.get('will_delete_image') === 'true' ? true : false
+  const willDeleteImage =
+    formData.get('will_delete_image') === 'true' ? true : false
 
   // Manual validation to ensure consistent error messages
   const validationErrors = []
@@ -381,7 +454,7 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
   }
 
   const d = new Date(date)
-  const props: Partial<WalkInsertAttributes>  = {
+  const props: Partial<WalkInsertAttributes> = {
     title,
     comment,
     date: d.toISOString(),
@@ -390,7 +463,8 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
   }
   if (walkPath !== '') {
     props.path = decode(walkPath)
-    props.length = sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
+    props.length =
+      sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
   }
   if (willDeleteImage) {
     props.image = null
@@ -404,7 +478,10 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
         const bucket = admin.storage().bucket()
         const blob = bucket.file(filePath)
         await blob.save(buffer) // await を追加
-        props.image = url.resolve('https://storage.googleapis.com', path.join(bucket.name, blob.name))
+        props.image = url.resolve(
+          'https://storage.googleapis.com',
+          path.join(bucket.name, blob.name),
+        )
       } else {
         await fs.writeFile(`public/${filePath}`, buffer)
         props.image = filePath
@@ -417,7 +494,12 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
     }
   }
   if (id) {
-    const walk = await db.select().from(walks).where(eq(walks.id, id)).limit(1).then((rows) => rows[0])
+    const walk = await db
+      .select()
+      .from(walks)
+      .where(eq(walks.id, id))
+      .limit(1)
+      .then((rows) => rows[0])
     if (walk.uid !== uid) {
       forbidden()
     }
@@ -435,7 +517,11 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
     try {
       props.createdAt = sql<string>`now()` as unknown as string
       props.updatedAt = sql<string>`now()` as unknown as string
-      const walk = await db.insert(walks).values(props as WalkInsertAttributes).returning({ id: walks.id }).then((rows) => rows[0])
+      const walk = await db
+        .insert(walks)
+        .values(props as WalkInsertAttributes)
+        .returning({ id: walks.id })
+        .then((rows) => rows[0])
       state.id = walk?.id
     } catch (error) {
       console.error('updateItemAction create error', error)
@@ -448,7 +534,11 @@ export const updateItemAction = async (prevState: UpdateItemState, formData: For
   return state
 }
 
-export const deleteItemAction = async (prevState: DeleteItemState, id: number, _getUid: typeof getUid = getUid): Promise<typeof prevState> => {
+export const deleteItemAction = async (
+  prevState: DeleteItemState,
+  id: number,
+  _getUid: typeof getUid = getUid,
+): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.deleted = false
   state.serial++
@@ -462,7 +552,12 @@ export const deleteItemAction = async (prevState: DeleteItemState, id: number, _
     forbidden()
   }
 
-  const walk = await db.select().from(walks).where(eq(walks.id, id)).limit(1).then((rows) => rows[0])
+  const walk = await db
+    .select()
+    .from(walks)
+    .where(eq(walks.id, id))
+    .limit(1)
+    .then((rows) => rows[0])
   if (!walk) {
     notFound()
   }
@@ -483,7 +578,11 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
   } else {
     where = sql`st_contains(${areas.theGeom}, st_setsrid(st_point(${params.longitude}, ${params.latitude}), ${SRID}))`
   }
-  const result = (await db.select().from(areas).where(where).then((rows) => rows.map((area) => asCityT(area))))
+  const result = await db
+    .select()
+    .from(areas)
+    .where(where)
+    .then((rows) => rows.map((area) => asCityT(area)))
   return result
 }
 
@@ -492,7 +591,7 @@ export const getUsersAction = async (): Promise<UserT[]> => {
   const userResult = await admin.auth().listUsers(1000)
   return userResult.users.map((user) => {
     const { uid, displayName, photoURL } = user
-    const admin: boolean = user.customClaims?.admin as boolean || false
+    const admin: boolean = (user.customClaims?.admin as boolean) || false
     return { uid, displayName, photoURL, admin }
   })
 }

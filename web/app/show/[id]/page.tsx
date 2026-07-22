@@ -1,18 +1,22 @@
+import ItemFetcher from '@/lib/utils/item-fetcher'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
 import ItemBox from '../../../lib/components/item-box'
 import { getItemAction } from '../../lib/walk-actions'
-import ItemFetcher from '@/lib/utils/item-fetcher'
 
 export default function Page() {
   return (
     <>
       <ItemFetcher />
-      <ItemBox /> 
+      <ItemBox />
     </>
   )
 }
 
-export async function generateMetadata({params}: {params: Promise<{ id: string }>}) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const getItemState = {
     error: null,
     idTokenExpired: false,
@@ -26,7 +30,9 @@ export async function generateMetadata({params}: {params: Promise<{ id: string }
   }
   const item = newState.current
   const title = `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`
-  const description = item.comment && (`${item.comment.replace(/[\n\r]/g, '').substring(0, 140)}...`)
+  const description =
+    item.comment &&
+    `${item.comment.replace(/[\n\r]/g, '').substring(0, 140)}...`
   const image = item.image
   return {
     title,
@@ -35,11 +41,13 @@ export async function generateMetadata({params}: {params: Promise<{ id: string }
       title,
       description,
       url: idToShowUrl(item.id),
-      images: image ? [
-        {
-          url: image,
-        },
-      ] : [],
+      images: image
+        ? [
+            {
+              url: image,
+            },
+          ]
+        : [],
     },
   }
 }

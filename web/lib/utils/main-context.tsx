@@ -1,7 +1,17 @@
 'use client'
-import { useReducer, useContext, useCallback, useEffect, createContext, Dispatch } from 'react'
-import { MouseEvent, MouseEventHandler } from 'react'
-const MESSAGE_ON_LEAVE = 'You have unsaved changes. Are you sure you want to leave this page?'
+import {
+  createContext,
+  Dispatch,
+  MouseEvent,
+  MouseEventHandler,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+} from 'react'
+
+const MESSAGE_ON_LEAVE =
+  'You have unsaved changes. Are you sure you want to leave this page?'
 
 type MainState = {
   mode: 'content' | 'map'
@@ -14,7 +24,8 @@ type MainState = {
   isDirty: boolean
 }
 
-type MainAction = { type: 'TOGGLE_VIEW' }
+type MainAction =
+  | { type: 'TOGGLE_VIEW' }
   | { type: 'OPEN_TOOL_BOX' }
   | { type: 'CLOSE_TOOL_BOX' }
   | { type: 'OPEN_SNACKBAR'; payload: string }
@@ -38,34 +49,38 @@ const initialMainState: MainState = {
 
 const mainReducer = (state: MainState, action: MainAction) => {
   switch (action.type) {
-  case 'TOGGLE_VIEW':
-    return { ...state, mode: state.mode === 'map' ? 'content' : 'map' }
-  case 'OPEN_TOOL_BOX':
-    return { ...state, toolBoxOpened: true }
-  case 'CLOSE_TOOL_BOX':
-    return { ...state, toolBoxOpened: false }
-  case 'OPEN_SNACKBAR':
-    return { ...state, message: action.payload }
-  case 'CLOSE_SNACKBAR':
-    return { ...state, message: null }
-  case 'SET_OVERLAY':
-    return { ...state, overlay: action.payload }
-  case 'SET_PANORAMA_INDEX':
-    return { ...state, panoramaIndex: action.payload }
-  case 'SET_PANORAMA_COUNT':
-    return { ...state, panoramaCount: action.payload }
-  case 'SET_AUTO_GEOLOCATION':
-    return { ...state, autoGeolocation: action.payload }
-  case 'SET_IS_DIRTY':
-    return { ...state, isDirty: action.payload }
-  default:
-    return state
+    case 'TOGGLE_VIEW':
+      return { ...state, mode: state.mode === 'map' ? 'content' : 'map' }
+    case 'OPEN_TOOL_BOX':
+      return { ...state, toolBoxOpened: true }
+    case 'CLOSE_TOOL_BOX':
+      return { ...state, toolBoxOpened: false }
+    case 'OPEN_SNACKBAR':
+      return { ...state, message: action.payload }
+    case 'CLOSE_SNACKBAR':
+      return { ...state, message: null }
+    case 'SET_OVERLAY':
+      return { ...state, overlay: action.payload }
+    case 'SET_PANORAMA_INDEX':
+      return { ...state, panoramaIndex: action.payload }
+    case 'SET_PANORAMA_COUNT':
+      return { ...state, panoramaCount: action.payload }
+    case 'SET_AUTO_GEOLOCATION':
+      return { ...state, autoGeolocation: action.payload }
+    case 'SET_IS_DIRTY':
+      return { ...state, isDirty: action.payload }
+    default:
+      return state
   }
 }
 
 const MainContext = createContext({})
 
-export function MainContextProvider({ children }: { children: React.ReactNode }) {
+export function MainContextProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [mainState, dispatchMain] = useReducer(mainReducer, initialMainState)
 
   useEffect(() => {
@@ -80,20 +95,22 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-  }, [mainState.isDirty]) 
-
-  const interceptLink = useCallback((ev: MouseEvent<HTMLButtonElement|HTMLAnchorElement|HTMLLIElement>) => {
-    if (mainState.isDirty) {
-      const confirmed = window.confirm(MESSAGE_ON_LEAVE)
-      if (confirmed) {
-        dispatchMain({ type: 'SET_IS_DIRTY', payload: false }) // Reset dirty state
-      }
-      else {
-        ev.preventDefault()
-        ev.stopPropagation()
-      }
-    }
   }, [mainState.isDirty])
+
+  const interceptLink = useCallback(
+    (ev: MouseEvent<HTMLButtonElement | HTMLAnchorElement | HTMLLIElement>) => {
+      if (mainState.isDirty) {
+        const confirmed = window.confirm(MESSAGE_ON_LEAVE)
+        if (confirmed) {
+          dispatchMain({ type: 'SET_IS_DIRTY', payload: false }) // Reset dirty state
+        } else {
+          ev.preventDefault()
+          ev.stopPropagation()
+        }
+      }
+    },
+    [mainState.isDirty],
+  )
 
   return (
     <MainContext.Provider value={[mainState, dispatchMain, interceptLink]}>
@@ -103,7 +120,13 @@ export function MainContextProvider({ children }: { children: React.ReactNode })
 }
 
 export function useMainContext() {
-  return useContext<[MainState, Dispatch<MainAction>, MouseEventHandler<HTMLButtonElement|HTMLAnchorElement|HTMLLIElement>]>(MainContext)
+  return useContext<
+    [
+      MainState,
+      Dispatch<MainAction>,
+      MouseEventHandler<HTMLButtonElement | HTMLAnchorElement | HTMLLIElement>,
+    ]
+  >(MainContext)
 }
 
 export default MainContext
