@@ -60,7 +60,7 @@
     "eslint": "9.39.2",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^17.5.0",
+    "globals": "^17.7.0",
     "jsdom": "^29.1.1",
     "postgis": "link:@electric-sql/pglite/postgis",
     "typescript": "^5.8.3",
