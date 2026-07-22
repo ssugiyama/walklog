@@ -23,12 +23,11 @@ jobs:
         run_install: true
     - name: run typecheck
       run: pnpm typecheck
-    - name: run eslint
+    - name: run lint & formatter check
       run: pnpm lint
     - name: run test
       run: pnpm test
     - name: Upload coverage report
-      if: always()
       uses: davelosert/vitest-coverage-report-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
