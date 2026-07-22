@@ -10,7 +10,7 @@
     "migrate": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.0",
+    "@base-ui/react": "^1.6.0",
     "@emotion/cache": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@googlemaps/js-api-loader": "^2.0.2",
