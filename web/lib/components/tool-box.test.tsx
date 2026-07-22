@@ -66,7 +66,7 @@ const mockMainContext = [
 ]
 
 const mockConfig = {
-  appVersion: '1.0.0',
+  appVersion: 'v1.0.0',
   googleApiKey: 'mock_api_key',
   mapTypeIds: 'roadmap,hybrid',
 }
