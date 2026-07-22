@@ -47,7 +47,7 @@ const ToolBox = (props) => {
   const geocoder = useRef<google.maps.Geocoder>(null)
   const length: number = (pathManager?.get('length') as number) ?? 0
   const config = useConfig()
-  const appVersion = `v${config.appVersion}`
+  const appVersion = config.appVersion
   const { map, marker, addPoint, downloadPath, uploadPath, clearPaths } =
         mapState
   const [confirmInfo, setConfirmInfo] = useState<ConfirmInfo>({
