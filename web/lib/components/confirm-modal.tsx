@@ -1,17 +1,17 @@
-import React from 'react'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import React from 'react'
 
 export type ConfirmInfo = {
   open: boolean
   resolve?: (value: boolean) => void
 }
 
-type ConfirmModalProps = ConfirmInfo &{
+type ConfirmModalProps = ConfirmInfo & {
   title: string
   text: string
   actions?: {
@@ -21,31 +21,25 @@ type ConfirmModalProps = ConfirmInfo &{
 }
 
 const ConfirmModal = (props: ConfirmModalProps) => {
-  const {
-    open, title, resolve, text, actions,
-  } = props
+  const { open, title, resolve, text, actions } = props
 
   return (
-    <Dialog
-      open={open}
-    >
+    <Dialog open={open}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{text}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        {
-          actions ?
-            actions.map((action) => (
+        {actions
+          ? actions.map((action) => (
               <Button
                 key={action.value.toString()}
-                onClick={() => resolve &&resolve(action.value)}
+                onClick={() => resolve && resolve(action.value)}
               >
                 {action.label}
               </Button>
-            )) :
-            null
-        }
+            ))
+          : null}
       </DialogActions>
     </Dialog>
   )

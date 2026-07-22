@@ -1,9 +1,9 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Main from '@/lib/components/main'
-import MainContext from '@/lib/utils/main-context'
-import { DataProvider, useData } from '@/lib/utils/data-context'
 import { Mock } from 'vitest'
+import Main from '@/lib/components/main'
+import { DataProvider, useData } from '@/lib/utils/data-context'
+import MainContext from '@/lib/utils/main-context'
 
 const defaultMainState = {
   mode: 'map',
@@ -42,19 +42,27 @@ vi.mock('@/lib/components/bottom-bar', () => ({
 }))
 
 vi.mock('@/lib/utils/data-context', () => ({
-  DataProvider: ({ children }) => <div data-testid="data-provider">{children}</div>,
+  DataProvider: ({ children }) => (
+    <div data-testid="data-provider">{children}</div>
+  ),
   useData: vi.fn(() => defaultData),
 }))
 
 vi.mock('@/lib/utils/map-context', () => ({
-  MapContextProvider: ({ children }) => <div data-testid="map-context-provider">{children}</div>,
+  MapContextProvider: ({ children }) => (
+    <div data-testid="map-context-provider">{children}</div>
+  ),
 }))
 
 vi.mock('use-query-params', () => ({
-  QueryParamProvider: ({ children }) => <div data-testid="query-param-provider">{children}</div>,
+  QueryParamProvider: ({ children }) => (
+    <div data-testid="query-param-provider">{children}</div>
+  ),
 }))
 
-vi.mock('next-query-params/app', () => ({ default: ({ children }) => children }))
+vi.mock('next-query-params/app', () => ({
+  default: ({ children }) => children,
+}))
 
 vi.mock('@/lib/utils/config', () => ({
   useConfig: vi.fn(() => ({
@@ -79,10 +87,13 @@ Object.defineProperty(navigator, 'share', {
 })
 
 // Wrapper for the component under test
-function renderWithProviders(ui, { mainState = defaultMainState, data = defaultData } = {}) {
-  const dispatchMain = vi.fn();
+function renderWithProviders(
+  ui,
+  { mainState = defaultMainState, data = defaultData } = {},
+) {
+  const dispatchMain = vi.fn()
 
-  (useData as Mock).mockReturnValue([data])
+  ;(useData as Mock).mockReturnValue([data])
   return {
     ...render(
       <DataProvider>

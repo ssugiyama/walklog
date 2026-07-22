@@ -1,9 +1,9 @@
 'use client'
-import { useState, useContext, Dispatch } from 'react'
-import { createContext } from 'react'
+import { createContext, Dispatch, useContext, useState } from 'react'
 import type PathManager from '@/lib/utils/path-manager'
-import PolygonManager from './polygon-manager'
 import { WalkT } from '@/types'
+import PolygonManager from './polygon-manager'
+
 type MapState = {
   map: google.maps.Map | null
   pathManager: PathManager | null
@@ -14,7 +14,7 @@ type MapState = {
   marker: google.maps.marker.AdvancedMarkerElement | null
   addPoint: (lat: number, lng: number, append: boolean) => void
   uploadPath: () => void
-  downloadPath: () => void,
+  downloadPath: () => void
   clearPaths: (retainTemporaryAndSelection: boolean) => void
   addPaths: (items: WalkT[]) => void
   deleteSelectedPath: () => void
@@ -28,17 +28,21 @@ const initialState: MapState = {
   pathInfoWindow: null,
   distanceWidget: null,
   marker: null,
-  addPoint: () => { },
-  uploadPath: () => { },
-  downloadPath: () => { },
-  clearPaths: () => { },
-  addPaths: () => { },
-  deleteSelectedPath: () => { },
+  addPoint: () => {},
+  uploadPath: () => {},
+  downloadPath: () => {},
+  clearPaths: () => {},
+  addPaths: () => {},
+  deleteSelectedPath: () => {},
 }
 
 const MapContext = createContext({})
 
-export function MapContextProvider({ children }: { children: React.ReactNode }) {
+export function MapContextProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [state, setState] = useState<MapState>(initialState)
   return (
     <MapContext.Provider value={[state, setState]}>

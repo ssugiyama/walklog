@@ -1,14 +1,13 @@
+import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import ItemBox from './item-box'
-import { useData } from '../utils/data-context'
-import { useUserContext } from '../utils/user-context'
-import { useSearchParams } from 'next/navigation'
-import { useConfig } from '../utils/config'
-import { useRouter } from 'next/navigation'
-import { useMainContext } from '../utils/main-context'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Mock } from 'vitest'
+import { useConfig } from '../utils/config'
+import { useData } from '../utils/data-context'
+import { useMainContext } from '../utils/main-context'
+import { useUserContext } from '../utils/user-context'
+import ItemBox from './item-box'
 
 vi.mock('@/app/lib/walk-actions', () => ({
   deleteItemAction: vi.fn(),
@@ -57,8 +56,8 @@ describe('ItemBox Component', () => {
   const mockRouterPush = vi.fn()
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    (useData as Mock).mockReturnValue([
+    vi.clearAllMocks()
+    ;(useData as Mock).mockReturnValue([
       {
         current: null,
         isPending: false,
@@ -66,44 +65,40 @@ describe('ItemBox Component', () => {
         nextId: null,
         prevId: null,
       },
-    ]);
-    (useUserContext as Mock).mockReturnValue({
+    ])
+    ;(useUserContext as Mock).mockReturnValue({
       users: [],
       currentUser: null,
-    });
-    (useMainContext as Mock).mockReturnValue([
+    })
+    ;(useMainContext as Mock).mockReturnValue([
       {
         overlay: false,
         PanoramaIndex: 0,
         paroramaCount: 100,
       },
       vi.fn(), // setOverlay
-    ]);
-    (useSearchParams as Mock).mockReturnValue(new URLSearchParams());
-    (useConfig as Mock).mockReturnValue({});
-    (useRouter as Mock).mockReturnValue({ push: mockRouterPush })
+    ])
+    ;(useSearchParams as Mock).mockReturnValue(new URLSearchParams())
+    ;(useConfig as Mock).mockReturnValue({})
+    ;(useRouter as Mock).mockReturnValue({ push: mockRouterPush })
   })
 
   it('renders loading state when data is pending', () => {
-    (useData as Mock).mockReturnValue([
-      { isPending: true },
-    ])
+    ;(useData as Mock).mockReturnValue([{ isPending: true }])
 
-    const { container} = render(<ItemBox />)
+    const { container } = render(<ItemBox />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders error state when there is an error', () => {
-    (useData as Mock).mockReturnValue([
-      { error: 'Test error' },
-    ])
+    ;(useData as Mock).mockReturnValue([{ error: 'Test error' }])
 
-    const { container} = render(<ItemBox />)
+    const { container } = render(<ItemBox />)
     expect(container.firstChild).toBeNull()
   })
 
   it('renders item details when data is available', () => {
-    (useData as Mock).mockReturnValue([
+    ;(useData as Mock).mockReturnValue([
       {
         current: {
           date: '2023-01-01',
@@ -116,28 +111,37 @@ describe('ItemBox Component', () => {
         isPending: false,
         error: null,
       },
-    ]);
-    (useUserContext as Mock).mockReturnValue({
-      users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
+    ])
+    ;(useUserContext as Mock).mockReturnValue({
+      users: [
+        { uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' },
+      ],
       currentUser: { uid: 'user1' },
     })
 
     render(<ItemBox />)
-    expect(screen.getByText('2023-01-01 : Test Walk (5.5 km)')).toBeInTheDocument()
+    expect(
+      screen.getByText('2023-01-01 : Test Walk (5.5 km)'),
+    ).toBeInTheDocument()
     expect(screen.getByText('Test User')).toBeInTheDocument()
-    expect(screen.getByTestId('item-image')).toHaveAttribute('src', 'test-image.jpg')
+    expect(screen.getByTestId('item-image')).toHaveAttribute(
+      'src',
+      'test-image.jpg',
+    )
   })
 
   it('calls handleEdit when edit button is clicked', () => {
-    (useData as Mock).mockReturnValue([
+    ;(useData as Mock).mockReturnValue([
       {
         current: { uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
-    ]);
-    (useUserContext as Mock).mockReturnValue({
-      users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
+    ])
+    ;(useUserContext as Mock).mockReturnValue({
+      users: [
+        { uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' },
+      ],
       currentUser: { uid: 'user1' },
     })
 
@@ -152,16 +156,18 @@ describe('ItemBox Component', () => {
   })
 
   it('calls handleDelete when delete button is clicked', () => {
-    window.confirm = vi.fn(() => true);
-    (useData as Mock).mockReturnValue([
+    window.confirm = vi.fn(() => true)
+    ;(useData as Mock).mockReturnValue([
       {
         current: { id: 'item1', uid: 'user1', length: 9.9 },
         isPending: false,
         error: null,
       },
-    ]);
-    (useUserContext as Mock).mockReturnValue({
-      users: [{ uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' }],
+    ])
+    ;(useUserContext as Mock).mockReturnValue({
+      users: [
+        { uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' },
+      ],
       currentUser: { uid: 'user1' },
     })
 

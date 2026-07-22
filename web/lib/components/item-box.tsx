@@ -1,31 +1,36 @@
 'use client'
-import { DeleteItemState, UserT } from '@/types'
-import React, { useState, useCallback, useEffect, useTransition, useActionState } from 'react'
-import Link from 'next/link'
-import ReactMarkdown from 'react-markdown'
-import Paper from '@mui/material/Paper'
-import { IconButton } from '@mui/material'
-import Fab from '@mui/material/Fab'
-import NavigationArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import NavigationArrowBackIcon from '@mui/icons-material/ArrowBack'
-import ListIcon from '@mui/icons-material/List'
-import EditIcon from '@mui/icons-material/Edit'
+import NavigationArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import DeleteIcon from '@mui/icons-material/Delete'
-import Typography from '@mui/material/Typography'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
+import EditIcon from '@mui/icons-material/Edit'
+import ListIcon from '@mui/icons-material/List'
+import { IconButton } from '@mui/material'
+import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
-import Avatar from '@mui/material/Avatar'
+import Fab from '@mui/material/Fab'
 import NoSsr from '@mui/material/NoSsr'
-import PanoramaBox from './panorama-box'
-import ElevationBox from './elevation-box'
-
-import { idToEditUrl, idToShowUrl } from '../utils/meta-utils'
-import { useData } from '../utils/data-context'
+import Paper from '@mui/material/Paper'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import Typography from '@mui/material/Typography'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useUserContext } from '../utils/user-context'
+import React, {
+  useActionState,
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react'
+import ReactMarkdown from 'react-markdown'
 import { deleteItemAction } from '@/app/lib/walk-actions'
+import { DeleteItemState, UserT } from '@/types'
+import { useData } from '../utils/data-context'
+import { idToEditUrl, idToShowUrl } from '../utils/meta-utils'
+import { useUserContext } from '../utils/user-context'
+import ElevationBox from './elevation-box'
+import PanoramaBox from './panorama-box'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -45,9 +50,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ padding: 2, overflow: 'auto' }}>
-          {children}
-        </Box>
+        <Box sx={{ padding: 2, overflow: 'auto' }}>{children}</Box>
       )}
     </div>
   )
@@ -63,7 +66,7 @@ const ItemBox = () => {
   const tabChangeCB = useCallback((e: React.SyntheticEvent, value: number) => {
     setTabValue(value)
   }, [])
-  
+
   const initialDeleteState: DeleteItemState = {
     deleted: false,
     idTokenExpired: false,
@@ -71,7 +74,10 @@ const ItemBox = () => {
   }
   const { updateIdToken } = useUserContext()
   const [isPending, startTransition] = useTransition()
-  const [deleteState, dispatchDelete] = useActionState(deleteItemAction, initialDeleteState)
+  const [deleteState, dispatchDelete] = useActionState(
+    deleteItemAction,
+    initialDeleteState,
+  )
   const handleDelete = useCallback(() => {
     startTransition(() => {
       if (window.confirm('Are you sure to delete?')) {
@@ -81,7 +87,9 @@ const ItemBox = () => {
   }, [item?.id])
 
   const itemWillRender = !data.isPending && item
-  const title = itemWillRender ? `${item.date} : ${item.title} (${item.length.toFixed(1)} km)` : ''
+  const title = itemWillRender
+    ? `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`
+    : ''
   const image = item?.image
   const dataUser = users.find((u: UserT) => u.uid === item?.uid) ?? null
   const upUrl = `/?${searchParams.toString()}`
@@ -116,81 +124,125 @@ const ItemBox = () => {
     display: { xs: 'inherit', sm: 'block' },
   }
 
-  return itemWillRender && 
-    <Box data-testid="ItemBox">
-      <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
-        <Fab sx={{ float: 'left', marginLeft: 1, marginTop: 1 }} size="small" color="primary" component={Link} href={upUrl}><ListIcon /></Fab>
-        <IconButton nativeButton={false} disabled={!prevUrl} component={Link} href={prevUrl ?? ''} size="large"><NavigationArrowBackIcon /></IconButton>
-        <IconButton nativeButton={false} disabled={!nextUrl} component={Link} href={nextUrl ?? ''} size="large"><NavigationArrowForwardIcon /></IconButton>
-        {
-          currentUser && item.uid && currentUser.uid === item.uid ? (
-            <IconButton nativeButton={false} size="large" data-testid="edit-button" component={Link} href={idToEditUrl(item?.id, searchParams)}><EditIcon /></IconButton>
-          ) : null
-        }
-        {
-          currentUser && item.uid && currentUser.uid === item.uid ? (<IconButton nativeButton={true} disabled={isPending} onClick={handleDelete} size="large" data-testid="delete-button"><DeleteIcon /></IconButton>) : null
-        }
-        <Typography variant="h6" sx={{ fontSize: '100%' }}>{title ?? 'not found'}</Typography>
-        <Box sx={{ textAlign: 'right' }}>
-          {
-            draft ?
-              <Chip label="draft" color="warning" /> : dataUser ?
-                (
-                  <Chip
-                    avatar={(
-                      <Avatar
-                        alt={dataUser.displayName}
-                        src={dataUser.photoURL}
-                      />
-                    )}
-                    label={dataUser.displayName}
-                    variant="outlined"
-                  />
-                ) : null
-          }
-        </Box>
-      </Paper>
-      <Paper>
-        <Tabs
-          value={tabValue}
-          onChange={tabChangeCB}
-          sx={{ margin: '4px 0' }}
-          textColor="secondary"
-          variant="fullWidth"
-        >
-          <Tab label="Comment" sx={{ textTransform: 'none' }} />
-          <Tab label="Elevation" sx={{ textTransform: 'none' }} />
-          <Tab label="StreetView" sx={{ textTransform: 'none' }} />
-        </Tabs>
-        <TabPanel value={tabValue} index={0}>
-          {image &&
-            <Box sx={sxImageBox} component="img" src={image} data-testid="item-image" />}
-          <Typography
-            variant="body2"
-            component="div"
-            sx={{
-              textIndent: '1.2em',
-              lineHeight: '1.65',
-              letterSpacing: '.1em',
-              textAlign: 'justify',
-              '& a': {
-                color: 'inherit',
-              },
-            }}
+  return (
+    itemWillRender && (
+      <Box data-testid="ItemBox">
+        <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
+          <Fab
+            sx={{ float: 'left', marginLeft: 1, marginTop: 1 }}
+            size="small"
+            color="primary"
+            component={Link}
+            href={upUrl}
           >
-            <ReactMarkdown>{item?.comment ?? ''}</ReactMarkdown>
+            <ListIcon />
+          </Fab>
+          <IconButton
+            nativeButton={false}
+            disabled={!prevUrl}
+            component={Link}
+            href={prevUrl ?? ''}
+            size="large"
+          >
+            <NavigationArrowBackIcon />
+          </IconButton>
+          <IconButton
+            nativeButton={false}
+            disabled={!nextUrl}
+            component={Link}
+            href={nextUrl ?? ''}
+            size="large"
+          >
+            <NavigationArrowForwardIcon />
+          </IconButton>
+          {currentUser && item.uid && currentUser.uid === item.uid ? (
+            <IconButton
+              nativeButton={false}
+              size="large"
+              data-testid="edit-button"
+              component={Link}
+              href={idToEditUrl(item?.id, searchParams)}
+            >
+              <EditIcon />
+            </IconButton>
+          ) : null}
+          {currentUser && item.uid && currentUser.uid === item.uid ? (
+            <IconButton
+              nativeButton={true}
+              disabled={isPending}
+              onClick={handleDelete}
+              size="large"
+              data-testid="delete-button"
+            >
+              <DeleteIcon />
+            </IconButton>
+          ) : null}
+          <Typography variant="h6" sx={{ fontSize: '100%' }}>
+            {title ?? 'not found'}
           </Typography>
-        </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <NoSsr>
-            <ElevationBox />
-          </NoSsr>
-        </TabPanel>
-        <TabPanel value={tabValue} index={2}>
-          <PanoramaBox />
-        </TabPanel>
-      </Paper>
-    </Box>
+          <Box sx={{ textAlign: 'right' }}>
+            {draft ? (
+              <Chip label="draft" color="warning" />
+            ) : dataUser ? (
+              <Chip
+                avatar={
+                  <Avatar alt={dataUser.displayName} src={dataUser.photoURL} />
+                }
+                label={dataUser.displayName}
+                variant="outlined"
+              />
+            ) : null}
+          </Box>
+        </Paper>
+        <Paper>
+          <Tabs
+            value={tabValue}
+            onChange={tabChangeCB}
+            sx={{ margin: '4px 0' }}
+            textColor="secondary"
+            variant="fullWidth"
+          >
+            <Tab label="Comment" sx={{ textTransform: 'none' }} />
+            <Tab label="Elevation" sx={{ textTransform: 'none' }} />
+            <Tab label="StreetView" sx={{ textTransform: 'none' }} />
+          </Tabs>
+          <TabPanel value={tabValue} index={0}>
+            {image && (
+              <Box
+                sx={sxImageBox}
+                component="img"
+                src={image}
+                data-testid="item-image"
+              />
+            )}
+            <Typography
+              variant="body2"
+              component="div"
+              sx={{
+                textIndent: '1.2em',
+                lineHeight: '1.65',
+                letterSpacing: '.1em',
+                textAlign: 'justify',
+                '& a': {
+                  color: 'inherit',
+                },
+              }}
+            >
+              <ReactMarkdown>{item?.comment ?? ''}</ReactMarkdown>
+            </Typography>
+          </TabPanel>
+          <TabPanel value={tabValue} index={1}>
+            <NoSsr>
+              <ElevationBox />
+            </NoSsr>
+          </TabPanel>
+          <TabPanel value={tabValue} index={2}>
+            <PanoramaBox />
+          </TabPanel>
+        </Paper>
+      </Box>
+    )
+  )
 }
 
 export default ItemBox

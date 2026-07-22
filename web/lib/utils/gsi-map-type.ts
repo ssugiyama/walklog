@@ -8,12 +8,16 @@ const createGsiMapType = (id: string, map: google.maps.Map) => {
     tileSize: new google.maps.Size(256, 256),
     minZoom: zoomMin,
     maxZoom: zoomMax,
-    getTile: (tileCoord: google.maps.Point, zoom: number, ownerDocument: Document) => {
+    getTile: (
+      tileCoord: google.maps.Point,
+      zoom: number,
+      ownerDocument: Document,
+    ) => {
       const img = ownerDocument.createElement('img')
       img.id = 'gsi-map-layer-image'
       img.style.width = '256px'
       img.style.height = '256px'
-      const x = (tileCoord.x % (2 ** zoom)).toString()
+      const x = (tileCoord.x % 2 ** zoom).toString()
       const y = tileCoord.y.toString()
       img.src = `https://cyberjapandata.gsi.go.jp/xyz/${tileType}/${zoom}/${x}/${y}.${tileExtension}`
       return img
@@ -21,7 +25,8 @@ const createGsiMapType = (id: string, map: google.maps.Map) => {
   }
   map.mapTypes.set(id, options)
   const gsiLogo = document.createElement('div')
-  gsiLogo.innerHTML = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" >地理院タイル</a>'
+  gsiLogo.innerHTML =
+    '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" >地理院タイル</a>'
   gsiLogo.style.display = 'none'
   google.maps.event.addListener(map, 'maptypeid_changed', () => {
     const currentMapTypeID = map.getMapTypeId()

@@ -1,9 +1,11 @@
-import { decode, encode } from './path-encoder'
-import wkx from 'wkx'
 import { Position } from 'geojson'
+import wkx from 'wkx'
+import { decode, encode } from './path-encoder'
 export const EARTH_RADIUS = 6370986
 export const SRID = process.env.SRID ?? 4326
-export const SRID_FOR_SIMILAR_SEARCH = Number(process.env.SRID_FOR_SIMILAR_SEARCH)
+export const SRID_FOR_SIMILAR_SEARCH = Number(
+  process.env.SRID_FOR_SIMILAR_SEARCH,
+)
 
 type Extent = {
   xmax?: number
@@ -17,7 +19,11 @@ export const getPoint = (x: number, y: number): string => {
 }
 
 export const decodePath = (path: string): string => {
-  const json =  { type: 'LineString', coordinates: decode(path), crs: { type: 'name', properties: { name: `EPSG:${SRID}` } } }
+  const json = {
+    type: 'LineString',
+    coordinates: decode(path),
+    crs: { type: 'name', properties: { name: `EPSG:${SRID}` } },
+  }
   return wkx.Geometry.parseGeoJSON(json).toEwkt()
 }
 
@@ -55,14 +61,16 @@ export const calcPathLength = (path: Position[]): number => {
   for (let i = 1; i < path.length; i += 1) {
     const [x1, y1] = path[i - 1]
     const [x2, y2] = path[i]
-    const dx = (x2 - x1) * Math.PI / 180
-    const dy = (y2 - y1) * Math.PI / 180
-  
-    const a = 
-      Math.sin(dy/2) * Math.sin(dy/2) +
-      Math.cos(y1 * Math.PI / 180) * Math.cos(y2 * Math.PI / 180) * 
-      Math.sin(dx/2) * Math.sin(dx/2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    const dx = ((x2 - x1) * Math.PI) / 180
+    const dy = ((y2 - y1) * Math.PI) / 180
+
+    const a =
+      Math.sin(dy / 2) * Math.sin(dy / 2) +
+      Math.cos((y1 * Math.PI) / 180) *
+        Math.cos((y2 * Math.PI) / 180) *
+        Math.sin(dx / 2) *
+        Math.sin(dx / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     const distance = EARTH_RADIUS * c
     length += distance
   }

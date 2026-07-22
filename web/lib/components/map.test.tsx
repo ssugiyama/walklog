@@ -1,13 +1,13 @@
-import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
 import '@testing-library/jest-dom'
-import Map from './map'
-import { useMainContext } from '../utils/main-context'
-import { useMapContext } from '../utils/map-context'
-import { useConfig } from '../utils/config'
-import { useData } from '../utils/data-context'
 import { initialize } from '@googlemaps/jest-mocks'
 import { Mock } from 'vitest'
+import { useConfig } from '../utils/config'
+import { useData } from '../utils/data-context'
+import { useMainContext } from '../utils/main-context'
+import { useMapContext } from '../utils/map-context'
+import GMap from './map'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -26,14 +26,12 @@ vi.mock('../utils/data-context', () => ({
 }))
 
 vi.mock('@/app/lib/walk-actions', () => ({
-  getCityAction: vi.fn().mockReturnValue(
-    [
-      {
-        jcode: '123',
-        theGeom: vi.fn(),
-      },
-    ],
-  ),
+  getCityAction: vi.fn().mockReturnValue([
+    {
+      jcode: '123',
+      theGeom: vi.fn(),
+    },
+  ]),
 }))
 
 vi.mock('use-query-params', () => ({
@@ -44,7 +42,9 @@ vi.mock('use-query-params', () => ({
 }))
 
 vi.mock('next/navigation', () => ({
-  useSearchParams: vi.fn(() => new URLSearchParams({ filter: 'cities', cities: '123' })),
+  useSearchParams: vi.fn(
+    () => new URLSearchParams({ filter: 'cities', cities: '123' }),
+  ),
   usePathname: vi.fn(() => '/show/1'),
   useRouter: vi.fn(() => ({
     push: vi.fn(),
@@ -69,42 +69,48 @@ vi.mock('terra-draw', () => {
         clear: vi.fn(),
       }
     }),
-    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () { return {} }),
-    TerraDrawLineStringMode: vi.fn().mockImplementation(function () { return {} }),
+    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () {
+      return {}
+    }),
+    TerraDrawLineStringMode: vi.fn().mockImplementation(function () {
+      return {}
+    }),
   }
 })
 
 vi.mock('terra-draw-google-maps-adapter', () => {
   return {
-    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () { return {} }),
+    TerraDrawGoogleMapsAdapter: vi.fn().mockImplementation(function () {
+      return {}
+    }),
   }
 })
 
 describe('Map Component', () => {
   const mockSetState = vi.fn()
   beforeEach(() => {
-    initialize();
-    (useMainContext as Mock).mockReturnValue([
+    initialize()
+    ;(useMainContext as Mock).mockReturnValue([
       { autoGeolocation: false, mode: 'default' },
       vi.fn(),
-    ]);
+    ])
 
-    (useMapContext as Mock).mockReturnValue([
-      {},
-      mockSetState,
-    ]);
+    ;(useMapContext as Mock).mockReturnValue([{}, mockSetState])
 
-    (useConfig as Mock).mockReturnValue({
+    ;(useConfig as Mock).mockReturnValue({
       defaultCenter: '35.6895,139.6917',
       defaultRadius: 1000,
-      shapeStyles: { polylines: { new: {} }, polygons: {}, circle: {}, marker: {} },
+      shapeStyles: {
+        polylines: { new: {} },
+        polygons: {},
+        circle: {},
+        marker: {},
+      },
       mapTypeIds: 'roadmap',
       mapId: 'test-map-id',
-    });
+    })
 
-    (useData as Mock).mockReturnValue([
-      { rows: [], current: null },
-    ])
+    ;(useData as Mock).mockReturnValue([{ rows: [], current: null }])
     google.maps.MapTypeControlStyle = {
       DEFAULT: 0,
       DROPDOWN_MENU: 1,
@@ -113,7 +119,7 @@ describe('Map Component', () => {
   })
 
   it('renders without crashing and initializes map context state', async () => {
-    render(<Map />)
+    render(<GMap />)
     expect(screen.getByTestId('map')).toBeInTheDocument()
     await waitFor(() => {
       expect(mockSetState).toHaveBeenCalled()

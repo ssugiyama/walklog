@@ -1,5 +1,5 @@
-import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
 import SearchForm from './search-form'
 
 vi.mock('../utils/config', () => ({
@@ -43,17 +43,23 @@ vi.mock('use-query-params', () => ({
 
 describe('SearchForm', () => {
   const expandAccordion = async () => {
-    const accordionButton = screen.getByRole('button', { name: /filter & sort/i })
+    const accordionButton = screen.getByRole('button', {
+      name: /filter & sort/i,
+    })
     fireEvent.click(accordionButton)
     // Wait for accordion to expand
     await waitFor(() => {
-      expect(screen.getByRole('combobox', { name: /filter/i })).toBeInTheDocument()
+      expect(
+        screen.getByRole('combobox', { name: /filter/i }),
+      ).toBeInTheDocument()
     })
   }
 
   it('renders the accordion with filter & sort label', () => {
     render(<SearchForm />)
-    expect(screen.getByRole('button', { name: /filter & sort/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /filter & sort/i }),
+    ).toBeInTheDocument()
   })
 
   it('renders the filter dropdown with default option when expanded', async () => {
@@ -111,8 +117,12 @@ describe('SearchForm', () => {
     expect(orderDropdown).toBeInTheDocument()
     fireEvent.mouseDown(orderDropdown)
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: /newest first/i })).toBeInTheDocument()
-      expect(screen.getByRole('option', { name: /oldest first/i })).toBeInTheDocument()
+      expect(
+        screen.getByRole('option', { name: /newest first/i }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('option', { name: /oldest first/i }),
+      ).toBeInTheDocument()
     })
   })
 

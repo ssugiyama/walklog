@@ -75,12 +75,12 @@ export type UserT = {
   admin?: boolean
 }
 
-export type DataT = Omit<SearchState & GetItemState, 'serial'> &{
+export type DataT = Omit<SearchState & GetItemState, 'serial'> & {
   isPending?: boolean
   count?: number
   offset?: number
-  showDistance?: false,
-  index?: number,
+  showDistance?: false
+  index?: number
   nextId?: number | null
   prevId?: number | null
   params?: string

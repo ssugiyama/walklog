@@ -1,36 +1,36 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
-import Draw from '@mui/icons-material/Draw'
 import NavigationRefresh from '@mui/icons-material/Block'
-import FileDownload from '@mui/icons-material/GetApp'
-import FileUpload from '@mui/icons-material/Publish'
-import SearchIcon from '@mui/icons-material/Search'
-import MyLocationIcon from '@mui/icons-material/MyLocation'
 import Circle from '@mui/icons-material/Circle'
 import Close from '@mui/icons-material/Close'
-import Straighten from '@mui/icons-material/Straighten'
+import Draw from '@mui/icons-material/Draw'
+import FileDownload from '@mui/icons-material/GetApp'
+import MyLocationIcon from '@mui/icons-material/MyLocation'
 import Numbers from '@mui/icons-material/Numbers'
+import FileUpload from '@mui/icons-material/Publish'
+import SearchIcon from '@mui/icons-material/Search'
+import Straighten from '@mui/icons-material/Straighten'
 import {
-  TextField,
-  Drawer,
   Divider,
+  Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   ListSubheader,
-  IconButton,
+  TextField,
 } from '@mui/material'
-import { useMapContext } from '../utils/map-context'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { StringParam } from 'serialize-query-params/dist/params'
+import { withDefault } from 'serialize-query-params/dist/withDefault'
+import { useQueryParam } from 'use-query-params/dist/useQueryParam'
+import { useConfig } from '../utils/config'
 import { useMainContext } from '../utils/main-context'
+import { useMapContext } from '../utils/map-context'
 import ConfirmModal, {
   APPEND_PATH_CONFIRM_INFO,
   ConfirmInfo,
 } from './confirm-modal'
-import { useConfig } from '../utils/config'
-import { useQueryParam } from 'use-query-params/dist/useQueryParam'
-import { withDefault } from 'serialize-query-params/dist/withDefault'
-import { StringParam } from 'serialize-query-params/dist/params'
 
 const AUTO_GEOLOCATION_INTERVAL = 60000
 
@@ -49,7 +49,7 @@ const ToolBox = (props) => {
   const config = useConfig()
   const appVersion = config.appVersion
   const { map, marker, addPoint, downloadPath, uploadPath, clearPaths } =
-        mapState
+    mapState
   const [confirmInfo, setConfirmInfo] = useState<ConfirmInfo>({
     open: false,
   })
@@ -152,10 +152,7 @@ const ToolBox = (props) => {
     (e: React.FocusEvent | React.KeyboardEvent) => {
       void (async () => {
         if (!location || !map || !marker) return
-        if (
-          e.type === 'keydown' &&
-                    (e as React.KeyboardEvent).key !== 'Enter'
-        )
+        if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter')
           return
         if (!geocoder.current) {
           await google.maps.importLibrary('geocoding')
@@ -212,11 +209,7 @@ const ToolBox = (props) => {
           </ListItemButton>
         </ListItem>
         <ListItem>
-          <ListItemButton
-            onClick={() => clearPaths(true)}
-            disableGutters
-            dense
-          >
+          <ListItemButton onClick={() => clearPaths(true)} disableGutters dense>
             <ListItemIcon>
               <NavigationRefresh />
             </ListItemIcon>
@@ -237,11 +230,7 @@ const ToolBox = (props) => {
           </ListItemButton>
         </ListItem>
         <ListItem>
-          <ListItemButton
-            onClick={() => uploadPath()}
-            disableGutters
-            dense
-          >
+          <ListItemButton onClick={() => uploadPath()} disableGutters dense>
             <ListItemIcon>
               <FileUpload />
             </ListItemIcon>
@@ -249,11 +238,7 @@ const ToolBox = (props) => {
           </ListItemButton>
         </ListItem>
         <ListItem>
-          <ListItemButton
-            onClick={toggleRecordCB}
-            disableGutters
-            dense
-          >
+          <ListItemButton onClick={toggleRecordCB} disableGutters dense>
             <ListItemIcon
               sx={{
                 color: autoGeolocation ? 'warning.main' : '',
@@ -286,11 +271,7 @@ const ToolBox = (props) => {
           />
         </ListItem>
         <ListItem>
-          <ListItemButton
-            onClick={currentLocationCB}
-            disableGutters
-            dense
-          >
+          <ListItemButton onClick={currentLocationCB} disableGutters dense>
             <ListItemIcon>
               <MyLocationIcon />
             </ListItemIcon>

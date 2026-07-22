@@ -1,13 +1,19 @@
-import Body from '../lib/components/body'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Roboto } from 'next/font/google'
-import type { Viewport } from 'next'
- 
-export const viewport: Viewport = {
+import Body from '../lib/components/body'
 
+export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: process.env.THEME_COLOR_LIGHT ?? process.env.THEME_COLOR ?? '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: process.env.THEME_COLOR_DARK ?? process.env.THEME_COLOR ?? '#000000' },
+    {
+      media: '(prefers-color-scheme: light)',
+      color:
+        process.env.THEME_COLOR_LIGHT ?? process.env.THEME_COLOR ?? '#ffffff',
+    },
+    {
+      media: '(prefers-color-scheme: dark)',
+      color:
+        process.env.THEME_COLOR_DARK ?? process.env.THEME_COLOR ?? '#000000',
+    },
   ],
 }
 
@@ -23,13 +29,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-
   return (
     <html lang="en" style={{ height: '100%' }} className={roboto.variable}>
       <body style={{ margin: 0, height: '100%' }}>
-        <Body>
-          {children}
-        </Body>
+        <Body>{children}</Body>
       </body>
     </html>
   )

@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { DataT } from '@/types'
+
 const initialData: DataT = {
   isPending: true,
   rows: [],
@@ -21,7 +21,7 @@ const DataContext = createContext<DataContextT | null>(null)
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<DataT>(initialData)
   const setDataExternal = (d: Partial<DataT>) => {
-    setData({ ...data, ...d }) 
+    setData({ ...data, ...d })
   }
   return (
     <DataContext.Provider value={[data, setDataExternal]}>

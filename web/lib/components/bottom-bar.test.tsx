@@ -1,10 +1,10 @@
+import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
-import BottomBar from './bottom-bar'
-import { useMainContext } from '../utils/main-context'
-import { useData } from '../utils/data-context'
-import { useConfig } from '../utils/config'
 import { Mock } from 'vitest'
+import { useConfig } from '../utils/config'
+import { useData } from '../utils/data-context'
+import { useMainContext } from '../utils/main-context'
+import BottomBar from './bottom-bar'
 
 vi.mock('../utils/main-context', () => ({
   useMainContext: vi.fn(),
@@ -49,14 +49,14 @@ describe('BottomBar', () => {
   const mockConfig = { defaultCenter: '35.6762,139.6503', defaultRadius: 500 }
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    (useMainContext as Mock).mockReturnValue([
+    vi.clearAllMocks()
+    ;(useMainContext as Mock).mockReturnValue([
       { overlay: false, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
-    ]);
-    (useData as Mock).mockReturnValue([mockData]);
-    (useConfig as Mock).mockReturnValue(mockConfig)
+    ])
+    ;(useData as Mock).mockReturnValue([mockData])
+    ;(useConfig as Mock).mockReturnValue(mockConfig)
   })
 
   it('renders the BottomBar component', () => {
@@ -74,7 +74,7 @@ describe('BottomBar', () => {
   })
 
   it('displays overlay controls when overlay is active', () => {
-    (useMainContext as Mock).mockReturnValue([
+    ;(useMainContext as Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
@@ -82,8 +82,12 @@ describe('BottomBar', () => {
 
     render(<BottomBar />)
     expect(screen.getByTestId('back-to-map-button')).toBeInTheDocument()
-    expect(screen.getByTestId('forward-panorama-index-by-1-button')).toBeInTheDocument()
-    expect(screen.getByTestId('backward-panorama-index-by-1-button')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('forward-panorama-index-by-1-button'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByTestId('backward-panorama-index-by-1-button'),
+    ).toBeInTheDocument()
     expect(screen.getByText('1 / 10')).toBeInTheDocument()
   })
 
@@ -109,7 +113,7 @@ describe('BottomBar', () => {
   })
 
   it('dispatches the correct action when overlay button is clicked', () => {
-    (useMainContext as Mock).mockReturnValue([
+    ;(useMainContext as Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 0, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
@@ -118,11 +122,14 @@ describe('BottomBar', () => {
     render(<BottomBar />)
     const overlayButton = screen.getByTestId('back-to-map-button')
     fireEvent.click(overlayButton)
-    expect(mockDispatchMain).toHaveBeenCalledWith({ type: 'SET_OVERLAY', payload: false })
+    expect(mockDispatchMain).toHaveBeenCalledWith({
+      type: 'SET_OVERLAY',
+      payload: false,
+    })
   })
 
   it('updates panorama index when panorama navigation buttons are clicked', () => {
-    (useMainContext as Mock).mockReturnValue([
+    ;(useMainContext as Mock).mockReturnValue([
       { overlay: true, panoramaIndex: 5, panoramaCount: 10 },
       mockDispatchMain,
       mockPushWithGuard,
@@ -130,13 +137,23 @@ describe('BottomBar', () => {
 
     render(<BottomBar />)
 
-    const forwardButton = screen.getByTestId('forward-panorama-index-by-1-button')
+    const forwardButton = screen.getByTestId(
+      'forward-panorama-index-by-1-button',
+    )
     fireEvent.click(forwardButton)
-    expect(mockDispatchMain).toHaveBeenCalledWith({ type: 'SET_PANORAMA_INDEX', payload: 6 })
+    expect(mockDispatchMain).toHaveBeenCalledWith({
+      type: 'SET_PANORAMA_INDEX',
+      payload: 6,
+    })
 
-    const backwardButton = screen.getByTestId('backward-panorama-index-by-1-button')
+    const backwardButton = screen.getByTestId(
+      'backward-panorama-index-by-1-button',
+    )
     fireEvent.click(backwardButton)
-    expect(mockDispatchMain).toHaveBeenCalledWith({ type: 'SET_PANORAMA_INDEX', payload: 4 })
+    expect(mockDispatchMain).toHaveBeenCalledWith({
+      type: 'SET_PANORAMA_INDEX',
+      payload: 4,
+    })
   })
 
   it('handles filter change in home page', () => {

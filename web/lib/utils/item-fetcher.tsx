@@ -1,10 +1,10 @@
 'use client'
-import { useEffect, useActionState, useTransition } from 'react'
 import { useParams } from 'next/navigation'
+import { useActionState, useEffect, useTransition } from 'react'
+import { DataT, GetItemState } from '@/types'
 import { getItemAction } from '../../app/lib/walk-actions'
-import { useUserContext } from './user-context'
 import { useData } from './data-context'
-import { GetItemState, DataT } from '@/types'
+import { useUserContext } from './user-context'
 
 const initialGetItemState: GetItemState = {
   idTokenExpired: false,
@@ -14,7 +14,10 @@ const initialGetItemState: GetItemState = {
 
 export function ItemFetcher() {
   const [isPending, startTransition] = useTransition()
-  const [getItemState, dispatchGetItem] = useActionState(getItemAction, initialGetItemState)
+  const [getItemState, dispatchGetItem] = useActionState(
+    getItemAction,
+    initialGetItemState,
+  )
   const { updateIdToken, idToken } = useUserContext()
   const params = useParams()
   const id = params.id ? Number(params.id) : null
@@ -28,9 +31,10 @@ export function ItemFetcher() {
     const index = findIndexById(id)
     if (index >= 0 && !data.rows[index].stale) {
       const newData: Partial<DataT> = {}
-      newData.index = index 
+      newData.index = index
       newData.prevId = index > 0 ? data.rows[index - 1].id : null
-      newData.nextId = index < data.rows.length - 1 ? data.rows[index + 1].id : null
+      newData.nextId =
+        index < data.rows.length - 1 ? data.rows[index + 1].id : null
       newData.current = data.rows[index]
       setData(newData)
     } else {
@@ -62,13 +66,11 @@ export function ItemFetcher() {
       newData.prevId = null
       newData.nextId = null
       newData.offset = 0
-    } 
+    }
     setData(newData)
   }, [getItemState.serial, isPending])
 
-  return (
-    <></>
-  )
+  return <></>
 }
 
 export default ItemFetcher

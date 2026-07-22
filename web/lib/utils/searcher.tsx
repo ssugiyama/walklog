@@ -1,11 +1,11 @@
 'use client'
-import { useEffect, useActionState, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useConfig } from './config'
-import { searchAction } from '../../app/lib/walk-actions'
-import { useUserContext } from './user-context'
-import { useData } from './data-context'
+import { useActionState, useEffect, useTransition } from 'react'
 import { DataT } from '@/types'
+import { searchAction } from '../../app/lib/walk-actions'
+import { useConfig } from './config'
+import { useData } from './data-context'
+import { useUserContext } from './user-context'
 
 const initialSearchState = {
   rows: [],
@@ -17,12 +17,25 @@ const initialSearchState = {
   append: false,
 }
 
-const watchKeys = ['order', 'filter', 'month', 'year', 'user', 'path', 'center', 'radius', 'cities']
+const watchKeys = [
+  'order',
+  'filter',
+  'month',
+  'year',
+  'user',
+  'path',
+  'center',
+  'radius',
+  'cities',
+]
 
 export function Searcher() {
   const config = useConfig()
   const [isPending, startTransition] = useTransition()
-  const [searchState, dispatchSearch] = useActionState(searchAction, initialSearchState)
+  const [searchState, dispatchSearch] = useActionState(
+    searchAction,
+    initialSearchState,
+  )
   const [data, setData] = useData()
   const { updateIdToken, idToken } = useUserContext()
   const defaultValues = {
@@ -47,8 +60,11 @@ export function Searcher() {
   const oldParams = new URLSearchParams(data.params)
 
   useEffect(() => {
-    if (watchKeys.every((key) => oldParams.get(key) === searchParams.get(key)) &&
-        data.offset > 0 && props.limit > data.offset) {
+    if (
+      watchKeys.every((key) => oldParams.get(key) === searchParams.get(key)) &&
+      data.offset > 0 &&
+      props.limit > data.offset
+    ) {
       const current = data.offset
       props.offset = current
       props.limit = props.limit - current
@@ -77,9 +93,7 @@ export function Searcher() {
     setData(newData)
   }, [searchState.serial, isPending])
 
-  return (
-    <></>
-  )
+  return <></>
 }
 
 export default Searcher

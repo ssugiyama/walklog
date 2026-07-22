@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "d2bf7ede-b7df-4b52-94cc-9910908426e1",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -401,9 +399,7 @@
       "table": "walks"
     },
     {
-      "columns": [
-        "gid"
-      ],
+      "columns": ["gid"],
       "nameExplicit": false,
       "name": "areas_pkey",
       "schema": "public",
@@ -411,9 +407,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "walks_pkey",
       "schema": "public",
