@@ -8,7 +8,6 @@ import Switch from '@mui/material/Switch'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import moment from 'moment'
-import { nanoid } from 'nanoid'
 import Link from 'next/link'
 import {
   forbidden,
@@ -21,12 +20,10 @@ import React, {
   useActionState,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from 'react'
 import { StringParam, useQueryParam, withDefault } from 'use-query-params'
 import { updateItemAction } from '@/app/lib/walk-actions'
-import { deleteImage, uploadImage } from '@/lib/utils/firebase-storage'
 import { WalkT } from '@/types'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
@@ -67,9 +64,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const { updateIdToken, currentUser, users } = useUserContext()
   const [data, setData] = useData()
   const [localError, setLocalError] = useState<Error | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const uploadedThisSubmitRef = useRef<string | null>(null)
-  const oldImageToDeleteRef = useRef<string | null>(null)
   let item: WalkT
   if (mode === 'update') {
     item = data.current
@@ -139,38 +133,19 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     [dispatchMain, setInputs],
   )
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     setLocalError(null)
-    let image = inputs.image
+    const image = inputs.image
     if (image instanceof File) {
-      const file = image
-      if (!file.type?.startsWith('image/')) {
+      if (!image.type?.startsWith('image/')) {
         setLocalError(new Error('Image must be an image file'))
         return
       }
-      if (file.size > 2 * 1024 * 1024) {
+      if (image.size > 2 * 1024 * 1024) {
         setLocalError(new Error('Image size must be 2MB or less'))
         return
       }
-      const match = file.name.match(/\.\w+$/)
-      const ext = match ? match[0] : ''
-      const storagePath = `${config.imagePrefix}/${currentUser.uid}-${inputs.date}-${nanoid(4)}${ext}`
-      setIsUploading(true)
-      try {
-        image = await uploadImage(file, storagePath)
-      } catch (error) {
-        setLocalError(error as Error)
-        return
-      } finally {
-        setIsUploading(false)
-      }
-      uploadedThisSubmitRef.current = image
-      // Swap the File for its uploaded URL so a idTokenExpired retry reuses
-      // it instead of uploading the same file again.
-      setInputs((prev) => ({ ...prev, image }))
     }
-    oldImageToDeleteRef.current =
-      item?.image && item.image !== image ? item.image : null
 
     startTransition(() => {
       const formData = new FormData()
@@ -179,22 +154,14 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       formData.append('comment', inputs.comment)
       formData.append('draft', inputs.draft ? 'true' : '')
       formData.append('path', searchPath ?? item?.path ?? '')
-      formData.append('image', typeof image === 'string' ? image : '')
+      formData.append('image', image instanceof File ? image : '')
       formData.append('will_delete_image', inputs.will_delete_image ?? '')
       if (mode === 'update' && item?.id) {
         formData.append('id', item.id.toString())
       }
       formAction(formData)
     })
-  }, [
-    inputs,
-    searchPath,
-    item,
-    mode,
-    formAction,
-    config.imagePrefix,
-    currentUser,
-  ])
+  }, [inputs, searchPath, item, mode, formAction])
 
   useEffect(() => {
     if (state.serial > 0) {
@@ -206,11 +173,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       } else if (state.id) {
         // フォーム送信が成功したらdirtyフラグをリセット
         dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
-        uploadedThisSubmitRef.current = null
-        if (oldImageToDeleteRef.current) {
-          void deleteImage(oldImageToDeleteRef.current)
-          oldImageToDeleteRef.current = null
-        }
 
         if (mode === 'update') {
           const index = data.rows.findIndex((row) => row?.id === item.id)
@@ -220,11 +182,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           }
         }
         router.push(idToShowUrl(state.id))
-      } else if (uploadedThisSubmitRef.current) {
-        // The save failed after we'd already uploaded a new image this
-        // submission; don't leave it orphaned in storage.
-        void deleteImage(uploadedThisSubmitRef.current)
-        uploadedThisSubmitRef.current = null
       }
     }
   }, [state?.serial])
@@ -312,11 +269,11 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           </Button>
           <Button
             data-testid="submit-button"
-            disabled={isPending || isUploading}
+            disabled={isPending}
             onClick={handleSubmit}
             color="secondary"
           >
-            {isPending || isUploading ? 'Uploading...' : mode}
+            {isPending ? 'Uploading...' : mode}
           </Button>
         </Box>
       </Paper>

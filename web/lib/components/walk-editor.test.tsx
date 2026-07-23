@@ -2,7 +2,6 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { Mock } from 'vitest'
 import { updateItemAction } from '@/app/lib/walk-actions'
-import { deleteImage, uploadImage } from '@/lib/utils/firebase-storage'
 import { useData } from '../utils/data-context'
 import WalkEditor from './walk-editor'
 
@@ -73,11 +72,6 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/app/lib/walk-actions', () => ({
   updateItemAction: vi.fn().mockResolvedValue({}),
-}))
-
-vi.mock('@/lib/utils/firebase-storage', () => ({
-  uploadImage: vi.fn(),
-  deleteImage: vi.fn(),
 }))
 
 vi.mock('./image-uploader', () => ({
@@ -179,7 +173,7 @@ describe('WalkEditor update', () => {
     })
   })
 
-  it('rejects a non-image file without uploading', async () => {
+  it('rejects a non-image file without submitting', async () => {
     selectedFile = new File(['x'], 'document.pdf', { type: 'application/pdf' })
     render(<WalkEditor mode="update" />)
 
@@ -191,11 +185,10 @@ describe('WalkEditor update', () => {
         screen.getByText('Image must be an image file'),
       ).toBeInTheDocument(),
     )
-    expect(uploadImage).not.toHaveBeenCalled()
     expect(updateItemAction).not.toHaveBeenCalled()
   })
 
-  it('rejects an image over 2MB without uploading', async () => {
+  it('rejects an image over 2MB without submitting', async () => {
     selectedFile = new File([new Uint8Array(3 * 1024 * 1024)], 'big.jpg', {
       type: 'image/jpeg',
     })
@@ -209,61 +202,27 @@ describe('WalkEditor update', () => {
         screen.getByText('Image size must be 2MB or less'),
       ).toBeInTheDocument(),
     )
-    expect(uploadImage).not.toHaveBeenCalled()
     expect(updateItemAction).not.toHaveBeenCalled()
   })
 
-  it('uploads a valid image and sends its URL instead of the file', async () => {
+  it('sends the file directly instead of uploading it client-side', async () => {
     selectedFile = new File(['x'], 'photo.jpg', { type: 'image/jpeg' })
-    const uploadedUrl = 'https://firebasestorage.googleapis.com/x/photo.jpg'
-    ;(uploadImage as Mock).mockResolvedValue(uploadedUrl)
     render(<WalkEditor mode="update" />)
 
     fireEvent.click(screen.getByTestId('mock-select-image'))
     fireEvent.click(screen.getByTestId('submit-button'))
 
     await waitFor(() => expect(updateItemAction).toHaveBeenCalled())
-    expect(uploadImage).toHaveBeenCalledWith(
-      selectedFile,
-      expect.stringContaining('test-uid'),
-    )
-    expect(lastFormData?.append).toHaveBeenCalledWith('image', uploadedUrl)
+    expect(lastFormData?.append).toHaveBeenCalledWith('image', selectedFile)
   })
 
-  it('deletes the newly uploaded image if the save fails', async () => {
-    selectedFile = new File(['x'], 'photo.jpg', { type: 'image/jpeg' })
-    const uploadedUrl = 'https://firebasestorage.googleapis.com/x/photo.jpg'
-    ;(uploadImage as Mock).mockResolvedValue(uploadedUrl)
-    ;(updateItemAction as Mock).mockResolvedValue({
-      serial: 1,
-      error: new Error('save failed'),
-      id: null,
-    })
-    render(<WalkEditor mode="update" />)
-
-    fireEvent.click(screen.getByTestId('mock-select-image'))
-    fireEvent.click(screen.getByTestId('submit-button'))
-
-    await waitFor(() => expect(deleteImage).toHaveBeenCalledWith(uploadedUrl))
-  })
-
-  it('deletes the old image once a replacement save succeeds', async () => {
-    const oldUrl = 'https://firebasestorage.googleapis.com/x/old.jpg'
-    ;(useData as Mock).mockReturnValue([
-      { current: { ...defaultWalk, image: oldUrl }, rows: [] },
-      mockSetData,
-    ])
-    selectedFile = new File(['x'], 'photo.jpg', { type: 'image/jpeg' })
-    const uploadedUrl = 'https://firebasestorage.googleapis.com/x/photo.jpg'
-    ;(uploadImage as Mock).mockResolvedValue(uploadedUrl)
+  it('navigates to the show page once the save succeeds', async () => {
     ;(updateItemAction as Mock).mockResolvedValue({ serial: 1, id: 2 })
     render(<WalkEditor mode="update" />)
 
-    fireEvent.click(screen.getByTestId('mock-select-image'))
     fireEvent.click(screen.getByTestId('submit-button'))
 
-    await waitFor(() => expect(deleteImage).toHaveBeenCalledWith(oldUrl))
-    expect(mockRouterPush).toHaveBeenCalledWith('/show/2')
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith('/show/2'))
   })
 })
 

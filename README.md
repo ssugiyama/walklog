@@ -81,7 +81,12 @@ SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
 FIREBASE_CONFIG=path-to-firebase-config.json
 GOOGLE_API_KEY=your-google-maps-api-key
-FIREBASE_STORAGE=on
+IMAGE_STORAGE=
+R2_ACCOUNT_ID=your-r2-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key-id
+R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+R2_BUCKET_NAME=your-r2-bucket-name
+R2_PUBLIC_URL=https://pub-xxxxxxxx.r2.dev
 MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
 DEFAULT_CENTER=35.6762,139.6503
 DEFAULT_ZOOM=12
@@ -103,7 +108,12 @@ THEME_COLOR="#3874cb"
 | `OPEN_USER_MODE` | If set, allows all users to manage walks | No |
 | `FIREBASE_CONFIG` | Path to Firebase web config JSON | Yes |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Path to Firebase service account JSON | Yes |
-| `FIREBASE_STORAGE` | Enable Firebase Storage for images (`on`/`off`) | Yes |
+| `IMAGE_STORAGE` | Image upload backend: `R2` for Cloudflare R2, anything else (including unset) for local disk | No |
+| `R2_ACCOUNT_ID` | Cloudflare account ID (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_ACCESS_KEY_ID` | R2 S3-compatible API access key ID (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_SECRET_ACCESS_KEY` | R2 S3-compatible API secret access key (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_BUCKET_NAME` | R2 bucket name (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_PUBLIC_URL` | Public base URL for the R2 bucket (r2.dev subdomain or custom domain, required when `IMAGE_STORAGE=R2`) | No † |
 | `DRAWING_STYLES_JSON` | Path to drawing styles configuration | No |
 | `GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
 | `MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
@@ -125,6 +135,8 @@ THEME_COLOR="#3874cb"
 | `APP_VERSION` | Version string | No |
 
 * if using docker, **DB_URL** is provided as an environment variable.
+
+† only required when `IMAGE_STORAGE=R2`. When unset (or set to anything other than `R2`), uploaded images are written to `public/uploads` on the server's local disk instead.
 
 ### 5. Admin User Management
 
@@ -236,9 +248,14 @@ walklog/
 - Ensure API key has proper restrictions and permissions
 
 **Image Upload Issues**
-- Check Firebase Storage rules and permissions
-- Verify `FIREBASE_STORAGE` environment variable
-- Ensure service account has Storage Admin role
+- Images are uploaded to the server (not directly from the browser) and then
+  saved to local disk or Cloudflare R2, depending on `IMAGE_STORAGE`
+- If `IMAGE_STORAGE=R2`, verify `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+  `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and `R2_PUBLIC_URL` are all set
+  and that the R2 bucket has public access enabled at `R2_PUBLIC_URL`
+- If `IMAGE_STORAGE` is unset (or anything other than `R2`), verify the
+  process can write to `public/uploads` (files saved there do not survive a
+  container rebuild, so this mode is best for local/simple deployments)
 
 ## Contributing
 

@@ -14,6 +14,7 @@ import {
 } from 'drizzle-orm'
 import fs from 'fs/promises'
 import moment from 'moment'
+import { nanoid } from 'nanoid'
 import { cacheTag, revalidateTag } from 'next/cache'
 import { ValueOf } from 'next/dist/shared/lib/constants'
 import { cookies } from 'next/headers'
@@ -23,6 +24,7 @@ import {
   IdTokenExpiredError,
   verifyFirebaseIdToken,
 } from '@/lib/utils/firebase-id-token'
+import { deleteImage, saveImage } from '@/lib/utils/image-storage'
 import { decode } from '@/lib/utils/path-encoder'
 import {
   BaseState,
@@ -445,6 +447,8 @@ export const updateItemAction = async (
   prevState: UpdateItemState,
   formData: FormData,
   _getUid: typeof getUid = getUid,
+  _saveImage: typeof saveImage = saveImage,
+  _deleteImage: typeof deleteImage = deleteImage,
 ): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.id = null
@@ -464,11 +468,15 @@ export const updateItemAction = async (
   const date = formData.get('date') as string
   const title = formData.get('title') as string
   const comment = formData.get('comment') as string
-  const image = formData.get('image') as string | null
+  const image = formData.get('image')
   const walkPath = formData.get('path') as string
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage =
     formData.get('will_delete_image') === 'true' ? true : false
+
+  // The client sends the raw file; the upload itself happens here so the
+  // storage backend (local disk or R2) stays an implementation detail.
+  const newImageFile = image instanceof File && image.size > 0 ? image : null
 
   // Manual validation to ensure consistent error messages
   const validationErrors = []
@@ -485,9 +493,30 @@ export const updateItemAction = async (
     validationErrors.push('Path is required')
   }
 
+  if (newImageFile) {
+    if (!newImageFile.type?.startsWith('image/')) {
+      validationErrors.push('Image must be an image file')
+    } else if (newImageFile.size > 2 * 1024 * 1024) {
+      validationErrors.push('Image size must be 2MB or less')
+    }
+  }
+
   if (validationErrors.length > 0) {
     state.error = new Error(validationErrors.join(', '))
     return state
+  }
+
+  let existingWalk: WalkSelectAttributes | undefined
+  if (id) {
+    existingWalk = await db
+      .select()
+      .from(walks)
+      .where(eq(walks.id, id))
+      .limit(1)
+      .then((rows) => rows[0])
+    if (!existingWalk || existingWalk.uid !== uid) {
+      forbidden()
+    }
   }
 
   const d = new Date(date)
@@ -503,23 +532,30 @@ export const updateItemAction = async (
     props.length =
       sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
   }
+
+  let uploadedImage: string | null = null
   if (willDeleteImage) {
     props.image = null
-  } else if (image) {
-    // The client uploads the image directly to Firebase Storage and only
-    // sends the resulting download URL here.
-    props.image = image
-  }
-  if (id) {
-    const walk = await db
-      .select()
-      .from(walks)
-      .where(eq(walks.id, id))
-      .limit(1)
-      .then((rows) => rows[0])
-    if (walk.uid !== uid) {
-      forbidden()
+  } else if (newImageFile) {
+    const imagePrefix = process.env.IMAGE_PREFIX ?? 'images'
+    const match = newImageFile.name.match(/\.\w+$/)
+    const ext = match ? match[0] : ''
+    const key = `${imagePrefix}/${uid}-${date}-${nanoid(4)}${ext}`
+    try {
+      uploadedImage = await _saveImage(newImageFile, key)
+    } catch (error) {
+      state.error = error as Error
+      return state
     }
+    props.image = uploadedImage
+  }
+
+  const oldImage =
+    (willDeleteImage || newImageFile) && existingWalk?.image
+      ? existingWalk.image
+      : null
+
+  if (id) {
     try {
       props.updatedAt = sql<string>`now()` as unknown as string
       await db.update(walks).set(props).where(eq(walks.id, id))
@@ -528,6 +564,9 @@ export const updateItemAction = async (
       console.error('updateItemAction error', error)
       state.error = error as Error
       state.id = null
+      if (uploadedImage) {
+        void _deleteImage(uploadedImage)
+      }
       return state
     }
   } else {
@@ -544,9 +583,17 @@ export const updateItemAction = async (
       console.error('updateItemAction create error', error)
       state.error = error as Error
       state.id = null
+      if (uploadedImage) {
+        void _deleteImage(uploadedImage)
+      }
       return state
     }
   }
+
+  if (oldImage) {
+    void _deleteImage(oldImage)
+  }
+
   revalidateTag(SEARCH_CACHE_TAG, 'max')
   return state
 }

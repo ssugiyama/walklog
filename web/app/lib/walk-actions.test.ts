@@ -545,41 +545,170 @@ describe('server actions', () => {
       ).rejects.toThrow('forbidden')
     })
 
-    it('should handle image upload and update the walk', async () => {
+    it('should upload a new image file and store the returned URL', async () => {
       const existing = await insertWalk({ uid: 'testUid' })
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
-      const imageUrl = 'https://firebasestorage.googleapis.com/images/test.jpg'
+      const uploadedUrl = '/uploads/images/testUid-2023-05-15-mocked-nanoid.jpg'
+      const mockSaveImage = vi.fn().mockResolvedValue(uploadedUrl)
+      const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
+      const file = new File([new Uint8Array([1, 2, 3])], 'test.jpg', {
+        type: 'image/jpeg',
+      })
       formData.set('id', String(existing.id))
       formData.set('title', 'Test Walk')
       formData.set('date', '2023-05-15')
       formData.set('path', encode(DEFAULT_PATH))
-      formData.set('image', imageUrl)
+      formData.set('image', file)
 
-      const result = await updateItemAction(prevState, formData, mockGetUid)
+      const result = await updateItemAction(
+        prevState,
+        formData,
+        mockGetUid,
+        mockSaveImage,
+        mockDeleteImage,
+      )
 
       expect(result.error).toBeNull()
+      expect(mockSaveImage).toHaveBeenCalledWith(
+        file,
+        expect.stringContaining('testUid-2023-05-15-mocked-nanoid'),
+      )
 
       const [row] = await db
         .select()
         .from(walks)
         .where(sql`id = ${existing.id}`)
-      expect(row.image).toBe(imageUrl)
+      expect(row.image).toBe(uploadedUrl)
     })
 
-    it('should clear the image when will_delete_image is true', async () => {
+    it('should delete the previous image once a replacement save succeeds', async () => {
+      const oldUrl = '/uploads/images/old.jpg'
       const existing = await insertWalk({ uid: 'testUid' })
       await db
         .update(walks)
-        .set({ image: 'https://firebasestorage.googleapis.com/images/old.jpg' })
+        .set({ image: oldUrl })
         .where(sql`id = ${existing.id}`)
       const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const uploadedUrl = '/uploads/images/new.jpg'
+      const mockSaveImage = vi.fn().mockResolvedValue(uploadedUrl)
+      const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
+      const file = new File([new Uint8Array([1, 2, 3])], 'test.jpg', {
+        type: 'image/jpeg',
+      })
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      const result = await updateItemAction(
+        prevState,
+        formData,
+        mockGetUid,
+        mockSaveImage,
+        mockDeleteImage,
+      )
+
+      expect(result.error).toBeNull()
+      expect(mockDeleteImage).toHaveBeenCalledWith(oldUrl)
+    })
+
+    it('should clean up the newly uploaded image if the db update fails', async () => {
+      const existing = await insertWalk({ uid: 'testUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const uploadedUrl = '/uploads/images/new.jpg'
+      const mockSaveImage = vi.fn().mockResolvedValue(uploadedUrl)
+      const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
+      const file = new File([new Uint8Array([1, 2, 3])], 'test.jpg', {
+        type: 'image/jpeg',
+      })
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      const updateSpy = vi.spyOn(db, 'update').mockReturnValueOnce({
+        set: () => ({
+          where: () => Promise.reject(new Error('db update failed')),
+        }),
+      } as unknown as ReturnType<typeof db.update>)
+
+      try {
+        const result = await updateItemAction(
+          prevState,
+          formData,
+          mockGetUid,
+          mockSaveImage,
+          mockDeleteImage,
+        )
+
+        expect(result.error).toBeInstanceOf(Error)
+        expect(mockSaveImage).toHaveBeenCalled()
+        expect(mockDeleteImage).toHaveBeenCalledWith(uploadedUrl)
+      } finally {
+        updateSpy.mockRestore()
+      }
+    })
+
+    it('should reject a non-image file', async () => {
+      const existing = await insertWalk({ uid: 'testUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const file = new File(['x'], 'document.pdf', {
+        type: 'application/pdf',
+      })
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toContain('Image must be an image file')
+    })
+
+    it('should reject an image over 2MB', async () => {
+      const existing = await insertWalk({ uid: 'testUid' })
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const file = new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'big.jpg', {
+        type: 'image/jpeg',
+      })
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toContain('Image size must be 2MB or less')
+    })
+
+    it('should clear the image when will_delete_image is true', async () => {
+      const oldUrl = '/uploads/images/old.jpg'
+      const existing = await insertWalk({ uid: 'testUid' })
+      await db
+        .update(walks)
+        .set({ image: oldUrl })
+        .where(sql`id = ${existing.id}`)
+      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
       formData.set('id', String(existing.id))
       formData.set('title', 'Test Walk')
       formData.set('date', '2023-05-15')
       formData.set('path', encode(DEFAULT_PATH))
       formData.set('will_delete_image', 'true')
 
-      const result = await updateItemAction(prevState, formData, mockGetUid)
+      const result = await updateItemAction(
+        prevState,
+        formData,
+        mockGetUid,
+        undefined,
+        mockDeleteImage,
+      )
 
       expect(result.error).toBeNull()
 
@@ -588,6 +717,7 @@ describe('server actions', () => {
         .from(walks)
         .where(sql`id = ${existing.id}`)
       expect(row.image).toBeNull()
+      expect(mockDeleteImage).toHaveBeenCalledWith(oldUrl)
     })
   })
 
