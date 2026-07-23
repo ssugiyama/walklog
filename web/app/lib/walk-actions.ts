@@ -12,17 +12,17 @@ import {
   SQL,
   sql,
 } from 'drizzle-orm'
-import { FirebaseError } from 'firebase/app'
-import admin from 'firebase-admin'
 import fs from 'fs/promises'
 import moment from 'moment'
-import { nanoid } from 'nanoid'
 import { cacheTag, revalidateTag } from 'next/cache'
 import { ValueOf } from 'next/dist/shared/lib/constants'
 import { cookies } from 'next/headers'
 import { forbidden, notFound, unauthorized } from 'next/navigation'
-import path from 'path'
-import url from 'url'
+import {
+  FirebaseIdTokenClaims,
+  IdTokenExpiredError,
+  verifyFirebaseIdToken,
+} from '@/lib/utils/firebase-id-token'
 import { decode } from '@/lib/utils/path-encoder'
 import {
   BaseState,
@@ -33,13 +33,14 @@ import {
   GetItemState,
   SearchProps,
   SearchState,
+  SelfStatusT,
   ShapeStyles,
   UpdateItemState,
   UserT,
   WalkT,
 } from '@/types'
 import { db } from '../../lib/drizzle/db'
-import { areas, coordinatesToWKT, walks } from '../../lib/drizzle/schema'
+import { areas, coordinatesToWKT, users, walks } from '../../lib/drizzle/schema'
 import {
   decodePath,
   EARTH_RADIUS,
@@ -85,17 +86,13 @@ const asCityT = (area: AreaAttributes): CityT => {
   }
 }
 
-let firebaseConfig: admin.AppOptions | null = null
+type FirebaseClientConfig = Record<string, unknown>
+
+let firebaseConfig: FirebaseClientConfig | null = null
 
 const loadFirebaseConfig = async () => {
   const content = await fs.readFile(process.env.FIREBASE_CONFIG)
-  firebaseConfig = JSON.parse(content.toString()) as admin.AppOptions
-  if (admin.apps.length === 0) {
-    admin.initializeApp({
-      ...firebaseConfig,
-      credential: admin.credential.applicationDefault(),
-    })
-  }
+  firebaseConfig = JSON.parse(content.toString()) as FirebaseClientConfig
 }
 
 export const getConfig = async (): Promise<ConfigT> => {
@@ -120,6 +117,7 @@ export const getConfig = async (): Promise<ConfigT> => {
     mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
     mapId: process.env.MAP_ID,
     firebaseConfig,
+    imagePrefix: process.env.IMAGE_PREFIX ?? 'images',
     shapeStyles,
     theme,
   }
@@ -128,28 +126,85 @@ export const getConfig = async (): Promise<ConfigT> => {
 const SEARCH_CACHE_TAG = 'searchTag'
 
 const openUserMode: boolean = !!process.env.OPEN_USER_MODE
-const firebaseStorage: boolean = !!process.env.FIREBASE_STORAGE
 
 type GetUidResponse = [string | null, boolean]
 
-const getUid = async (state: BaseState): Promise<GetUidResponse> => {
+type UserRow = typeof users.$inferSelect
+
+// Not exported: takes a verified token claim, so it must never be reachable
+// as a server action directly from the client.
+const getOrCreateUser = async (
+  claim: FirebaseIdTokenClaims,
+): Promise<UserRow> => {
+  const existing = await db
+    .select()
+    .from(users)
+    .where(eq(users.uid, claim.uid))
+    .limit(1)
+    .then((rows) => rows[0])
+  if (existing) return existing
+  const created = await db
+    .insert(users)
+    .values({
+      uid: claim.uid,
+      email: claim.email ?? null,
+      displayName: claim.name ?? null,
+      photoURL: claim.picture ?? null,
+    })
+    .onConflictDoNothing()
+    .returning()
+    .then((rows) => rows[0])
+  return (
+    created ??
+    (await db
+      .select()
+      .from(users)
+      .where(eq(users.uid, claim.uid))
+      .limit(1)
+      .then((rows) => rows[0]))
+  )
+}
+
+const verifyIdToken = async (
+  state: BaseState,
+): Promise<FirebaseIdTokenClaims | null> => {
   const cookieStore = await cookies()
   state.idTokenExpired = false
   const idToken = cookieStore.get('idToken')
   if (!idToken?.value) {
-    return [null, false]
+    return null
   }
   try {
-    const claim = await admin.auth().verifyIdToken(idToken.value)
-    return [claim?.uid, claim?.admin ?? false]
+    return await verifyFirebaseIdToken(idToken.value)
   } catch (error) {
-    if ((error as FirebaseError).code === 'auth/id-token-expired') {
+    if (error instanceof IdTokenExpiredError) {
       state.idTokenExpired = true
     } else {
       state.error = error as Error
     }
+    return null
+  }
+}
+
+const getUid = async (state: BaseState): Promise<GetUidResponse> => {
+  const claim = await verifyIdToken(state)
+  if (!claim) {
     return [null, false]
   }
+  const user = await getOrCreateUser(claim)
+  if (user.status !== 'active' && user.status !== 'admin') {
+    return [null, false]
+  }
+  return [claim.uid, user.status === 'admin']
+}
+
+export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
+  const claim = await verifyIdToken({})
+  if (!claim) {
+    return 'anonymous'
+  }
+  const user = await getOrCreateUser(claim)
+  return user.status as SelfStatusT
 }
 
 export const searchInternalAction = async (
@@ -384,13 +439,6 @@ export const getItemAction = async (
   return Object.assign({ ...state }, newState)
 }
 
-const getFilename = (uid: string, date: string, file: File) => {
-  const match = file.name.match(/\.\w+$/)
-  const ext = match ? match[0] : ''
-  const basename = `${uid}-${date}-${nanoid(4)}`
-  return match ? basename + ext : basename
-}
-
 // Manual validation replaces Zod schema for better error message control
 
 export const updateItemAction = async (
@@ -416,7 +464,7 @@ export const updateItemAction = async (
   const date = formData.get('date') as string
   const title = formData.get('title') as string
   const comment = formData.get('comment') as string
-  const image = formData.get('image') as File | null
+  const image = formData.get('image') as string | null
   const walkPath = formData.get('path') as string
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage =
@@ -435,17 +483,6 @@ export const updateItemAction = async (
 
   if (!walkPath || walkPath.trim() === '') {
     validationErrors.push('Path is required')
-  }
-
-  // Image validation
-  if (image && image.size > 0) {
-    if (!image.type) {
-      validationErrors.push('Image must be a valid file')
-    } else if (!image.type?.startsWith('image/')) {
-      validationErrors.push('Image must be an image file')
-    } else if (image.size > 2 * 1024 * 1024) {
-      validationErrors.push('Image size must be 2MB or less')
-    }
   }
 
   if (validationErrors.length > 0) {
@@ -468,30 +505,10 @@ export const updateItemAction = async (
   }
   if (willDeleteImage) {
     props.image = null
-  } else if ((image?.size ?? 0) > 0) {
-    try {
-      const prefix = process.env.IMAGE_PREFIX ?? 'images'
-      const filePath = path.join(prefix, getFilename(uid, date, image))
-      const content = await image.arrayBuffer()
-      const buffer = Buffer.from(content)
-      if (firebaseStorage) {
-        const bucket = admin.storage().bucket()
-        const blob = bucket.file(filePath)
-        await blob.save(buffer) // await を追加
-        props.image = url.resolve(
-          'https://storage.googleapis.com',
-          path.join(bucket.name, blob.name),
-        )
-      } else {
-        await fs.writeFile(`public/${filePath}`, buffer)
-        props.image = filePath
-      }
-    } catch (error) {
-      console.error('updateItemAction image error', error)
-      state.error = error as Error
-      state.id = null
-      return state
-    }
+  } else if (image) {
+    // The client uploads the image directly to Firebase Storage and only
+    // sends the resulting download URL here.
+    props.image = image
   }
   if (id) {
     const walk = await db
@@ -588,10 +605,14 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
 
 export const getUsersAction = async (): Promise<UserT[]> => {
   'use cache'
-  const userResult = await admin.auth().listUsers(1000)
-  return userResult.users.map((user) => {
-    const { uid, displayName, photoURL } = user
-    const admin: boolean = (user.customClaims?.admin as boolean) || false
-    return { uid, displayName, photoURL, admin }
-  })
+  const rows = await db
+    .select()
+    .from(users)
+    .where(inArray(users.status, ['active', 'admin']))
+  return rows.map((user) => ({
+    uid: user.uid,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+    admin: user.status === 'admin',
+  }))
 }

@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+// Requires DB_URL (and DB_SSL* if applicable) to be set in the environment,
+// e.g. `node --env-file=.env bin/manage-users.js list-pending`.
+const postgres = require('postgres')
+
+const options = {
+  ssl:
+    process.env.DB_SSL === 'true'
+      ? {
+          rejectUnauthorized:
+            process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+          ca: process.env.DB_SSL_CA
+            ? Buffer.from(process.env.DB_SSL_CA, 'base64').toString('utf-8')
+            : undefined,
+          key: process.env.DB_SSL_KEY
+            ? Buffer.from(process.env.DB_SSL_KEY, 'base64').toString('utf-8')
+            : undefined,
+          cert: process.env.DB_SSL_CERT
+            ? Buffer.from(process.env.DB_SSL_CERT, 'base64').toString('utf-8')
+            : undefined,
+        }
+      : false,
+}
+
+const sql = postgres(process.env.DB_URL, options)
+
+const usage = () => {
+  console.error(
+    'usage: manage-users.js <list-pending|approve <uid>|set-admin <uid>|rm <uid>>',
+  )
+  process.exitCode = 1
+}
+
+const setStatus = async (uid, status) => {
+  const rows =
+    await sql`UPDATE users SET status = ${status} WHERE uid = ${uid} RETURNING uid`
+  if (rows.length === 0) {
+    console.error(`user not found: ${uid}`)
+    process.exitCode = 1
+  } else {
+    console.info('done')
+  }
+}
+
+const main = async () => {
+  const [command, uid] = process.argv.slice(2)
+  switch (command) {
+    case 'list-pending': {
+      const rows =
+        await sql`SELECT uid, email, display_name, created_at FROM users WHERE status = 'pending' ORDER BY created_at`
+      console.table(rows)
+      break
+    }
+    case 'approve':
+      if (!uid) return usage()
+      await setStatus(uid, 'active')
+      break
+    case 'set-admin':
+      if (!uid) return usage()
+      await setStatus(uid, 'admin')
+      break
+    case 'rm':
+      if (!uid) return usage()
+      await setStatus(uid, 'pending')
+      break
+    default:
+      usage()
+  }
+}
+
+main()
+  .catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
+  .finally(() => sql.end())

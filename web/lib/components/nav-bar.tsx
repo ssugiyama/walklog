@@ -31,7 +31,8 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const [accountAnchorEl, setAccountAnchorEl] = useState<HTMLElement | null>(
     null,
   )
-  const { currentUser, setCurrentUser } = useUserContext()
+  const { currentUser, setCurrentUser, selfStatus } = useUserContext()
+  const canPost = selfStatus === 'active' || selfStatus === 'admin'
   const handleMenuOpen =
     (setter: typeof setAccountAnchorEl) =>
     (event: React.MouseEvent<HTMLElement>) => {
@@ -150,19 +151,26 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
               <MenuItem key="label" disabled>
                 Logged in as {currentUser.displayName}
               </MenuItem>,
+              selfStatus === 'pending' ? (
+                <MenuItem key="pending" disabled>
+                  承認待ちです
+                </MenuItem>
+              ) : null,
               <Divider key="divider" />,
-              <EndMenuItem
-                key="new walk"
-                component={Link}
-                href={`/new?${searchParams.toString()}`}
-                onClick={interceptLink}
-              >
-                new walk...
-              </EndMenuItem>,
+              canPost ? (
+                <EndMenuItem
+                  key="new walk"
+                  component={Link}
+                  href={`/new?${searchParams.toString()}`}
+                  onClick={interceptLink}
+                >
+                  new walk...
+                </EndMenuItem>
+              ) : null,
               <EndMenuItem key="logout" onClick={handleLogout}>
                 logout
               </EndMenuItem>,
-            ]
+            ].filter(Boolean)
           : [
               <EndMenuItem key="login" onClick={handleLogin}>
                 login with Google

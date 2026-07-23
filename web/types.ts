@@ -75,6 +75,8 @@ export type UserT = {
   admin?: boolean
 }
 
+export type SelfStatusT = 'anonymous' | 'pending' | 'active' | 'admin'
+
 export type DataT = Omit<SearchState & GetItemState, 'serial'> & {
   isPending?: boolean
   count?: number
@@ -109,6 +111,7 @@ export type ConfigT = {
   mapTypeIds: string
   mapId: string
   firebaseConfig: object
+  imagePrefix: string
   shapeStyles: ShapeStyles
   theme: object
 }

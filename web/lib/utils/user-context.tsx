@@ -7,13 +7,14 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { UserT } from '@/types'
-import { getUsersAction } from '../../app/lib/walk-actions'
+import { SelfStatusT, UserT } from '@/types'
+import { getSelfStatusAction, getUsersAction } from '../../app/lib/walk-actions'
 
 type UserContextT = {
   users: UserT[]
   idToken: string | null
   currentUser: FirebaseUser | null | undefined
+  selfStatus: SelfStatusT
   setCurrentUser: (user: FirebaseUser | null) => void
   updateIdToken: () => Promise<void>
 }
@@ -21,6 +22,7 @@ const initialState: UserContextT = {
   users: [],
   idToken: null,
   currentUser: null,
+  selfStatus: 'anonymous',
   setCurrentUser: () => {},
   updateIdToken: async () => {},
 }
@@ -44,12 +46,14 @@ export function UserContextProvider({
   const initialIdToken = getCookieValue('idToken')
   const [idToken, setIdToken] = useState(initialIdToken)
   const [users, setUsers] = useState<UserT[]>([])
+  const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')
 
   const updateIdToken = useCallback(async () => {
     if (!currentUser) {
       const secure = location.protocol === 'https:' ? '; secure' : ''
       document.cookie = `idToken=; path=/; samesite=strict${secure}; expires=Thu, 01 Jan 1970 00:00:00 GMT`
       setIdToken('')
+      setSelfStatus('anonymous')
       return
     }
     const newIdToken = (await currentUser?.getIdToken()) ?? ''
@@ -57,6 +61,7 @@ export function UserContextProvider({
     // Max-Ageを1時間に設定してトークンの有効期限を管理
     document.cookie = `idToken=${newIdToken}; path=/; samesite=strict${secure};`
     setIdToken(newIdToken)
+    setSelfStatus(await getSelfStatusAction())
   }, [currentUser])
 
   useEffect(() => {
@@ -79,6 +84,7 @@ export function UserContextProvider({
         currentUser,
         setCurrentUser,
         idToken,
+        selfStatus,
         updateIdToken,
       }}
     >
