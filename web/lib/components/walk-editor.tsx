@@ -25,7 +25,6 @@ import React, {
 import { StringParam, useQueryParam, withDefault } from 'use-query-params'
 import { updateItemAction } from '@/app/lib/walk-actions'
 import { WalkT } from '@/types'
-import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { useMainContext } from '../utils/main-context'
 import { idToShowUrl } from '../utils/meta-utils'
@@ -60,9 +59,9 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     idTokenExpired: false,
     serial: 0,
   }
-  const config = useConfig()
   const { updateIdToken, currentUser, users } = useUserContext()
   const [data, setData] = useData()
+  const [localError, setLocalError] = useState<Error | null>(null)
   let item: WalkT
   if (mode === 'update') {
     item = data.current
@@ -133,6 +132,19 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   )
 
   const handleSubmit = useCallback(() => {
+    setLocalError(null)
+    const image = inputs.image
+    if (image instanceof File) {
+      if (!image.type?.startsWith('image/')) {
+        setLocalError(new Error('Image must be an image file'))
+        return
+      }
+      if (image.size > 2 * 1024 * 1024) {
+        setLocalError(new Error('Image size must be 2MB or less'))
+        return
+      }
+    }
+
     startTransition(() => {
       const formData = new FormData()
       formData.append('date', inputs.date)
@@ -140,7 +152,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       formData.append('comment', inputs.comment)
       formData.append('draft', inputs.draft ? 'true' : '')
       formData.append('path', searchPath ?? item?.path ?? '')
-      formData.append('image', inputs.image ?? '')
+      formData.append('image', image instanceof File ? image : '')
       formData.append('will_delete_image', inputs.will_delete_image ?? '')
       if (mode === 'update' && item?.id) {
         formData.append('id', item.id.toString())
@@ -179,7 +191,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     return null
   }
   const dataUser = users.find((u) => u.uid === currentUser.uid) ?? null
-  if (!config.openUserMode && !dataUser?.admin) {
+  if (!dataUser?.active) {
     forbidden()
   }
 
@@ -192,7 +204,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     <Box data-testid="WalkEditor">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
         <Typography variant="body1" color="error">
-          {state?.error?.message}
+          {localError?.message ?? state?.error?.message}
         </Typography>
         <form name="walk-form">
           <FormGroup row>

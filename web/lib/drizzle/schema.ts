@@ -85,6 +85,20 @@ export const areas = pgTable(
   ],
 )
 
+export const users = pgTable('users', {
+  uid: varchar({ length: 255 }).primaryKey(),
+  email: varchar({ length: 255 }),
+  displayName: varchar('display_name', { length: 255 }),
+  photoURL: varchar('photo_url', { length: 512 }),
+  active: boolean().notNull().default(false),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'string',
+  })
+    .defaultNow()
+    .notNull(),
+})
+
 export const walks = pgTable(
   'walks',
   {

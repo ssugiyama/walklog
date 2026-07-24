@@ -1,0 +1,532 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "674f4f72-a839-4f29-9891-7dad8ed84447",
+  "prevIds": ["d2bf7ede-b7df-4b52-94cc-9910908426e1"],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "areas",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "users",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "walks",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "gid",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(254)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jcode",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(254)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ken",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(254)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "sicho",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "gun",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "seirei",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "sikuchoson",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(254)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "city_eng",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "p_num",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "h_num",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "geometry(MultiPolygon,4326)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "the_geom",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "uid",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "display_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "varchar(512)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "photo_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "active",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "comment",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "length",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "draft",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "geometry(LineString,4326)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "path",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "uid",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "the_geom",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": {
+            "name": "gist_geometry_ops_2d",
+            "default": false
+          }
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "gist",
+      "concurrently": false,
+      "name": "areas_the_geom_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "areas"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "date",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": {
+            "name": "date_ops",
+            "default": false
+          }
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "walks_date",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "draft",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": {
+            "name": "bool_ops",
+            "default": false
+          }
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "walks_draft",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "path",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": {
+            "name": "gist_geometry_ops_2d",
+            "default": false
+          }
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "gist",
+      "concurrently": false,
+      "name": "walks_path",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "columns": ["gid"],
+      "nameExplicit": false,
+      "name": "areas_pkey",
+      "schema": "public",
+      "table": "areas",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["uid"],
+      "nameExplicit": false,
+      "name": "users_pkey",
+      "schema": "public",
+      "table": "users",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "walks_pkey",
+      "schema": "public",
+      "table": "walks",
+      "entityType": "pks"
+    },
+    {
+      "value": "st_ndims(path) = 2",
+      "name": "enforce_dims_path",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "value": "(geometrytype(path) = 'LINESTRING'::text) OR (path IS NULL)",
+      "name": "enforce_geotype_path",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "walks"
+    },
+    {
+      "value": "st_srid(path) = 4326",
+      "name": "enforce_srid_path",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "walks"
+    }
+  ],
+  "renames": []
+}

@@ -1,5 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
+import { Mock } from 'vitest'
+import { updateItemAction } from '@/app/lib/walk-actions'
+import { useData } from '../utils/data-context'
 import WalkEditor from './walk-editor'
 
 const mockUpdateIdToken = vi.fn()
@@ -12,13 +15,18 @@ const mockSearchParams = {
   toString: vi.fn(() => 'param1=value1&param2=value2'),
 }
 
+let selectedFile: File | null = null
+
+let lastFormData: { append: Mock; get: Mock; entries: Mock } | null = null
+
 beforeAll(() => {
   global.FormData = vi.fn().mockImplementation(function () {
-    return {
+    lastFormData = {
       append: vi.fn(),
       get: vi.fn(),
       entries: vi.fn(() => []),
     }
+    return lastFormData
   })
 })
 
@@ -26,30 +34,12 @@ vi.mock('../utils/user-context', () => ({
   useUserContext: () => ({
     updateIdToken: mockUpdateIdToken,
     currentUser: { uid: 'test-uid' },
-    users: [{ uid: 'test-uid', admin: true }],
-  }),
-}))
-
-vi.mock('../utils/config', () => ({
-  useConfig: () => ({
-    openUserMode: true,
+    users: [{ uid: 'test-uid', active: true }],
   }),
 }))
 
 vi.mock('../utils/data-context', () => ({
-  useData: () => [
-    {
-      current: {
-        id: '2',
-        date: '2023-01-01',
-        title: 'Test Walk',
-        comment: 'Test comment',
-        draft: true,
-        path: 'test-path',
-      },
-    },
-    mockSetData,
-  ],
+  useData: vi.fn(),
 }))
 
 vi.mock('../utils/map-context', () => ({
@@ -77,6 +67,30 @@ vi.mock('@/app/lib/walk-actions', () => ({
   updateItemAction: vi.fn().mockResolvedValue({}),
 }))
 
+vi.mock('./image-uploader', () => ({
+  default: ({
+    onChange,
+    onClear,
+  }: {
+    onChange: (event: { target: { files: File[] } }) => void
+    onClear: () => void
+  }) => (
+    <div>
+      <button
+        data-testid="mock-select-image"
+        onClick={() =>
+          onChange({ target: { files: selectedFile ? [selectedFile] : [] } })
+        }
+      >
+        select image
+      </button>
+      <button data-testid="mock-clear-image" onClick={() => onClear()}>
+        clear image
+      </button>
+    </div>
+  ),
+}))
+
 vi.mock('use-query-params', () => ({
   useQueryParam: vi.fn(() => ['test-path']),
   StringParam: vi.fn(),
@@ -94,9 +108,26 @@ vi.mock('moment', async () => {
   }
 })
 
+const defaultWalk = {
+  id: '2',
+  date: '2023-01-01',
+  title: 'Test Walk',
+  comment: 'Test comment',
+  draft: true,
+  path: 'test-path',
+  image: null,
+}
+
 describe('WalkEditor update', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    selectedFile = null
+    lastFormData = null
+    ;(useData as Mock).mockReturnValue([
+      { current: defaultWalk, rows: [] },
+      mockSetData,
+    ])
+    ;(updateItemAction as Mock).mockResolvedValue({})
   })
 
   it('renders WalkEditor with default props', () => {
@@ -134,11 +165,70 @@ describe('WalkEditor update', () => {
       payload: true,
     })
   })
+
+  it('rejects a non-image file without submitting', async () => {
+    selectedFile = new File(['x'], 'document.pdf', { type: 'application/pdf' })
+    render(<WalkEditor mode="update" />)
+
+    fireEvent.click(screen.getByTestId('mock-select-image'))
+    fireEvent.click(screen.getByTestId('submit-button'))
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Image must be an image file'),
+      ).toBeInTheDocument(),
+    )
+    expect(updateItemAction).not.toHaveBeenCalled()
+  })
+
+  it('rejects an image over 2MB without submitting', async () => {
+    selectedFile = new File([new Uint8Array(3 * 1024 * 1024)], 'big.jpg', {
+      type: 'image/jpeg',
+    })
+    render(<WalkEditor mode="update" />)
+
+    fireEvent.click(screen.getByTestId('mock-select-image'))
+    fireEvent.click(screen.getByTestId('submit-button'))
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Image size must be 2MB or less'),
+      ).toBeInTheDocument(),
+    )
+    expect(updateItemAction).not.toHaveBeenCalled()
+  })
+
+  it('sends the file directly instead of uploading it client-side', async () => {
+    selectedFile = new File(['x'], 'photo.jpg', { type: 'image/jpeg' })
+    render(<WalkEditor mode="update" />)
+
+    fireEvent.click(screen.getByTestId('mock-select-image'))
+    fireEvent.click(screen.getByTestId('submit-button'))
+
+    await waitFor(() => expect(updateItemAction).toHaveBeenCalled())
+    expect(lastFormData?.append).toHaveBeenCalledWith('image', selectedFile)
+  })
+
+  it('navigates to the show page once the save succeeds', async () => {
+    ;(updateItemAction as Mock).mockResolvedValue({ serial: 1, id: 2 })
+    render(<WalkEditor mode="update" />)
+
+    fireEvent.click(screen.getByTestId('submit-button'))
+
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith('/show/2'))
+  })
 })
 
 describe('WalkEditor create', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    selectedFile = null
+    lastFormData = null
+    ;(useData as Mock).mockReturnValue([
+      { current: null, rows: [] },
+      mockSetData,
+    ])
+    ;(updateItemAction as Mock).mockResolvedValue({})
   })
 
   it('renders WalkEditor with default props', () => {

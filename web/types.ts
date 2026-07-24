@@ -72,8 +72,10 @@ export type UserT = {
   uid: string
   displayName: string
   photoURL: string
-  admin?: boolean
+  active: boolean
 }
+
+export type SelfStatusT = 'anonymous' | 'pending' | 'active'
 
 export type DataT = Omit<SearchState & GetItemState, 'serial'> & {
   isPending?: boolean
@@ -101,14 +103,15 @@ export type ShapeStyles = {
 export type ConfigT = {
   googleApiKey: string
   googleApiVersion: string
-  openUserMode: boolean
+  autoApproveUsers: boolean
   appVersion: string
   defaultCenter: string
   defaultZoom: number
   defaultRadius: number
   mapTypeIds: string
   mapId: string
-  firebaseConfig: object
+  firebaseConfig: { apiKey: string; authDomain: string }
+  imagePrefix: string
   shapeStyles: ShapeStyles
   theme: object
 }

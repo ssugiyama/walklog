@@ -12,8 +12,6 @@ import {
   SQL,
   sql,
 } from 'drizzle-orm'
-import { FirebaseError } from 'firebase/app'
-import admin from 'firebase-admin'
 import fs from 'fs/promises'
 import moment from 'moment'
 import { nanoid } from 'nanoid'
@@ -21,8 +19,12 @@ import { cacheTag, revalidateTag } from 'next/cache'
 import { ValueOf } from 'next/dist/shared/lib/constants'
 import { cookies } from 'next/headers'
 import { forbidden, notFound, unauthorized } from 'next/navigation'
-import path from 'path'
-import url from 'url'
+import {
+  FirebaseIdTokenClaims,
+  IdTokenExpiredError,
+  verifyFirebaseIdToken,
+} from '@/lib/utils/firebase-id-token'
+import { deleteImage, saveImage } from '@/lib/utils/image-storage'
 import { decode } from '@/lib/utils/path-encoder'
 import {
   BaseState,
@@ -33,13 +35,14 @@ import {
   GetItemState,
   SearchProps,
   SearchState,
+  SelfStatusT,
   ShapeStyles,
   UpdateItemState,
   UserT,
   WalkT,
 } from '@/types'
 import { db } from '../../lib/drizzle/db'
-import { areas, coordinatesToWKT, walks } from '../../lib/drizzle/schema'
+import { areas, coordinatesToWKT, users, walks } from '../../lib/drizzle/schema'
 import {
   decodePath,
   EARTH_RADIUS,
@@ -85,41 +88,43 @@ const asCityT = (area: AreaAttributes): CityT => {
   }
 }
 
-let firebaseConfig: admin.AppOptions | null = null
-
-const loadFirebaseConfig = async () => {
-  const content = await fs.readFile(process.env.FIREBASE_CONFIG)
-  firebaseConfig = JSON.parse(content.toString()) as admin.AppOptions
-  if (admin.apps.length === 0) {
-    admin.initializeApp({
-      ...firebaseConfig,
-      credential: admin.credential.applicationDefault(),
-    })
+const readJsonConfig = async (
+  url: string | undefined,
+  defaultLocalPath: string,
+): Promise<unknown> => {
+  if (url) {
+    const response = await fetch(url)
+    return response.json()
   }
+  const content = await fs.readFile(defaultLocalPath)
+  return JSON.parse(content.toString())
 }
 
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
-  const shapeStylesContent = await fs.readFile(
-    process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json',
-  )
-  const shapeStyles = JSON.parse(shapeStylesContent.toString()) as ShapeStyles
-  const themeContent = await fs.readFile(
-    process.env.THEME_JSON ?? './default-theme.json',
-  )
-  const theme = JSON.parse(themeContent.toString()) as Theme
-  if (!firebaseConfig) await loadFirebaseConfig()
+  const shapeStyles = (await readJsonConfig(
+    process.env.SHAPE_STYLES_JSON_URL,
+    './default-shape-styles.json',
+  )) as ShapeStyles
+  const theme = (await readJsonConfig(
+    process.env.THEME_JSON_URL,
+    './default-theme.json',
+  )) as Theme
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
-    openUserMode: !!process.env.OPEN_USER_MODE,
+    autoApproveUsers: !!process.env.AUTO_APPROVE_USERS,
     appVersion: process.env.APP_VERSION || 'dev',
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
     defaultRadius: 500,
     mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
     mapId: process.env.MAP_ID,
-    firebaseConfig,
+    firebaseConfig: {
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    },
+    imagePrefix: process.env.IMAGE_PREFIX ?? 'images',
     shapeStyles,
     theme,
   }
@@ -127,29 +132,85 @@ export const getConfig = async (): Promise<ConfigT> => {
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
-const openUserMode: boolean = !!process.env.OPEN_USER_MODE
-const firebaseStorage: boolean = !!process.env.FIREBASE_STORAGE
+const autoApproveUsers: boolean = !!process.env.AUTO_APPROVE_USERS
 
-type GetUidResponse = [string | null, boolean]
+type UserRow = typeof users.$inferSelect
 
-const getUid = async (state: BaseState): Promise<GetUidResponse> => {
+// Not exported: takes a verified token claim, so it must never be reachable
+// as a server action directly from the client.
+const getOrCreateUser = async (
+  claim: FirebaseIdTokenClaims,
+): Promise<UserRow> => {
+  const existing = await db
+    .select()
+    .from(users)
+    .where(eq(users.uid, claim.uid))
+    .limit(1)
+    .then((rows) => rows[0])
+  if (existing) return existing
+  const created = await db
+    .insert(users)
+    .values({
+      uid: claim.uid,
+      email: claim.email ?? null,
+      displayName: claim.name ?? null,
+      photoURL: claim.picture ?? null,
+      active: autoApproveUsers,
+    })
+    .onConflictDoNothing()
+    .returning()
+    .then((rows) => rows[0])
+  return (
+    created ??
+    (await db
+      .select()
+      .from(users)
+      .where(eq(users.uid, claim.uid))
+      .limit(1)
+      .then((rows) => rows[0]))
+  )
+}
+
+const verifyIdToken = async (
+  state: BaseState,
+): Promise<FirebaseIdTokenClaims | null> => {
   const cookieStore = await cookies()
   state.idTokenExpired = false
   const idToken = cookieStore.get('idToken')
   if (!idToken?.value) {
-    return [null, false]
+    return null
   }
   try {
-    const claim = await admin.auth().verifyIdToken(idToken.value)
-    return [claim?.uid, claim?.admin ?? false]
+    return await verifyFirebaseIdToken(idToken.value)
   } catch (error) {
-    if ((error as FirebaseError).code === 'auth/id-token-expired') {
+    if (error instanceof IdTokenExpiredError) {
       state.idTokenExpired = true
     } else {
       state.error = error as Error
     }
-    return [null, false]
+    return null
   }
+}
+
+const getUid = async (state: BaseState): Promise<string | null> => {
+  const claim = await verifyIdToken(state)
+  if (!claim) {
+    return null
+  }
+  const user = await getOrCreateUser(claim)
+  if (!user.active) {
+    return null
+  }
+  return claim.uid
+}
+
+export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
+  const claim = await verifyIdToken({})
+  if (!claim) {
+    return 'anonymous'
+  }
+  const user = await getOrCreateUser(claim)
+  return user.active ? 'active' : 'pending'
 }
 
 export const searchInternalAction = async (
@@ -340,7 +401,7 @@ export const searchAction = async (
   state.idTokenExpired = false
   state.append = props.offset > 0
 
-  const [uid] = await _getUid(state)
+  const uid = await _getUid(state)
   const newState = await _searchInternalAction(props, uid)
   return Object.assign({ ...state }, newState)
 }
@@ -376,19 +437,12 @@ export const getItemAction = async (
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
-  const [uid] = await _getUid(state)
+  const uid = await _getUid(state)
   const newState = await _getItemInternalAction(id, uid)
   if (!newState.current && !newState.idTokenExpired) {
     notFound()
   }
   return Object.assign({ ...state }, newState)
-}
-
-const getFilename = (uid: string, date: string, file: File) => {
-  const match = file.name.match(/\.\w+$/)
-  const ext = match ? match[0] : ''
-  const basename = `${uid}-${date}-${nanoid(4)}`
-  return match ? basename + ext : basename
 }
 
 // Manual validation replaces Zod schema for better error message control
@@ -397,18 +451,18 @@ export const updateItemAction = async (
   prevState: UpdateItemState,
   formData: FormData,
   _getUid: typeof getUid = getUid,
+  _saveImage: typeof saveImage = saveImage,
+  _deleteImage: typeof deleteImage = deleteImage,
 ): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.id = null
   state.serial++
-  const [uid, isAdmin] = await _getUid(state)
+  const uid = await _getUid(state)
   if (state.idTokenExpired) {
     return state
   }
   if (!uid) {
     unauthorized()
-  } else if (!openUserMode && !isAdmin) {
-    forbidden()
   }
 
   // Extract form data
@@ -416,11 +470,15 @@ export const updateItemAction = async (
   const date = formData.get('date') as string
   const title = formData.get('title') as string
   const comment = formData.get('comment') as string
-  const image = formData.get('image') as File | null
+  const image = formData.get('image')
   const walkPath = formData.get('path') as string
   const draft = formData.get('draft') === 'true' ? true : false
   const willDeleteImage =
     formData.get('will_delete_image') === 'true' ? true : false
+
+  // The client sends the raw file; the upload itself happens here so the
+  // storage backend (local disk or R2) stays an implementation detail.
+  const newImageFile = image instanceof File && image.size > 0 ? image : null
 
   // Manual validation to ensure consistent error messages
   const validationErrors = []
@@ -437,13 +495,10 @@ export const updateItemAction = async (
     validationErrors.push('Path is required')
   }
 
-  // Image validation
-  if (image && image.size > 0) {
-    if (!image.type) {
-      validationErrors.push('Image must be a valid file')
-    } else if (!image.type?.startsWith('image/')) {
+  if (newImageFile) {
+    if (!newImageFile.type?.startsWith('image/')) {
       validationErrors.push('Image must be an image file')
-    } else if (image.size > 2 * 1024 * 1024) {
+    } else if (newImageFile.size > 2 * 1024 * 1024) {
       validationErrors.push('Image size must be 2MB or less')
     }
   }
@@ -451,6 +506,19 @@ export const updateItemAction = async (
   if (validationErrors.length > 0) {
     state.error = new Error(validationErrors.join(', '))
     return state
+  }
+
+  let existingWalk: WalkSelectAttributes | undefined
+  if (id) {
+    existingWalk = await db
+      .select()
+      .from(walks)
+      .where(eq(walks.id, id))
+      .limit(1)
+      .then((rows) => rows[0])
+    if (!existingWalk || existingWalk.uid !== uid) {
+      forbidden()
+    }
   }
 
   const d = new Date(date)
@@ -466,43 +534,30 @@ export const updateItemAction = async (
     props.length =
       sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
   }
+
+  let uploadedImage: string | null = null
   if (willDeleteImage) {
     props.image = null
-  } else if ((image?.size ?? 0) > 0) {
+  } else if (newImageFile) {
+    const imagePrefix = process.env.IMAGE_PREFIX ?? 'images'
+    const match = newImageFile.name.match(/\.\w+$/)
+    const ext = match ? match[0] : ''
+    const key = `${imagePrefix}/${uid}-${date}-${nanoid(4)}${ext}`
     try {
-      const prefix = process.env.IMAGE_PREFIX ?? 'images'
-      const filePath = path.join(prefix, getFilename(uid, date, image))
-      const content = await image.arrayBuffer()
-      const buffer = Buffer.from(content)
-      if (firebaseStorage) {
-        const bucket = admin.storage().bucket()
-        const blob = bucket.file(filePath)
-        await blob.save(buffer) // await を追加
-        props.image = url.resolve(
-          'https://storage.googleapis.com',
-          path.join(bucket.name, blob.name),
-        )
-      } else {
-        await fs.writeFile(`public/${filePath}`, buffer)
-        props.image = filePath
-      }
+      uploadedImage = await _saveImage(newImageFile, key)
     } catch (error) {
-      console.error('updateItemAction image error', error)
       state.error = error as Error
-      state.id = null
       return state
     }
+    props.image = uploadedImage
   }
+
+  const oldImage =
+    (willDeleteImage || newImageFile) && existingWalk?.image
+      ? existingWalk.image
+      : null
+
   if (id) {
-    const walk = await db
-      .select()
-      .from(walks)
-      .where(eq(walks.id, id))
-      .limit(1)
-      .then((rows) => rows[0])
-    if (walk.uid !== uid) {
-      forbidden()
-    }
     try {
       props.updatedAt = sql<string>`now()` as unknown as string
       await db.update(walks).set(props).where(eq(walks.id, id))
@@ -511,6 +566,9 @@ export const updateItemAction = async (
       console.error('updateItemAction error', error)
       state.error = error as Error
       state.id = null
+      if (uploadedImage) {
+        void _deleteImage(uploadedImage)
+      }
       return state
     }
   } else {
@@ -527,9 +585,17 @@ export const updateItemAction = async (
       console.error('updateItemAction create error', error)
       state.error = error as Error
       state.id = null
+      if (uploadedImage) {
+        void _deleteImage(uploadedImage)
+      }
       return state
     }
   }
+
+  if (oldImage) {
+    void _deleteImage(oldImage)
+  }
+
   revalidateTag(SEARCH_CACHE_TAG, 'max')
   return state
 }
@@ -542,14 +608,12 @@ export const deleteItemAction = async (
   const state = { ...prevState }
   state.deleted = false
   state.serial++
-  const [uid, isAdmin] = await _getUid(state)
+  const uid = await _getUid(state)
   if (state.idTokenExpired) {
     return state
   }
   if (!uid) {
     unauthorized()
-  } else if (!openUserMode && !isAdmin) {
-    forbidden()
   }
 
   const walk = await db
@@ -588,10 +652,11 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
 
 export const getUsersAction = async (): Promise<UserT[]> => {
   'use cache'
-  const userResult = await admin.auth().listUsers(1000)
-  return userResult.users.map((user) => {
-    const { uid, displayName, photoURL } = user
-    const admin: boolean = (user.customClaims?.admin as boolean) || false
-    return { uid, displayName, photoURL, admin }
-  })
+  const rows = await db.select().from(users).where(eq(users.active, true))
+  return rows.map((user) => ({
+    uid: user.uid,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+    active: user.active,
+  }))
 }

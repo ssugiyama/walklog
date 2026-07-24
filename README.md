@@ -75,18 +75,24 @@ Edit `web/.env` or add `web/.env.local` with your configuration:
 SITE_NAME=Walklog
 SITE_DESCRIPTION=Web application for managing your walking logs
 IMAGE_PREFIX=uploads
-OPEN_USER_MODE=
-SHAPE_STYLES_JSON=/default-shape-styles.json
+AUTO_APPROVE_USERS=
+SHAPE_STYLES_JSON_URL=https://example.com/shape-styles.json
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
-FIREBASE_CONFIG=path-to-firebase-config.json
+FIREBASE_API_KEY=your-firebase-api-key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 GOOGLE_API_KEY=your-google-maps-api-key
-FIREBASE_STORAGE=on
+IMAGE_STORAGE=
+R2_ACCOUNT_ID=your-r2-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key-id
+R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+R2_BUCKET_NAME=your-r2-bucket-name
+R2_PUBLIC_URL=https://pub-xxxxxxxx.r2.dev
 MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
 DEFAULT_CENTER=35.6762,139.6503
 DEFAULT_ZOOM=12
 MAP_ID=your-google-map-id
-GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
+# THEME_JSON_URL=https://example.com/theme.json
 THEME_COLOR="#3874cb"
 # THEME_COLOR_LIGHT="#3874cb"
 # THEME_COLOR_DARK="#3874cb"
@@ -100,11 +106,16 @@ THEME_COLOR="#3874cb"
 | `SITE_NAME` | Display name for the application | Yes |
 | `SITE_DESCRIPTION` | Site description for meta tags | Yes |
 | `IMAGE_PREFIX` | Prefix for image storage paths | Yes |
-| `OPEN_USER_MODE` | If set, allows all users to manage walks | No |
-| `FIREBASE_CONFIG` | Path to Firebase web config JSON | Yes |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Path to Firebase service account JSON | Yes |
-| `FIREBASE_STORAGE` | Enable Firebase Storage for images (`on`/`off`) | Yes |
-| `DRAWING_STYLES_JSON` | Path to drawing styles configuration | No |
+| `AUTO_APPROVE_USERS` | If set, new users are automatically approved (active) on first login instead of requiring manual approval | No |
+| `FIREBASE_API_KEY` | Firebase Web API key (Authentication) | Yes |
+| `FIREBASE_AUTH_DOMAIN` | Firebase Auth domain, e.g. `your-project.firebaseapp.com` | Yes |
+| `IMAGE_STORAGE` | Image upload backend: `R2` for Cloudflare R2, anything else (including unset) for local disk | No |
+| `R2_ACCOUNT_ID` | Cloudflare account ID (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_ACCESS_KEY_ID` | R2 S3-compatible API access key ID (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_SECRET_ACCESS_KEY` | R2 S3-compatible API secret access key (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_BUCKET_NAME` | R2 bucket name (required when `IMAGE_STORAGE=R2`) | No † |
+| `R2_PUBLIC_URL` | Public base URL for the R2 bucket (r2.dev subdomain or custom domain, required when `IMAGE_STORAGE=R2`) | No † |
+| `SHAPE_STYLES_JSON_URL` | URL to fetch shape styles configuration JSON from over the network; falls back to the bundled default when unset | No |
 | `GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
 | `MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
 | `MAP_ID` | Google Maps ID for custom styling | No |
@@ -112,7 +123,7 @@ THEME_COLOR="#3874cb"
 | `DEFAULT_ZOOM` | Default map zoom | No |
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
-| `THEME_JSON` | Theme specification for material-ui | No |
+| `THEME_JSON_URL` | URL to fetch the material-ui theme specification JSON from over the network; falls back to the bundled default when unset | No |
 | `THEME_COLOR` | Theme color for UA in both light mode and dark mode| No |
 | `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
 | `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
@@ -126,20 +137,23 @@ THEME_COLOR="#3874cb"
 
 * if using docker, **DB_URL** is provided as an environment variable.
 
-### 5. Admin User Management
+† only required when `IMAGE_STORAGE=R2`. When unset (or set to anything other than `R2`), uploaded images are written to `public/uploads` on the server's local disk instead.
 
-To manage admin users, use the provided script:
+### 5. User Approval Management
+
+New users are `pending` (inactive) by default unless `AUTO_APPROVE_USERS` is set. Use the provided script to manage user approval:
 
 ```bash
 cd web
 
-# Add admin user
-GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
-./bin/set-admin.js add firebase-uid
+# List pending (inactive) users
+node --env-file=.env bin/manage-users.js list-pending
 
-# Remove admin user
-GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
-./bin/set-admin.js rm firebase-uid
+# Approve a user (allow them to create/edit walks)
+node --env-file=.env bin/manage-users.js approve firebase-uid
+
+# Revoke a user's approval
+node --env-file=.env bin/manage-users.js rm firebase-uid
 ```
 
 ## Deployment Options
@@ -236,9 +250,14 @@ walklog/
 - Ensure API key has proper restrictions and permissions
 
 **Image Upload Issues**
-- Check Firebase Storage rules and permissions
-- Verify `FIREBASE_STORAGE` environment variable
-- Ensure service account has Storage Admin role
+- Images are uploaded to the server (not directly from the browser) and then
+  saved to local disk or Cloudflare R2, depending on `IMAGE_STORAGE`
+- If `IMAGE_STORAGE=R2`, verify `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+  `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and `R2_PUBLIC_URL` are all set
+  and that the R2 bucket has public access enabled at `R2_PUBLIC_URL`
+- If `IMAGE_STORAGE` is unset (or anything other than `R2`), verify the
+  process can write to `public/uploads` (files saved there do not survive a
+  container rebuild, so this mode is best for local/simple deployments)
 
 ## Contributing
 
