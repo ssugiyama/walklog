@@ -76,7 +76,7 @@ SITE_NAME=Walklog
 SITE_DESCRIPTION=Web application for managing your walking logs
 IMAGE_PREFIX=uploads
 AUTO_APPROVE_USERS=
-SHAPE_STYLES_JSON=/default-shape-styles.json
+SHAPE_STYLES_JSON_URL=https://example.com/shape-styles.json
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
 FIREBASE_API_KEY=your-firebase-api-key
@@ -92,7 +92,7 @@ MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
 DEFAULT_CENTER=35.6762,139.6503
 DEFAULT_ZOOM=12
 MAP_ID=your-google-map-id
-GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
+# THEME_JSON_URL=https://example.com/theme.json
 THEME_COLOR="#3874cb"
 # THEME_COLOR_LIGHT="#3874cb"
 # THEME_COLOR_DARK="#3874cb"
@@ -109,14 +109,13 @@ THEME_COLOR="#3874cb"
 | `AUTO_APPROVE_USERS` | If set, new users are automatically approved (active) on first login instead of requiring manual approval | No |
 | `FIREBASE_API_KEY` | Firebase Web API key (Authentication) | Yes |
 | `FIREBASE_AUTH_DOMAIN` | Firebase Auth domain, e.g. `your-project.firebaseapp.com` | Yes |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Path to Firebase service account JSON | Yes |
 | `IMAGE_STORAGE` | Image upload backend: `R2` for Cloudflare R2, anything else (including unset) for local disk | No |
 | `R2_ACCOUNT_ID` | Cloudflare account ID (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_ACCESS_KEY_ID` | R2 S3-compatible API access key ID (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_SECRET_ACCESS_KEY` | R2 S3-compatible API secret access key (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_BUCKET_NAME` | R2 bucket name (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_PUBLIC_URL` | Public base URL for the R2 bucket (r2.dev subdomain or custom domain, required when `IMAGE_STORAGE=R2`) | No † |
-| `DRAWING_STYLES_JSON` | Path to drawing styles configuration | No |
+| `SHAPE_STYLES_JSON_URL` | URL to fetch shape styles configuration JSON from over the network; falls back to the bundled default when unset | No |
 | `GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
 | `MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
 | `MAP_ID` | Google Maps ID for custom styling | No |
@@ -124,7 +123,7 @@ THEME_COLOR="#3874cb"
 | `DEFAULT_ZOOM` | Default map zoom | No |
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
-| `THEME_JSON` | Theme specification for material-ui | No |
+| `THEME_JSON_URL` | URL to fetch the material-ui theme specification JSON from over the network; falls back to the bundled default when unset | No |
 | `THEME_COLOR` | Theme color for UA in both light mode and dark mode| No |
 | `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
 | `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |

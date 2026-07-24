@@ -88,16 +88,28 @@ const asCityT = (area: AreaAttributes): CityT => {
   }
 }
 
+const readJsonConfig = async (
+  url: string | undefined,
+  defaultLocalPath: string,
+): Promise<unknown> => {
+  if (url) {
+    const response = await fetch(url)
+    return response.json()
+  }
+  const content = await fs.readFile(defaultLocalPath)
+  return JSON.parse(content.toString())
+}
+
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
-  const shapeStylesContent = await fs.readFile(
-    process.env.SHAPE_STYLES_JSON ?? './default-shape-styles.json',
-  )
-  const shapeStyles = JSON.parse(shapeStylesContent.toString()) as ShapeStyles
-  const themeContent = await fs.readFile(
-    process.env.THEME_JSON ?? './default-theme.json',
-  )
-  const theme = JSON.parse(themeContent.toString()) as Theme
+  const shapeStyles = (await readJsonConfig(
+    process.env.SHAPE_STYLES_JSON_URL,
+    './default-shape-styles.json',
+  )) as ShapeStyles
+  const theme = (await readJsonConfig(
+    process.env.THEME_JSON_URL,
+    './default-theme.json',
+  )) as Theme
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
