@@ -79,7 +79,8 @@ AUTO_APPROVE_USERS=
 SHAPE_STYLES_JSON=/default-shape-styles.json
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
-FIREBASE_CONFIG=path-to-firebase-config.json
+FIREBASE_API_KEY=your-firebase-api-key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 GOOGLE_API_KEY=your-google-maps-api-key
 IMAGE_STORAGE=
 R2_ACCOUNT_ID=your-r2-account-id
@@ -106,7 +107,8 @@ THEME_COLOR="#3874cb"
 | `SITE_DESCRIPTION` | Site description for meta tags | Yes |
 | `IMAGE_PREFIX` | Prefix for image storage paths | Yes |
 | `AUTO_APPROVE_USERS` | If set, new users are automatically approved (active) on first login instead of requiring manual approval | No |
-| `FIREBASE_CONFIG` | Path to Firebase web config JSON | Yes |
+| `FIREBASE_API_KEY` | Firebase Web API key (Authentication) | Yes |
+| `FIREBASE_AUTH_DOMAIN` | Firebase Auth domain, e.g. `your-project.firebaseapp.com` | Yes |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Path to Firebase service account JSON | Yes |
 | `IMAGE_STORAGE` | Image upload backend: `R2` for Cloudflare R2, anything else (including unset) for local disk | No |
 | `R2_ACCOUNT_ID` | Cloudflare account ID (required when `IMAGE_STORAGE=R2`) | No † |

@@ -110,7 +110,7 @@ export type ConfigT = {
   defaultRadius: number
   mapTypeIds: string
   mapId: string
-  firebaseConfig: object
+  firebaseConfig: { apiKey: string; authDomain: string }
   imagePrefix: string
   shapeStyles: ShapeStyles
   theme: object

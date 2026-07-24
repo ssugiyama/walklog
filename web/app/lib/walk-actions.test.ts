@@ -959,17 +959,15 @@ describe('server actions', () => {
     it('should return the correct configuration object', async () => {
       const mockShapeStyles = { style: 'mockStyle' }
       const mockTheme = { palette: {} }
-      const mockFirebaseConfig = { key: 'value' }
       ;(fs.readFile as Mock).mockImplementation((path) => {
         if (path === './default-shape-styles.json') {
           return Buffer.from(JSON.stringify(mockShapeStyles))
         }
-        if (path === './default-theme.json') {
-          return Buffer.from(JSON.stringify(mockTheme))
-        }
-        return Buffer.from(JSON.stringify(mockFirebaseConfig))
+        return Buffer.from(JSON.stringify(mockTheme))
       })
       process.env.APP_VERSION = '1.2.3'
+      process.env.FIREBASE_API_KEY = 'test-api-key'
+      process.env.FIREBASE_AUTH_DOMAIN = 'test.firebaseapp.com'
       const result = await getConfig()
       expect(result).toEqual({
         googleApiKey: process.env.GOOGLE_API_KEY,
@@ -983,7 +981,10 @@ describe('server actions', () => {
           process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
         mapId: process.env.MAP_ID,
         imagePrefix: process.env.IMAGE_PREFIX ?? 'images',
-        firebaseConfig: expect.any(Object),
+        firebaseConfig: {
+          apiKey: 'test-api-key',
+          authDomain: 'test.firebaseapp.com',
+        },
         theme: mockTheme,
         shapeStyles: mockShapeStyles,
       })

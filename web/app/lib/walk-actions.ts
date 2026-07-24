@@ -88,15 +88,6 @@ const asCityT = (area: AreaAttributes): CityT => {
   }
 }
 
-type FirebaseClientConfig = Record<string, unknown>
-
-let firebaseConfig: FirebaseClientConfig | null = null
-
-const loadFirebaseConfig = async () => {
-  const content = await fs.readFile(process.env.FIREBASE_CONFIG)
-  firebaseConfig = JSON.parse(content.toString()) as FirebaseClientConfig
-}
-
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
   const shapeStylesContent = await fs.readFile(
@@ -107,7 +98,6 @@ export const getConfig = async (): Promise<ConfigT> => {
     process.env.THEME_JSON ?? './default-theme.json',
   )
   const theme = JSON.parse(themeContent.toString()) as Theme
-  if (!firebaseConfig) await loadFirebaseConfig()
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
@@ -118,7 +108,10 @@ export const getConfig = async (): Promise<ConfigT> => {
     defaultRadius: 500,
     mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
     mapId: process.env.MAP_ID,
-    firebaseConfig,
+    firebaseConfig: {
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    },
     imagePrefix: process.env.IMAGE_PREFIX ?? 'images',
     shapeStyles,
     theme,
