@@ -75,7 +75,7 @@ Edit `web/.env` or add `web/.env.local` with your configuration:
 SITE_NAME=Walklog
 SITE_DESCRIPTION=Web application for managing your walking logs
 IMAGE_PREFIX=uploads
-OPEN_USER_MODE=
+AUTO_APPROVE_USERS=
 SHAPE_STYLES_JSON=/default-shape-styles.json
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
@@ -105,7 +105,7 @@ THEME_COLOR="#3874cb"
 | `SITE_NAME` | Display name for the application | Yes |
 | `SITE_DESCRIPTION` | Site description for meta tags | Yes |
 | `IMAGE_PREFIX` | Prefix for image storage paths | Yes |
-| `OPEN_USER_MODE` | If set, allows all users to manage walks | No |
+| `AUTO_APPROVE_USERS` | If set, new users are automatically approved (active) on first login instead of requiring manual approval | No |
 | `FIREBASE_CONFIG` | Path to Firebase web config JSON | Yes |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Path to Firebase service account JSON | Yes |
 | `IMAGE_STORAGE` | Image upload backend: `R2` for Cloudflare R2, anything else (including unset) for local disk | No |
@@ -138,20 +138,21 @@ THEME_COLOR="#3874cb"
 
 † only required when `IMAGE_STORAGE=R2`. When unset (or set to anything other than `R2`), uploaded images are written to `public/uploads` on the server's local disk instead.
 
-### 5. Admin User Management
+### 5. User Approval Management
 
-To manage admin users, use the provided script:
+New users are `pending` (inactive) by default unless `AUTO_APPROVE_USERS` is set. Use the provided script to manage user approval:
 
 ```bash
 cd web
 
-# Add admin user
-GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
-./bin/set-admin.js add firebase-uid
+# List pending (inactive) users
+node --env-file=.env bin/manage-users.js list-pending
 
-# Remove admin user
-GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json \
-./bin/set-admin.js rm firebase-uid
+# Approve a user (allow them to create/edit walks)
+node --env-file=.env bin/manage-users.js approve firebase-uid
+
+# Revoke a user's approval
+node --env-file=.env bin/manage-users.js rm firebase-uid
 ```
 
 ## Deployment Options

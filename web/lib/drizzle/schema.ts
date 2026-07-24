@@ -90,7 +90,7 @@ export const users = pgTable('users', {
   email: varchar({ length: 255 }),
   displayName: varchar('display_name', { length: 255 }),
   photoURL: varchar('photo_url', { length: 512 }),
-  status: varchar({ length: 20 }).notNull().default('pending'),
+  active: boolean().notNull().default(false),
   createdAt: timestamp('created_at', {
     withTimezone: true,
     mode: 'string',

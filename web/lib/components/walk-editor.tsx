@@ -25,7 +25,6 @@ import React, {
 import { StringParam, useQueryParam, withDefault } from 'use-query-params'
 import { updateItemAction } from '@/app/lib/walk-actions'
 import { WalkT } from '@/types'
-import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import { useMainContext } from '../utils/main-context'
 import { idToShowUrl } from '../utils/meta-utils'
@@ -60,7 +59,6 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     idTokenExpired: false,
     serial: 0,
   }
-  const config = useConfig()
   const { updateIdToken, currentUser, users } = useUserContext()
   const [data, setData] = useData()
   const [localError, setLocalError] = useState<Error | null>(null)
@@ -193,7 +191,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     return null
   }
   const dataUser = users.find((u) => u.uid === currentUser.uid) ?? null
-  if (!config.openUserMode && !dataUser?.admin) {
+  if (!dataUser?.active) {
     forbidden()
   }
 

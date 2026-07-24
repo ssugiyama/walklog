@@ -25,15 +25,13 @@ const options = {
 const sql = postgres(process.env.DB_URL, options)
 
 const usage = () => {
-  console.error(
-    'usage: manage-users.js <list-pending|approve <uid>|set-admin <uid>|rm <uid>>',
-  )
+  console.error('usage: manage-users.js <list-pending|approve <uid>|rm <uid>>')
   process.exitCode = 1
 }
 
-const setStatus = async (uid, status) => {
+const setActive = async (uid, active) => {
   const rows =
-    await sql`UPDATE users SET status = ${status} WHERE uid = ${uid} RETURNING uid`
+    await sql`UPDATE users SET active = ${active} WHERE uid = ${uid} RETURNING uid`
   if (rows.length === 0) {
     console.error(`user not found: ${uid}`)
     process.exitCode = 1
@@ -47,21 +45,17 @@ const main = async () => {
   switch (command) {
     case 'list-pending': {
       const rows =
-        await sql`SELECT uid, email, display_name, created_at FROM users WHERE status = 'pending' ORDER BY created_at`
+        await sql`SELECT uid, email, display_name, created_at FROM users WHERE active = false ORDER BY created_at`
       console.table(rows)
       break
     }
     case 'approve':
       if (!uid) return usage()
-      await setStatus(uid, 'active')
-      break
-    case 'set-admin':
-      if (!uid) return usage()
-      await setStatus(uid, 'admin')
+      await setActive(uid, true)
       break
     case 'rm':
       if (!uid) return usage()
-      await setStatus(uid, 'pending')
+      await setActive(uid, false)
       break
     default:
       usage()

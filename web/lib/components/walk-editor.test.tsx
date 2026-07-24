@@ -34,14 +34,7 @@ vi.mock('../utils/user-context', () => ({
   useUserContext: () => ({
     updateIdToken: mockUpdateIdToken,
     currentUser: { uid: 'test-uid' },
-    users: [{ uid: 'test-uid', admin: true }],
-  }),
-}))
-
-vi.mock('../utils/config', () => ({
-  useConfig: () => ({
-    openUserMode: true,
-    imagePrefix: 'images',
+    users: [{ uid: 'test-uid', active: true }],
   }),
 }))
 

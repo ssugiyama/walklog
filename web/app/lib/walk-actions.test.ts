@@ -214,7 +214,7 @@ describe('server actions', () => {
     })
 
     it('should increment the serial number and reset error/idTokenExpired', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockSearchInternalAction = vi
         .fn()
         .mockResolvedValue({ count: 0, rows: [] })
@@ -232,7 +232,7 @@ describe('server actions', () => {
 
     it('should set append to true if offset is greater than 0', async () => {
       props.offset = 10
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockSearchInternalAction = vi
         .fn()
         .mockResolvedValue({ count: 0, rows: [] })
@@ -248,7 +248,7 @@ describe('server actions', () => {
     })
 
     it('should call getUid and searchInternalAction with correct arguments', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockSearchInternalAction = vi
         .fn()
         .mockResolvedValue({ count: 0, rows: [] })
@@ -260,7 +260,7 @@ describe('server actions', () => {
     })
 
     it('should merge the new state returned by searchInternalAction', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockSearchInternalAction = vi
         .fn()
         .mockResolvedValue({ count: 5, rows: [{ id: 1, title: 'Test Walk' }] })
@@ -340,7 +340,7 @@ describe('server actions', () => {
     })
 
     it('should increment the serial number and reset error/idTokenExpired', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockGetItemInternalActionMock = vi
         .fn()
         .mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
@@ -357,7 +357,7 @@ describe('server actions', () => {
     })
 
     it('should call getUid and getItemInternalAction with correct arguments', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockGetItemInternalActionMock = vi
         .fn()
         .mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
@@ -374,7 +374,7 @@ describe('server actions', () => {
     })
 
     it('should merge the new state returned by getItemInternalAction', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid'])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockGetItemInternalActionMock = vi
         .fn()
         .mockResolvedValue({ current: { id: 1, title: 'Test Walk' } })
@@ -413,22 +413,15 @@ describe('server actions', () => {
     })
 
     it('should return unauthorized error if uid is null', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue([null, false])
+      const mockGetUid = vi.fn().mockResolvedValue(null)
       await expect(
         updateItemAction(prevState, formData, mockGetUid),
       ).rejects.toThrow('unauthorized')
     })
 
-    it('should return forbidden error if user is not admin and openUserMode is false', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', false])
-      await expect(
-        updateItemAction(prevState, formData, mockGetUid),
-      ).rejects.toThrow('forbidden')
-    })
-
     // Zod validation tests
     it('should return validation error if date is missing', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       formData.set('title', 'Test Walk')
       formData.set('path', encode(DEFAULT_PATH))
@@ -441,7 +434,7 @@ describe('server actions', () => {
     })
 
     it('should return validation error if title is missing', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       formData.set('date', '2023-05-15')
       formData.set('path', encode(DEFAULT_PATH))
@@ -454,7 +447,7 @@ describe('server actions', () => {
     })
 
     it('should return validation error if path is missing', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       formData.set('date', '2023-05-15')
       formData.set('title', 'Test Walk')
@@ -467,7 +460,7 @@ describe('server actions', () => {
     })
 
     it('should return validation error if both date and title are missing', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       formData.set('path', encode(DEFAULT_PATH))
 
@@ -480,7 +473,7 @@ describe('server actions', () => {
     })
 
     it('should create a new walk if id is not provided', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       formData.set('title', 'New Walk')
       formData.set('date', '2023-05-15')
@@ -508,7 +501,7 @@ describe('server actions', () => {
         uid: 'testUid',
         title: 'Original title',
       })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       formData.set('id', String(existing.id))
       formData.set('title', 'Updated Walk')
@@ -533,7 +526,7 @@ describe('server actions', () => {
 
     it('should return forbidden error when updating a walk owned by someone else', async () => {
       const existing = await insertWalk({ uid: 'otherUid' })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       formData.set('id', String(existing.id))
       formData.set('title', 'Hijacked')
@@ -547,7 +540,7 @@ describe('server actions', () => {
 
     it('should upload a new image file and store the returned URL', async () => {
       const existing = await insertWalk({ uid: 'testUid' })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const uploadedUrl = '/uploads/images/testUid-2023-05-15-mocked-nanoid.jpg'
       const mockSaveImage = vi.fn().mockResolvedValue(uploadedUrl)
       const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
@@ -588,7 +581,7 @@ describe('server actions', () => {
         .update(walks)
         .set({ image: oldUrl })
         .where(sql`id = ${existing.id}`)
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const uploadedUrl = '/uploads/images/new.jpg'
       const mockSaveImage = vi.fn().mockResolvedValue(uploadedUrl)
       const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
@@ -615,7 +608,7 @@ describe('server actions', () => {
 
     it('should clean up the newly uploaded image if the db update fails', async () => {
       const existing = await insertWalk({ uid: 'testUid' })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const uploadedUrl = '/uploads/images/new.jpg'
       const mockSaveImage = vi.fn().mockResolvedValue(uploadedUrl)
       const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
@@ -653,7 +646,7 @@ describe('server actions', () => {
 
     it('should reject a non-image file', async () => {
       const existing = await insertWalk({ uid: 'testUid' })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const file = new File(['x'], 'document.pdf', {
         type: 'application/pdf',
       })
@@ -671,7 +664,7 @@ describe('server actions', () => {
 
     it('should reject an image over 2MB', async () => {
       const existing = await insertWalk({ uid: 'testUid' })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const file = new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'big.jpg', {
         type: 'image/jpeg',
       })
@@ -694,7 +687,7 @@ describe('server actions', () => {
         .update(walks)
         .set({ image: oldUrl })
         .where(sql`id = ${existing.id}`)
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockDeleteImage = vi.fn().mockResolvedValue(undefined)
       formData.set('id', String(existing.id))
       formData.set('title', 'Test Walk')
@@ -734,21 +727,14 @@ describe('server actions', () => {
     })
 
     it('should return unauthorized error if uid is null', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue([null, false])
+      const mockGetUid = vi.fn().mockResolvedValue(null)
       await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow(
         'unauthorized',
       )
     })
 
-    it('should return forbidden error if user is not admin and openUserMode is false', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', false])
-      await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow(
-        'forbidden',
-      )
-    })
-
     it('should return not found error if walk does not exist', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       await expect(deleteItemAction(prevState, 1, mockGetUid)).rejects.toThrow(
         'NEXT_HTTP_ERROR_FALLBACK;404',
       )
@@ -756,7 +742,7 @@ describe('server actions', () => {
 
     it('should return forbidden error if walk.uid does not match uid', async () => {
       const walk = await insertWalk({ uid: 'otherUid' })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       await expect(
         deleteItemAction(prevState, walk.id, mockGetUid),
@@ -765,7 +751,7 @@ describe('server actions', () => {
 
     it('should delete the walk and set deleted to true', async () => {
       const walk = await insertWalk({ uid: 'testUid' })
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
 
       const result = await deleteItemAction(prevState, walk.id, mockGetUid)
 
@@ -780,7 +766,7 @@ describe('server actions', () => {
     })
 
     it('should propagate a database error during deletion', async () => {
-      const mockGetUid = vi.fn().mockResolvedValue(['testUid', true])
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
       // An id outside the int4 range makes postgres itself reject the query,
       // exercising the (intentionally unhandled) error path.
       await expect(
@@ -832,50 +818,35 @@ describe('server actions', () => {
   })
 
   describe('getUsersAction', () => {
-    it('should return only active/admin users with uid, displayName, and photoURL', async () => {
+    it('should return only active users with uid, displayName, and photoURL', async () => {
       await db.insert(users).values([
         {
           uid: 'user1',
           displayName: 'User One',
           photoURL: 'http://example.com/user1.jpg',
-          status: 'active',
+          active: true,
         },
         {
           uid: 'user2',
-          displayName: 'User Two',
-          photoURL: 'http://example.com/user2.jpg',
-          status: 'admin',
-        },
-        {
-          uid: 'user3',
           displayName: 'Pending User',
-          photoURL: 'http://example.com/user3.jpg',
-          status: 'pending',
+          photoURL: 'http://example.com/user2.jpg',
+          active: false,
         },
       ])
 
       const result = await getUsersAction()
 
-      expect(result).toEqual(
-        expect.arrayContaining([
-          {
-            uid: 'user1',
-            displayName: 'User One',
-            photoURL: 'http://example.com/user1.jpg',
-            admin: false,
-          },
-          {
-            uid: 'user2',
-            displayName: 'User Two',
-            photoURL: 'http://example.com/user2.jpg',
-            admin: true,
-          },
-        ]),
-      )
-      expect(result).toHaveLength(2)
+      expect(result).toEqual([
+        {
+          uid: 'user1',
+          displayName: 'User One',
+          photoURL: 'http://example.com/user1.jpg',
+          active: true,
+        },
+      ])
     })
 
-    it('should return an empty array if no active/admin users exist', async () => {
+    it('should return an empty array if no active users exist', async () => {
       const result = await getUsersAction()
 
       expect(result).toEqual([])
@@ -897,7 +868,7 @@ describe('server actions', () => {
         .select()
         .from(users)
         .where(eq(users.uid, 'testUserId'))
-      expect(row.status).toBe('pending')
+      expect(row.active).toBe(false)
     })
 
     it('does not create a second row for the same uid on repeated calls', async () => {
@@ -913,11 +884,11 @@ describe('server actions', () => {
       expect(rows).toHaveLength(1)
     })
 
-    it('reports active/admin status from the users table', async () => {
+    it('reports active status from the users table', async () => {
       mockIdTokenCookie = 'token'
-      await db.insert(users).values({ uid: 'testUserId', status: 'admin' })
+      await db.insert(users).values({ uid: 'testUserId', active: true })
 
-      expect(await getSelfStatusAction()).toBe('admin')
+      expect(await getSelfStatusAction()).toBe('active')
     })
 
     it('sets idTokenExpired and skips the DB lookup when the token is expired', async () => {
@@ -960,9 +931,9 @@ describe('server actions', () => {
       ).rejects.toThrow('unauthorized')
     })
 
-    it('allows posting for an admin user', async () => {
+    it('allows posting for an active user', async () => {
       mockIdTokenCookie = 'token'
-      await db.insert(users).values({ uid: 'testUserId', status: 'admin' })
+      await db.insert(users).values({ uid: 'testUserId', active: true })
       const prevState = {
         serial: 0,
         error: null,
@@ -1003,7 +974,7 @@ describe('server actions', () => {
       expect(result).toEqual({
         googleApiKey: process.env.GOOGLE_API_KEY,
         googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
-        openUserMode: false,
+        autoApproveUsers: false,
         appVersion: '1.2.3',
         defaultCenter: process.env.DEFAULT_CENTER,
         defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),

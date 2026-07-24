@@ -111,7 +111,7 @@ export const getConfig = async (): Promise<ConfigT> => {
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
-    openUserMode: !!process.env.OPEN_USER_MODE,
+    autoApproveUsers: !!process.env.AUTO_APPROVE_USERS,
     appVersion: process.env.APP_VERSION || 'dev',
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
@@ -127,9 +127,7 @@ export const getConfig = async (): Promise<ConfigT> => {
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
-const openUserMode: boolean = !!process.env.OPEN_USER_MODE
-
-type GetUidResponse = [string | null, boolean]
+const autoApproveUsers: boolean = !!process.env.AUTO_APPROVE_USERS
 
 type UserRow = typeof users.$inferSelect
 
@@ -152,6 +150,7 @@ const getOrCreateUser = async (
       email: claim.email ?? null,
       displayName: claim.name ?? null,
       photoURL: claim.picture ?? null,
+      active: autoApproveUsers,
     })
     .onConflictDoNothing()
     .returning()
@@ -188,16 +187,16 @@ const verifyIdToken = async (
   }
 }
 
-const getUid = async (state: BaseState): Promise<GetUidResponse> => {
+const getUid = async (state: BaseState): Promise<string | null> => {
   const claim = await verifyIdToken(state)
   if (!claim) {
-    return [null, false]
+    return null
   }
   const user = await getOrCreateUser(claim)
-  if (user.status !== 'active' && user.status !== 'admin') {
-    return [null, false]
+  if (!user.active) {
+    return null
   }
-  return [claim.uid, user.status === 'admin']
+  return claim.uid
 }
 
 export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
@@ -206,7 +205,7 @@ export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
     return 'anonymous'
   }
   const user = await getOrCreateUser(claim)
-  return user.status as SelfStatusT
+  return user.active ? 'active' : 'pending'
 }
 
 export const searchInternalAction = async (
@@ -397,7 +396,7 @@ export const searchAction = async (
   state.idTokenExpired = false
   state.append = props.offset > 0
 
-  const [uid] = await _getUid(state)
+  const uid = await _getUid(state)
   const newState = await _searchInternalAction(props, uid)
   return Object.assign({ ...state }, newState)
 }
@@ -433,7 +432,7 @@ export const getItemAction = async (
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
-  const [uid] = await _getUid(state)
+  const uid = await _getUid(state)
   const newState = await _getItemInternalAction(id, uid)
   if (!newState.current && !newState.idTokenExpired) {
     notFound()
@@ -453,14 +452,12 @@ export const updateItemAction = async (
   const state = { ...prevState }
   state.id = null
   state.serial++
-  const [uid, isAdmin] = await _getUid(state)
+  const uid = await _getUid(state)
   if (state.idTokenExpired) {
     return state
   }
   if (!uid) {
     unauthorized()
-  } else if (!openUserMode && !isAdmin) {
-    forbidden()
   }
 
   // Extract form data
@@ -606,14 +603,12 @@ export const deleteItemAction = async (
   const state = { ...prevState }
   state.deleted = false
   state.serial++
-  const [uid, isAdmin] = await _getUid(state)
+  const uid = await _getUid(state)
   if (state.idTokenExpired) {
     return state
   }
   if (!uid) {
     unauthorized()
-  } else if (!openUserMode && !isAdmin) {
-    forbidden()
   }
 
   const walk = await db
@@ -652,14 +647,11 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
 
 export const getUsersAction = async (): Promise<UserT[]> => {
   'use cache'
-  const rows = await db
-    .select()
-    .from(users)
-    .where(inArray(users.status, ['active', 'admin']))
+  const rows = await db.select().from(users).where(eq(users.active, true))
   return rows.map((user) => ({
     uid: user.uid,
     displayName: user.displayName,
     photoURL: user.photoURL,
-    admin: user.status === 'admin',
+    active: user.active,
   }))
 }

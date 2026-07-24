@@ -218,14 +218,14 @@
       "table": "users"
     },
     {
-      "type": "varchar(20)",
+      "type": "boolean",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "'pending'",
+      "default": "false",
       "generated": null,
       "identity": null,
-      "name": "status",
+      "name": "active",
       "entityType": "columns",
       "schema": "public",
       "table": "users"

@@ -32,7 +32,7 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
     null,
   )
   const { currentUser, setCurrentUser, selfStatus } = useUserContext()
-  const canPost = selfStatus === 'active' || selfStatus === 'admin'
+  const canPost = selfStatus === 'active'
   const handleMenuOpen =
     (setter: typeof setAccountAnchorEl) =>
     (event: React.MouseEvent<HTMLElement>) => {
