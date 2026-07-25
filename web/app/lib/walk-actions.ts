@@ -26,6 +26,7 @@ import {
 } from '@/lib/utils/firebase-id-token'
 import { deleteImage, saveImage } from '@/lib/utils/image-storage'
 import { decode } from '@/lib/utils/path-encoder'
+import str2bool from '@/lib/utils/str2bool'
 import {
   BaseState,
   CityParams,
@@ -113,7 +114,7 @@ export const getConfig = async (): Promise<ConfigT> => {
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
-    autoApproveUsers: !!process.env.AUTO_APPROVE_USERS,
+    autoApproveUsers: str2bool(process.env.AUTO_APPROVE_USERS),
     appVersion: process.env.APP_VERSION || 'dev',
     defaultCenter: process.env.DEFAULT_CENTER,
     defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
