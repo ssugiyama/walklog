@@ -547,6 +547,7 @@ export const updateItemAction = async (
     try {
       uploadedImage = await _saveImage(newImageFile, key)
     } catch (error) {
+      console.error('updateItemAction saveImage error', error)
       state.error = error as Error
       return state
     }
