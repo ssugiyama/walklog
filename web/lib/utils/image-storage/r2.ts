@@ -17,12 +17,19 @@ export const saveR2 = async (file: File, key: string): Promise<string> => {
   const response = await getClient().fetch(getObjectUrl(key), {
     method: 'PUT',
     body,
-    headers: { 'Content-Type': file.type || 'application/octet-stream' },
+    headers: {
+      'Content-Type': file.type || 'application/octet-stream',
+      // aws4fetch treats Content-Length as unsignable and leaves it to the
+      // runtime's fetch to set from the body; Next.js's patched fetch in
+      // production builds doesn't always do so, which R2 then rejects with
+      // 411 Length Required. Set it explicitly to sidestep that.
+      'Content-Length': String(body.byteLength),
+    },
   })
   if (!response.ok) {
-    const body = await response.text()
+    const errorBody = await response.text()
     throw new Error(
-      `Failed to upload to R2: ${response.status} ${response.statusText} ${body}`,
+      `Failed to upload to R2: ${response.status} ${response.statusText} ${errorBody}`,
     )
   }
   return `${process.env.R2_PUBLIC_URL}/${key}`
