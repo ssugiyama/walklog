@@ -21,8 +21,8 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2
       '@mui/icons-material':
-        specifier: ^9.0.0
-        version: 9.0.0(@mui/material@9.0.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react@19.2.14)(react@19.2.6)
+        specifier: ^9.2.0
+        version: 9.2.0(@mui/material@9.0.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react@19.2.14)(react@19.2.6)
       '@mui/material':
         specifier: ^9.0.0
         version: 9.0.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -1890,11 +1890,11 @@ packages:
   '@mui/core-downloads-tracker@9.0.0':
     resolution: {integrity: sha512-uwQNGkhv0lf7ufxw6QXev77BW6pWbW+7uxYjU5+rfp4lBkFtMEgJCsarTM3Tn+i0lGx6+Ol2u88JdGXr0GDskA==}
 
-  '@mui/icons-material@9.0.0':
-    resolution: {integrity: sha512-oDwyvI6LgjWRC9MBcSGvLkPud9S9ELgSBQFYxa1rYcZn6Br55dn22SyvsPDMsn0G8OndFk53iMT45W5mNqrogw==}
+  '@mui/icons-material@9.2.0':
+    resolution: {integrity: sha512-VgBd3z7Qc3vd/thcNSMC03nHRh/U4DzMUd+1dRyJTbm/hGo7+N6N4GDuJZDNHa6LZhhwG6Cu1X3DNvrVv8sNag==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
-      '@mui/material': ^9.0.0
+      '@mui/material': ^9.2.0
       '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
       react: ^17.0.0 || ^18.0.0 || ^19.0.0
     peerDependenciesMeta:
@@ -6885,9 +6885,9 @@ snapshots:
 
   '@mui/core-downloads-tracker@9.0.0': {}
 
-  '@mui/icons-material@9.0.0(@mui/material@9.0.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react@19.2.14)(react@19.2.6)':
+  '@mui/icons-material@9.2.0(@mui/material@9.0.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react@19.2.14)(react@19.2.6)':
     dependencies:
-      '@babel/runtime': 7.29.2
+      '@babel/runtime': 7.29.7
       '@mui/material': 9.0.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.6)(supports-color@10.2.2))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react: 19.2.6
     optionalDependencies:
