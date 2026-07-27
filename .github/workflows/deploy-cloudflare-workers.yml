@@ -1,0 +1,53 @@
+name: Deploy to Cloudflare Workers
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      app_version:
+        type: string
+        required: false
+        description: 'App version'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      HYPERDRIVE_ID: ${{ secrets.HYPERDRIVE_ID }}
+      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: ${{ secrets.CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Use Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+      - name: pnpm-setup
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+          run_install: true
+      - name: run typecheck
+        run: pnpm typecheck
+      - name: run lint & formatter check
+        run: pnpm lint
+      - name: run test
+        run: pnpm test
+      - name: Set APP_VERSION secret
+        # Not a wrangler.jsonc `var`: it changes every release, and `wrangler
+        # types` would otherwise infer whatever value was present at the last
+        # local `cf-typegen` run as APP_VERSION's literal TS type.
+        run: |
+          pnpm run render-wrangler-config
+          echo "$APP_VERSION" | pnpm exec wrangler secret put APP_VERSION --config .wrangler.generated.jsonc
+        env:
+          APP_VERSION: ${{ github.event.release.tag_name || inputs.app_version }}
+      - name: Deploy to Cloudflare Workers
+        run: pnpm run deploy

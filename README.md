@@ -265,6 +265,19 @@ pnpm run deploy   # publishes to Cloudflare Workers
 
 If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeScript types with `pnpm run cf-typegen`.
 
+#### CI Deployment
+
+`.github/workflows/deploy-cloudflare-workers.yml` deploys automatically whenever a GitHub release is published (`APP_VERSION` is set to the release tag), or manually via workflow dispatch. It needs these repository secrets:
+
+| Secret | Description |
+|--------|-------------|
+| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token with permission to edit Workers/Hyperdrive for this account |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
+| `HYPERDRIVE_ID` | Same as `HYPERDRIVE_ID` above |
+| `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` | Same as above |
+
+Everything set via `wrangler secret put` (`SITE_NAME`, `DB_URL`... - see the reference table) is already stored on Cloudflare from the manual setup above and doesn't need to be repeated in CI; only `APP_VERSION` is set fresh on every deploy, since it changes every release.
+
 ## Development
 
 ### Development Mode
