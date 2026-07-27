@@ -43,7 +43,7 @@ import {
 } from '@/types'
 import defaultShapeStyles from '../../default-shape-styles.json'
 import defaultTheme from '../../default-theme.json'
-import { db } from '../../lib/drizzle/db'
+import { getDb } from '../../lib/drizzle/db'
 import { areas, coordinatesToWKT, users, walks } from '../../lib/drizzle/schema'
 import {
   decodePath,
@@ -142,6 +142,7 @@ type UserRow = typeof users.$inferSelect
 const getOrCreateUser = async (
   claim: FirebaseIdTokenClaims,
 ): Promise<UserRow> => {
+  const db = await getDb()
   const existing = await db
     .select()
     .from(users)
@@ -220,6 +221,7 @@ export const searchInternalAction = async (
 ): Promise<SearchState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
+  const db = await getDb()
   const selectColumns = {
     ...getColumns(walks),
     distance: sql<number>`0 as distance`,
@@ -413,6 +415,7 @@ export const getItemInternalAction = async (
 ): Promise<GetItemState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
+  const db = await getDb()
   const state: GetItemState = {}
 
   const walk = await db
@@ -455,6 +458,7 @@ export const updateItemAction = async (
   _saveImage: typeof saveImage = saveImage,
   _deleteImage: typeof deleteImage = deleteImage,
 ): Promise<typeof prevState> => {
+  const db = await getDb()
   const state = { ...prevState }
   state.id = null
   state.serial++
@@ -607,6 +611,7 @@ export const deleteItemAction = async (
   id: number,
   _getUid: typeof getUid = getUid,
 ): Promise<typeof prevState> => {
+  const db = await getDb()
   const state = { ...prevState }
   state.deleted = false
   state.serial++
@@ -638,6 +643,7 @@ export const deleteItemAction = async (
 
 export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
   'use cache'
+  const db = await getDb()
   let where: SQL
   if (params.jcodes) {
     where = inArray(areas.jcode, params.jcodes)
@@ -654,6 +660,7 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
 
 export const getUsersAction = async (): Promise<UserT[]> => {
   'use cache'
+  const db = await getDb()
   const rows = await db.select().from(users).where(eq(users.active, true))
   return rows.map((user) => ({
     uid: user.uid,
