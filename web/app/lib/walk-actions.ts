@@ -12,7 +12,6 @@ import {
   SQL,
   sql,
 } from 'drizzle-orm'
-import fs from 'fs/promises'
 import moment from 'moment'
 import { nanoid } from 'nanoid'
 import { cacheTag, revalidateTag } from 'next/cache'
@@ -42,6 +41,8 @@ import {
   UserT,
   WalkT,
 } from '@/types'
+import defaultShapeStyles from '../../default-shape-styles.json'
+import defaultTheme from '../../default-theme.json'
 import { db } from '../../lib/drizzle/db'
 import { areas, coordinatesToWKT, users, walks } from '../../lib/drizzle/schema'
 import {
@@ -91,25 +92,24 @@ const asCityT = (area: AreaAttributes): CityT => {
 
 const readJsonConfig = async (
   url: string | undefined,
-  defaultLocalPath: string,
+  defaultValue: unknown,
 ): Promise<unknown> => {
   if (url) {
     const response = await fetch(url)
     return response.json()
   }
-  const content = await fs.readFile(defaultLocalPath)
-  return JSON.parse(content.toString())
+  return defaultValue
 }
 
 export const getConfig = async (): Promise<ConfigT> => {
   'use cache'
   const shapeStyles = (await readJsonConfig(
     process.env.SHAPE_STYLES_JSON_URL,
-    './default-shape-styles.json',
+    defaultShapeStyles,
   )) as ShapeStyles
   const theme = (await readJsonConfig(
     process.env.THEME_JSON_URL,
-    './default-theme.json',
+    defaultTheme,
   )) as Theme
   return {
     googleApiKey: process.env.GOOGLE_API_KEY,

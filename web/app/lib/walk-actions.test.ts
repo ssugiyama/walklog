@@ -1,5 +1,6 @@
 import { eq, sql } from 'drizzle-orm'
-import fs from 'fs/promises'
+import defaultShapeStyles from '../../default-shape-styles.json'
+import defaultTheme from '../../default-theme.json'
 import { users, walks } from '../../lib/drizzle/schema'
 import { encode } from '../../lib/utils/path-encoder'
 
@@ -28,14 +29,6 @@ vi.mock('@/lib/utils/firebase-id-token', () => ({
   verifyFirebaseIdToken: vi.fn().mockResolvedValue({ uid: 'testUserId' }),
   IdTokenExpiredError: class IdTokenExpiredError extends Error {},
 }))
-
-vi.mock('fs/promises', () => {
-  const mockFs = {
-    writeFile: vi.fn(),
-    readFile: vi.fn(),
-  }
-  return { default: mockFs, ...mockFs }
-})
 
 // app/lib/walk-actions.ts talks to a real drizzle db instance. Rather than
 // mocking every query, swap it for a pglite (in-memory postgres + postgis)
@@ -956,15 +949,13 @@ describe('server actions', () => {
   })
 
   describe('getConfig', () => {
-    it('should return the correct configuration object', async () => {
-      const mockShapeStyles = { style: 'mockStyle' }
-      const mockTheme = { palette: {} }
-      ;(fs.readFile as Mock).mockImplementation((path) => {
-        if (path === './default-shape-styles.json') {
-          return Buffer.from(JSON.stringify(mockShapeStyles))
-        }
-        return Buffer.from(JSON.stringify(mockTheme))
-      })
+    afterEach(() => {
+      delete process.env.SHAPE_STYLES_JSON_URL
+      delete process.env.THEME_JSON_URL
+      vi.unstubAllGlobals()
+    })
+
+    it('returns the bundled default shape styles and theme when no URL is configured', async () => {
       process.env.APP_VERSION = '1.2.3'
       process.env.FIREBASE_API_KEY = 'test-api-key'
       process.env.FIREBASE_AUTH_DOMAIN = 'test.firebaseapp.com'
@@ -985,15 +976,31 @@ describe('server actions', () => {
           apiKey: 'test-api-key',
           authDomain: 'test.firebaseapp.com',
         },
-        theme: mockTheme,
-        shapeStyles: mockShapeStyles,
+        theme: defaultTheme,
+        shapeStyles: defaultShapeStyles,
       })
     })
 
-    it('should throw an error if reading the file fails', async () => {
-      ;(fs.readFile as Mock).mockRejectedValue(new Error('File read error'))
+    it('fetches shape styles and theme from the configured URLs instead', async () => {
+      const mockShapeStyles = { style: 'mockStyle' }
+      const mockTheme = { palette: {} }
+      process.env.SHAPE_STYLES_JSON_URL =
+        'https://example.com/shape-styles.json'
+      process.env.THEME_JSON_URL = 'https://example.com/theme.json'
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (url: string) => ({
+          json: async () =>
+            url === process.env.SHAPE_STYLES_JSON_URL
+              ? mockShapeStyles
+              : mockTheme,
+        })),
+      )
 
-      await expect(getConfig()).rejects.toThrow('File read error')
+      const result = await getConfig()
+
+      expect(result.shapeStyles).toEqual(mockShapeStyles)
+      expect(result.theme).toEqual(mockTheme)
     })
   })
 })
