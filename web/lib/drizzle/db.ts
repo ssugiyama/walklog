@@ -22,7 +22,13 @@ let nodeDb: Db | null = null
 // ALPNProtocols - when tried directly against Supabase without Hyperdrive).
 const createWorkerDb = async (): Promise<Db> => {
   const { env } = await getCloudflareContext({ async: true })
-  const { connectionString } = env.HYPERDRIVE
+  // Not typed against the ambient CloudflareEnv global: that's only merged
+  // in by `wrangler types`/`pnpm run cf-typegen`, whose output is gitignored
+  // (regenerated per-deployer, and depends on HYPERDRIVE_ID being set) - CI
+  // never has it.
+  const { connectionString } = (
+    env as unknown as { HYPERDRIVE: { connectionString: string } }
+  ).HYPERDRIVE
   return drizzle({
     client: postgres(connectionString, { prepare: false, max: 1 }),
     relations,
