@@ -4,3 +4,13 @@ coverage/**
 node_modules/**
 public/uploads/**
 !.env
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+cloudflare-env.d.ts
+.wrangler.generated.jsonc

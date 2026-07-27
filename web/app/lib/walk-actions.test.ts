@@ -36,10 +36,12 @@ vi.mock('@/lib/utils/firebase-id-token', () => ({
 vi.mock('../../lib/drizzle/db', async () => {
   const { createTestDb } = await import('../../lib/drizzle/test-db')
   const db = await createTestDb()
-  return { db }
+  return { getDb: async () => db }
 })
 
-import { db } from '../../lib/drizzle/db'
+import { getDb } from '../../lib/drizzle/db'
+
+const db = await getDb()
 
 const client = db.$client as unknown as PGlite
 

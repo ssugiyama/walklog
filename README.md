@@ -134,6 +134,7 @@ THEME_COLOR="#3874cb"
 | `DB_SSL_KEY` | Base64-encoded SSL client key (PEM) | No |
 | `DB_SSL_CERT` | Base64-encoded SSL client certificate (PEM) | No |
 | `APP_VERSION` | Version string | No |
+| `CF_WORKERS` | Set to `true` only when deploying to Cloudflare Workers (see [Option 3](#option-3-cloudflare-workers-deployment)) | No |
 
 * if using docker, **DB_URL** is provided as an environment variable.
 
@@ -209,6 +210,73 @@ pnpm install
 pnpm build
 pnpm start
 ```
+
+### Option 3: Cloudflare Workers Deployment
+
+Deploys the app to Cloudflare Workers via [@opennextjs/cloudflare](https://opennext.js.org/cloudflare), using Supabase Postgres as the database. Firebase Auth and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
+
+#### Prerequisites
+- A Cloudflare account, with [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) logged in (`pnpm exec wrangler login`)
+- A Supabase project with the PostGIS extension enabled (`create extension if not exists postgis;`), with migrations applied (`pnpm migrate` with `DB_URL` pointed at Supabase)
+
+#### Set Up Hyperdrive
+
+Direct TLS connections from a Worker straight to Supabase (bypassing Hyperdrive) don't work reliably: Workers' TLS socket implementation rejects several of postgres.js's connection options (`rejectUnauthorized`, `ALPNProtocols`), and the alternative negotiation mode just hangs until timeout. [Hyperdrive](https://developers.cloudflare.com/hyperdrive/) terminates the real TLS connection to Supabase itself and hands the Worker an already-pooled local connection instead, which sidesteps all of that.
+
+```bash
+cd web
+pnpm exec wrangler hyperdrive create walklog-db --connection-string="postgres://postgres:password@db.xxxx.supabase.co:5432/postgres"
+```
+
+Use Supabase's **direct** connection string here (found in the Supabase dashboard under Project Settings → Database), not the Supavisor pooler - Hyperdrive does its own pooling. The command prints an `id`, which isn't meaningful to share across deployments, so it isn't hardcoded in `wrangler.jsonc` - export it as an env var instead:
+
+```bash
+export HYPERDRIVE_ID=<the id it printed>
+```
+
+`pnpm run build`/`preview`/`deploy`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
+
+#### Configure Environment Variables
+
+`web/wrangler.jsonc`'s `vars` only holds `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure. Every other variable from the [reference table](#environment-variables-reference) (`SITE_NAME`, `DEFAULT_CENTER`, `FIREBASE_API_KEY`, `R2_*`, etc.), whether secret or not, is set with `wrangler secret put` instead. `DB_URL` is the one exception - it's only used for the Docker/manual deployment path, not Workers (which reads the connection string from the Hyperdrive binding instead), so it doesn't need to be set here at all:
+
+```bash
+cd web
+pnpm exec wrangler secret put SITE_NAME
+pnpm exec wrangler secret put FIREBASE_API_KEY
+# ...repeat for whichever other variables from the reference table your deployment needs
+```
+
+Don't add these to `wrangler.jsonc`'s `vars` even as empty placeholders: `wrangler types` infers a var's *literal* value as its TypeScript type (breaking code elsewhere that assigns other strings to it), and an empty string is not the same as unset for the app's `?? 'default'` fallbacks - a variable left genuinely unset still gets its built-in default, but one set to `""` would not.
+
+`wrangler` needs the Hyperdrive binding emulated locally for both `preview` and `deploy` - it can't reach the real proxy from outside Cloudflare's network. Add this once to your local (gitignored) `web/.dev.vars` rather than passing it on every command:
+
+```
+CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://postgres:password@db.xxxx.supabase.co:5432/postgres
+```
+
+That local connection string can point anywhere reachable, including a local Postgres instead of Supabase directly, if you'd rather not hit production data while previewing.
+
+#### Preview Locally, Then Deploy
+```bash
+pnpm run preview  # builds and runs the app under the actual Workers runtime, locally
+pnpm run deploy   # publishes to Cloudflare Workers
+```
+
+If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeScript types with `pnpm run cf-typegen`.
+
+#### CI Deployment
+
+`.github/workflows/deploy-cloudflare-workers.yml` deploys automatically whenever a GitHub release is published (`APP_VERSION` is set to the release tag), or manually via workflow dispatch. It needs these repository secrets:
+
+| Secret | Description |
+|--------|-------------|
+| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token with permission to edit Workers/Hyperdrive for this account |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
+| `HYPERDRIVE_ID` | Same as `HYPERDRIVE_ID` above |
+| `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` | Same as above |
+
+Everything set via `wrangler secret put` (`SITE_NAME`, `DB_URL`... - see the reference table) is already stored on Cloudflare from the manual setup above and doesn't need to be repeated in CI; only `APP_VERSION` is set fresh on every deploy, since it changes every release.
 
 ## Development
 
