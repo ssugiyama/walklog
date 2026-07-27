@@ -20,8 +20,9 @@ export const saveR2 = async (file: File, key: string): Promise<string> => {
     headers: { 'Content-Type': file.type || 'application/octet-stream' },
   })
   if (!response.ok) {
+    const body = await response.text()
     throw new Error(
-      `Failed to upload to R2: ${response.status} ${response.statusText}`,
+      `Failed to upload to R2: ${response.status} ${response.statusText} ${body}`,
     )
   }
   return `${process.env.R2_PUBLIC_URL}/${key}`
