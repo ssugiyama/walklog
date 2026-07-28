@@ -153,7 +153,7 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
               </MenuItem>,
               selfStatus === 'pending' ? (
                 <MenuItem key="pending" disabled>
-                  承認待ちです
+                  pending approval...
                 </MenuItem>
               ) : null,
               <Divider key="divider" />,
