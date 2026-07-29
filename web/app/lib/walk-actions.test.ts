@@ -16,12 +16,23 @@ vi.mock('next/cache', () => ({
 
 let mockIdTokenCookie: string | undefined
 
+const mockCookieSet = vi.fn(
+  (name: string, value: string, _options?: unknown) => {
+    if (name === 'idToken') mockIdTokenCookie = value
+  },
+)
+const mockCookieDelete = vi.fn((name: string) => {
+  if (name === 'idToken') mockIdTokenCookie = undefined
+})
+
 vi.mock('next/headers', () => ({
   cookies: vi.fn(async () => ({
     get: (name: string) =>
       name === 'idToken' && mockIdTokenCookie
         ? { value: mockIdTokenCookie }
         : undefined,
+    set: mockCookieSet,
+    delete: mockCookieDelete,
   })),
 }))
 
@@ -50,6 +61,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { revalidateTag } from 'next/cache'
 import { Mock } from 'vitest'
 import {
+  clearIdTokenAction,
   deleteItemAction,
   getCityAction,
   getConfig,
@@ -59,6 +71,7 @@ import {
   getUsersAction,
   searchAction,
   searchInternalAction,
+  setIdTokenAction,
   updateItemAction,
 } from '@/app/lib/walk-actions'
 import {
@@ -947,6 +960,44 @@ describe('server actions', () => {
 
       expect(result.error).toBeNull()
       expect(result.id).toEqual(expect.any(Number))
+    })
+  })
+
+  describe('setIdTokenAction / clearIdTokenAction', () => {
+    it('verifies the token and sets it as an httpOnly cookie', async () => {
+      const result = await setIdTokenAction('a-valid-token')
+
+      expect(result.error).toBe(false)
+      expect(mockCookieSet).toHaveBeenCalledWith(
+        'idToken',
+        'a-valid-token',
+        expect.objectContaining({
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/',
+        }),
+      )
+      expect(mockIdTokenCookie).toBe('a-valid-token')
+    })
+
+    it('does not set the cookie when the token fails verification', async () => {
+      ;(verifyFirebaseIdToken as Mock).mockRejectedValueOnce(
+        new Error('invalid'),
+      )
+
+      const result = await setIdTokenAction('a-bad-token')
+
+      expect(result.error).toBe(true)
+      expect(mockCookieSet).not.toHaveBeenCalled()
+    })
+
+    it('deletes the cookie', async () => {
+      mockIdTokenCookie = 'token'
+
+      await clearIdTokenAction()
+
+      expect(mockCookieDelete).toHaveBeenCalledWith('idToken')
+      expect(mockIdTokenCookie).toBeUndefined()
     })
   })
 
