@@ -1,5 +1,5 @@
 'use client'
-import { User as FirebaseUser } from 'firebase/auth'
+import { User as FirebaseUser, getAuth } from 'firebase/auth'
 import {
   createContext,
   useCallback,
@@ -8,7 +8,12 @@ import {
   useState,
 } from 'react'
 import { SelfStatusT, UserT } from '@/types'
-import { getSelfStatusAction, getUsersAction } from '../../app/lib/walk-actions'
+import {
+  clearIdTokenAction,
+  getSelfStatusAction,
+  getUsersAction,
+  setIdTokenAction,
+} from '../../app/lib/walk-actions'
 
 type UserContextT = {
   users: UserT[]
@@ -36,47 +41,42 @@ export function UserContextProvider({
   const [currentUser, setCurrentUser] = useState<
     FirebaseUser | null | undefined
   >(undefined)
-  const getCookieValue = (name: string) => {
-    if (typeof document === 'undefined') return ''
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop()?.split(';').shift() ?? ''
-    return ''
-  }
-  const initialIdToken = getCookieValue('idToken')
-  const [idToken, setIdToken] = useState(initialIdToken)
+  // Can't read the idToken cookie here anymore now that it's httpOnly - it
+  // only ever serves as a trigger for effects elsewhere, so starting empty
+  // and letting the first auth callback populate it is fine.
+  const [idToken, setIdToken] = useState('')
   const [users, setUsers] = useState<UserT[]>([])
   const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')
 
+  // Reads getAuth().currentUser directly rather than closing over the
+  // `currentUser` state: this is also called from the onIdTokenChanged
+  // listener on Firebase's own silent background token refresh, where the
+  // User object is mutated in place rather than replaced, so a stale React
+  // closure could hand back an already-expired token.
   const updateIdToken = useCallback(async () => {
-    if (!currentUser) {
-      const secure = location.protocol === 'https:' ? '; secure' : ''
-      document.cookie = `idToken=; path=/; samesite=strict${secure}; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+    const user = getAuth().currentUser
+    if (!user) {
+      await clearIdTokenAction()
       setIdToken('')
       setSelfStatus('anonymous')
       return
     }
-    const newIdToken = (await currentUser?.getIdToken()) ?? ''
-    const secure = location.protocol === 'https:' ? '; secure' : ''
-    // Max-Ageを1時間に設定してトークンの有効期限を管理
-    document.cookie = `idToken=${newIdToken}; path=/; samesite=strict${secure};`
+    const newIdToken = (await user.getIdToken()) ?? ''
+    const { error } = await setIdTokenAction(newIdToken)
+    if (error) {
+      setIdToken('')
+      setSelfStatus('anonymous')
+      return
+    }
     setIdToken(newIdToken)
     setSelfStatus(await getSelfStatusAction())
-  }, [currentUser])
+  }, [])
 
   useEffect(() => {
     void (async () => {
       setUsers(await getUsersAction())
     })()
   }, [])
-  useEffect(() => {
-    if (currentUser === undefined) {
-      return
-    }
-    void (async () => {
-      await updateIdToken()
-    })()
-  }, [currentUser])
   return (
     <UserContext.Provider
       value={{

@@ -215,6 +215,34 @@ export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
   return user.active ? 'active' : 'pending'
 }
 
+// A little under Firebase's 1-hour token lifetime, so the cookie never
+// outlives the token it holds.
+const ID_TOKEN_COOKIE_MAX_AGE = 55 * 60
+
+export const setIdTokenAction = async (
+  idToken: string,
+): Promise<{ error: boolean }> => {
+  try {
+    await verifyFirebaseIdToken(idToken)
+  } catch {
+    return { error: true }
+  }
+  const cookieStore = await cookies()
+  cookieStore.set('idToken', idToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: ID_TOKEN_COOKIE_MAX_AGE,
+  })
+  return { error: false }
+}
+
+export const clearIdTokenAction = async (): Promise<void> => {
+  const cookieStore = await cookies()
+  cookieStore.delete('idToken')
+}
+
 export const searchInternalAction = async (
   props: SearchProps,
   uid: string,

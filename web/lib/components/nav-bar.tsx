@@ -11,7 +11,7 @@ import { initializeApp } from 'firebase/app'
 import {
   GoogleAuthProvider,
   getAuth,
-  onAuthStateChanged,
+  onIdTokenChanged,
   signInWithPopup,
   signOut,
 } from 'firebase/auth'
@@ -31,7 +31,8 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const [accountAnchorEl, setAccountAnchorEl] = useState<HTMLElement | null>(
     null,
   )
-  const { currentUser, setCurrentUser, selfStatus } = useUserContext()
+  const { currentUser, setCurrentUser, selfStatus, updateIdToken } =
+    useUserContext()
   const canPost = selfStatus === 'active'
   const handleMenuOpen =
     (setter: typeof setAccountAnchorEl) =>
@@ -66,10 +67,15 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
 
     initializeApp(config.firebaseConfig)
     provider.current = new GoogleAuthProvider()
-    onAuthStateChanged(getAuth(), (user) => {
+    // onIdTokenChanged (rather than onAuthStateChanged) also fires on
+    // Firebase's own silent background token refresh, not just sign-in/out,
+    // so the httpOnly session cookie gets renewed proactively instead of
+    // waiting for a request to fail with an expired token first.
+    return onIdTokenChanged(getAuth(), (user) => {
       setCurrentUser(user)
+      void updateIdToken()
     })
-  }, [config.firebaseConfig])
+  }, [config.firebaseConfig, updateIdToken])
   const closeAllMenus = () => {
     setAccountAnchorEl(null)
   }

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { onIdTokenChanged } from 'firebase/auth'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { Mock } from 'vitest'
@@ -24,7 +25,7 @@ vi.mock('firebase/auth', () => ({
   GoogleAuthProvider: vi.fn(),
   signInWithPopup: vi.fn(),
   signOut: vi.fn(),
-  onAuthStateChanged: vi.fn(),
+  onIdTokenChanged: vi.fn(() => vi.fn()),
 }))
 
 vi.mock(
@@ -54,9 +55,11 @@ describe('NavBar', () => {
   const mockDispatchMain = vi.fn()
   const mockPushWithGuard = vi.fn(() => vi.fn())
   const mockSetCurrentUser = vi.fn()
+  const mockUpdateIdToken = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
+    ;(onIdTokenChanged as Mock).mockReturnValue(vi.fn())
 
     ;(useMainContext as Mock).mockReturnValue([
       { overlay: false, toolBoxOpened: false },
@@ -67,6 +70,7 @@ describe('NavBar', () => {
     ;(useUserContext as Mock).mockReturnValue({
       currentUser: null,
       setCurrentUser: mockSetCurrentUser,
+      updateIdToken: mockUpdateIdToken,
     })
 
     ;(useConfig as Mock).mockReturnValue({
@@ -103,11 +107,23 @@ describe('NavBar', () => {
     ;(useUserContext as Mock).mockReturnValue({
       currentUser: { displayName: 'Test User', photoURL: 'test-url' },
       setCurrentUser: mockSetCurrentUser,
+      updateIdToken: mockUpdateIdToken,
     })
 
     render(<NavBar />)
     fireEvent.click(screen.getByTestId('account-button'))
     expect(screen.getByText(/Logged in as Test User/)).toBeInTheDocument()
     expect(screen.getByText('logout')).toBeInTheDocument()
+  })
+
+  it('syncs currentUser and the id token cookie whenever Firebase reports a token change', () => {
+    render(<NavBar />)
+    const listener = (onIdTokenChanged as Mock).mock.calls[0][1]
+    const fakeUser = { displayName: 'Test User' }
+
+    listener(fakeUser)
+
+    expect(mockSetCurrentUser).toHaveBeenCalledWith(fakeUser)
+    expect(mockUpdateIdToken).toHaveBeenCalled()
   })
 })
