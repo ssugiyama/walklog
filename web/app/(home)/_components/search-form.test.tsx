@@ -2,13 +2,13 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import SearchForm from './search-form'
 
-vi.mock('../utils/config', () => ({
+vi.mock('@/lib/utils/config', () => ({
   useConfig: () => ({
     defaultCenter: [0, 0],
   }),
 }))
 
-vi.mock('../utils/user-context', () => ({
+vi.mock('@/lib/utils/user-context', () => ({
   useUserContext: () => ({
     users: [
       { uid: '1', displayName: 'User 1' },
@@ -17,7 +17,7 @@ vi.mock('../utils/user-context', () => ({
   }),
 }))
 
-vi.mock('../utils/map-context', () => ({
+vi.mock('@/lib/utils/map-context', () => ({
   useMapContext: () => ({
     state: {
       pathManager: {},

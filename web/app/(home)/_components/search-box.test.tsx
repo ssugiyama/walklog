@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import { useData } from '../utils/data-context'
-import { useUserContext } from '../utils/user-context'
+import { useData } from '@/lib/utils/data-context'
+import { useUserContext } from '@/lib/utils/user-context'
 import SearchBox from './search-box'
 import '@testing-library/jest-dom/vitest'
 import { Mock } from 'vitest'
@@ -14,15 +14,15 @@ vi.mock('next/navigation', () => ({
   })),
 }))
 
-vi.mock('../utils/user-context', () => ({
+vi.mock('@/lib/utils/user-context', () => ({
   useUserContext: vi.fn(),
 }))
 
-vi.mock('../utils/data-context', () => ({
+vi.mock('@/lib/utils/data-context', () => ({
   useData: vi.fn(),
 }))
 
-vi.mock('../utils/map-context', () => ({
+vi.mock('@/lib/utils/map-context', () => ({
   useMapContext: vi.fn(() => [
     {
       pathManager: {},
@@ -30,7 +30,7 @@ vi.mock('../utils/map-context', () => ({
   ]),
 }))
 
-vi.mock('../utils/config', () => ({
+vi.mock('@/lib/utils/config', () => ({
   useConfig: vi.fn(() => ({})),
 }))
 

@@ -17,8 +17,8 @@ import {
   useQueryParam,
   withDefault,
 } from 'use-query-params'
-import { useConfig } from '../utils/config'
-import { useUserContext } from '../utils/user-context'
+import { useConfig } from '@/lib/utils/config'
+import { useUserContext } from '@/lib/utils/user-context'
 import NumberField from './number-field'
 
 const monthOptions = [

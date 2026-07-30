@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import SearchBox from '@/lib/components/search-box'
 import Searcher from '@/lib/utils/searcher'
+import SearchBox from './_components/search-box'
 
 const description = process.env.SITE_DESCRIPTION ?? ''
 

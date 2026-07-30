@@ -16,10 +16,10 @@ import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useData } from '@/lib/utils/data-context'
+import { idToShowUrl } from '@/lib/utils/meta-utils'
+import { useUserContext } from '@/lib/utils/user-context'
 import { UserT } from '@/types'
-import { useData } from '../utils/data-context'
-import { idToShowUrl } from '../utils/meta-utils'
-import { useUserContext } from '../utils/user-context'
 import SearchForm from './search-form'
 
 const SearchBox = () => {
