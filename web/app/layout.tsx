@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Roboto } from 'next/font/google'
-import Body from '../lib/components/body'
+import Body from './_components/body'
 
 export const viewport: Viewport = {
   themeColor: [

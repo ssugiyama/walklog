@@ -21,10 +21,10 @@ import {
   useQueryParam,
   withDefault,
 } from 'use-query-params'
-import { useConfig } from '../utils/config'
-import { useData } from '../utils/data-context'
-import { useMainContext } from '../utils/main-context'
-import { idToShowUrl } from '../utils/meta-utils'
+import { useConfig } from '@/lib/utils/config'
+import { useData } from '@/lib/utils/data-context'
+import { useMainContext } from '@/lib/utils/main-context'
+import { idToShowUrl } from '@/lib/utils/meta-utils'
 
 const BottomBar = (props) => {
   const config = useConfig()

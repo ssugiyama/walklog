@@ -3,20 +3,20 @@ import { onIdTokenChanged } from 'firebase/auth'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { Mock } from 'vitest'
-import { useConfig } from '../utils/config'
-import { useMainContext } from '../utils/main-context'
-import { useUserContext } from '../utils/user-context'
+import { useConfig } from '@/lib/utils/config'
+import { useMainContext } from '@/lib/utils/main-context'
+import { useUserContext } from '@/lib/utils/user-context'
 import NavBar from './nav-bar'
 
-vi.mock('../utils/main-context', () => ({
+vi.mock('@/lib/utils/main-context', () => ({
   useMainContext: vi.fn(),
 }))
 
-vi.mock('../utils/user-context', () => ({
+vi.mock('@/lib/utils/user-context', () => ({
   useUserContext: vi.fn(),
 }))
 
-vi.mock('../utils/config', () => ({
+vi.mock('@/lib/utils/config', () => ({
   useConfig: vi.fn(),
 }))
 
@@ -29,7 +29,7 @@ vi.mock('firebase/auth', () => ({
 }))
 
 vi.mock(
-  '@/lib/components/walk-editor',
+  '@/app/(editor)/_components/walk-editor',
   () =>
     function MockWalkEditor() {
       return <div data-testid="walk-editor">Walk Editor</div>

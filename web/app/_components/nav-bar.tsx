@@ -18,9 +18,9 @@ import {
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useConfig } from '../utils/config'
-import { useMainContext } from '../utils/main-context'
-import { useUserContext } from '../utils/user-context'
+import { useConfig } from '@/lib/utils/config'
+import { useMainContext } from '@/lib/utils/main-context'
+import { useUserContext } from '@/lib/utils/user-context'
 
 const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const searchParams = useSearchParams()

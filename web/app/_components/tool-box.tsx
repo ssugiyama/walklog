@@ -24,9 +24,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { StringParam } from 'serialize-query-params/dist/params'
 import { withDefault } from 'serialize-query-params/dist/withDefault'
 import { useQueryParam } from 'use-query-params/dist/useQueryParam'
-import { useConfig } from '../utils/config'
-import { useMainContext } from '../utils/main-context'
-import { useMapContext } from '../utils/map-context'
+import { useConfig } from '@/lib/utils/config'
+import { useMainContext } from '@/lib/utils/main-context'
+import { useMapContext } from '@/lib/utils/map-context'
 import ConfirmModal, {
   APPEND_PATH_CONFIRM_INFO,
   ConfirmInfo,

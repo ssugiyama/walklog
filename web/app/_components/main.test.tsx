@@ -1,9 +1,9 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { Mock } from 'vitest'
-import Main from '@/lib/components/main'
 import { DataProvider, useData } from '@/lib/utils/data-context'
 import MainContext from '@/lib/utils/main-context'
+import Main from './main'
 
 const defaultMainState = {
   mode: 'map',
@@ -17,25 +17,25 @@ const defaultData = {
 }
 
 // Mock dependencies
-vi.mock('@/lib/components/nav-bar', () => ({
+vi.mock('./nav-bar', () => ({
   default: function MockNavBar() {
     return <div data-testid="nav-bar">Nav Bar</div>
   },
 }))
 
-vi.mock('@/lib/components/tool-box', () => ({
+vi.mock('./tool-box', () => ({
   default: function MockToolBox() {
     return <div data-testid="tool-box">Tool Box</div>
   },
 }))
 
-vi.mock('@/lib/components/map', () => ({
+vi.mock('./map', () => ({
   default: function MockMap() {
     return <div data-testid="map">Map Component</div>
   },
 }))
 
-vi.mock('@/lib/components/bottom-bar', () => ({
+vi.mock('./bottom-bar', () => ({
   default: function MockBottomBar() {
     return <div data-testid="bottom-bar">Bottom Bar</div>
   },

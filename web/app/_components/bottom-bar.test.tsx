@@ -1,20 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 import { Mock } from 'vitest'
-import { useConfig } from '../utils/config'
-import { useData } from '../utils/data-context'
-import { useMainContext } from '../utils/main-context'
+import { useConfig } from '@/lib/utils/config'
+import { useData } from '@/lib/utils/data-context'
+import { useMainContext } from '@/lib/utils/main-context'
 import BottomBar from './bottom-bar'
 
-vi.mock('../utils/main-context', () => ({
+vi.mock('@/lib/utils/main-context', () => ({
   useMainContext: vi.fn(),
 }))
 
-vi.mock('../utils/data-context', () => ({
+vi.mock('@/lib/utils/data-context', () => ({
   useData: vi.fn(),
 }))
 
-vi.mock('../utils/config', () => ({
+vi.mock('@/lib/utils/config', () => ({
   useConfig: vi.fn(),
 }))
 

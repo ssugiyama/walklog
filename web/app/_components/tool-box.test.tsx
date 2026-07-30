@@ -3,10 +3,10 @@ import React from 'react'
 import '@testing-library/jest-dom'
 import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 import { Mock } from 'vitest'
-import ToolBox from '@/lib/components/tool-box'
 import { ConfigProvider } from '@/lib/utils/config'
 import { MainContextProvider } from '@/lib/utils/main-context'
 import { MapContextProvider } from '@/lib/utils/map-context'
+import ToolBox from './tool-box'
 
 // Test configuration
 const TEST_TIMEOUT = 10000

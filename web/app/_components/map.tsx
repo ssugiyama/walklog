@@ -15,15 +15,15 @@ import {
   withDefault,
 } from 'use-query-params'
 import { getCityAction } from '@/lib/actions/walk-actions'
+import { useConfig } from '@/lib/utils/config'
+import { useData } from '@/lib/utils/data-context'
+import createGsiMapType from '@/lib/utils/gsi-map-type'
+import { useMainContext } from '@/lib/utils/main-context'
+import { useMapContext } from '@/lib/utils/map-context'
+import { idToShowUrl } from '@/lib/utils/meta-utils'
+import type PathManager from '@/lib/utils/path-manager'
+import type PolygonManager from '@/lib/utils/polygon-manager'
 import { ShapeStyles, WalkT } from '@/types'
-import { useConfig } from '../utils/config'
-import { useData } from '../utils/data-context'
-import createGsiMapType from '../utils/gsi-map-type'
-import { useMainContext } from '../utils/main-context'
-import { useMapContext } from '../utils/map-context'
-import { idToShowUrl } from '../utils/meta-utils'
-import type PathManager from '../utils/path-manager'
-import type PolygonManager from '../utils/polygon-manager'
 import ConfirmModal, {
   APPEND_PATH_CONFIRM_INFO,
   ConfirmInfo,
@@ -236,7 +236,7 @@ const GMap = (props) => {
     google.maps.event.addListener(rc.map, 'tilesloaded', () => {
       google.maps.event.clearListeners(rc.map, 'tilesloaded')
     })
-    const { default: PathManager } = await import('../utils/path-manager')
+    const { default: PathManager } = await import('@/lib/utils/path-manager')
     rc.pathManager = new PathManager({
       map: rc.map,
       styles: rc.shapeStyles.polylines,
@@ -262,7 +262,9 @@ const GMap = (props) => {
         rc.pathManager.applyPath(path, append)
       },
     )
-    const { default: PolygonManager } = await import('../utils/polygon-manager')
+    const { default: PolygonManager } = await import(
+      '@/lib/utils/polygon-manager'
+    )
     rc.polygonManager = new PolygonManager({
       map: rc.map,
       styles: rc.shapeStyles.polygons,
