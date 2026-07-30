@@ -1,5 +1,5 @@
-import WalkEditor from '@/lib/components/walk-editor'
 import ItemFetcher from '@/lib/utils/item-fetcher'
+import WalkEditor from '../../_components/walk-editor'
 
 export default function Page() {
   return (

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import WalkEditor from '@/lib/components/walk-editor'
+import WalkEditor from '../_components/walk-editor'
 
 export default function Page() {
   return <WalkEditor mode="create" />

@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { Mock } from 'vitest'
 import { updateItemAction } from '@/lib/actions/walk-actions'
-import { useData } from '../utils/data-context'
+import { useData } from '@/lib/utils/data-context'
 import WalkEditor from './walk-editor'
 
 const mockUpdateIdToken = vi.fn()
@@ -30,7 +30,7 @@ beforeAll(() => {
   })
 })
 
-vi.mock('../utils/user-context', () => ({
+vi.mock('@/lib/utils/user-context', () => ({
   useUserContext: () => ({
     updateIdToken: mockUpdateIdToken,
     currentUser: { uid: 'test-uid' },
@@ -38,11 +38,11 @@ vi.mock('../utils/user-context', () => ({
   }),
 }))
 
-vi.mock('../utils/data-context', () => ({
+vi.mock('@/lib/utils/data-context', () => ({
   useData: vi.fn(),
 }))
 
-vi.mock('../utils/map-context', () => ({
+vi.mock('@/lib/utils/map-context', () => ({
   useMapContext: () => [
     {
       deleteSelectedPath: mockDeleteSelectedPath,
@@ -50,7 +50,7 @@ vi.mock('../utils/map-context', () => ({
   ],
 }))
 
-vi.mock('../utils/main-context', () => ({
+vi.mock('@/lib/utils/main-context', () => ({
   useMainContext: () => [{}, mockDispatchMain, mockInterceptLink],
 }))
 

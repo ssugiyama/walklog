@@ -24,11 +24,11 @@ import React, {
 } from 'react'
 import { StringParam, useQueryParam, withDefault } from 'use-query-params'
 import { updateItemAction } from '@/lib/actions/walk-actions'
+import { useData } from '@/lib/utils/data-context'
+import { useMainContext } from '@/lib/utils/main-context'
+import { idToShowUrl } from '@/lib/utils/meta-utils'
+import { useUserContext } from '@/lib/utils/user-context'
 import { WalkT } from '@/types'
-import { useData } from '../utils/data-context'
-import { useMainContext } from '../utils/main-context'
-import { idToShowUrl } from '../utils/meta-utils'
-import { useUserContext } from '../utils/user-context'
 import ImageUploader from './image-uploader'
 
 type WalkFields = {
