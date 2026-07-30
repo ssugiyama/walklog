@@ -25,7 +25,7 @@ vi.mock('../utils/data-context', () => ({
   useData: vi.fn(),
 }))
 
-vi.mock('@/app/lib/walk-actions', () => ({
+vi.mock('@/lib/actions/walk-actions', () => ({
   getCityAction: vi.fn().mockReturnValue([
     {
       jcode: '123',

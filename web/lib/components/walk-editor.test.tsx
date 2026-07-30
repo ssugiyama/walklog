@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { Mock } from 'vitest'
-import { updateItemAction } from '@/app/lib/walk-actions'
+import { updateItemAction } from '@/lib/actions/walk-actions'
 import { useData } from '../utils/data-context'
 import WalkEditor from './walk-editor'
 
@@ -63,7 +63,7 @@ vi.mock('next/navigation', () => ({
   forbidden: vi.fn(),
 }))
 
-vi.mock('@/app/lib/walk-actions', () => ({
+vi.mock('@/lib/actions/walk-actions', () => ({
   updateItemAction: vi.fn().mockResolvedValue({}),
 }))
 

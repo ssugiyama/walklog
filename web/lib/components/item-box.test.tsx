@@ -9,7 +9,7 @@ import { useMainContext } from '../utils/main-context'
 import { useUserContext } from '../utils/user-context'
 import ItemBox from './item-box'
 
-vi.mock('@/app/lib/walk-actions', () => ({
+vi.mock('@/lib/actions/walk-actions', () => ({
   deleteItemAction: vi.fn(),
 }))
 

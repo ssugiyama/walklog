@@ -23,7 +23,7 @@ import React, {
   useState,
 } from 'react'
 import { StringParam, useQueryParam, withDefault } from 'use-query-params'
-import { updateItemAction } from '@/app/lib/walk-actions'
+import { updateItemAction } from '@/lib/actions/walk-actions'
 import { WalkT } from '@/types'
 import { useData } from '../utils/data-context'
 import { useMainContext } from '../utils/main-context'

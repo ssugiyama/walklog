@@ -24,7 +24,7 @@ import React, {
   useTransition,
 } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { deleteItemAction } from '@/app/lib/walk-actions'
+import { deleteItemAction } from '@/lib/actions/walk-actions'
 import { DeleteItemState, UserT } from '@/types'
 import { useData } from '../utils/data-context'
 import { idToEditUrl, idToShowUrl } from '../utils/meta-utils'

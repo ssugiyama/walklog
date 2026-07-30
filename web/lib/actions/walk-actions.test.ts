@@ -41,7 +41,7 @@ vi.mock('@/lib/utils/firebase-id-token', () => ({
   IdTokenExpiredError: class IdTokenExpiredError extends Error {},
 }))
 
-// app/lib/walk-actions.ts talks to a real drizzle db instance. Rather than
+// lib/actions/walk-actions.ts talks to a real drizzle db instance. Rather than
 // mocking every query, swap it for a pglite (in-memory postgres + postgis)
 // instance so the actual generated SQL runs against a real database.
 vi.mock('../../lib/drizzle/db', async () => {
@@ -73,7 +73,7 @@ import {
   searchInternalAction,
   setIdTokenAction,
   updateItemAction,
-} from '@/app/lib/walk-actions'
+} from '@/lib/actions/walk-actions'
 import {
   IdTokenExpiredError,
   verifyFirebaseIdToken,

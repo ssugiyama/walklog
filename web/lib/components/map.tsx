@@ -14,8 +14,8 @@ import {
   useQueryParam,
   withDefault,
 } from 'use-query-params'
+import { getCityAction } from '@/lib/actions/walk-actions'
 import { ShapeStyles, WalkT } from '@/types'
-import { getCityAction } from '../../app/lib/walk-actions'
 import { useConfig } from '../utils/config'
 import { useData } from '../utils/data-context'
 import createGsiMapType from '../utils/gsi-map-type'
