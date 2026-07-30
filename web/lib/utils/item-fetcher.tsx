@@ -1,8 +1,8 @@
 'use client'
 import { useParams } from 'next/navigation'
 import { useActionState, useEffect, useTransition } from 'react'
+import { getItemAction } from '@/lib/actions/walk-actions'
 import { DataT, GetItemState } from '@/types'
-import { getItemAction } from '../../app/lib/walk-actions'
 import { useData } from './data-context'
 import { useUserContext } from './user-context'
 

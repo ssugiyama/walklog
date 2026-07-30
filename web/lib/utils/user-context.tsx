@@ -7,13 +7,13 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { SelfStatusT, UserT } from '@/types'
 import {
   clearIdTokenAction,
   getSelfStatusAction,
   getUsersAction,
   setIdTokenAction,
-} from '../../app/lib/walk-actions'
+} from '@/lib/actions/walk-actions'
+import { SelfStatusT, UserT } from '@/types'
 
 type UserContextT = {
   users: UserT[]
