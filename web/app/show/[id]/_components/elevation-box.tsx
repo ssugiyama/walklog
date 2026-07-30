@@ -9,9 +9,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { useConfig } from '../utils/config'
-import { useData } from '../utils/data-context'
-import { useMapContext } from '../utils/map-context'
+import { useConfig } from '@/lib/utils/config'
+import { useData } from '@/lib/utils/data-context'
+import { useMapContext } from '@/lib/utils/map-context'
 
 const { useRef, useEffect, useState } = React
 

@@ -25,10 +25,10 @@ import React, {
 } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { deleteItemAction } from '@/lib/actions/walk-actions'
+import { useData } from '@/lib/utils/data-context'
+import { idToEditUrl, idToShowUrl } from '@/lib/utils/meta-utils'
+import { useUserContext } from '@/lib/utils/user-context'
 import { DeleteItemState, UserT } from '@/types'
-import { useData } from '../utils/data-context'
-import { idToEditUrl, idToShowUrl } from '../utils/meta-utils'
-import { useUserContext } from '../utils/user-context'
 import ElevationBox from './elevation-box'
 import PanoramaBox from './panorama-box'
 

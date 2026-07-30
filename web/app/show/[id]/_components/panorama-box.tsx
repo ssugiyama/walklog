@@ -8,10 +8,10 @@ import IconButton from '@mui/material/IconButton'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
 import React, { useCallback, useEffect, useRef } from 'react'
+import { useData } from '@/lib/utils/data-context'
+import { useMainContext } from '@/lib/utils/main-context'
+import { useMapContext } from '@/lib/utils/map-context'
 import { WalkT } from '@/types'
-import { useData } from '../utils/data-context'
-import { useMainContext } from '../utils/main-context'
-import { useMapContext } from '../utils/map-context'
 
 type PanoramaRefs = {
   panorama?: google.maps.StreetViewPanorama | null

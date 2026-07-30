@@ -3,23 +3,23 @@ import React from 'react'
 import '@testing-library/jest-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mock } from 'vitest'
-import { useConfig } from '../utils/config'
-import { useData } from '../utils/data-context'
-import { useMainContext } from '../utils/main-context'
-import { useUserContext } from '../utils/user-context'
+import { useConfig } from '@/lib/utils/config'
+import { useData } from '@/lib/utils/data-context'
+import { useMainContext } from '@/lib/utils/main-context'
+import { useUserContext } from '@/lib/utils/user-context'
 import ItemBox from './item-box'
 
 vi.mock('@/lib/actions/walk-actions', () => ({
   deleteItemAction: vi.fn(),
 }))
 
-vi.mock('@/lib/components/walk-editor', () => ({
+vi.mock('@/app/(editor)/_components/walk-editor', () => ({
   default: function MockWalkEditor() {
     return <div data-testid="walk-editor">Walk Editor</div>
   },
 }))
 
-vi.mock('../utils/data-context', () => ({
+vi.mock('@/lib/utils/data-context', () => ({
   useData: vi.fn(),
 }))
 
@@ -35,11 +35,11 @@ vi.mock('./panorama-box', () => ({
   },
 }))
 
-vi.mock('../utils/user-context', () => ({
+vi.mock('@/lib/utils/user-context', () => ({
   useUserContext: vi.fn(),
 }))
 
-vi.mock('../utils/main-context', () => ({
+vi.mock('@/lib/utils/main-context', () => ({
   useMainContext: vi.fn(),
 }))
 
@@ -48,7 +48,7 @@ vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
 }))
 
-vi.mock('../utils/config', () => ({
+vi.mock('@/lib/utils/config', () => ({
   useConfig: vi.fn(),
 }))
 

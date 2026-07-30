@@ -1,7 +1,7 @@
 import { getItemAction } from '@/lib/actions/walk-actions'
 import ItemFetcher from '@/lib/utils/item-fetcher'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
-import ItemBox from '../../../lib/components/item-box'
+import ItemBox from './_components/item-box'
 
 export default function Page() {
   return (
