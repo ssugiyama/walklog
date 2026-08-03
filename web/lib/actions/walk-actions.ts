@@ -185,11 +185,14 @@ const verifyIdToken = async (
   try {
     return await verifyFirebaseIdToken(idToken.value)
   } catch (error) {
-    if (error instanceof IdTokenExpiredError) {
-      state.idTokenExpired = true
-    } else {
-      state.error = error as Error
+    // Treat any verification failure as retryable, not just an expired
+    // token: transient failures (e.g. refetching Google's JWKS right after
+    // a long-idle tab wakes up) land here too, and should let the client
+    // refresh the token and retry rather than hit a permanent unauthorized.
+    if (!(error instanceof IdTokenExpiredError)) {
+      console.error('verifyIdToken failed', error)
     }
+    state.idTokenExpired = true
     return null
   }
 }
