@@ -44,24 +44,14 @@ export function ItemFetcher() {
     }
   }, [id, idToken])
 
-  // Kept separate from the setData effect below, and keyed only on `serial`
-  // (not `isPending`): retrying inside a startTransition makes `isPending`
-  // flicker before the retried dispatch itself lands, which would otherwise
-  // re-trigger this branch while `idTokenExpired` is still stale and fire
-  // duplicate retries.
   useEffect(() => {
-    if (getItemState.serial > 0 && getItemState.idTokenExpired) {
-      startTransition(() => {
-        void (async () => {
-          await updateIdToken()
-          dispatchGetItem(id)
-        })()
-      })
+    if (getItemState.serial <= 0) {
+      return
     }
-  }, [getItemState.serial])
-
-  useEffect(() => {
-    if (getItemState.serial <= 0 || getItemState.idTokenExpired) {
+    if (getItemState.idTokenExpired) {
+      startTransition(async () => {
+        await updateIdToken()
+      })
       return
     }
     const index = findIndexById(id)

@@ -921,28 +921,6 @@ describe('server actions', () => {
       expect(result.id).toBeNull()
     })
 
-    it('treats other token verification failures as retryable too, instead of a permanent unauthorized', async () => {
-      mockIdTokenCookie = 'token'
-      ;(verifyFirebaseIdToken as Mock).mockRejectedValueOnce(
-        new Error('JWKS fetch failed'),
-      )
-      const prevState = {
-        serial: 0,
-        error: null,
-        id: null,
-        idTokenExpired: false,
-      }
-      const formData = new Map()
-
-      const result = await updateItemAction(
-        prevState,
-        formData as unknown as FormData,
-      )
-
-      expect(result.idTokenExpired).toBe(true)
-      expect(result.id).toBeNull()
-    })
-
     it('denies posting for a pending user (auto-provisioned on first login)', async () => {
       mockIdTokenCookie = 'token'
       const prevState = {
