@@ -74,24 +74,14 @@ export function Searcher() {
     })
   }, [searchParams, idToken])
 
-  // Kept separate from the setData effect below, and keyed only on `serial`
-  // (not `isPending`): retrying inside a startTransition makes `isPending`
-  // flicker before the retried dispatch itself lands, which would otherwise
-  // re-trigger this branch while `idTokenExpired` is still stale and fire
-  // duplicate retries.
   useEffect(() => {
-    if (searchState.serial > 0 && searchState.idTokenExpired) {
-      startTransition(() => {
-        void (async () => {
-          await updateIdToken()
-          dispatchSearch(props)
-        })()
-      })
+    if (searchState.serial <= 0) {
+      return
     }
-  }, [searchState.serial])
-
-  useEffect(() => {
-    if (searchState.serial <= 0 || searchState.idTokenExpired) {
+    if (searchState.idTokenExpired) {
+      startTransition(async () => {
+        await updateIdToken()
+      })
       return
     }
 
