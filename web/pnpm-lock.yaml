@@ -37,7 +37,7 @@ importers:
         version: 1.0.20
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.18.0)(postgres@3.4.9)(zod@4.3.6)
+        version: 1.0.0-rc.4(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.18.0)(postgres@3.4.9)(zod@4.4.3)
       firebase:
         specifier: ^12.8.0
         version: 12.8.0
@@ -90,8 +90,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0
       zod:
-        specifier: ^4.3.6
-        version: 4.3.6
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.4
@@ -297,6 +297,9 @@ packages:
   '@aws-sdk/core@3.977.1':
     resolution: {integrity: sha512-KVtQRtc00ES/y+Sc3vYXeP6pCIcNlBJCZOwvqSy8ZpVGmbM5+IG+AfhuTKQ2oXmIVqZJewaGMMpzPkywC6xg0w==}
     engines: {node: '>=20.0.0'}
+    deprecated: |-
+      Deprecated due to Document number parsing bug in JSON, see
+        https://github.com/aws/aws-sdk-js-v3/issues/8246. Newer version available.
 
   '@aws-sdk/credential-provider-env@3.972.61':
     resolution: {integrity: sha512-qihs2ekMb89Nxd2JenCgVFhjbkb3EIo7HEBCBzyZACKVJdrLUZBLOmAE3xr0Sayml8n/jZSzwO/IufIiIzO7PQ==}
@@ -5039,8 +5042,8 @@ packages:
   youch@4.1.0-beta.10:
     resolution: {integrity: sha512-rLfVLB4FgQneDr0dv1oddCVZmKjcJ6yX6mS4pU82Mq/Dt9a3cLZQ62pDBL4AUO+uVrCvtWz3ZFUL2HFAFJ/BXQ==}
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -8082,7 +8085,7 @@ snapshots:
       get-tsconfig: 4.14.0
       jiti: 2.7.0
 
-  drizzle-orm@1.0.0-rc.4(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.18.0)(postgres@3.4.9)(zod@4.3.6):
+  drizzle-orm@1.0.0-rc.4(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.18.0)(postgres@3.4.9)(zod@4.4.3):
     optionalDependencies:
       '@electric-sql/pglite': 0.5.4
       '@opentelemetry/api': 1.9.0
@@ -8090,7 +8093,7 @@ snapshots:
       '@types/pg': 8.20.0
       pg: 8.18.0
       postgres: 3.4.9
-      zod: 4.3.6
+      zod: 4.4.3
 
   dunder-proto@1.0.1:
     dependencies:
@@ -10174,6 +10177,6 @@ snapshots:
       cookie: 1.1.1
       youch-core: 0.3.3
 
-  zod@4.3.6: {}
+  zod@4.4.3: {}
 
   zwitch@2.0.4: {}
