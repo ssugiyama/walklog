@@ -78,11 +78,11 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4
       terra-draw:
-        specifier: ^1.28.8
-        version: 1.28.8
+        specifier: ^1.32.2
+        version: 1.32.2
       terra-draw-google-maps-adapter:
         specifier: ^1.5.0
-        version: 1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.28.8)
+        version: 1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.32.2)
       use-query-params:
         specifier: ^2.2.2
         version: 2.2.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -297,6 +297,9 @@ packages:
   '@aws-sdk/core@3.977.1':
     resolution: {integrity: sha512-KVtQRtc00ES/y+Sc3vYXeP6pCIcNlBJCZOwvqSy8ZpVGmbM5+IG+AfhuTKQ2oXmIVqZJewaGMMpzPkywC6xg0w==}
     engines: {node: '>=20.0.0'}
+    deprecated: |-
+      Deprecated due to Document number parsing bug in JSON, see
+        https://github.com/aws/aws-sdk-js-v3/issues/8246. Newer version available.
 
   '@aws-sdk/credential-provider-env@3.972.61':
     resolution: {integrity: sha512-qihs2ekMb89Nxd2JenCgVFhjbkb3EIo7HEBCBzyZACKVJdrLUZBLOmAE3xr0Sayml8n/jZSzwO/IufIiIzO7PQ==}
@@ -4640,8 +4643,8 @@ packages:
       '@googlemaps/js-api-loader': ^1.14.3 || ^2.0.0
       terra-draw: ^1.0.0
 
-  terra-draw@1.28.8:
-    resolution: {integrity: sha512-Tq3Ny8Klnhnu2B0skgG/+apYwdLyygm+SVY5MjWbK2Gd7r7pG+OzZzE0RJBBIxVe4EM2wYiy0mTa8Vdttg/xew==}
+  terra-draw@1.32.2:
+    resolution: {integrity: sha512-ysy1EBhvYbMqddv4+LyNmb56DpZLGPP9QO/I5kZoD4PArRJekOBlvXPKjo9w+jikcOEMgHUSw2G7AHLqI2QoiA==}
 
   terser@5.16.9:
     resolution: {integrity: sha512-HPa/FdTB9XGI2H1/keLFZHxl6WNvAI4YalHGtDQTlMnJcoqSab1UwL4l1hGEhs6/GmLHBZIg/YgB++jcbzoOEg==}
@@ -9808,12 +9811,12 @@ snapshots:
 
   symbol-tree@3.2.4: {}
 
-  terra-draw-google-maps-adapter@1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.28.8):
+  terra-draw-google-maps-adapter@1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.32.2):
     dependencies:
       '@googlemaps/js-api-loader': 2.0.2
-      terra-draw: 1.28.8
+      terra-draw: 1.32.2
 
-  terra-draw@1.28.8: {}
+  terra-draw@1.32.2: {}
 
   terser@5.16.9:
     dependencies:
