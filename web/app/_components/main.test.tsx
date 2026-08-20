@@ -54,14 +54,10 @@ vi.mock('@/lib/utils/map-context', () => ({
   ),
 }))
 
-vi.mock('use-query-params', () => ({
-  QueryParamProvider: ({ children }) => (
-    <div data-testid="query-param-provider">{children}</div>
+vi.mock('nuqs/adapters/next/app', () => ({
+  NuqsAdapter: ({ children }) => (
+    <div data-testid="nuqs-adapter">{children}</div>
   ),
-}))
-
-vi.mock('next-query-params/app', () => ({
-  default: ({ children }) => children,
 }))
 
 vi.mock('@/lib/utils/config', () => ({

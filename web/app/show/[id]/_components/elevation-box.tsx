@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
+import { positionArrayToLatLngArray } from '@/lib/utils/geo-utils'
 import { useMapContext } from '@/lib/utils/map-context'
 
 const { useRef, useEffect, useState } = React
@@ -81,7 +82,7 @@ const ElevationBox = () => {
 
   const requestElevation = () => {
     if (!selectedItem) return
-    const path = google.maps.geometry.encoding.decodePath(selectedItem.path)
+    const path = positionArrayToLatLngArray(selectedItem.path)
 
     const pathRequest = {
       path,

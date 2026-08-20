@@ -532,6 +532,33 @@ describe('server actions', () => {
       expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
     })
 
+    it('should update an existing walk without changing its path when path is omitted', async () => {
+      const existing = await insertWalk({
+        uid: 'testUid',
+        title: 'Original title',
+      })
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
+
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Updated Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('draft', 'false')
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeNull()
+      expect(result.id).toBe(existing.id)
+
+      const [row] = await db
+        .select()
+        .from(walks)
+        .where(sql`id = ${existing.id}`)
+      expect(row).toEqual(
+        expect.objectContaining({ title: 'Updated Walk', draft: false }),
+      )
+      expect(row.path).toEqual(existing.path)
+    })
+
     it('should return forbidden error when updating a walk owned by someone else', async () => {
       const existing = await insertWalk({ uid: 'otherUid' })
       const mockGetUid = vi.fn().mockResolvedValue('testUid')

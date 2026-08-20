@@ -10,19 +10,42 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useCallback } from 'react'
 import {
-  NumberParam,
-  StringParam,
-  useQueryParam,
-  withDefault,
-} from 'use-query-params'
+  parseAsInteger,
+  parseAsString,
+  parseAsStringLiteral,
+  useQueryStates,
+} from 'nuqs'
+import React, { useCallback } from 'react'
 import { useConfig } from '@/lib/utils/config'
 import { useUserContext } from '@/lib/utils/user-context'
 import NumberField from './number-field'
 
+const filterOptionLiterals = [
+  '',
+  'neighborhood',
+  'start',
+  'end',
+  'cities',
+  'frechet',
+  'hausdorff',
+  'crossing',
+]
+
+const orderOptionLiterals = [
+  'newest_first',
+  'oldest_first',
+  'longest_first',
+  'shortest_first',
+  'northernmost_first',
+  'southernmost_first',
+  'easternmost_first',
+  'westernmost_first',
+  'nearest_first',
+]
+
 const monthOptions = [
-  { label: '-', value: '' },
+  { label: '-', value: 0 },
   { label: 'Jan', value: 1 },
   { label: 'Feb', value: 2 },
   { label: 'Mar', value: 3 },
@@ -53,9 +76,9 @@ const orderOptionsWithNearest = [
 ]
 
 const currentYear = new Date().getFullYear()
-const years: string[] = []
+const years: number[] = []
 for (let y = currentYear; y >= 1997; y -= 1) {
-  years.push(y.toString())
+  years.push(y)
 }
 
 const SearchForm = () => {
@@ -63,8 +86,8 @@ const SearchForm = () => {
   const defaultValues = {
     filter: '',
     user: '',
-    month: '',
-    year: '',
+    month: 0,
+    year: 0,
     order: 'newest_first',
     limit: 20,
     center: config.defaultCenter,
@@ -74,63 +97,52 @@ const SearchForm = () => {
   }
   const { users } = useUserContext()
   const router = useRouter()
-  const [filter] = useQueryParam(
-    'filter',
-    withDefault(StringParam, defaultValues.filter),
-  )
-  const [order, setOrder] = useQueryParam(
-    'order',
-    withDefault(StringParam, defaultValues.order),
-  )
-  const [user, setUser] = useQueryParam(
-    'user',
-    withDefault(StringParam, defaultValues.user),
-  )
-  const [month, setMonth] = useQueryParam(
-    'month',
-    withDefault(StringParam, defaultValues.month),
-  )
-  const [year, setYear] = useQueryParam(
-    'year',
-    withDefault(StringParam, defaultValues.year),
-  )
-  const [limit, setLimit] = useQueryParam(
-    'limit',
-    withDefault(NumberParam, defaultValues.limit),
-  )
   const searchParams = useSearchParams()
+  const [formValue, setFormValue] = useQueryStates({
+    filter: parseAsStringLiteral(filterOptionLiterals).withDefault(
+      defaultValues.filter,
+    ),
+    user: parseAsString.withDefault(defaultValues.user),
+    month: parseAsInteger.withDefault(defaultValues.month),
+    year: parseAsInteger.withDefault(defaultValues.year),
+    order: parseAsStringLiteral(orderOptionLiterals).withDefault(
+      defaultValues.order,
+    ),
+    limit: parseAsInteger.withDefault(defaultValues.limit),
+  })
+  const { filter, user, month, year, order, limit } = formValue
 
   const handleChange = {
     user: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setUser(e.target.value)
+        setFormValue({ user: e.target.value })
       },
-      [setUser],
+      [setFormValue],
     ),
     month: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setMonth(e.target.value)
+        setFormValue({ month: Number(e.target.value) })
       },
-      [setMonth],
+      [setFormValue],
     ),
     year: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setYear(e.target.value)
+        setFormValue({ year: Number(e.target.value) })
       },
-      [setYear],
+      [setFormValue],
     ),
     order: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setOrder(e.target.value)
+        setFormValue({ order: e.target.value })
       },
-      [setOrder],
+      [setFormValue],
     ),
   }
   const handleLimitCommited = useCallback(
     (value: number) => {
-      setLimit(value)
+      setFormValue({ limit: value })
     },
-    [setLimit],
+    [setFormValue],
   )
   const handleFilterChange = useCallback(
     (e: React.ChangeEvent<{ value: string }>) => {
@@ -242,7 +254,7 @@ const SearchForm = () => {
             sx={sxFormInput}
             variant="standard"
           >
-            <MenuItem value="" key="default">
+            <MenuItem value={0} key="default">
               -
             </MenuItem>
             {years.map((y) => (

@@ -76,3 +76,9 @@ export const calcPathLength = (path: Position[]): number => {
   }
   return length
 }
+
+export const positionArrayToLatLngArray = (
+  positions: Position[],
+): google.maps.LatLng[] => {
+  return positions.map((pos) => new google.maps.LatLng(pos[1], pos[0]))
+}

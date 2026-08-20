@@ -1,4 +1,4 @@
-import { initialize, LatLng } from '@googlemaps/jest-mocks'
+import { initialize } from '@googlemaps/jest-mocks'
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 import { Mock } from 'vitest'
@@ -28,13 +28,6 @@ describe('PanoramaBox', () => {
     initialize()
     google.maps.geometry = {
       ...global.google.maps.geometry,
-      encoding: {
-        ...global.google.maps.geometry.encoding,
-        decodePath: vi.fn((_encodedPath: string) => [
-          new LatLng(0, 0),
-          new LatLng(1, 1),
-        ]),
-      },
       spherical: {
         ...global.google.maps.geometry.spherical,
         computeHeading: vi.fn(() => 0),
@@ -51,7 +44,16 @@ describe('PanoramaBox', () => {
       mockDispatchMain,
     ])
 
-    ;(useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }])
+    ;(useData as Mock).mockReturnValue([
+      {
+        current: {
+          path: [
+            [0, 0],
+            [1, 1],
+          ],
+        },
+      },
+    ])
 
     ;(useMapContext as Mock).mockReturnValue([
       {

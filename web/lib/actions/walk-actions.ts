@@ -48,8 +48,6 @@ import { areas, coordinatesToWKT, users, walks } from '../../lib/drizzle/schema'
 import {
   decodePath,
   EARTH_RADIUS,
-  encodedPath,
-  encodeMultipolygon,
   getEndPoint,
   getPathExtent,
   getPoint,
@@ -77,7 +75,7 @@ const asWalkT = (
     draft: walk.draft,
     image: walk.image,
     length: walk.length,
-    path: includePath && walk.path ? encodedPath(walk.path) : null,
+    path: includePath && walk.path ? walk.path : null,
     distance: walk.distance,
     uid: walk.uid,
   }
@@ -86,7 +84,7 @@ const asWalkT = (
 const asCityT = (area: AreaAttributes): CityT => {
   return {
     jcode: area.jcode,
-    theGeom: encodeMultipolygon(area.theGeom),
+    theGeom: area.theGeom,
   }
 }
 
@@ -524,7 +522,7 @@ export const updateItemAction = async (
     validationErrors.push('Title is required')
   }
 
-  if (!walkPath || walkPath.trim() === '') {
+  if (!id && (!walkPath || walkPath.trim() === '')) {
     validationErrors.push('Path is required')
   }
 
@@ -562,7 +560,7 @@ export const updateItemAction = async (
     draft,
     uid,
   }
-  if (walkPath !== '') {
+  if (walkPath) {
     props.path = decode(walkPath)
     props.length =
       sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number

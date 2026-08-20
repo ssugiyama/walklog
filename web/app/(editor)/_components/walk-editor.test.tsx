@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React from 'react'
 import { Mock } from 'vitest'
 import { updateItemAction } from '@/lib/actions/walk-actions'
@@ -91,12 +92,6 @@ vi.mock('./image-uploader', () => ({
   ),
 }))
 
-vi.mock('use-query-params', () => ({
-  useQueryParam: vi.fn(() => ['test-path']),
-  StringParam: vi.fn(),
-  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
-}))
-
 vi.mock('moment', async () => {
   const moment = await vi.importActual('moment')
   return {
@@ -131,7 +126,9 @@ describe('WalkEditor update', () => {
   })
 
   it('renders WalkEditor with default props', () => {
-    render(<WalkEditor mode="update" />)
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
     expect(screen.getByTestId('WalkEditor')).toBeInTheDocument()
     expect(screen.getByDisplayValue('2023-01-01')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Test Walk')).toBeInTheDocument()
@@ -139,23 +136,58 @@ describe('WalkEditor update', () => {
     expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument()
   })
 
+  it('does not disable the submit button when no path is in the URL', () => {
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
+    expect(screen.getByRole('button', { name: 'update' })).toBeEnabled()
+  })
+
   it('calls interceptLink when cancel button is clicked', () => {
-    render(<WalkEditor mode="update" />)
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
     const cancelButton = screen.getByText('cancel')
     fireEvent.click(cancelButton)
     expect(mockInterceptLink).toHaveBeenCalled()
   })
 
-  it('submits the form when update button is clicked', () => {
-    render(<WalkEditor mode="update" />)
+  it('submits the form when update button is clicked', async () => {
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
     const submitButton = screen.getByTestId('submit-button')
 
     fireEvent.click(submitButton)
-    expect(submitButton).toBeInTheDocument()
+    await waitFor(() => expect(updateItemAction).toHaveBeenCalled())
+  })
+
+  it('submits an empty path when no path is selected in the URL', async () => {
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
+    fireEvent.click(screen.getByTestId('submit-button'))
+
+    await waitFor(() => expect(updateItemAction).toHaveBeenCalled())
+    expect(lastFormData?.append).toHaveBeenCalledWith('path', '')
+  })
+
+  it('submits the encoded path from the URL when one is selected', async () => {
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter({
+        searchParams: { path: '_pyxEaktsYbcEqE' },
+      }),
+    })
+    fireEvent.click(screen.getByTestId('submit-button'))
+
+    await waitFor(() => expect(updateItemAction).toHaveBeenCalled())
+    expect(lastFormData?.append).toHaveBeenCalledWith('path', '_pyxEaktsYbcEqE')
   })
 
   it('updates form data when input changes', () => {
-    render(<WalkEditor mode="update" />)
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
     const titleInput = screen.getByLabelText('title')
 
     fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -168,7 +200,9 @@ describe('WalkEditor update', () => {
 
   it('rejects a non-image file without submitting', async () => {
     selectedFile = new File(['x'], 'document.pdf', { type: 'application/pdf' })
-    render(<WalkEditor mode="update" />)
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
 
     fireEvent.click(screen.getByTestId('mock-select-image'))
     fireEvent.click(screen.getByTestId('submit-button'))
@@ -185,7 +219,9 @@ describe('WalkEditor update', () => {
     selectedFile = new File([new Uint8Array(3 * 1024 * 1024)], 'big.jpg', {
       type: 'image/jpeg',
     })
-    render(<WalkEditor mode="update" />)
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
 
     fireEvent.click(screen.getByTestId('mock-select-image'))
     fireEvent.click(screen.getByTestId('submit-button'))
@@ -200,7 +236,9 @@ describe('WalkEditor update', () => {
 
   it('sends the file directly instead of uploading it client-side', async () => {
     selectedFile = new File(['x'], 'photo.jpg', { type: 'image/jpeg' })
-    render(<WalkEditor mode="update" />)
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
 
     fireEvent.click(screen.getByTestId('mock-select-image'))
     fireEvent.click(screen.getByTestId('submit-button'))
@@ -211,7 +249,9 @@ describe('WalkEditor update', () => {
 
   it('navigates to the show page once the save succeeds', async () => {
     ;(updateItemAction as Mock).mockResolvedValue({ serial: 1, id: 2 })
-    render(<WalkEditor mode="update" />)
+    render(<WalkEditor mode="update" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
 
     fireEvent.click(screen.getByTestId('submit-button'))
 
@@ -232,16 +272,53 @@ describe('WalkEditor create', () => {
   })
 
   it('renders WalkEditor with default props', () => {
-    render(<WalkEditor mode="create" />)
+    render(<WalkEditor mode="create" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
     expect(screen.getByTestId('WalkEditor')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'create' })).toBeInTheDocument()
   })
 
-  it('submits the form when create button is clicked', () => {
-    render(<WalkEditor mode="create" />)
+  it('disables the submit button when no path has been drawn', () => {
+    render(<WalkEditor mode="create" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
+    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled()
+  })
+
+  it('enables the submit button once a path is present in the URL', () => {
+    render(<WalkEditor mode="create" />, {
+      wrapper: withNuqsTestingAdapter({
+        searchParams: { path: '_pyxEaktsYbcEqE' },
+      }),
+    })
+    expect(screen.getByRole('button', { name: 'create' })).toBeEnabled()
+  })
+
+  it('does not call the action when the submit button is disabled', () => {
+    render(<WalkEditor mode="create" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
+
+    fireEvent.click(screen.getByTestId('submit-button'))
+    expect(updateItemAction).not.toHaveBeenCalled()
+  })
+
+  it('submits the encoded path once the create button is enabled', async () => {
+    render(<WalkEditor mode="create" />, {
+      wrapper: withNuqsTestingAdapter({
+        searchParams: { path: '_pyxEaktsYbcEqE' },
+      }),
+    })
     const submitButton = screen.getByTestId('submit-button')
 
     fireEvent.click(submitButton)
-    expect(submitButton).toBeInTheDocument()
+
+    await waitFor(() => expect(updateItemAction).toHaveBeenCalled())
+    expect(lastFormData?.append).toHaveBeenCalledWith('path', '_pyxEaktsYbcEqE')
+    expect(lastFormData?.append).not.toHaveBeenCalledWith(
+      'id',
+      expect.anything(),
+    )
   })
 })

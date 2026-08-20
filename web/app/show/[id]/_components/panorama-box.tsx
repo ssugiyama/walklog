@@ -9,6 +9,7 @@ import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
 import React, { useCallback, useEffect, useRef } from 'react'
 import { useData } from '@/lib/utils/data-context'
+import { positionArrayToLatLngArray } from '@/lib/utils/geo-utils'
 import { useMainContext } from '@/lib/utils/main-context'
 import { useMapContext } from '@/lib/utils/map-context'
 import { WalkT } from '@/types'
@@ -112,7 +113,7 @@ const PanoramaBox = () => {
       setStreetView(refs.current.panorama)
       return
     }
-    const path = google.maps.geometry.encoding.decodePath(item.path)
+    const path = positionArrayToLatLngArray(item.path)
     refs.current.panoramaPointsAndHeadings = getPanoramaPointsAndHeadings(path)
     dispatchMain({
       type: 'SET_PANORAMA_COUNT',
