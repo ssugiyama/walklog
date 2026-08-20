@@ -192,6 +192,7 @@ const SearchBox = () => {
           color="primary"
           component={Link}
           href={moreUrl}
+          scroll={false}
         >
           <ExpandMoreIcon sx={{ mr: 1 }} /> more
         </Button>

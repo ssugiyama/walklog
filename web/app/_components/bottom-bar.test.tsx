@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React from 'react'
 import { Mock } from 'vitest'
 import { useConfig } from '@/lib/utils/config'
@@ -19,20 +20,12 @@ vi.mock('@/lib/utils/config', () => ({
 }))
 
 const mockUsePathname = vi.fn(() => '/show/1')
-const mockUseQueryParam = vi.fn(() => ['', vi.fn()])
 
 vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn(() => new URLSearchParams()),
   usePathname: () => mockUsePathname(),
   useParams: vi.fn(() => ({ id: '1' })),
   useRouter: vi.fn(() => ({ push: vi.fn() })),
-}))
-
-vi.mock('use-query-params', () => ({
-  useQueryParam: () => mockUseQueryParam(),
-  StringParam: vi.fn(),
-  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
-  NumberParam: vi.fn(),
 }))
 
 describe('BottomBar', () => {
@@ -60,14 +53,14 @@ describe('BottomBar', () => {
   })
 
   it('renders the BottomBar component', () => {
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
     expect(screen.getByTestId('BottomBar')).toBeInTheDocument()
   })
 
   it('displays item controls when in show page with item data', () => {
     mockUsePathname.mockReturnValue('/show/1')
 
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
     expect(screen.getByText('2023-01-01 : Walk 1 (5.0 km)')).toBeInTheDocument()
     expect(screen.getByTestId('prev-button')).toBeInTheDocument()
     expect(screen.getByTestId('next-button')).toBeInTheDocument()
@@ -80,7 +73,7 @@ describe('BottomBar', () => {
       mockPushWithGuard,
     ])
 
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
     expect(screen.getByTestId('back-to-map-button')).toBeInTheDocument()
     expect(
       screen.getByTestId('forward-panorama-index-by-1-button'),
@@ -94,21 +87,21 @@ describe('BottomBar', () => {
   it('displays filter controls when on home page', () => {
     mockUsePathname.mockReturnValue('/')
 
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
     expect(screen.getByTestId('filter-select')).toBeInTheDocument()
   })
 
   it('displays edit controls when on new or edit page', () => {
     mockUsePathname.mockReturnValue('/new')
 
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
     expect(screen.getByTestId('cancel-button')).toBeInTheDocument()
   })
 
   it('displays home button as default when no specific page context', () => {
     mockUsePathname.mockReturnValue('/other')
 
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
     expect(screen.getByTestId('home-button')).toBeInTheDocument()
   })
 
@@ -119,7 +112,7 @@ describe('BottomBar', () => {
       mockPushWithGuard,
     ])
 
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
     const overlayButton = screen.getByTestId('back-to-map-button')
     fireEvent.click(overlayButton)
     expect(mockDispatchMain).toHaveBeenCalledWith({
@@ -135,7 +128,7 @@ describe('BottomBar', () => {
       mockPushWithGuard,
     ])
 
-    render(<BottomBar />)
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter() })
 
     const forwardButton = screen.getByTestId(
       'forward-panorama-index-by-1-button',
@@ -156,20 +149,18 @@ describe('BottomBar', () => {
     })
   })
 
-  it('handles filter change in home page', () => {
+  it('handles filter change in home page', async () => {
     mockUsePathname.mockReturnValue('/')
 
-    const mockSetFilter = vi.fn()
-    mockUseQueryParam.mockImplementation(() => ['', mockSetFilter])
-
-    render(<BottomBar />)
+    const onUrlUpdate = vi.fn()
+    render(<BottomBar />, { wrapper: withNuqsTestingAdapter({ onUrlUpdate }) })
     const filterSelect = screen.getByTestId('filter-select')
 
     // Material-UIのSelectコンポーネントでは、inputにchangeイベントを発火させる
     const selectInput = filterSelect.querySelector('input')
     if (selectInput) {
       fireEvent.change(selectInput, { target: { value: 'neighborhood' } })
-      expect(mockSetFilter).toHaveBeenCalled()
+      await waitFor(() => expect(onUrlUpdate).toHaveBeenCalled())
     } else {
       // inputが見つからない場合は、selectの存在だけを確認
       expect(filterSelect).toBeInTheDocument()

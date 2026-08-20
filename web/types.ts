@@ -1,3 +1,5 @@
+import { Position } from 'geojson'
+
 export type SearchProps = {
   date?: string
   user?: string
@@ -25,7 +27,7 @@ export type WalkT = {
   comment: string
   distance?: number
   length?: number
-  path?: string
+  path?: Position[]
   image?: string
   draft?: boolean
   stale?: boolean
@@ -65,7 +67,7 @@ export type CityParams = {
 
 export type CityT = {
   jcode: string
-  theGeom: string
+  theGeom: Position[][][]
 }
 
 export type UserT = {

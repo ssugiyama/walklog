@@ -1,3 +1,5 @@
+import { Position } from 'geojson'
+
 type PathManagerOptions = {
   map?: google.maps.Map
   styles?: google.maps.PolygonOptions
@@ -5,7 +7,7 @@ type PathManagerOptions = {
 }
 
 export default class PolygonManager extends google.maps.MVCObject {
-  private cache: { [key: string]: string }
+  private cache: { [key: string]: Position[][][] }
   private polygons: { [key: string]: google.maps.Polygon }
   private map: google.maps.Map
   private styles: google.maps.PolygonOptions
@@ -18,21 +20,22 @@ export default class PolygonManager extends google.maps.MVCObject {
     this.setValues(options)
   }
 
-  addCache(id: string, str: string) {
-    this.cache[id] = str
+  addCache(id: string, coordinates: Position[][][]) {
+    this.cache[id] = coordinates
   }
 
   getFromCache(id: string) {
     return this.cache[id]
   }
 
-  addPolygon(id: string, str: string) {
-    this.addCache(id, str)
-    const paths = str
-      .split(' ')
-      .map((element) => google.maps.geometry.encoding.decodePath(element))
+  addPolygon(id: string, coordinates: Position[][][]) {
+    this.addCache(id, coordinates)
     const pg = new google.maps.Polygon({})
-    pg.setPaths(paths)
+    pg.setPaths(
+      coordinates.map((polygon) =>
+        polygon[0].map((point) => new google.maps.LatLng(point[1], point[0])),
+      ),
+    )
     pg.setOptions(this.styles)
     this.polygons[id] = pg
     google.maps.event.addListener(pg, 'click', () => {

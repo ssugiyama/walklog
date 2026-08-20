@@ -14,13 +14,13 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import { useParams, usePathname, useSearchParams } from 'next/navigation'
-import React from 'react'
 import {
-  NumberParam,
-  StringParam,
-  useQueryParam,
-  withDefault,
-} from 'use-query-params'
+  parseAsArrayOf,
+  parseAsInteger,
+  parseAsString,
+  useQueryState,
+} from 'nuqs'
+import React from 'react'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
@@ -38,21 +38,18 @@ const BottomBar = (props) => {
     limit: 20,
     center: config.defaultCenter,
     radius: '500',
-    cities: '',
+    cities: [] as string[],
     path: '',
   }
-  const [filter, setFilter] = useQueryParam(
+  const [filter, setFilter] = useQueryState(
     'filter',
-    withDefault(StringParam, defaultValues.filter),
+    parseAsString.withDefault(defaultValues.filter),
   )
-  const [radius, setRadius] = useQueryParam(
+  const [radius, setRadius] = useQueryState(
     'radius',
-    withDefault(NumberParam, config.defaultRadius),
+    parseAsInteger.withDefault(config.defaultRadius),
   )
-  const [, setCities] = useQueryParam(
-    'cities',
-    withDefault(StringParam, defaultValues.cities),
-  )
+  const [, setCities] = useQueryState('cities', parseAsArrayOf(parseAsString))
   const { overlay, panoramaIndex, panoramaCount } = mainState
   const searchParams = useSearchParams()
   const [data] = useData()
@@ -223,7 +220,7 @@ const BottomBar = (props) => {
         setFilter(e.target.value),
       radius: (e: React.ChangeEvent<HTMLInputElement>) =>
         setRadius(Number(e.target.value)),
-      cities: () => setCities(''),
+      cities: () => setCities([]),
     }
     controls = (
       <div key="filter">

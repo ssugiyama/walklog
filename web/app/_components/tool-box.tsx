@@ -20,13 +20,12 @@ import {
   ListSubheader,
   TextField,
 } from '@mui/material'
+import { useQueryState } from 'nuqs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { StringParam } from 'serialize-query-params/dist/params'
-import { withDefault } from 'serialize-query-params/dist/withDefault'
-import { useQueryParam } from 'use-query-params/dist/useQueryParam'
 import { useConfig } from '@/lib/utils/config'
 import { useMainContext } from '@/lib/utils/main-context'
 import { useMapContext } from '@/lib/utils/map-context'
+import { parseAsPath } from '@/lib/utils/nuqs-parsers'
 import ConfirmModal, {
   APPEND_PATH_CONFIRM_INFO,
   ConfirmInfo,
@@ -38,10 +37,7 @@ const ToolBox = (props) => {
   const [mainState, dispatchMain] = useMainContext()
   const [mapState] = useMapContext()
   const pathManager = mapState.pathManager
-  const [selectedPath] = useQueryParam<string, string>(
-    'path',
-    withDefault<string, string, string>(StringParam, null),
-  )
+  const [selectedPath] = useQueryState('path', parseAsPath.withDefault([]))
   const autoGeolocation = mainState.autoGeolocation
   const [location, setLocation] = useState('')
   const geocoder = useRef<google.maps.Geocoder>(null)
@@ -104,7 +100,7 @@ const ToolBox = (props) => {
               payload: 'start following your location',
             })
             const append: boolean = await new Promise((resolve) => {
-              if (selectedPath) {
+              if (selectedPath.length > 0) {
                 setConfirmInfo({ open: true, resolve })
               } else {
                 resolve(false)
@@ -219,7 +215,7 @@ const ToolBox = (props) => {
         <ListItem>
           <ListItemButton
             onClick={() => downloadPath()}
-            disabled={!selectedPath}
+            disabled={selectedPath.length === 0}
             disableGutters
             dense
           >

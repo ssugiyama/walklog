@@ -7,9 +7,8 @@ import CssBaseline from '@mui/material/CssBaseline'
 import Fab from '@mui/material/Fab'
 import Snackbar from '@mui/material/Snackbar'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
-import NextAdapterApp from 'next-query-params/app'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { QueryParamProvider } from 'use-query-params'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
@@ -116,7 +115,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
         height: '100%',
       }}
     >
-      <QueryParamProvider adapter={NextAdapterApp}>
+      <NuqsAdapter>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <MapContextProvider>
@@ -186,7 +185,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
             />
           </MapContextProvider>
         </ThemeProvider>
-      </QueryParamProvider>
+      </NuqsAdapter>
     </Box>
   )
 }

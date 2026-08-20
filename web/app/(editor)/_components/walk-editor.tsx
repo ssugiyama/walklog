@@ -15,6 +15,7 @@ import {
   useRouter,
   useSearchParams,
 } from 'next/navigation'
+import { parseAsString, useQueryState } from 'nuqs'
 import React, {
   startTransition,
   useActionState,
@@ -22,7 +23,6 @@ import React, {
   useEffect,
   useState,
 } from 'react'
-import { StringParam, useQueryParam, withDefault } from 'use-query-params'
 import { updateItemAction } from '@/lib/actions/walk-actions'
 import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
@@ -98,10 +98,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     updateItemAction,
     initialState,
   )
-  const [searchPath] = useQueryParam<string, string>(
-    'path',
-    withDefault<string, string, string>(StringParam, null),
-  )
+  const [encodedSearchPath] = useQueryState('path', parseAsString)
 
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback(
@@ -151,7 +148,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       formData.append('title', inputs.title)
       formData.append('comment', inputs.comment)
       formData.append('draft', inputs.draft ? 'true' : '')
-      formData.append('path', searchPath ?? item?.path ?? '')
+      formData.append('path', encodedSearchPath ?? '')
       formData.append('image', image instanceof File ? image : '')
       formData.append('will_delete_image', inputs.will_delete_image ?? '')
       if (mode === 'update' && item?.id) {
@@ -159,7 +156,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
       }
       formAction(formData)
     })
-  }, [inputs, searchPath, item, mode, formAction])
+  }, [inputs, encodedSearchPath, item, mode, formAction])
 
   useEffect(() => {
     if (state.serial > 0) {
@@ -267,7 +264,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           </Button>
           <Button
             data-testid="submit-button"
-            disabled={isPending}
+            disabled={isPending || (mode === 'create' && !encodedSearchPath)}
             onClick={handleSubmit}
             color="secondary"
           >

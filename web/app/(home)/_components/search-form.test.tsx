@@ -34,11 +34,23 @@ vi.mock('next/navigation', () => ({
   }),
 }))
 
-vi.mock('use-query-params', () => ({
-  useQueryParam: vi.fn((key, defaultValue) => [defaultValue[1], vi.fn()]),
-  StringParam: vi.fn(),
-  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
-  NumberParam: vi.fn(),
+const mockSetFormValue = vi.fn()
+
+vi.mock('nuqs', () => ({
+  useQueryStates: vi.fn(() => [
+    {
+      filter: '',
+      user: '',
+      month: 0,
+      year: 0,
+      order: 'newest_first',
+      limit: 20,
+    },
+    mockSetFormValue,
+  ]),
+  parseAsStringLiteral: vi.fn(() => ({ withDefault: vi.fn() })),
+  parseAsString: { withDefault: vi.fn() },
+  parseAsInteger: { withDefault: vi.fn() },
 }))
 
 describe('SearchForm', () => {

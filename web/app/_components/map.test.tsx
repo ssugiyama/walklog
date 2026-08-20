@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { initialize } from '@googlemaps/jest-mocks'
@@ -32,13 +33,6 @@ vi.mock('@/lib/actions/walk-actions', () => ({
       theGeom: vi.fn(),
     },
   ]),
-}))
-
-vi.mock('use-query-params', () => ({
-  useQueryParam: vi.fn(() => ['', vi.fn()]),
-  StringParam: vi.fn(),
-  withDefault: vi.fn((param, defaultValue) => [param, defaultValue]),
-  NumberParam: vi.fn(),
 }))
 
 vi.mock('next/navigation', () => ({
@@ -119,7 +113,7 @@ describe('Map Component', () => {
   })
 
   it('renders without crashing and initializes map context state', async () => {
-    render(<GMap />)
+    render(<GMap />, { wrapper: withNuqsTestingAdapter() })
     expect(screen.getByTestId('map')).toBeInTheDocument()
     await waitFor(() => {
       expect(mockSetState).toHaveBeenCalled()

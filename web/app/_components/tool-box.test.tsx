@@ -1,8 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React from 'react'
 import '@testing-library/jest-dom'
-import { useQueryParam } from 'use-query-params/dist/useQueryParam'
-import { Mock } from 'vitest'
 import { ConfigProvider } from '@/lib/utils/config'
 import { MainContextProvider } from '@/lib/utils/main-context'
 import { MapContextProvider } from '@/lib/utils/map-context'
@@ -128,18 +127,6 @@ vi.mock('@/lib/utils/config', () => ({
   ),
 }))
 
-vi.mock('use-query-params/dist/useQueryParam', () => ({
-  useQueryParam: vi.fn(() => ['mock-path', vi.fn()]),
-}))
-
-vi.mock('serialize-query-params/dist/withDefault', () => ({
-  withDefault: vi.fn((param, _defaultValue) => param),
-}))
-
-vi.mock('serialize-query-params/dist/params', () => ({
-  StringParam: {},
-}))
-
 vi.mock('./confirm-modal', () => ({
   __esModule: true,
   default: ({ open, resolve }) => (
@@ -163,6 +150,7 @@ describe('ToolBox Component', () => {
           </MapContextProvider>
         </MainContextProvider>
       </ConfigProvider>,
+      { wrapper: withNuqsTestingAdapter() },
     )
 
     expect(screen.getByText('path')).toBeInTheDocument()
@@ -187,6 +175,7 @@ describe('ToolBox Component', () => {
           </MapContextProvider>
         </MainContextProvider>
       </ConfigProvider>,
+      { wrapper: withNuqsTestingAdapter() },
     )
 
     // Click the "here" button to get current location
@@ -231,6 +220,7 @@ describe('ToolBox Component', () => {
           </MapContextProvider>
         </MainContextProvider>
       </ConfigProvider>,
+      { wrapper: withNuqsTestingAdapter() },
     )
 
     // Type a location and press enter
@@ -266,6 +256,7 @@ describe('ToolBox Component', () => {
           </MapContextProvider>
         </MainContextProvider>
       </ConfigProvider>,
+      { wrapper: withNuqsTestingAdapter() },
     )
 
     // Click the record button
@@ -292,6 +283,7 @@ describe('ToolBox Component', () => {
           </MapContextProvider>
         </MainContextProvider>
       </ConfigProvider>,
+      { wrapper: withNuqsTestingAdapter() },
     )
 
     // Click the draw button
@@ -310,6 +302,7 @@ describe('ToolBox Component', () => {
           </MapContextProvider>
         </MainContextProvider>
       </ConfigProvider>,
+      { wrapper: withNuqsTestingAdapter() },
     )
 
     // Click the clear button
@@ -320,9 +313,6 @@ describe('ToolBox Component', () => {
   })
 
   it('disables download buttons when no path is selected', () => {
-    // Mock useQueryParam to return null (no selected path)
-    ;(useQueryParam as Mock).mockReturnValueOnce([null, vi.fn()])
-
     render(
       <ConfigProvider>
         <MainContextProvider>
@@ -331,6 +321,7 @@ describe('ToolBox Component', () => {
           </MapContextProvider>
         </MainContextProvider>
       </ConfigProvider>,
+      { wrapper: withNuqsTestingAdapter() },
     )
 
     // Check that download buttons are disabled

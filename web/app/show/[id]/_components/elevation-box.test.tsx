@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
-import { initialize, LatLng } from '@googlemaps/jest-mocks'
+import { initialize } from '@googlemaps/jest-mocks'
 import { Mock } from 'vitest'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
@@ -44,15 +44,6 @@ describe('ElevationBox', () => {
       ...global.google,
       maps: {
         ...global.google.maps,
-        geometry: {
-          ...global.google.maps.geometry,
-          encoding: {
-            ...global.google.maps.geometry.encoding,
-            decodePath: vi.fn((_encodedPath: string) => [
-              new LatLng(35.6762, 139.6503),
-            ]),
-          },
-        },
         ElevationService: vi.fn().mockImplementation(function () {
           return mockElevationService
         }),
@@ -73,7 +64,9 @@ describe('ElevationBox', () => {
   })
 
   it('renders null when selectedItem is present but no chartData', () => {
-    ;(useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }])
+    ;(useData as Mock).mockReturnValue([
+      { current: { path: [[139.6503, 35.6762]] } },
+    ])
     ;(useMapContext as Mock).mockReturnValue([
       { map: {}, elevationInfoWindow: {} },
     ])
@@ -103,7 +96,9 @@ describe('ElevationBox', () => {
       },
     )
 
-    ;(useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }])
+    ;(useData as Mock).mockReturnValue([
+      { current: { path: [[139.6503, 35.6762]] } },
+    ])
     ;(useMapContext as Mock).mockReturnValue([
       { map: {}, elevationInfoWindow: {} },
     ])
@@ -145,7 +140,9 @@ describe('ElevationBox', () => {
       },
     )
 
-    ;(useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }])
+    ;(useData as Mock).mockReturnValue([
+      { current: { path: [[139.6503, 35.6762]] } },
+    ])
     ;(useMapContext as Mock).mockReturnValue([
       { map: {}, elevationInfoWindow: {} },
     ])
@@ -166,7 +163,9 @@ describe('ElevationBox', () => {
       },
     )
 
-    ;(useData as Mock).mockReturnValue([{ current: { path: 'encodedPath' } }])
+    ;(useData as Mock).mockReturnValue([
+      { current: { path: [[139.6503, 35.6762]] } },
+    ])
     ;(useMapContext as Mock).mockReturnValue([
       { map: {}, elevationInfoWindow: {} },
     ])

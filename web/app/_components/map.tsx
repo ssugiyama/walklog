@@ -6,21 +6,23 @@ import { LineString } from 'geojson'
 import moment from 'moment'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import {
+  parseAsArrayOf,
+  parseAsFloat,
+  parseAsString,
+  useQueryState,
+} from 'nuqs'
 import React, { MouseEventHandler, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-  NumberParam,
-  StringParam,
-  useQueryParam,
-  withDefault,
-} from 'use-query-params'
 import { getCityAction } from '@/lib/actions/walk-actions'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
+import { positionArrayToLatLngArray } from '@/lib/utils/geo-utils'
 import createGsiMapType from '@/lib/utils/gsi-map-type'
 import { useMainContext } from '@/lib/utils/main-context'
 import { useMapContext } from '@/lib/utils/map-context'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
+import { parseAsLatLng, parseAsPath } from '@/lib/utils/nuqs-parsers'
 import type PathManager from '@/lib/utils/path-manager'
 import type PolygonManager from '@/lib/utils/polygon-manager'
 import { ShapeStyles, WalkT } from '@/types'
@@ -35,7 +37,7 @@ const PRECISION = 0.0001
 
 type MapRefs = {
   filter?: string
-  cities?: string
+  cities?: string[]
   selectedPath?: string
   view?: string
   autoGeolocation?: boolean
@@ -46,10 +48,10 @@ type MapRefs = {
   pathManager?: PathManager
   polygonManager?: PolygonManager
   shapeStyles?: ShapeStyles
-  searchPath?: string
+  searchPath?: google.maps.LatLng[]
   radius?: number
   fetching?: boolean
-  searchCenter?: string
+  searchCenter?: google.maps.LatLng
   clickedItem?: WalkT
   resizeIntervalID?: NodeJS.Timeout | null
   elevationInfoWindow?: google.maps.InfoWindow
@@ -62,27 +64,24 @@ const GMap = (props) => {
   const [mainState, dispatchMain, interceptLink] = useMainContext()
   const [, setMapState] = useMapContext()
   const config = useConfig()
-  const [searchPath, setSearchPath] = useQueryParam(
+  const [searchPath, setSearchPath] = useQueryState(
     'path',
-    withDefault(StringParam, ''),
+    parseAsPath.withDefault([]),
   )
-  const [searchCenter, setSearchCenter] = useQueryParam(
-    'center',
-    withDefault(StringParam, config.defaultCenter),
-  )
-  const [radius, setRadius] = useQueryParam(
+  const [searchCenter, setSearchCenter] = useQueryState('center', parseAsLatLng)
+  const [radius, setRadius] = useQueryState(
     'radius',
-    withDefault(NumberParam, config.defaultRadius),
+    parseAsFloat.withDefault(config.defaultRadius),
   )
-  const [cities, setCities] = useQueryParam(
+  const [cities, setCities] = useQueryState(
     'cities',
-    withDefault(StringParam, ''),
+    parseAsArrayOf(parseAsString),
   )
   const [data] = useData()
   const { rows, current } = data
   const refs = useRef<MapRefs>({ initialized: false })
   const rc = refs.current
-  rc.cities = cities
+  rc.cities = cities ?? []
   rc.searchPath = searchPath
   rc.autoGeolocation = mainState.autoGeolocation
   const mapElemRef = useRef<HTMLDivElement | null>(null)
@@ -121,15 +120,20 @@ const GMap = (props) => {
   }
   const addPaths = (items: WalkT[]) => {
     items.forEach((item) =>
-      rc.pathManager.showPath(item.path, false, false, item),
+      rc.pathManager.showPath(
+        positionArrayToLatLngArray(item.path),
+        false,
+        false,
+        item,
+      ),
     )
   }
 
   const pathChanged = () => {
     if (!rc.pathManager) return
     const nextPath = rc.pathManager.getEncodedSelection()
-    if (searchPath !== nextPath) {
-      setSearchPath(nextPath)
+    if (parseAsPath.serialize(searchPath) !== (nextPath ?? '')) {
+      setSearchPath(nextPath ? parseAsPath.parse(nextPath) : [])
       if (nextPath) {
         const pair = rc.pathManager.searchPolyline(nextPath)
         const item = pair?.[1]
@@ -162,10 +166,7 @@ const GMap = (props) => {
       const pts = coordinates.map(
         (item) => new google.maps.LatLng(item[1], item[0]),
       )
-      const path = google.maps.geometry.encoding.encodePath(
-        new google.maps.MVCArray(pts),
-      )
-      setSearchPath(path)
+      setSearchPath(pts)
     })
     reader.readAsText(file)
   }
@@ -180,22 +181,19 @@ const GMap = (props) => {
   }
 
   const addCity = (id: string) => {
-    const newCities = Array.from(
-      new Set(
-        rc.cities
-          .split(/,/)
-          .filter((elm) => elm)
-          .concat(id),
-      ),
-    ).join(',')
+    const newCities = Array.from(new Set(rc.cities.concat(id)))
     setCities(newCities)
+  }
+
+  const defaultCenterLatLng = () => {
+    const [lat, lng] = config.defaultCenter.split(',').map(parseFloat)
+    return new google.maps.LatLng(lat, lng)
   }
 
   const initMap = async () => {
     if (rc.initialized) return
     rc.shapeStyles = config.shapeStyles
     const mapTypeIds = config.mapTypeIds.split(/,/)
-    const cs = rc.searchCenter.split(/,/)
     const options = {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDoubleClickZoom: true,
@@ -207,7 +205,7 @@ const GMap = (props) => {
         mapTypeIds,
         style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
       },
-      center: { lat: parseFloat(cs[0]), lng: parseFloat(cs[1]) },
+      center: rc.searchCenter ?? defaultCenterLatLng(),
       zoom: config.defaultZoom,
     }
     mapElemRef.current.addEventListener('touchmove', (event) => {
@@ -252,7 +250,7 @@ const GMap = (props) => {
       'drawfinish',
       async (path: google.maps.LatLng[]) => {
         const append: boolean = await new Promise((resolve) => {
-          if (rc.searchPath) {
+          if (rc.searchPath.length > 0) {
             setConfirmInfo({ open: true, resolve })
           } else {
             resolve(false)
@@ -274,12 +272,11 @@ const GMap = (props) => {
       rc.polygonManager,
       'polygon_deleted',
       (id: string) => {
-        const citiesArray = rc.cities.split(/,/)
+        const citiesArray = [...rc.cities]
         const index = citiesArray.indexOf(id)
         if (index >= 0) {
           citiesArray.splice(index, 1)
-          const newCities = citiesArray.join(',')
-          setCities(newCities)
+          setCities(citiesArray)
         }
       },
     )
@@ -309,20 +306,23 @@ const GMap = (props) => {
       }
       rc.pathInfoWindow.close()
     })
-    const c = rc.searchCenter.split(/,/)
-    const center = { lat: parseFloat(c[0]), lng: parseFloat(c[1]) }
     const circleOpts = {
       ...rc.shapeStyles.circle,
-      center: center,
+      center: rc.searchCenter ?? defaultCenterLatLng(),
       radius: radius,
     }
     rc.distanceWidget = new google.maps.Circle(circleOpts)
     google.maps.event.addListener(rc.distanceWidget, 'center_changed', () => {
-      const lat = rc.distanceWidget.getCenter().lat()
-      const lng = rc.distanceWidget.getCenter().lng()
-      const newCenter = lat.toFixed(5) + ',' + lng.toFixed(5)
-      if (newCenter === rc.searchCenter) return
-      setSearchCenter(newCenter)
+      const lat = Number(rc.distanceWidget.getCenter().lat().toFixed(5))
+      const lng = Number(rc.distanceWidget.getCenter().lng().toFixed(5))
+      if (
+        rc.searchCenter &&
+        rc.searchCenter.lat() === lat &&
+        rc.searchCenter.lng() === lng
+      ) {
+        return
+      }
+      setSearchCenter(new google.maps.LatLng(lat, lng))
     })
     google.maps.event.addListener(rc.distanceWidget, 'radius_changed', () => {
       const r = rc.distanceWidget.getRadius()
@@ -378,7 +378,7 @@ const GMap = (props) => {
   }, [])
 
   const citiesChanges = () => {
-    const a = rc.cities.split(/,/)
+    const a = rc.cities
     const b = rc.polygonManager.idSet()
     if (a.length !== b.size) return true
     if (a.some((j) => !b.has(j))) return true
@@ -386,7 +386,10 @@ const GMap = (props) => {
   }
   useEffect(() => {
     if (!rc.initialized) return
-    if (searchPath && searchPath !== rc.pathManager.getEncodedSelection()) {
+    if (
+      searchPath.length > 0 &&
+      parseAsPath.serialize(searchPath) !== rc.pathManager.getEncodedSelection()
+    ) {
       rc.pathManager.showPath(searchPath, true)
     }
   }, [searchPath, rc.initialized])
@@ -397,9 +400,14 @@ const GMap = (props) => {
   }, [rows, rc.initialized])
   useEffect(() => {
     if (!rc.initialized) return
-    if (current && current.path !== rc.pathManager.getEncodedCurrent()) {
-      rc.pathManager.showPath(current.path, false, true, current)
-    } else if (!current) {
+    if (current) {
+      rc.pathManager.showPath(
+        positionArrayToLatLngArray(current.path),
+        false,
+        true,
+        current,
+      )
+    } else {
       rc.pathManager.set('current', null)
     }
   }, [current, rc.initialized])
@@ -409,9 +417,7 @@ const GMap = (props) => {
     if (['neighborhood', 'start', 'end'].includes(filter)) {
       rc.distanceWidget.setMap(rc.map)
       rc.distanceWidget.set('radius', radius)
-      const c = searchCenter.split(/,/)
-      const center = { lat: parseFloat(c[0]), lng: parseFloat(c[1]) }
-      rc.distanceWidget.setCenter(center)
+      rc.distanceWidget.setCenter(searchCenter ?? defaultCenterLatLng())
     } else {
       rc.distanceWidget.setMap(null)
     }
@@ -421,10 +427,10 @@ const GMap = (props) => {
     if (!rc.initialized) return
     if (rc.filter === 'cities' && citiesChanges() && !rc.fetching) {
       rc.polygonManager.deleteAll()
-      if (rc.cities) {
+      if (rc.cities.length > 0) {
         rc.fetching = true
         void (async () => {
-          const jcodes = rc.cities.split(/,/)
+          const jcodes = rc.cities
           const uncached: string[] = []
           jcodes.forEach((jcode) => {
             const geom = rc.polygonManager.getFromCache(jcode)

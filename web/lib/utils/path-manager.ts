@@ -68,7 +68,8 @@ export default class PathManager extends google.maps.MVCObject {
             this.draw.getSnapshotFeature(id)
           if (feature?.geometry.type === 'LineString') {
             const path: google.maps.LatLng[] = feature.geometry.coordinates.map(
-              (coord: number[]) => new google.maps.LatLng(coord[1], coord[0]),
+              (coord: [number, number]) =>
+                new google.maps.LatLng(coord[1], coord[0]),
             )
             this.draw.clear()
             this.draw.stop()
