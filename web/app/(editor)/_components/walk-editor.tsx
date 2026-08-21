@@ -21,6 +21,7 @@ import React, {
   useActionState,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import { updateItemAction } from '@/lib/actions/walk-actions'
@@ -99,6 +100,9 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     initialState,
   )
   const [encodedSearchPath] = useQueryState('path', parseAsString)
+  // Caps retries to one per failed submit so a persistent verification
+  // failure (not just a stale token) can't loop forever.
+  const submitRetryCountRef = useRef(0)
 
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback(
@@ -161,22 +165,29 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   useEffect(() => {
     if (state.serial > 0) {
       if (state.idTokenExpired) {
+        if (submitRetryCountRef.current >= 1) {
+          return
+        }
+        submitRetryCountRef.current += 1
         void (async () => {
-          await updateIdToken()
+          await updateIdToken(true)
           handleSubmit()
         })()
-      } else if (state.id) {
-        // フォーム送信が成功したらdirtyフラグをリセット
-        dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
+      } else {
+        submitRetryCountRef.current = 0
+        if (state.id) {
+          // フォーム送信が成功したらdirtyフラグをリセット
+          dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
 
-        if (mode === 'update') {
-          const index = data.rows.findIndex((row) => row?.id === item.id)
-          if (index >= 0) {
-            data.rows[index].stale = true
-            setData({ rows: data.rows })
+          if (mode === 'update') {
+            const index = data.rows.findIndex((row) => row?.id === item.id)
+            if (index >= 0) {
+              data.rows[index].stale = true
+              setData({ rows: data.rows })
+            }
           }
+          router.push(idToShowUrl(state.id))
         }
-        router.push(idToShowUrl(state.id))
       }
     }
   }, [state?.serial])
