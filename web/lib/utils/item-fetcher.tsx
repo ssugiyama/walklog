@@ -1,6 +1,6 @@
 'use client'
 import { useParams } from 'next/navigation'
-import { useActionState, useEffect, useTransition } from 'react'
+import { useActionState, useEffect, useRef, useTransition } from 'react'
 import { getItemAction } from '@/lib/actions/walk-actions'
 import { DataT, GetItemState } from '@/types'
 import { useData } from './data-context'
@@ -27,7 +27,22 @@ export function ItemFetcher() {
     return data.rows.findIndex((row) => row.id === id)
   }
 
+  // Set right before a retry's forced token refresh changes `idToken`, and
+  // consumed by the effect below: without it, that idToken change would
+  // fire this effect too, dispatching the retried fetch a second time on
+  // top of the explicit retry dispatch, and if the refreshed token is still
+  // rejected, each of those duplicate dispatches spawns its own retry -
+  // compounding into a runaway loop of item fetches.
+  const suppressNextDispatchRef = useRef(false)
+  // Caps retries to one per failed fetch so a persistent verification
+  // failure (not just a stale token) can't loop forever either.
+  const retryCountRef = useRef(0)
+
   useEffect(() => {
+    if (suppressNextDispatchRef.current) {
+      suppressNextDispatchRef.current = false
+      return
+    }
     const index = findIndexById(id)
     if (index >= 0 && !data.rows[index].stale) {
       const newData: Partial<DataT> = {}
@@ -38,6 +53,7 @@ export function ItemFetcher() {
       newData.current = data.rows[index]
       setData(newData)
     } else {
+      retryCountRef.current = 0
       startTransition(() => {
         dispatchGetItem(id)
       })
@@ -49,11 +65,20 @@ export function ItemFetcher() {
       return
     }
     if (getItemState.idTokenExpired) {
-      startTransition(async () => {
-        await updateIdToken()
+      if (retryCountRef.current >= 1) {
+        return
+      }
+      retryCountRef.current += 1
+      suppressNextDispatchRef.current = true
+      startTransition(() => {
+        void (async () => {
+          await updateIdToken(true)
+          dispatchGetItem(id)
+        })()
       })
       return
     }
+    retryCountRef.current = 0
     const index = findIndexById(id)
     const newData: Partial<DataT> = { isPending }
     if (index >= 0) {

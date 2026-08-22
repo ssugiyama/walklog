@@ -1,8 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mock } from 'vitest'
+import { deleteItemAction } from '@/lib/actions/walk-actions'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
@@ -175,5 +176,84 @@ describe('ItemBox Component', () => {
     const deleteButton = screen.getByTestId('delete-button')
     fireEvent.click(deleteButton)
     expect(window.confirm).toHaveBeenCalledWith('Are you sure to delete?')
+  })
+
+  it('force-refreshes the id token and retries the delete once when the token has expired', async () => {
+    window.confirm = vi.fn(() => true)
+    const mockUpdateIdToken = vi.fn().mockResolvedValue(undefined)
+    ;(deleteItemAction as Mock)
+      .mockResolvedValueOnce({
+        deleted: false,
+        idTokenExpired: true,
+        serial: 1,
+      })
+      .mockResolvedValueOnce({
+        deleted: true,
+        idTokenExpired: false,
+        serial: 2,
+      })
+    ;(useData as Mock).mockReturnValue([
+      {
+        current: { id: 'item1', uid: 'user1', length: 9.9 },
+        isPending: false,
+        error: null,
+      },
+    ])
+    ;(useUserContext as Mock).mockReturnValue({
+      users: [
+        { uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' },
+      ],
+      currentUser: { uid: 'user1' },
+      updateIdToken: mockUpdateIdToken,
+    })
+
+    render(<ItemBox />)
+    fireEvent.click(screen.getByTestId('delete-button'))
+
+    await waitFor(() => expect(deleteItemAction).toHaveBeenCalledTimes(2))
+    expect(mockUpdateIdToken).toHaveBeenCalledWith(true)
+  })
+
+  it('stops retrying the delete after one failed refresh attempt, instead of looping forever', async () => {
+    window.confirm = vi.fn(() => true)
+    const mockUpdateIdToken = vi.fn().mockResolvedValue(undefined)
+    ;(deleteItemAction as Mock)
+      .mockResolvedValueOnce({
+        deleted: false,
+        idTokenExpired: true,
+        serial: 1,
+      })
+      .mockResolvedValueOnce({
+        deleted: false,
+        idTokenExpired: true,
+        serial: 2,
+      })
+      .mockResolvedValueOnce({
+        deleted: false,
+        idTokenExpired: true,
+        serial: 3,
+      })
+    ;(useData as Mock).mockReturnValue([
+      {
+        current: { id: 'item1', uid: 'user1', length: 9.9 },
+        isPending: false,
+        error: null,
+      },
+    ])
+    ;(useUserContext as Mock).mockReturnValue({
+      users: [
+        { uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' },
+      ],
+      currentUser: { uid: 'user1' },
+      updateIdToken: mockUpdateIdToken,
+    })
+
+    render(<ItemBox />)
+    fireEvent.click(screen.getByTestId('delete-button'))
+
+    await waitFor(() => expect(deleteItemAction).toHaveBeenCalledTimes(2))
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(deleteItemAction).toHaveBeenCalledTimes(2)
+    expect(mockUpdateIdToken).toHaveBeenCalledTimes(1)
   })
 })
