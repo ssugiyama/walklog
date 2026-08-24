@@ -20,7 +20,6 @@ import React, {
   useActionState,
   useCallback,
   useEffect,
-  useRef,
   useState,
   useTransition,
 } from 'react'
@@ -86,9 +85,6 @@ const ItemBox = () => {
       }
     })
   }, [item?.id])
-  // Caps retries to one per failed delete so a persistent verification
-  // failure (not just a stale token) can't loop forever.
-  const deleteRetryCountRef = useRef(0)
 
   const itemWillRender = !data.isPending && item
   const title = itemWillRender
@@ -108,18 +104,12 @@ const ItemBox = () => {
   useEffect(() => {
     if (deleteState && deleteState.serial > 0) {
       if (deleteState.idTokenExpired) {
-        if (deleteRetryCountRef.current >= 1) {
-          return
-        }
-        deleteRetryCountRef.current += 1
         startTransition(() => {
           void (async () => {
-            await updateIdToken(true)
+            await updateIdToken()
             dispatchDelete(item?.id)
           })()
         })
-      } else {
-        deleteRetryCountRef.current = 0
       }
     }
   }, [deleteState?.serial])
