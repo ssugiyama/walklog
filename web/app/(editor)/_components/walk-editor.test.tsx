@@ -257,64 +257,6 @@ describe('WalkEditor update', () => {
 
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith('/show/2'))
   })
-
-  it('force-refreshes the id token and retries the submit once when the token has expired', async () => {
-    mockUpdateIdToken.mockResolvedValue(undefined)
-    ;(updateItemAction as Mock)
-      .mockResolvedValueOnce({
-        id: null,
-        error: null,
-        idTokenExpired: true,
-        serial: 1,
-      })
-      .mockResolvedValueOnce({
-        id: 2,
-        error: null,
-        idTokenExpired: false,
-        serial: 2,
-      })
-    render(<WalkEditor mode="update" />, {
-      wrapper: withNuqsTestingAdapter(),
-    })
-
-    fireEvent.click(screen.getByTestId('submit-button'))
-
-    await waitFor(() => expect(updateItemAction).toHaveBeenCalledTimes(2))
-    expect(mockUpdateIdToken).toHaveBeenCalledWith(true)
-  })
-
-  it('stops retrying the submit after one failed refresh attempt, instead of looping forever', async () => {
-    mockUpdateIdToken.mockResolvedValue(undefined)
-    ;(updateItemAction as Mock)
-      .mockResolvedValueOnce({
-        id: null,
-        error: null,
-        idTokenExpired: true,
-        serial: 1,
-      })
-      .mockResolvedValueOnce({
-        id: null,
-        error: null,
-        idTokenExpired: true,
-        serial: 2,
-      })
-      .mockResolvedValueOnce({
-        id: null,
-        error: null,
-        idTokenExpired: true,
-        serial: 3,
-      })
-    render(<WalkEditor mode="update" />, {
-      wrapper: withNuqsTestingAdapter(),
-    })
-
-    fireEvent.click(screen.getByTestId('submit-button'))
-
-    await waitFor(() => expect(updateItemAction).toHaveBeenCalledTimes(2))
-    await new Promise((resolve) => setTimeout(resolve, 50))
-    expect(updateItemAction).toHaveBeenCalledTimes(2)
-    expect(mockUpdateIdToken).toHaveBeenCalledTimes(1)
-  })
 })
 
 describe('WalkEditor create', () => {

@@ -21,7 +21,7 @@ type UserContextT = {
   currentUser: FirebaseUser | null | undefined
   selfStatus: SelfStatusT
   setCurrentUser: (user: FirebaseUser | null) => void
-  updateIdToken: (forceRefresh?: boolean) => Promise<void>
+  updateIdToken: () => Promise<void>
 }
 const initialState: UserContextT = {
   users: [],
@@ -53,7 +53,7 @@ export function UserContextProvider({
   // listener on Firebase's own silent background token refresh, where the
   // User object is mutated in place rather than replaced, so a stale React
   // closure could hand back an already-expired token.
-  const updateIdToken = useCallback(async (forceRefresh = false) => {
+  const updateIdToken = useCallback(async () => {
     const user = getAuth().currentUser
     if (!user) {
       await clearIdTokenAction()
@@ -61,7 +61,7 @@ export function UserContextProvider({
       setSelfStatus('anonymous')
       return
     }
-    const newIdToken = (await user.getIdToken(forceRefresh)) ?? ''
+    const newIdToken = (await user.getIdToken()) ?? ''
     const { error } = await setIdTokenAction(newIdToken)
     if (error) {
       setIdToken('')
