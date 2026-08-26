@@ -23,6 +23,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       HYPERDRIVE_ID: ${{ secrets.HYPERDRIVE_ID }}
       CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: ${{ secrets.CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE }}
+      D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
     steps:
       - uses: actions/checkout@v7
       - name: Use Node.js
@@ -40,14 +41,35 @@ jobs:
         run: pnpm lint
       - name: run test
         run: pnpm test
-      - name: Set APP_VERSION secret
-        # Not a wrangler.jsonc `var`: it changes every release, and `wrangler
-        # types` would otherwise infer whatever value was present at the last
-        # local `cf-typegen` run as APP_VERSION's literal TS type.
+      - name: Set Cloudflare secrets/vars
+        # Pushes every non-Hyperdrive-managed variable from the reference
+        # table (README.md) to Cloudflare on each deploy, so GitHub
+        # Secrets/Variables are the source of truth instead of the dashboard.
+        # DB_URL/DB_SSL/DB_SSL_CA and CF_WORKERS are deliberately not in this
+        # list: the Workers runtime reads the DB connection from the
+        # Hyperdrive binding instead of DB_URL/DB_SSL* (see lib/drizzle/db.ts),
+        # and CF_WORKERS is a fixed `vars` entry in wrangler.jsonc already.
         run: |
           pnpm run render-wrangler-config
-          echo "$APP_VERSION" | pnpm exec wrangler secret put APP_VERSION --config .wrangler.generated.jsonc
+          for name in FIREBASE_API_KEY FIREBASE_AUTH_DOMAIN FIREBASE_PROJECT_ID GOOGLE_API_KEY IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL APP_VERSION; do
+            value="${!name}"
+            echo "$value" | pnpm exec wrangler secret put "$name" --config .wrangler.generated.jsonc
+          done
         env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          IMAGE_STORAGE: ${{ vars.IMAGE_STORAGE }}
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
+          R2_PUBLIC_URL: ${{ vars.R2_PUBLIC_URL }}
+          # Not a wrangler.jsonc `var`: it changes every release, and
+          # `wrangler types` would otherwise infer whatever value was present
+          # at the last local `cf-typegen` run as APP_VERSION's literal TS
+          # type.
           APP_VERSION: ${{ github.event.release.tag_name || inputs.app_version }}
       - name: Deploy to Cloudflare Workers
         run: pnpm run deploy

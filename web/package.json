@@ -9,9 +9,9 @@
     "typecheck": "tsc --noEmit",
     "migrate": "drizzle-kit generate && drizzle-kit migrate",
     "render-wrangler-config": "node scripts/render-wrangler-config.mjs",
-    "preview": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare preview --config .wrangler.generated.jsonc",
-    "deploy": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare deploy --config .wrangler.generated.jsonc",
-    "upload": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare upload --config .wrangler.generated.jsonc",
+    "preview": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare populateCache local --config .wrangler.generated.jsonc && opennextjs-cloudflare preview --config .wrangler.generated.jsonc",
+    "deploy": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare deploy --config .wrangler.generated.jsonc",
+    "upload": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare upload --config .wrangler.generated.jsonc",
     "cf-typegen": "pnpm run render-wrangler-config && wrangler types --config .wrangler.generated.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {

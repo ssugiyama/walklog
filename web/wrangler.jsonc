@@ -16,6 +16,9 @@
     // the same as unset for the app's `?? 'default'` fallbacks.
     "CF_WORKERS": "true"
   },
+  "observability": {
+    "enabled": true
+  },
   "hyperdrive": [
     {
       // Run `wrangler hyperdrive create walklog-db --connection-string="<supabase-connection-string>"`
@@ -33,15 +36,47 @@
       "id": "$HYPERDRIVE_ID"
     }
   ],
+  "r2_buckets": [
+    {
+      // Backs the `'use cache'` functions in lib/actions/walk-actions.ts
+      // (see open-next.config.ts). Binding name is fixed by
+      // @opennextjs/cloudflare's r2-incremental-cache override. The bucket
+      // itself doesn't need to be created manually - `pnpm run deploy` runs
+      // `opennextjs-cloudflare populateCache remote` first, which creates it
+      // if missing.
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "walklog-cache"
+    }
+  ],
+  "d1_databases": [
+    {
+      // Tracks on-demand revalidation (`revalidateTag`) for the same
+      // `'use cache'` functions. Binding name is fixed by
+      // @opennextjs/cloudflare's d1-next-tag-cache override. Run
+      // `wrangler d1 create walklog-tag-cache` (see README.md), then
+      // `export D1_DATABASE_ID=<the id it prints>` - same
+      // render-wrangler-config.mjs substitution as $HYPERDRIVE_ID above. The
+      // `revalidations` table itself is created automatically (idempotently)
+      // by `opennextjs-cloudflare populateCache remote`, run as part of
+      // `pnpm run deploy`.
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "walklog-tag-cache",
+      "database_id": "$D1_DATABASE_ID"
+    }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
-    // Without this, requests to a path that matches a static/prerendered
-    // asset (e.g. `/`, which is statically prerendered) are served directly
-    // by the assets layer without ever invoking the Worker - so a Server
-    // Action POST to that same path 500s before our code runs at all (and
-    // never shows up in `wrangler tail`, since the Worker never saw it).
-    "run_worker_first": true
+    // "/*" routes everything to the Worker by default (needed because a
+    // Server Action POST to a path that also matches a static/prerendered
+    // asset, e.g. `/`, would otherwise be served directly by the assets
+    // layer without ever invoking the Worker, and 500 before our code runs -
+    // see https://opennext.js.org/cloudflare/caching#static-assets-caching).
+    // The negative rule excludes hashed `_next/static/*` build assets, which
+    // are immutable and never a Server Action target, so those are served
+    // straight from Cloudflare's edge asset cache (see public/_headers)
+    // instead of paying for a Worker invocation on every request.
+    "run_worker_first": ["/*", "!/_next/static/*"]
   },
   "services": [
     {
