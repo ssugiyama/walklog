@@ -234,7 +234,21 @@ Use Supabase's **direct** connection string here (found in the Supabase dashboar
 export HYPERDRIVE_ID=<the id it printed>
 ```
 
-`pnpm run build`/`preview`/`deploy`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
+`pnpm run build`/`preview`/`deploy`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` (and `D1_DATABASE_ID`, see below) into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
+
+#### Set Up Caching
+
+The `'use cache'` functions in `lib/actions/walk-actions.ts` (search results, item lookups) need a place to persist cached data and track `revalidateTag` calls - without this they still work, but every call recomputes from scratch. `open-next.config.ts` wires these to an R2 bucket (`incrementalCache`) and a D1 database (`tagCache`), per [OpenNext's Cloudflare caching guide](https://opennext.js.org/cloudflare/caching). The R2 bucket (`walklog-cache`) is created automatically on first deploy; D1 needs to be created once, the same way as Hyperdrive:
+
+```bash
+cd web
+pnpm exec wrangler d1 create walklog-tag-cache
+export D1_DATABASE_ID=<the id it printed>
+```
+
+`pnpm run deploy`/`upload` run `opennextjs-cloudflare populateCache remote` before deploying, which (idempotently) creates the R2 bucket and the D1 `revalidations` table if they don't already exist - no separate migration step is needed. `pnpm run preview` runs the `local` variant instead, against wrangler's local emulated storage.
+
+Time-based ISR (`revalidate: N`) isn't used anywhere in this app - only on-demand `revalidateTag`, which writes directly to the tag cache - so there's no revalidation queue to configure.
 
 #### Configure Environment Variables
 
@@ -265,6 +279,8 @@ pnpm run deploy   # publishes to Cloudflare Workers
 
 If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeScript types with `pnpm run cf-typegen`.
 
+`wrangler.jsonc`'s `observability.enabled` turns on Workers Logs, so invocation logs for every request are queryable in the Cloudflare dashboard (Workers & Pages → walklog → Logs) after a deploy; `pnpm exec wrangler tail` also streams them live from the CLI.
+
 #### CI Deployment
 
 `.github/workflows/deploy-cloudflare-workers.yml` deploys automatically whenever a GitHub release is published (`APP_VERSION` is set to the release tag), or manually via workflow dispatch. It needs these repository secrets:
@@ -275,8 +291,22 @@ If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeSc
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
 | `HYPERDRIVE_ID` | Same as `HYPERDRIVE_ID` above |
 | `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` | Same as above |
+| `D1_DATABASE_ID` | Same as `D1_DATABASE_ID` above |
 
-Everything set via `wrangler secret put` (`SITE_NAME`, `DB_URL`... - see the reference table) is already stored on Cloudflare from the manual setup above and doesn't need to be repeated in CI; only `APP_VERSION` is set fresh on every deploy, since it changes every release.
+On every deploy, the workflow also pushes a fixed set of app-level values to Cloudflare via `wrangler secret put`, so GitHub is the source of truth instead of the dashboard (`APP_VERSION` is set fresh from the release tag; everything else comes from a repository secret or variable of the same name):
+
+| Repository secret | Repository variable |
+|---|---|
+| `FIREBASE_API_KEY` | `FIREBASE_AUTH_DOMAIN` |
+| `GOOGLE_API_KEY` | `FIREBASE_PROJECT_ID` |
+| `R2_ACCESS_KEY_ID` | `IMAGE_STORAGE` |
+| `R2_SECRET_ACCESS_KEY` | `R2_ACCOUNT_ID` |
+| | `R2_BUCKET_NAME` |
+| | `R2_PUBLIC_URL` |
+
+Any other variable from the reference table that your deployment needs (`SITE_NAME`, `DEFAULT_CENTER`, ...) isn't touched by CI and must still be set on Cloudflare manually with `wrangler secret put`, same as before. `DB_URL`/`DB_SSL`/`DB_SSL_CA` and `CF_WORKERS` are never set this way for Workers: the runtime reads the DB connection from the Hyperdrive binding instead of `DB_URL`/`DB_SSL*` (see `lib/drizzle/db.ts`), and `CF_WORKERS` is a fixed `vars` entry already committed in `wrangler.jsonc`.
+
+Because CI overwrites these secrets on every deploy, make sure the repository secrets/variables above hold real values *before* the first deploy after this workflow change - an unset one will overwrite the existing Cloudflare secret with an empty string.
 
 ## Development
 
