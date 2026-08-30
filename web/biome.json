@@ -76,8 +76,7 @@
       "!out/**",
       "!public/**",
       "!coverage/**",
-      "!*.config.*",
-      "!next-env.d.ts"
+      "!*.config.*"
     ]
   },
   "javascript": {
