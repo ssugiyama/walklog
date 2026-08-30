@@ -1,6 +1,5 @@
 'use server'
 
-import { Theme } from '@mui/material'
 import {
   and,
   asc,
@@ -25,24 +24,19 @@ import {
 } from '@/lib/utils/firebase-id-token'
 import { deleteImage, saveImage } from '@/lib/utils/image-storage'
 import { decode } from '@/lib/utils/path-encoder'
-import str2bool from '@/lib/utils/str2bool'
 import {
   BaseState,
   CityParams,
   CityT,
-  ConfigT,
   DeleteItemState,
   GetItemState,
   SearchProps,
   SearchState,
   SelfStatusT,
-  ShapeStyles,
   UpdateItemState,
   UserT,
   WalkT,
 } from '@/types'
-import defaultShapeStyles from '../../default-shape-styles.json'
-import defaultTheme from '../../default-theme.json'
 import { getDb } from '../../lib/drizzle/db'
 import { areas, coordinatesToWKT, users, walks } from '../../lib/drizzle/schema'
 import {
@@ -85,47 +79,6 @@ const asCityT = (area: AreaAttributes): CityT => {
   return {
     jcode: area.jcode,
     theGeom: area.theGeom,
-  }
-}
-
-const readJsonConfig = async (
-  url: string | undefined,
-  defaultValue: unknown,
-): Promise<unknown> => {
-  if (url) {
-    const response = await fetch(url)
-    return response.json()
-  }
-  return defaultValue
-}
-
-export const getConfig = async (): Promise<ConfigT> => {
-  'use cache'
-  const shapeStyles = (await readJsonConfig(
-    process.env.SHAPE_STYLES_JSON_URL,
-    defaultShapeStyles,
-  )) as ShapeStyles
-  const theme = (await readJsonConfig(
-    process.env.THEME_JSON_URL,
-    defaultTheme,
-  )) as Theme
-  return {
-    googleApiKey: process.env.GOOGLE_API_KEY,
-    googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
-    autoApproveUsers: str2bool(process.env.AUTO_APPROVE_USERS),
-    appVersion: process.env.APP_VERSION || 'dev',
-    defaultCenter: process.env.DEFAULT_CENTER,
-    defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
-    defaultRadius: 500,
-    mapTypeIds: process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
-    mapId: process.env.MAP_ID,
-    firebaseConfig: {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    },
-    imagePrefix: process.env.IMAGE_PREFIX ?? 'images',
-    shapeStyles,
-    theme,
   }
 }
 

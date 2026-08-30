@@ -51,15 +51,11 @@ jobs:
         # and CF_WORKERS is a fixed `vars` entry in wrangler.jsonc already.
         run: |
           pnpm run render-wrangler-config
-          for name in FIREBASE_API_KEY FIREBASE_AUTH_DOMAIN FIREBASE_PROJECT_ID GOOGLE_API_KEY IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL APP_VERSION; do
+          for name in IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL; do
             value="${!name}"
             echo "$value" | pnpm exec wrangler secret put "$name" --config .wrangler.generated.jsonc
           done
         env:
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_AUTH_DOMAIN }}
-          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           IMAGE_STORAGE: ${{ vars.IMAGE_STORAGE }}
           R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -70,6 +66,6 @@ jobs:
           # `wrangler types` would otherwise infer whatever value was present
           # at the last local `cf-typegen` run as APP_VERSION's literal TS
           # type.
-          APP_VERSION: ${{ github.event.release.tag_name || inputs.app_version }}
+
       - name: Deploy to Cloudflare Workers
         run: pnpm run deploy

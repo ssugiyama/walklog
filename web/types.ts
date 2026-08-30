@@ -105,7 +105,6 @@ export type ShapeStyles = {
 export type ConfigT = {
   googleApiKey: string
   googleApiVersion: string
-  autoApproveUsers: boolean
   appVersion: string
   defaultCenter: string
   defaultZoom: number
@@ -113,7 +112,6 @@ export type ConfigT = {
   mapTypeIds: string
   mapId: string
   firebaseConfig: { apiKey: string; authDomain: string }
-  imagePrefix: string
   shapeStyles: ShapeStyles
   theme: object
 }

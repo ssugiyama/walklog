@@ -49,7 +49,7 @@ jobs:
           tags: ${{ steps.web_meta.outputs.tags }}
           labels: ${{ steps.web_meta.outputs.labels }}
           build-args: |
-            APP_VERSION=${{ github.event.release.tag_name || inputs.app_version }}
+            NEXT_PUBLIC_APP_VERSION=${{ github.event.release.tag_name || inputs.app_version }}
         env:
           NODE_ENV: production
 
