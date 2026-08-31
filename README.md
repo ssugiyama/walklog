@@ -287,7 +287,7 @@ If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeSc
 
 | Secret | Description |
 |--------|-------------|
-| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token with permission to edit Workers/Hyperdrive for this account |
+| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token with permission to edit Workers, Hyperdrive, D1, and R2 for this account |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
 | `HYPERDRIVE_ID` | Same as `HYPERDRIVE_ID` above |
 | `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` | Same as above |
