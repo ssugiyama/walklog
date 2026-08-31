@@ -76,23 +76,23 @@ SITE_NAME=Walklog
 SITE_DESCRIPTION=Web application for managing your walking logs
 IMAGE_PREFIX=uploads
 AUTO_APPROVE_USERS=
-SHAPE_STYLES_JSON_URL=https://example.com/shape-styles.json
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
-FIREBASE_API_KEY=your-firebase-api-key
-FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-GOOGLE_API_KEY=your-google-maps-api-key
+NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_GOOGLE_API_KEY=your-google-maps-api-key
 IMAGE_STORAGE=
 R2_ACCOUNT_ID=your-r2-account-id
 R2_ACCESS_KEY_ID=your-r2-access-key-id
 R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
 R2_BUCKET_NAME=your-r2-bucket-name
 R2_PUBLIC_URL=https://pub-xxxxxxxx.r2.dev
-MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
-DEFAULT_CENTER=35.6762,139.6503
-DEFAULT_ZOOM=12
-MAP_ID=your-google-map-id
-# THEME_JSON_URL=https://example.com/theme.json
+NEXT_PUBLIC_MAP_TYPE_IDS=roadmap,hybrid,terrain,gsi
+NEXT_PUBLIC_DEFAULT_CENTER=35.6762,139.6503
+NEXT_PUBLIC_DEFAULT_ZOOM=12
+NEXT_PUBLIC_MAP_ID=your-google-map-id
+# NEXT_PUBLIC_THEME_JSON_URL=https://example.com/theme.json
+NEXT_PUBLIC_SHAPE_STYLES_JSON_URL=https://example.com/shape-styles.json
 THEME_COLOR="#3874cb"
 # THEME_COLOR_LIGHT="#3874cb"
 # THEME_COLOR_DARK="#3874cb"
@@ -101,29 +101,32 @@ THEME_COLOR="#3874cb"
 
 #### Environment Variables Reference
 
+Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript bundle at build time (standard Next.js behavior), unlike the rest which are read from the server's runtime environment on each request. This distinction matters for the [Cloudflare Workers](#configure-environment-variables) deployment path.
+
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `SITE_NAME` | Display name for the application | Yes |
 | `SITE_DESCRIPTION` | Site description for meta tags | Yes |
 | `IMAGE_PREFIX` | Prefix for image storage paths | Yes |
 | `AUTO_APPROVE_USERS` | If set, new users are automatically approved (active) on first login instead of requiring manual approval | No |
-| `FIREBASE_API_KEY` | Firebase Web API key (Authentication) | Yes |
-| `FIREBASE_AUTH_DOMAIN` | Firebase Auth domain, e.g. `your-project.firebaseapp.com` | Yes |
 | `IMAGE_STORAGE` | Image upload backend: `R2` for Cloudflare R2, anything else (including unset) for local disk | No |
 | `R2_ACCOUNT_ID` | Cloudflare account ID (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_ACCESS_KEY_ID` | R2 S3-compatible API access key ID (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_SECRET_ACCESS_KEY` | R2 S3-compatible API secret access key (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_BUCKET_NAME` | R2 bucket name (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_PUBLIC_URL` | Public base URL for the R2 bucket (r2.dev subdomain or custom domain, required when `IMAGE_STORAGE=R2`) | No † |
-| `SHAPE_STYLES_JSON_URL` | URL to fetch shape styles configuration JSON from over the network; falls back to the bundled default when unset | No |
-| `GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
-| `MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
-| `MAP_ID` | Google Maps ID for custom styling | No |
-| `DEFAULT_CENTER` | Default map center as `lat,lng` | Yes |
-| `DEFAULT_ZOOM` | Default map zoom | No |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase Web API key (Authentication) | Yes |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain, e.g. `your-project.firebaseapp.com` | Yes |
+| `NEXT_PUBLIC_SHAPE_STYLES_JSON_URL` | URL to fetch shape styles configuration JSON from over the network; falls back to the bundled default when unset | No |
+| `NEXT_PUBLIC_GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
+| `NEXT_PUBLIC_MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
+| `NEXT_PUBLIC_MAP_ID` | Google Maps ID for custom styling | No |
+| `NEXT_PUBLIC_DEFAULT_CENTER` | Default map center as `lat,lng` | Yes |
+| `NEXT_PUBLIC_DEFAULT_ZOOM` | Default map zoom | No |
+| `NEXT_PUBLIC_THEME_JSON_URL` | URL to fetch the material-ui theme specification JSON from over the network; falls back to the bundled default when unset | No |
+| `NEXT_PUBLIC_APP_VERSION` | Version string | No |
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
-| `THEME_JSON_URL` | URL to fetch the material-ui theme specification JSON from over the network; falls back to the bundled default when unset | No |
 | `THEME_COLOR` | Theme color for UA in both light mode and dark mode| No |
 | `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
 | `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
@@ -133,7 +136,6 @@ THEME_COLOR="#3874cb"
 | `DB_SSL_CA` | Base64-encoded SSL CA certificate (PEM) | No |
 | `DB_SSL_KEY` | Base64-encoded SSL client key (PEM) | No |
 | `DB_SSL_CERT` | Base64-encoded SSL client certificate (PEM) | No |
-| `APP_VERSION` | Version string | No |
 | `CF_WORKERS` | Set to `true` only when deploying to Cloudflare Workers (see [Option 3](#option-3-cloudflare-workers-deployment)) | No |
 
 * if using docker, **DB_URL** is provided as an environment variable.
@@ -252,16 +254,29 @@ Time-based ISR (`revalidate: N`) isn't used anywhere in this app - only on-deman
 
 #### Configure Environment Variables
 
-`web/wrangler.jsonc`'s `vars` only holds `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure. Every other variable from the [reference table](#environment-variables-reference) (`SITE_NAME`, `DEFAULT_CENTER`, `FIREBASE_API_KEY`, `R2_*`, etc.), whether secret or not, is set with `wrangler secret put` instead. `DB_URL` is the one exception - it's only used for the Docker/manual deployment path, not Workers (which reads the connection string from the Hyperdrive binding instead), so it doesn't need to be set here at all:
+`web/wrangler.jsonc`'s `vars` only holds `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure.
+
+Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - `wrangler secret put` has no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before `wrangler` even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `pnpm run preview`/`deploy`/`upload`:
+
+```bash
+cd web
+export NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
+# ...repeat for whichever other NEXT_PUBLIC_* variables your deployment needs
+pnpm run deploy
+```
+
+Every other variable from the reference table (`SITE_NAME`, `R2_*`, etc.) is read from the Worker's runtime environment on each request instead, so it's set with `wrangler secret put`:
 
 ```bash
 cd web
 pnpm exec wrangler secret put SITE_NAME
-pnpm exec wrangler secret put FIREBASE_API_KEY
-# ...repeat for whichever other variables from the reference table your deployment needs
+pnpm exec wrangler secret put R2_ACCOUNT_ID
+# ...repeat for whichever other server-only variables from the reference table your deployment needs
 ```
 
-Don't add these to `wrangler.jsonc`'s `vars` even as empty placeholders: `wrangler types` infers a var's *literal* value as its TypeScript type (breaking code elsewhere that assigns other strings to it), and an empty string is not the same as unset for the app's `?? 'default'` fallbacks - a variable left genuinely unset still gets its built-in default, but one set to `""` would not.
+`DB_URL` is the one exception among these - it's only used for the Docker/manual deployment path, not Workers (which reads the connection string from the Hyperdrive binding instead), so it doesn't need to be set here at all.
+
+Don't add either kind of variable to `wrangler.jsonc`'s `vars` even as empty placeholders: `wrangler types` infers a var's *literal* value as its TypeScript type (breaking code elsewhere that assigns other strings to it), and an empty string is not the same as unset for the app's `?? 'default'` fallbacks - a variable left genuinely unset still gets its built-in default, but one set to `""` would not.
 
 `wrangler` needs the Hyperdrive binding emulated locally for both `preview` and `deploy` - it can't reach the real proxy from outside Cloudflare's network. Add this once to your local (gitignored) `web/.dev.vars` rather than passing it on every command:
 
@@ -283,7 +298,7 @@ If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeSc
 
 #### CI Deployment
 
-`.github/workflows/deploy-cloudflare-workers.yml` deploys automatically whenever a GitHub release is published (`APP_VERSION` is set to the release tag), or manually via workflow dispatch. It needs these repository secrets:
+`.github/workflows/deploy-cloudflare-workers.yml` deploys automatically whenever a GitHub release is published (`NEXT_PUBLIC_APP_VERSION` is set to the release tag), or manually via workflow dispatch. It needs these repository secrets:
 
 | Secret | Description |
 |--------|-------------|
@@ -293,20 +308,32 @@ If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeSc
 | `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` | Same as above |
 | `D1_DATABASE_ID` | Same as `D1_DATABASE_ID` above |
 
-On every deploy, the workflow also pushes a fixed set of app-level values to Cloudflare via `wrangler secret put`, so GitHub is the source of truth instead of the dashboard (`APP_VERSION` is set fresh from the release tag; everything else comes from a repository secret or variable of the same name):
+On every deploy, the workflow pushes a fixed set of values from repository secrets/variables of the same name, so GitHub is the source of truth instead of manual configuration - using two different mechanisms, matching the two categories from [Configure Environment Variables](#configure-environment-variables) above.
+
+Server-only variables are pushed to Cloudflare via `wrangler secret put` before the build runs:
 
 | Repository secret | Repository variable |
 |---|---|
-| `FIREBASE_API_KEY` | `FIREBASE_AUTH_DOMAIN` |
-| `GOOGLE_API_KEY` | `FIREBASE_PROJECT_ID` |
 | `R2_ACCESS_KEY_ID` | `IMAGE_STORAGE` |
 | `R2_SECRET_ACCESS_KEY` | `R2_ACCOUNT_ID` |
 | | `R2_BUCKET_NAME` |
 | | `R2_PUBLIC_URL` |
 
-Any other variable from the reference table that your deployment needs (`SITE_NAME`, `DEFAULT_CENTER`, ...) isn't touched by CI and must still be set on Cloudflare manually with `wrangler secret put`, same as before. `DB_URL`/`DB_SSL`/`DB_SSL_CA` and `CF_WORKERS` are never set this way for Workers: the runtime reads the DB connection from the Hyperdrive binding instead of `DB_URL`/`DB_SSL*` (see `lib/drizzle/db.ts`), and `CF_WORKERS` is a fixed `vars` entry already committed in `wrangler.jsonc`.
+`NEXT_PUBLIC_*` variables are instead passed as build-time environment variables to the `pnpm run deploy` step itself, since they have to be present *before* the build runs, not after (`NEXT_PUBLIC_APP_VERSION` is set fresh from the release tag; everything else comes from a repository secret or variable named after the suffix):
 
-Because CI overwrites these secrets on every deploy, make sure the repository secrets/variables above hold real values *before* the first deploy after this workflow change - an unset one will overwrite the existing Cloudflare secret with an empty string.
+| Repository secret | Repository variable |
+|---|---|
+| `FIREBASE_API_KEY` | `FIREBASE_AUTH_DOMAIN` |
+| `GOOGLE_API_KEY` | `MAP_TYPE_IDS` |
+| | `DEFAULT_CENTER` |
+| | `DEFAULT_ZOOM` |
+| | `MAP_ID` |
+| | `SHAPE_STYLES_JSON_URL` |
+| | `THEME_JSON_URL` |
+
+Any other variable from the reference table that your deployment needs (`SITE_NAME`, ...) isn't touched by CI and must still be set on Cloudflare manually with `wrangler secret put`, same as before. `DB_URL`/`DB_SSL`/`DB_SSL_CA` and `CF_WORKERS` are never set this way for Workers: the runtime reads the DB connection from the Hyperdrive binding instead of `DB_URL`/`DB_SSL*` (see `lib/drizzle/db.ts`), and `CF_WORKERS` is a fixed `vars` entry already committed in `wrangler.jsonc`.
+
+Because CI overwrites these on every deploy, make sure the repository secrets/variables above hold real values *before* the first deploy after this workflow change - an unset one will overwrite the existing Cloudflare secret with an empty string (server-only group) or bake an empty value into the client bundle (`NEXT_PUBLIC_*` group).
 
 ## Development
 
@@ -343,7 +370,7 @@ walklog/
 - Ensure service account has proper permissions
 
 **Map Not Loading**
-- Verify `GOOGLE_API_KEY` is set correctly
+- Verify `NEXT_PUBLIC_GOOGLE_API_KEY` is set correctly
 - Check that Google Maps JavaScript API is enabled
 - Ensure API key has proper restrictions and permissions
 

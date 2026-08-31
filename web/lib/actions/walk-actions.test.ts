@@ -64,7 +64,6 @@ import {
   clearIdTokenAction,
   deleteItemAction,
   getCityAction,
-  getConfig,
   getItemAction,
   getItemInternalAction,
   getSelfStatusAction,
@@ -1025,62 +1024,6 @@ describe('server actions', () => {
 
       expect(mockCookieDelete).toHaveBeenCalledWith('idToken')
       expect(mockIdTokenCookie).toBeUndefined()
-    })
-  })
-
-  describe('getConfig', () => {
-    afterEach(() => {
-      delete process.env.SHAPE_STYLES_JSON_URL
-      delete process.env.THEME_JSON_URL
-      vi.unstubAllGlobals()
-    })
-
-    it('returns the bundled default shape styles and theme when no URL is configured', async () => {
-      process.env.APP_VERSION = '1.2.3'
-      process.env.FIREBASE_API_KEY = 'test-api-key'
-      process.env.FIREBASE_AUTH_DOMAIN = 'test.firebaseapp.com'
-      const result = await getConfig()
-      expect(result).toEqual({
-        googleApiKey: process.env.GOOGLE_API_KEY,
-        googleApiVersion: process.env.GOOGLE_API_VERSION ?? 'weekly',
-        autoApproveUsers: false,
-        appVersion: '1.2.3',
-        defaultCenter: process.env.DEFAULT_CENTER,
-        defaultZoom: parseInt(process.env.DEFAULT_ZOOM ?? '12', 10),
-        defaultRadius: 500,
-        mapTypeIds:
-          process.env.MAP_TYPE_IDS ?? 'roadmap,hybrid,satellite,terrain',
-        mapId: process.env.MAP_ID,
-        imagePrefix: process.env.IMAGE_PREFIX ?? 'images',
-        firebaseConfig: {
-          apiKey: 'test-api-key',
-          authDomain: 'test.firebaseapp.com',
-        },
-        theme: defaultTheme,
-        shapeStyles: defaultShapeStyles,
-      })
-    })
-
-    it('fetches shape styles and theme from the configured URLs instead', async () => {
-      const mockShapeStyles = { style: 'mockStyle' }
-      const mockTheme = { palette: {} }
-      process.env.SHAPE_STYLES_JSON_URL =
-        'https://example.com/shape-styles.json'
-      process.env.THEME_JSON_URL = 'https://example.com/theme.json'
-      vi.stubGlobal(
-        'fetch',
-        vi.fn(async (url: string) => ({
-          json: async () =>
-            url === process.env.SHAPE_STYLES_JSON_URL
-              ? mockShapeStyles
-              : mockTheme,
-        })),
-      )
-
-      const result = await getConfig()
-
-      expect(result.shapeStyles).toEqual(mockShapeStyles)
-      expect(result.theme).toEqual(mockTheme)
     })
   })
 })
