@@ -62,10 +62,6 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
           R2_PUBLIC_URL: ${{ vars.R2_PUBLIC_URL }}
-          # Not a wrangler.jsonc `var`: it changes every release, and
-          # `wrangler types` would otherwise infer whatever value was present
-          # at the last local `cf-typegen` run as APP_VERSION's literal TS
-          # type.
 
       - name: Deploy to Cloudflare Workers
         run: pnpm run deploy
@@ -79,4 +75,8 @@ jobs:
           NEXT_PUBLIC_MAP_ID: ${{ vars.MAP_ID }}
           NEXT_PUBLIC_SHAPE_STYLES_JSON_URL: ${{ vars.SHAPE_STYLES_JSON_URL }}
           NEXT_PUBLIC_THEME_JSON_URL: ${{ vars.THEME_JSON_URL }}
-          NEXT_PUBLIC_APP_VERSION: ${{ github.event.release.tag_name || inputs.app_version }
+          # Not a wrangler.jsonc `var`: it changes every release, and
+          # `wrangler types` would otherwise infer whatever value was present
+          # at the last local `cf-typegen` run as NEXT_PUBLIC_APP_VERSION's
+          # literal TS type.
+          NEXT_PUBLIC_APP_VERSION: ${{ github.event.release.tag_name || inputs.app_version }}
