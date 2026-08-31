@@ -1,7 +1,9 @@
 const nextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
   experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    useCache: true,
     authInterrupts: true,
   },
   output: 'standalone',
