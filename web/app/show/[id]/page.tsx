@@ -1,31 +1,11 @@
-import { connection } from 'next/server'
-import { Suspense } from 'react'
 import { getItemAction } from '@/lib/actions/walk-actions'
 import ItemFetcher from '@/lib/utils/item-fetcher'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
 import ItemBox from './_components/item-box'
 
-// generateMetadata below reads params and cookies (via getItemAction), which
-// are runtime-only inputs. Without this marker, Cache Components errors
-// because it can't tell whether that's intentional - see
-// https://nextjs.org/docs/messages/blocking-prerender-metadata-runtime
-const Connection = async () => {
-  await connection()
-  return null
-}
-
-function DynamicMarker() {
-  return (
-    <Suspense>
-      <Connection />
-    </Suspense>
-  )
-}
-
 export default function Page() {
   return (
     <>
-      <DynamicMarker />
       <ItemFetcher />
       <ItemBox />
     </>
