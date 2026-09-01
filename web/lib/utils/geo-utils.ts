@@ -2,7 +2,7 @@ import { Position } from 'geojson'
 import wkx from 'wkx'
 import { decode, encode } from './path-encoder'
 export const EARTH_RADIUS = 6370986
-export const SRID = process.env.SRID ?? 4326
+export const SRID = process.env.SRID || 4326
 export const SRID_FOR_SIMILAR_SEARCH = Number(
   process.env.SRID_FOR_SIMILAR_SEARCH,
 )

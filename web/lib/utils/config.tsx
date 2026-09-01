@@ -31,13 +31,13 @@ const getConfig = async (): Promise<ConfigT> => {
 
   return {
     googleApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-    googleApiVersion: process.env.NEXT_PUBLIC_GOOGLE_API_VERSION ?? 'weekly',
+    googleApiVersion: process.env.NEXT_PUBLIC_GOOGLE_API_VERSION || 'weekly',
     appVersion: process.env.NEXT_PUBLIC_APP_VERSION || 'dev',
     defaultCenter: process.env.NEXT_PUBLIC_DEFAULT_CENTER,
-    defaultZoom: parseInt(process.env.NEXT_PUBLIC_DEFAULT_ZOOM ?? '12', 10),
+    defaultZoom: parseInt(process.env.NEXT_PUBLIC_DEFAULT_ZOOM || '12', 10),
     defaultRadius: 500,
     mapTypeIds:
-      process.env.NEXT_PUBLIC_MAP_TYPE_IDS ??
+      process.env.NEXT_PUBLIC_MAP_TYPE_IDS ||
       'roadmap,hybrid,satellite,terrain',
     mapId: process.env.NEXT_PUBLIC_MAP_ID,
     firebaseConfig: {
