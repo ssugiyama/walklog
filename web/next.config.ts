@@ -3,6 +3,7 @@ const nextConfig = {
   partialPrefetching: false,
   experimental: {
     authInterrupts: true,
+    useCache: true,
   },
   output: 'standalone',
 }
