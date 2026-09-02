@@ -308,9 +308,9 @@ export const searchInternalAction = async (
       sql`ST_Within(${walks.path}, ST_SetSRID(ST_MakeBox2d(${lb}, ${rt}), ${SRID}))`,
     )
     where.push(sql`ST_HausdorffDistance(
-    ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
-    ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
-  ) <= ${maxDistance}`)
+      ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
+      ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
+    ) <= ${maxDistance}`)
   } else if (props.filter === 'frechet') {
     if (!props.path) {
       state.count = 0
@@ -342,9 +342,9 @@ export const searchInternalAction = async (
       sql`ST_Within(ST_EndPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${elb}, ${ert}), ${SRID}))`,
     )
     where.push(sql`ST_FrechetDistance(
-    ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
-    ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
-  ) <= ${maxDistance}`)
+      ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
+      ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
+    ) <= ${maxDistance}`)
   }
 
   if (uid !== null) {
