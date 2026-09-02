@@ -166,10 +166,6 @@ export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
   return user.active ? 'active' : 'pending'
 }
 
-// A little under Firebase's 1-hour token lifetime, so the cookie never
-// outlives the token it holds.
-const ID_TOKEN_COOKIE_MAX_AGE = 55 * 60
-
 export const setIdTokenAction = async (
   idToken: string,
 ): Promise<{ error: boolean }> => {
@@ -179,12 +175,15 @@ export const setIdTokenAction = async (
     return { error: true }
   }
   const cookieStore = await cookies()
+  // No maxAge: this is a session cookie, so it never disappears on its own
+  // before the JWT itself expires. Expiry is judged solely by verifying the
+  // JWT's `exp` claim (see verifyIdToken), which is what drives the
+  // idTokenExpired refresh flow.
   cookieStore.set('idToken', idToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-    maxAge: ID_TOKEN_COOKIE_MAX_AGE,
   })
   return { error: false }
 }
