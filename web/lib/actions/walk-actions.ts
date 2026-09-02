@@ -638,6 +638,7 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
 }
 
 export const getUsersAction = async (): Promise<UserT[]> => {
+  'use cache'
   const db = await getDb()
   const rows = await db.select().from(users).where(eq(users.active, true))
   return rows.map((user) => ({
