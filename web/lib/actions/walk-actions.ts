@@ -166,10 +166,6 @@ export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
   return user.active ? 'active' : 'pending'
 }
 
-// A little under Firebase's 1-hour token lifetime, so the cookie never
-// outlives the token it holds.
-const ID_TOKEN_COOKIE_MAX_AGE = 55 * 60
-
 export const setIdTokenAction = async (
   idToken: string,
 ): Promise<{ error: boolean }> => {
@@ -179,12 +175,15 @@ export const setIdTokenAction = async (
     return { error: true }
   }
   const cookieStore = await cookies()
+  // No maxAge: this is a session cookie, so it never disappears on its own
+  // before the JWT itself expires. Expiry is judged solely by verifying the
+  // JWT's `exp` claim (see verifyIdToken), which is what drives the
+  // idTokenExpired refresh flow.
   cookieStore.set('idToken', idToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-    maxAge: ID_TOKEN_COOKIE_MAX_AGE,
   })
   return { error: false }
 }
@@ -308,9 +307,9 @@ export const searchInternalAction = async (
       sql`ST_Within(${walks.path}, ST_SetSRID(ST_MakeBox2d(${lb}, ${rt}), ${SRID}))`,
     )
     where.push(sql`ST_HausdorffDistance(
-    ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
-    ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
-  ) <= ${maxDistance}`)
+      ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
+      ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
+    ) <= ${maxDistance}`)
   } else if (props.filter === 'frechet') {
     if (!props.path) {
       state.count = 0
@@ -342,9 +341,9 @@ export const searchInternalAction = async (
       sql`ST_Within(ST_EndPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${elb}, ${ert}), ${SRID}))`,
     )
     where.push(sql`ST_FrechetDistance(
-    ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
-    ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
-  ) <= ${maxDistance}`)
+      ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
+      ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
+    ) <= ${maxDistance}`)
   }
 
   if (uid !== null) {
@@ -638,6 +637,7 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
 }
 
 export const getUsersAction = async (): Promise<UserT[]> => {
+  'use cache'
   const db = await getDb()
   const rows = await db.select().from(users).where(eq(users.active, true))
   return rows.map((user) => ({
