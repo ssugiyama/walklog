@@ -78,6 +78,7 @@ IMAGE_PREFIX=uploads
 AUTO_APPROVE_USERS=
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
+FIREBASE_PROJECT_ID=your-firebase-project-id
 NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 NEXT_PUBLIC_GOOGLE_API_KEY=your-google-maps-api-key
@@ -115,6 +116,7 @@ Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript 
 | `R2_SECRET_ACCESS_KEY` | R2 S3-compatible API secret access key (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_BUCKET_NAME` | R2 bucket name (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_PUBLIC_URL` | Public base URL for the R2 bucket (r2.dev subdomain or custom domain, required when `IMAGE_STORAGE=R2`) | No † |
+| `FIREBASE_PROJECT_ID` | Firebase project ID | Yes |
 | `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase Web API key (Authentication) | Yes |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain, e.g. `your-project.firebaseapp.com` | Yes |
 | `NEXT_PUBLIC_SHAPE_STYLES_JSON_URL` | URL to fetch shape styles configuration JSON from over the network; falls back to the bundled default when unset | No |
