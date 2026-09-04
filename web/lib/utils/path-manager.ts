@@ -120,7 +120,9 @@ export default class PathManager extends google.maps.MVCObject {
     }
   }
 
-  static pathToHash(path: string | google.maps.LatLng[] | null): string | null {
+  static pathToHash(
+    path: string | google.maps.LatLngLiteral[] | google.maps.LatLng[] | null,
+  ): string | null {
     if (!path) return null
     const key =
       typeof path === 'string'
@@ -170,24 +172,20 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   searchPolyline(
-    path: string | google.maps.LatLng[],
+    path: string | google.maps.LatLngLiteral[] | google.maps.LatLng[],
   ): [google.maps.Polyline, WalkT | null] | null {
     const key = PathManager.pathToHash(path)
     return this.polylines[key]
   }
 
   showPath(
-    path: string | google.maps.LatLng[],
+    path: google.maps.LatLngLiteral[] | google.maps.LatLng[],
     select = false,
     current = false,
     item: WalkT | null = null,
   ) {
     const pair = this.searchPolyline(path)
     let pl = pair?.[0]
-    if (typeof path === 'string') {
-      path = google.maps.geometry.encoding.decodePath(path)
-    }
-
     if (!pl) {
       pl = new google.maps.Polyline({})
       pl.setPath(path)
@@ -209,16 +207,19 @@ export default class PathManager extends google.maps.MVCObject {
       }
       for (let i = 0; i < path.length; i += 1) {
         const elem = path[i]
+        const lat = typeof elem.lat === 'function' ? elem.lat() : elem.lat
+        const lng = typeof elem.lng === 'function' ? elem.lng() : elem.lng
+
         if (i === 0) {
-          xmax = elem.lng()
+          xmax = lng
           xmin = xmax
-          ymax = elem.lat()
+          ymax = lat
           ymin = ymax
         } else {
-          if (xmin > elem.lng()) xmin = elem.lng()
-          if (xmax < elem.lng()) xmax = elem.lng()
-          if (ymin > elem.lat()) ymin = elem.lat()
-          if (ymax < elem.lat()) ymax = elem.lat()
+          if (xmin > lng) xmin = lng
+          if (xmax < lng) xmax = lng
+          if (ymin > lat) ymin = lat
+          if (ymax < lat) ymax = lat
         }
       }
       const center = { lat: (ymin + ymax) / 2, lng: (xmin + xmax) / 2 }

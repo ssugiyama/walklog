@@ -48,10 +48,10 @@ type MapRefs = {
   pathManager?: PathManager
   polygonManager?: PolygonManager
   shapeStyles?: ShapeStyles
-  searchPath?: google.maps.LatLng[]
+  searchPath?: google.maps.LatLngLiteral[] | google.maps.LatLng[]
   radius?: number
   fetching?: boolean
-  searchCenter?: google.maps.LatLng
+  searchCenter?: google.maps.LatLngLiteral | google.maps.LatLng
   clickedItem?: WalkT
   resizeIntervalID?: NodeJS.Timeout | null
   elevationInfoWindow?: google.maps.InfoWindow
@@ -313,16 +313,7 @@ const GMap = (props) => {
     }
     rc.distanceWidget = new google.maps.Circle(circleOpts)
     google.maps.event.addListener(rc.distanceWidget, 'center_changed', () => {
-      const lat = Number(rc.distanceWidget.getCenter().lat().toFixed(5))
-      const lng = Number(rc.distanceWidget.getCenter().lng().toFixed(5))
-      if (
-        rc.searchCenter &&
-        rc.searchCenter.lat() === lat &&
-        rc.searchCenter.lng() === lng
-      ) {
-        return
-      }
-      setSearchCenter(new google.maps.LatLng(lat, lng))
+      setSearchCenter(rc.distanceWidget.getCenter())
     })
     google.maps.event.addListener(rc.distanceWidget, 'radius_changed', () => {
       const r = rc.distanceWidget.getRadius()
