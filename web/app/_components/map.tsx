@@ -131,24 +131,20 @@ const GMap = (props) => {
 
   const pathChanged = () => {
     if (!rc.pathManager) return
-    const nextPath = rc.pathManager.getEncodedSelection()
-    if (parseAsPath.serialize(searchPath) !== (nextPath ?? '')) {
-      setSearchPath(nextPath ? parseAsPath.parse(nextPath) : [])
-      if (nextPath) {
-        const pair = rc.pathManager.searchPolyline(nextPath)
-        const item = pair?.[1]
-        if (rc.autoGeolocation || item) {
-          rc.clickedItem = item
-          const content = '<span id="path-info-window-content">foo</span>'
-          rc.pathInfoWindow.setContent(content)
-          rc.pathInfoWindow.open(rc.map)
-          const pos = rc.autoGeolocation
-            ? rc.pathManager.lastAppendLatLng()
-            : rc.pathManager.getLastClickLatLng()
-          if (pos) rc.pathInfoWindow.setPosition(pos)
-        } else {
-          rc.pathInfoWindow.close()
-        }
+    const nextPath = rc.pathManager.getSelectedLatLngArray()
+    setSearchPath(nextPath)
+    if (nextPath) {
+      const pair = rc.pathManager.searchPolyline(nextPath)
+      const item = pair?.[1]
+      if (rc.autoGeolocation || item) {
+        rc.clickedItem = item
+        const content = '<span id="path-info-window-content">foo</span>'
+        rc.pathInfoWindow.setContent(content)
+        rc.pathInfoWindow.open(rc.map)
+        const pos = rc.autoGeolocation
+          ? rc.pathManager.lastAppendLatLng()
+          : rc.pathManager.getLastClickLatLng()
+        if (pos) rc.pathInfoWindow.setPosition(pos)
       } else {
         rc.pathInfoWindow.close()
       }
@@ -250,14 +246,18 @@ const GMap = (props) => {
       'drawfinish',
       async (path: google.maps.LatLng[]) => {
         const append: boolean = await new Promise((resolve) => {
-          if (rc.searchPath.length > 0) {
+          if (rc.pathManager.selection) {
             setConfirmInfo({ open: true, resolve })
           } else {
             resolve(false)
           }
         })
         setConfirmInfo({ open: false })
-        rc.pathManager.applyPath(path, append)
+
+        // Apply the path after a short delay to ensure the UI updates correctly
+        setTimeout(() => {
+          rc.pathManager.applyPath(path, append)
+        }, 0)
       },
     )
     const { default: PolygonManager } = await import(
