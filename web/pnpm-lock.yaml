@@ -75,11 +75,11 @@ importers:
         specifier: ^3.7.0
         version: 3.7.0(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@19.2.6)(react@19.2.6)(redux@5.0.1)
       terra-draw:
-        specifier: ^1.32.2
-        version: 1.32.2
+        specifier: ^1.32.3
+        version: 1.32.3
       terra-draw-google-maps-adapter:
         specifier: ^1.5.0
-        version: 1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.32.2)
+        version: 1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.32.3)
       wkx:
         specifier: ^0.5.0
         version: 0.5.0
@@ -4671,8 +4671,8 @@ packages:
       '@googlemaps/js-api-loader': ^1.14.3 || ^2.0.0
       terra-draw: ^1.0.0
 
-  terra-draw@1.32.2:
-    resolution: {integrity: sha512-ysy1EBhvYbMqddv4+LyNmb56DpZLGPP9QO/I5kZoD4PArRJekOBlvXPKjo9w+jikcOEMgHUSw2G7AHLqI2QoiA==}
+  terra-draw@1.32.3:
+    resolution: {integrity: sha512-pQpwL8winsDW6/DbBgsaZKeMc83D+HqokxR+t1AbrN4U7C4mGgEfCtmRix1/5L4GfkLh1FE7pq44SWt76vK2Bw==}
 
   terser@5.16.9:
     resolution: {integrity: sha512-HPa/FdTB9XGI2H1/keLFZHxl6WNvAI4YalHGtDQTlMnJcoqSab1UwL4l1hGEhs6/GmLHBZIg/YgB++jcbzoOEg==}
@@ -9829,12 +9829,12 @@ snapshots:
 
   symbol-tree@3.2.4: {}
 
-  terra-draw-google-maps-adapter@1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.32.2):
+  terra-draw-google-maps-adapter@1.5.0(@googlemaps/js-api-loader@2.0.2)(terra-draw@1.32.3):
     dependencies:
       '@googlemaps/js-api-loader': 2.0.2
-      terra-draw: 1.32.2
+      terra-draw: 1.32.3
 
-  terra-draw@1.32.2: {}
+  terra-draw@1.32.3: {}
 
   terser@5.16.9:
     dependencies:
