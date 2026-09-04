@@ -15,7 +15,7 @@ type MapState = {
   addPoint: (lat: number, lng: number, append: boolean) => void
   uploadPath: () => void
   downloadPath: () => void
-  clearPaths: (retainTemporaryAndSelection: boolean) => void
+  clearPaths: (retainTemporary: boolean, retainPesistent: boolean) => void
   addPaths: (items: WalkT[]) => void
   deleteSelectedPath: () => void
 }
@@ -31,7 +31,7 @@ const initialState: MapState = {
   addPoint: () => {},
   uploadPath: () => {},
   downloadPath: () => {},
-  clearPaths: () => {},
+  clearPaths: (retainTemporary: boolean, retainPesistent: boolean) => {},
   addPaths: () => {},
   deleteSelectedPath: () => {},
 }

@@ -101,13 +101,13 @@ export default class PathManager extends google.maps.MVCObject {
     if (this.selection && append) {
       if (this.current === this.selection) {
         const pl = new google.maps.Polyline({})
-        const newpath = Object.assign([], this.selection.getPath().getArray())
+        const newpath = Object.assign([], this.getSelectedLatLngArray())
         newpath.push(...path)
         pl.setPath(newpath)
         this.addPolyline(pl)
         this.set('selection', pl)
       } else {
-        const ar = this.selection.getPath().getArray()
+        const ar = this.getSelectedLatLngArray()
         ar.push(...path)
         this.selection.setPath(ar)
         this.updateLength()
@@ -120,12 +120,11 @@ export default class PathManager extends google.maps.MVCObject {
     }
   }
 
-  static pathToHash(path: string | google.maps.LatLng[] | null): string | null {
+  static pathToHash(
+    path: google.maps.LatLngLiteral[] | google.maps.LatLng[] | null,
+  ): string | null {
     if (!path) return null
-    const key =
-      typeof path === 'string'
-        ? path
-        : google.maps.geometry.encoding.encodePath(path)
+    const key = google.maps.geometry.encoding.encodePath(path)
     const obj = new jsSHA1('SHA-1', 'TEXT')
     obj.update(key)
     return obj.getHash('B64')
@@ -145,49 +144,42 @@ export default class PathManager extends google.maps.MVCObject {
 
   deleteSelection() {
     if (this.selection !== null) {
-      const key = PathManager.pathToHash(this.getEncodedSelection())
+      const key = PathManager.pathToHash(this.getSelectedLatLngArray())
       this.selection.setMap(null)
       this.set('selection', null)
       delete this.polylines[key]
     }
   }
 
-  deleteAll(retainTemporaryAndSelection) {
-    if (!retainTemporaryAndSelection) {
-      this.set('selection', null)
-    }
-    // retain current
-    const currentKey = PathManager.pathToHash(this.getEncodedCurrent())
+  deleteAll(retainTemporary: boolean, retainPesistent: boolean) {
     Object.keys(this.polylines).forEach((key) => {
-      if (key !== currentKey) {
-        const [pl, item] = this.polylines[key]
-        if (!retainTemporaryAndSelection || (item && pl !== this.selection)) {
-          pl.setMap(null)
-          delete this.polylines[key]
-        }
+      const [pl, item] = this.polylines[key]
+      if (
+        pl !== this.selection &&
+        (!retainTemporary || item) &&
+        (!retainPesistent || !item)
+      ) {
+        pl.setMap(null)
+        delete this.polylines[key]
       }
     })
   }
 
   searchPolyline(
-    path: string | google.maps.LatLng[],
+    path: google.maps.LatLngLiteral[] | google.maps.LatLng[],
   ): [google.maps.Polyline, WalkT | null] | null {
     const key = PathManager.pathToHash(path)
     return this.polylines[key]
   }
 
   showPath(
-    path: string | google.maps.LatLng[],
+    path: google.maps.LatLngLiteral[] | google.maps.LatLng[],
     select = false,
     current = false,
     item: WalkT | null = null,
   ) {
     const pair = this.searchPolyline(path)
     let pl = pair?.[0]
-    if (typeof path === 'string') {
-      path = google.maps.geometry.encoding.decodePath(path)
-    }
-
     if (!pl) {
       pl = new google.maps.Polyline({})
       pl.setPath(path)
@@ -209,16 +201,19 @@ export default class PathManager extends google.maps.MVCObject {
       }
       for (let i = 0; i < path.length; i += 1) {
         const elem = path[i]
+        const lat = typeof elem.lat === 'function' ? elem.lat() : elem.lat
+        const lng = typeof elem.lng === 'function' ? elem.lng() : elem.lng
+
         if (i === 0) {
-          xmax = elem.lng()
+          xmax = lng
           xmin = xmax
-          ymax = elem.lat()
+          ymax = lat
           ymin = ymax
         } else {
-          if (xmin > elem.lng()) xmin = elem.lng()
-          if (xmax < elem.lng()) xmax = elem.lng()
-          if (ymin > elem.lat()) ymin = elem.lat()
-          if (ymax < elem.lat()) ymax = elem.lat()
+          if (xmin > lng) xmin = lng
+          if (xmax < lng) xmax = lng
+          if (ymin > lat) ymin = lat
+          if (ymax < lat) ymax = lat
         }
       }
       const center = { lat: (ymin + ymax) / 2, lng: (xmin + xmax) / 2 }
@@ -260,9 +255,7 @@ export default class PathManager extends google.maps.MVCObject {
   }
 
   getPolylineStyle(pl: google.maps.Polyline) {
-    const pair = this.searchPolyline(
-      google.maps.geometry.encoding.encodePath(pl.getPath()),
-    )
+    const pair = this.searchPolyline(pl.getPath().getArray())
     let style = pair?.[1] ? { ...this.styles.normal } : { ...this.styles.new }
     if (pl === this.current) {
       style = Object.assign(style, this.styles.current)
@@ -295,6 +288,13 @@ export default class PathManager extends google.maps.MVCObject {
 
   getSelection() {
     return this.selection
+  }
+
+  getSelectedLatLngArray() {
+    if (this.selection) {
+      return this.selection.getPath().getArray()
+    }
+    return []
   }
 
   getEncodedSelection() {
@@ -340,10 +340,10 @@ export default class PathManager extends google.maps.MVCObject {
     if (this.selection) {
       return JSON.stringify({
         type: 'LineString',
-        coordinates: this.selection
-          .getPath()
-          .getArray()
-          .map((p) => [p.lng(), p.lat()]),
+        coordinates: this.getSelectedLatLngArray().map((p) => [
+          p.lng(),
+          p.lat(),
+        ]),
       })
     }
     return ''

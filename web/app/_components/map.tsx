@@ -48,10 +48,10 @@ type MapRefs = {
   pathManager?: PathManager
   polygonManager?: PolygonManager
   shapeStyles?: ShapeStyles
-  searchPath?: google.maps.LatLng[]
+  searchPath?: google.maps.LatLngLiteral[] | google.maps.LatLng[]
   radius?: number
   fetching?: boolean
-  searchCenter?: google.maps.LatLng
+  searchCenter?: google.maps.LatLngLiteral | google.maps.LatLng
   clickedItem?: WalkT
   resizeIntervalID?: NodeJS.Timeout | null
   elevationInfoWindow?: google.maps.InfoWindow
@@ -112,8 +112,8 @@ const GMap = (props) => {
       window.URL.revokeObjectURL(elem.href)
     }, 0)
   }
-  const clearPaths = (retainTemporaryAndSelection: boolean) => {
-    rc.pathManager.deleteAll(retainTemporaryAndSelection)
+  const clearPaths = (retainTemporary, retainPesistent) => {
+    rc.pathManager.deleteAll(retainTemporary, retainPesistent)
   }
   const deleteSelectedPath = () => {
     rc.pathManager.deleteSelection()
@@ -131,24 +131,20 @@ const GMap = (props) => {
 
   const pathChanged = () => {
     if (!rc.pathManager) return
-    const nextPath = rc.pathManager.getEncodedSelection()
-    if (parseAsPath.serialize(searchPath) !== (nextPath ?? '')) {
-      setSearchPath(nextPath ? parseAsPath.parse(nextPath) : [])
-      if (nextPath) {
-        const pair = rc.pathManager.searchPolyline(nextPath)
-        const item = pair?.[1]
-        if (rc.autoGeolocation || item) {
-          rc.clickedItem = item
-          const content = '<span id="path-info-window-content">foo</span>'
-          rc.pathInfoWindow.setContent(content)
-          rc.pathInfoWindow.open(rc.map)
-          const pos = rc.autoGeolocation
-            ? rc.pathManager.lastAppendLatLng()
-            : rc.pathManager.getLastClickLatLng()
-          if (pos) rc.pathInfoWindow.setPosition(pos)
-        } else {
-          rc.pathInfoWindow.close()
-        }
+    const nextPath = rc.pathManager.getSelectedLatLngArray()
+    setSearchPath(nextPath)
+    if (nextPath) {
+      const pair = rc.pathManager.searchPolyline(nextPath)
+      const item = pair?.[1]
+      if (rc.autoGeolocation || item) {
+        rc.clickedItem = item
+        const content = '<span id="path-info-window-content">foo</span>'
+        rc.pathInfoWindow.setContent(content)
+        rc.pathInfoWindow.open(rc.map)
+        const pos = rc.autoGeolocation
+          ? rc.pathManager.lastAppendLatLng()
+          : rc.pathManager.getLastClickLatLng()
+        if (pos) rc.pathInfoWindow.setPosition(pos)
       } else {
         rc.pathInfoWindow.close()
       }
@@ -250,14 +246,18 @@ const GMap = (props) => {
       'drawfinish',
       async (path: google.maps.LatLng[]) => {
         const append: boolean = await new Promise((resolve) => {
-          if (rc.searchPath.length > 0) {
+          if (rc.pathManager.selection) {
             setConfirmInfo({ open: true, resolve })
           } else {
             resolve(false)
           }
         })
         setConfirmInfo({ open: false })
-        rc.pathManager.applyPath(path, append)
+
+        // Apply the path after a short delay to ensure the UI updates correctly
+        setTimeout(() => {
+          rc.pathManager.applyPath(path, append)
+        }, 0)
       },
     )
     const { default: PolygonManager } = await import(
@@ -313,16 +313,7 @@ const GMap = (props) => {
     }
     rc.distanceWidget = new google.maps.Circle(circleOpts)
     google.maps.event.addListener(rc.distanceWidget, 'center_changed', () => {
-      const lat = Number(rc.distanceWidget.getCenter().lat().toFixed(5))
-      const lng = Number(rc.distanceWidget.getCenter().lng().toFixed(5))
-      if (
-        rc.searchCenter &&
-        rc.searchCenter.lat() === lat &&
-        rc.searchCenter.lng() === lng
-      ) {
-        return
-      }
-      setSearchCenter(new google.maps.LatLng(lat, lng))
+      setSearchCenter(rc.distanceWidget.getCenter())
     })
     google.maps.event.addListener(rc.distanceWidget, 'radius_changed', () => {
       const r = rc.distanceWidget.getRadius()
@@ -395,7 +386,7 @@ const GMap = (props) => {
   }, [searchPath, rc.initialized])
   useEffect(() => {
     if (!rc.initialized) return
-    clearPaths(true)
+    clearPaths(true, false)
     addPaths(rows)
   }, [rows, rc.initialized])
   useEffect(() => {

@@ -205,7 +205,11 @@ const ToolBox = (props) => {
           </ListItemButton>
         </ListItem>
         <ListItem>
-          <ListItemButton onClick={() => clearPaths(true)} disableGutters dense>
+          <ListItemButton
+            onClick={() => clearPaths(false, true)}
+            disableGutters
+            dense
+          >
             <ListItemIcon>
               <NavigationRefresh />
             </ListItemIcon>
