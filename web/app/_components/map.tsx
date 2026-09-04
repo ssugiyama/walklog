@@ -112,8 +112,8 @@ const GMap = (props) => {
       window.URL.revokeObjectURL(elem.href)
     }, 0)
   }
-  const clearPaths = (retainTemporaryAndSelection: boolean) => {
-    rc.pathManager.deleteAll(retainTemporaryAndSelection)
+  const clearPaths = (retainTemporary, retainPesistent) => {
+    rc.pathManager.deleteAll(retainTemporary, retainPesistent)
   }
   const deleteSelectedPath = () => {
     rc.pathManager.deleteSelection()
@@ -386,7 +386,7 @@ const GMap = (props) => {
   }, [searchPath, rc.initialized])
   useEffect(() => {
     if (!rc.initialized) return
-    clearPaths(true)
+    clearPaths(true, false)
     addPaths(rows)
   }, [rows, rc.initialized])
   useEffect(() => {
