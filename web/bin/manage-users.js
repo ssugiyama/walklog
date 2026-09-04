@@ -1,9 +1,34 @@
 #!/usr/bin/env node
 // Requires DB_URL (and DB_SSL* if applicable) to be set in the environment,
 // e.g. `node --env-file=.env bin/manage-users.js list-pending`.
-import ssl from '../lib/drizzle/ssl.js'
-
+//
+// This runs under plain node (no bundler/TS support), so it can't import
+// lib/drizzle/ssl.ts (TypeScript, and it uses the `@/` path alias that only
+// Next's bundler resolves) - the ssl logic is duplicated here instead.
 const postgres = require('postgres')
+
+const str2bool = (value) => {
+  if (value === undefined || value === null) {
+    return false
+  }
+  const lc = value.toLowerCase().trim()
+  return !['', 'false', '0', 'no', 'off', 'null', 'undefined'].includes(lc)
+}
+
+const ssl = str2bool(process.env.DB_SSL)
+  ? {
+      rejectUnauthorized: str2bool(process.env.DB_SSL_REJECT_UNAUTHORIZED),
+      ca: process.env.DB_SSL_CA
+        ? Buffer.from(process.env.DB_SSL_CA, 'base64').toString('utf-8')
+        : undefined,
+      key: process.env.DB_SSL_KEY
+        ? Buffer.from(process.env.DB_SSL_KEY, 'base64').toString('utf-8')
+        : undefined,
+      cert: process.env.DB_SSL_CERT
+        ? Buffer.from(process.env.DB_SSL_CERT, 'base64').toString('utf-8')
+        : undefined,
+    }
+  : undefined
 
 const options = {
   ssl,
