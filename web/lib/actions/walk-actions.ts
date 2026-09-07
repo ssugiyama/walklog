@@ -93,27 +93,14 @@ type UserRow = typeof users.$inferSelect
 const getOrCreateUser = async (
   claim: FirebaseIdTokenClaims,
 ): Promise<UserRow> => {
-  console.warn('[DIAG] getOrCreateUser: before getDb', claim.uid, Date.now())
   const db = await getDb()
-  console.warn('[DIAG] getOrCreateUser: after getDb', claim.uid, Date.now())
-  console.warn(
-    '[DIAG] getOrCreateUser: before select existing',
-    claim.uid,
-    Date.now(),
-  )
   const existing = await db
     .select()
     .from(users)
     .where(eq(users.uid, claim.uid))
     .limit(1)
     .then((rows) => rows[0])
-  console.warn(
-    '[DIAG] getOrCreateUser: after select existing',
-    claim.uid,
-    Date.now(),
-  )
   if (existing) return existing
-  console.warn('[DIAG] getOrCreateUser: before insert', claim.uid, Date.now())
   const created = await db
     .insert(users)
     .values({
@@ -126,7 +113,6 @@ const getOrCreateUser = async (
     .onConflictDoNothing()
     .returning()
     .then((rows) => rows[0])
-  console.warn('[DIAG] getOrCreateUser: after insert', claim.uid, Date.now())
   return (
     created ??
     (await db
@@ -148,16 +134,7 @@ const verifyIdToken = async (
     return null
   }
   try {
-    console.warn(
-      '[DIAG] verifyIdToken: before verifyFirebaseIdToken',
-      Date.now(),
-    )
-    const claims = await verifyFirebaseIdToken(idToken.value)
-    console.warn(
-      '[DIAG] verifyIdToken: after verifyFirebaseIdToken',
-      Date.now(),
-    )
-    return claims
+    return await verifyFirebaseIdToken(idToken.value)
   } catch (error) {
     if (error instanceof IdTokenExpiredError) {
       state.idTokenExpired = true
@@ -169,15 +146,11 @@ const verifyIdToken = async (
 }
 
 const getUid = async (state: BaseState): Promise<string | null> => {
-  console.warn('[DIAG] getUid: before verifyIdToken', Date.now())
   const claim = await verifyIdToken(state)
-  console.warn('[DIAG] getUid: after verifyIdToken', Date.now())
   if (!claim) {
     return null
   }
-  console.warn('[DIAG] getUid: before getOrCreateUser', claim.uid, Date.now())
   const user = await getOrCreateUser(claim)
-  console.warn('[DIAG] getUid: after getOrCreateUser', claim.uid, Date.now())
   if (!user.active) {
     return null
   }
@@ -418,21 +391,20 @@ export const getItemInternalAction = async (
   id: number,
   uid: string,
 ): Promise<GetItemState> => {
-  // TEMPORARY: 'use cache'/cacheTag removed to test whether it's the source
-  // of the concurrent-request hang under investigation (see DIAG logs).
-  console.warn('[DIAG] getItemInternalAction: before getDb', id, Date.now())
+  // Deliberately not `'use cache'`: concurrent requests for the same id hit
+  // a Next.js 16.2.12 bug where a follower request waiting on an in-flight
+  // "use cache" entry never resumes even after the leader completes, hanging
+  // the request indefinitely. This is a single indexed PK lookup, so the
+  // caching benefit isn't worth that risk.
   const db = await getDb()
-  console.warn('[DIAG] getItemInternalAction: after getDb', id, Date.now())
   const state: GetItemState = {}
 
-  console.warn('[DIAG] getItemInternalAction: before select', id, Date.now())
   const walk = await db
     .select()
     .from(walks)
     .where(eq(walks.id, id))
     .limit(1)
     .then((rows) => rows[0])
-  console.warn('[DIAG] getItemInternalAction: after select', id, Date.now())
   if (!walk) {
     return state
   }
@@ -447,18 +419,11 @@ export const getItemAction = async (
   _getUid = getUid,
   _getItemInternalAction = getItemInternalAction,
 ): Promise<GetItemState> => {
-  console.warn('[DIAG] getItemAction: start', id, Date.now())
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
   const uid = await _getUid(state)
-  console.warn('[DIAG] getItemAction: after getUid', id, Date.now())
   const newState = await _getItemInternalAction(id, uid)
-  console.warn(
-    '[DIAG] getItemAction: after getItemInternalAction',
-    id,
-    Date.now(),
-  )
   if (!newState.current && !newState.idTokenExpired) {
     notFound()
   }
