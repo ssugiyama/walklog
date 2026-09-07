@@ -146,6 +146,7 @@ const verifyIdToken = async (
 }
 
 const getUid = async (state: BaseState): Promise<string | null> => {
+  'use cache: private'
   const claim = await verifyIdToken(state)
   if (!claim) {
     return null
