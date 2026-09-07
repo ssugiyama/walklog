@@ -418,8 +418,8 @@ export const getItemInternalAction = async (
   id: number,
   uid: string,
 ): Promise<GetItemState> => {
-  'use cache'
-  cacheTag(SEARCH_CACHE_TAG)
+  // TEMPORARY: 'use cache'/cacheTag removed to test whether it's the source
+  // of the concurrent-request hang under investigation (see DIAG logs).
   console.warn('[DIAG] getItemInternalAction: before getDb', id, Date.now())
   const db = await getDb()
   console.warn('[DIAG] getItemInternalAction: after getDb', id, Date.now())
