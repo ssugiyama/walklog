@@ -1,9 +1,8 @@
 const nextConfig = {
-  cacheComponents: false,
-  partialPrefetching: false,
+  cacheComponents: true,
+  partialPrefetching: true,
   experimental: {
     authInterrupts: true,
-    useCache: true,
   },
   output: 'standalone',
 }
