@@ -145,8 +145,14 @@ const verifyIdToken = async (
   }
 }
 
+// Verified inert, not assumed: `'use cache: private'` results are never
+// stored server-side and are only ever cached in the browser via the
+// router's runtime prefetching of a *rendered* segment. getUid is called
+// as a plain function from inside Server Action bodies (searchAction,
+// getItemAction, updateItemAction, deleteItemAction), never rendered, so
+// there is no prefetchable segment for the browser to cache and this
+// always executes fresh. No directive needed.
 const getUid = async (state: BaseState): Promise<string | null> => {
-  'use cache: private'
   const claim = await verifyIdToken(state)
   if (!claim) {
     return null
@@ -627,6 +633,12 @@ export const deleteItemAction = async (
   return state
 }
 
+// No cacheTag: nothing in this codebase writes to the `areas` table, so
+// there is no invalidation path to wire up. This is a per-server-instance,
+// in-memory cache (not a build-time snapshot — see getUsersAction below
+// for the full explanation), refreshed only by the default time-based
+// profile. Add a cacheTag + updateTag/revalidateTag pair the moment a
+// write path to `areas` appears.
 export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
   'use cache'
   const db = await getDb()
@@ -644,6 +656,19 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
   return result
 }
 
+// No cacheTag: nothing in this codebase flips `users.active`, so there is
+// no invalidation path to wire up. Like getCityAction above, this is a
+// per-server-instance in-memory cache populated lazily on first call in
+// whichever process handles it - not something baked in at `next build`
+// time (build-time inclusion only applies to `'use cache'` code reachable
+// from a route's rendered component tree per
+// docs/01-app/01-getting-started/08-caching.md "How rendering works", and
+// this is only ever invoked as a plain Server Action RPC from a Client
+// Component's useEffect - see lib/utils/user-context.tsx). With multiple
+// server replicas each holds its own independent copy, so results can
+// briefly diverge between instances until each independently refreshes on
+// its own default time-based profile; add a cacheTag + updateTag/
+// revalidateTag pair the moment a write path to `users.active` appears.
 export const getUsersAction = async (): Promise<UserT[]> => {
   'use cache'
   const db = await getDb()
