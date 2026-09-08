@@ -36,14 +36,14 @@ const ElevationBox = () => {
   interface CustomTooltipPayload {
     payload: {
       elevation: number
-      ocation: google.maps.LatLng
+      location: google.maps.LatLng
       index: number
     }
   }
 
   const handleTooltipChange = (props: TooltipContentProps<number, number>) => {
     const active = props.active
-    const payload = props.payload as CustomTooltipPayload[] | undefined
+    const payload = props.payload as readonly CustomTooltipPayload[] | undefined
     if (!refs.current.elevationResults || !elevationInfoWindow || !map) return
 
     if (!active || !payload?.length) {
