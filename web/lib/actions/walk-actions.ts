@@ -13,7 +13,7 @@ import {
 } from 'drizzle-orm'
 import moment from 'moment'
 import { nanoid } from 'nanoid'
-import { cacheTag, revalidateTag } from 'next/cache'
+import { cacheTag, updateTag } from 'next/cache'
 import { ValueOf } from 'next/dist/shared/lib/constants'
 import { cookies } from 'next/headers'
 import { forbidden, notFound, unauthorized } from 'next/navigation'
@@ -584,7 +584,11 @@ export const updateItemAction = async (
     void _deleteImage(oldImage)
   }
 
-  revalidateTag(SEARCH_CACHE_TAG, 'max')
+  // updateItemAction is a Server Action the user just triggered by saving,
+  // so the search results they see next must reflect their own write
+  // immediately (read-your-own-writes) rather than serve one more stale
+  // render while revalidating in the background.
+  updateTag(SEARCH_CACHE_TAG)
   return state
 }
 
@@ -619,7 +623,7 @@ export const deleteItemAction = async (
   }
   await db.delete(walks).where(eq(walks.id, id))
   state.deleted = true
-  revalidateTag(SEARCH_CACHE_TAG, 'max')
+  updateTag(SEARCH_CACHE_TAG)
   return state
 }
 
