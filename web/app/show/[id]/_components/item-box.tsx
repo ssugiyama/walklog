@@ -20,6 +20,7 @@ import React, {
   useActionState,
   useCallback,
   useEffect,
+  useRef,
   useState,
   useTransition,
 } from 'react'
@@ -101,8 +102,19 @@ const ItemBox = () => {
     nextUrl = `/?${params.toString()}&index=${data.offset}`
   }
   const prevUrl = data.prevId && idToShowUrl(data.prevId, searchParams)
+  // Next.js Cache Componentsはページ遷移時に/show/[id]をアンマウントせず
+  // React Activityで非表示にするため、`deleteState`はページを再度開いた
+  // ときも保持される。そのままだとこのeffectが非表示→表示の遷移で
+  // 再実行され、トークン再取得後の再削除が確認ダイアログなしに再度走って
+  // しまうため、既に処理したserialをrefで記録して防ぐ。
+  const handledDeleteSerialRef = useRef(0)
   useEffect(() => {
-    if (deleteState && deleteState.serial > 0) {
+    if (
+      deleteState &&
+      deleteState.serial > 0 &&
+      handledDeleteSerialRef.current !== deleteState.serial
+    ) {
+      handledDeleteSerialRef.current = deleteState.serial
       if (deleteState.idTokenExpired) {
         startTransition(() => {
           void (async () => {

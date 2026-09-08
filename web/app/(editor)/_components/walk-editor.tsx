@@ -21,6 +21,7 @@ import React, {
   useActionState,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import { updateItemAction } from '@/lib/actions/walk-actions'
@@ -158,6 +159,12 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     })
   }, [inputs, encodedSearchPath, item, mode, formAction])
 
+  // Next.js Cache Componentsはページ遷移時に/edit/[id]をアンマウントせず
+  // React Activityで非表示にするため、保存成功後の`state`（serial/id）は
+  // 再度このページを開いたときも保持される。そのままだとこのeffectが
+  // 非表示→表示の遷移で再実行され、二度目に開いた瞬間に/show/[id]へ
+  // リダイレクトしてしまうため、既に処理したserialをrefで記録して防ぐ。
+  const redirectedSerialRef = useRef(0)
   useEffect(() => {
     if (state.serial > 0) {
       if (state.idTokenExpired) {
@@ -165,7 +172,8 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
           await updateIdToken()
           handleSubmit()
         })()
-      } else if (state.id) {
+      } else if (state.id && redirectedSerialRef.current !== state.serial) {
+        redirectedSerialRef.current = state.serial
         // フォーム送信が成功したらdirtyフラグをリセット
         dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
 
