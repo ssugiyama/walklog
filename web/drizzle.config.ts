@@ -20,6 +20,4 @@ export default defineConfig({
   },
   // Print all statements
   verbose: true,
-  // Always ask for confirmation
-  strict: true,
 })
