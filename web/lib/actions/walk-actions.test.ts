@@ -12,6 +12,7 @@ vi.mock('next/cache', () => ({
   cacheTag: vi.fn(),
   unstable_cache: (fn) => fn,
   revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }))
 
 let mockIdTokenCookie: string | undefined
@@ -58,7 +59,7 @@ const client = db.$client as unknown as PGlite
 
 import { PGlite } from '@electric-sql/pglite'
 
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, updateTag } from 'next/cache'
 import { Mock } from 'vitest'
 import {
   clearIdTokenAction,
@@ -500,7 +501,8 @@ describe('server actions', () => {
           uid: 'testUid',
         }),
       )
-      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+      expect(updateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
+      expect(revalidateTag).not.toHaveBeenCalled()
     })
 
     it('should update an existing walk if id is provided', async () => {
@@ -528,7 +530,8 @@ describe('server actions', () => {
       expect(row).toEqual(
         expect.objectContaining({ title: 'Updated Walk', draft: false }),
       )
-      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+      expect(updateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
+      expect(revalidateTag).not.toHaveBeenCalled()
     })
 
     it('should update an existing walk without changing its path when path is omitted', async () => {
@@ -790,7 +793,8 @@ describe('server actions', () => {
       const result = await deleteItemAction(prevState, walk.id, mockGetUid)
 
       expect(result.deleted).toBe(true)
-      expect(revalidateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG, 'max')
+      expect(updateTag).toHaveBeenCalledWith(SEARCH_CACHE_TAG)
+      expect(revalidateTag).not.toHaveBeenCalled()
 
       const remaining = await db
         .select()
