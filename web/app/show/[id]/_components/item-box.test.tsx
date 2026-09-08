@@ -1,8 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import React from 'react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import React, { Activity } from 'react'
 import '@testing-library/jest-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mock } from 'vitest'
+import { deleteItemAction } from '@/lib/actions/walk-actions'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
@@ -175,5 +176,61 @@ describe('ItemBox Component', () => {
     const deleteButton = screen.getByTestId('delete-button')
     fireEvent.click(deleteButton)
     expect(window.confirm).toHaveBeenCalledWith('Are you sure to delete?')
+  })
+
+  it('does not silently retry the delete again when the page is hidden and re-shown by Activity', async () => {
+    const mockUpdateIdToken = vi.fn()
+    window.confirm = vi.fn(() => true)
+    ;(useData as Mock).mockReturnValue([
+      {
+        current: { id: 'item1', uid: 'user1', length: 9.9 },
+        isPending: false,
+        error: null,
+      },
+    ])
+    ;(useUserContext as Mock).mockReturnValue({
+      users: [
+        { uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' },
+      ],
+      currentUser: { uid: 'user1' },
+      updateIdToken: mockUpdateIdToken,
+    })
+    ;(deleteItemAction as Mock).mockResolvedValue({
+      serial: 1,
+      idTokenExpired: true,
+      deleted: false,
+    })
+
+    const { rerender } = render(
+      <Activity mode="visible">
+        <ItemBox />
+      </Activity>,
+    )
+
+    fireEvent.click(screen.getByTestId('delete-button'))
+
+    // The initial delete call comes back with an expired token, which
+    // triggers one automatic retry after refreshing the token.
+    await waitFor(() => expect(mockUpdateIdToken).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(deleteItemAction).toHaveBeenCalledTimes(2))
+
+    // Simulate Next.js Cache Components hiding then re-showing the cached
+    // /show/[id] route via React's <Activity> when the user reopens it.
+    rerender(
+      <Activity mode="hidden">
+        <ItemBox />
+      </Activity>,
+    )
+    rerender(
+      <Activity mode="visible">
+        <ItemBox />
+      </Activity>,
+    )
+
+    await waitFor(() =>
+      expect(screen.getByTestId('ItemBox')).toBeInTheDocument(),
+    )
+    expect(mockUpdateIdToken).toHaveBeenCalledTimes(1)
+    expect(deleteItemAction).toHaveBeenCalledTimes(2)
   })
 })

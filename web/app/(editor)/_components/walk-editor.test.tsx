@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
-import React from 'react'
+import React, { Activity } from 'react'
 import { Mock } from 'vitest'
 import { updateItemAction } from '@/lib/actions/walk-actions'
 import { useData } from '@/lib/utils/data-context'
@@ -256,6 +256,37 @@ describe('WalkEditor update', () => {
     fireEvent.click(screen.getByTestId('submit-button'))
 
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith('/show/2'))
+  })
+
+  it('does not redirect again when the page is hidden and re-shown by Activity after a save', async () => {
+    ;(updateItemAction as Mock).mockResolvedValue({ serial: 1, id: 2 })
+    const { rerender } = render(
+      <Activity mode="visible">
+        <WalkEditor mode="update" />
+      </Activity>,
+      { wrapper: withNuqsTestingAdapter() },
+    )
+
+    fireEvent.click(screen.getByTestId('submit-button'))
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalledTimes(1))
+
+    // Simulate Next.js Cache Components hiding then re-showing the cached
+    // /edit/[id] route via React's <Activity> when the user reopens it.
+    rerender(
+      <Activity mode="hidden">
+        <WalkEditor mode="update" />
+      </Activity>,
+    )
+    rerender(
+      <Activity mode="visible">
+        <WalkEditor mode="update" />
+      </Activity>,
+    )
+
+    await waitFor(() =>
+      expect(screen.getByTestId('WalkEditor')).toBeInTheDocument(),
+    )
+    expect(mockRouterPush).toHaveBeenCalledTimes(1)
   })
 })
 
