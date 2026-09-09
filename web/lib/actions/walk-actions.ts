@@ -437,6 +437,37 @@ export const getItemAction = async (
   return Object.assign({ ...state }, newState)
 }
 
+// Error's own properties (message, stack, ...) are non-enumerable, so
+// `console.error('...', error)` can log as an empty object once it passes
+// through a structured-logging pipeline that JSON-serializes its arguments
+// (observed in production: the logged error carried no message at all).
+// Postgres driver errors also attach extra fields (code/detail/hint/
+// constraint/table/column) that are worth surfacing directly.
+const describeError = (error: unknown) => {
+  if (error instanceof Error) {
+    const pgError = error as Error & {
+      code?: string
+      detail?: string
+      hint?: string
+      constraint?: string
+      table?: string
+      column?: string
+    }
+    return {
+      name: pgError.name,
+      message: pgError.message,
+      code: pgError.code,
+      detail: pgError.detail,
+      hint: pgError.hint,
+      constraint: pgError.constraint,
+      table: pgError.table,
+      column: pgError.column,
+      stack: pgError.stack,
+    }
+  }
+  return { message: String(error) }
+}
+
 // Manual validation replaces Zod schema for better error message control
 
 export const updateItemAction = async (
@@ -539,7 +570,7 @@ export const updateItemAction = async (
     try {
       uploadedImage = await _saveImage(newImageFile, key)
     } catch (error) {
-      console.error('updateItemAction saveImage error', error)
+      console.error('updateItemAction saveImage error', describeError(error))
       state.error = error as Error
       return state
     }
@@ -557,7 +588,7 @@ export const updateItemAction = async (
       await db.update(walks).set(props).where(eq(walks.id, id))
       state.id = id
     } catch (error) {
-      console.error('updateItemAction error', error)
+      console.error('updateItemAction update error', describeError(error))
       state.error = error as Error
       state.id = null
       if (uploadedImage) {
@@ -576,7 +607,7 @@ export const updateItemAction = async (
         .then((rows) => rows[0])
       state.id = walk?.id
     } catch (error) {
-      console.error('updateItemAction create error', error)
+      console.error('updateItemAction create error', describeError(error))
       state.error = error as Error
       state.id = null
       if (uploadedImage) {
