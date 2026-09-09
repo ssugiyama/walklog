@@ -80,4 +80,53 @@ describe('Searcher', () => {
 
     await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(2))
   })
+
+  it('waits for auth state to resolve before dispatching, then dispatches exactly once for an already-logged-in user', async () => {
+    // idToken starts `null`: the auth state hasn't resolved yet (mirrors
+    // user-context.tsx's real initial value before Firebase's
+    // onIdTokenChanged fires for the first time).
+    ;(useUserContext as Mock).mockReturnValue({
+      updateIdToken: vi.fn(),
+      idToken: null,
+    })
+
+    const { rerender } = render(<Searcher />)
+
+    // Give any effects a chance to run before asserting nothing fired.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(searchAction).not.toHaveBeenCalled()
+
+    // Firebase resolves the already-persisted login in one step: idToken
+    // goes straight from `null` to the real token, never passing through
+    // `''` (which means "resolved: anonymous", a different case).
+    ;(useUserContext as Mock).mockReturnValue({
+      updateIdToken: vi.fn(),
+      idToken: 'real-token-1',
+    })
+    rerender(<Searcher />)
+
+    await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(1))
+  })
+
+  it('dispatches exactly once for a user who is not logged in', async () => {
+    ;(useUserContext as Mock).mockReturnValue({
+      updateIdToken: vi.fn(),
+      idToken: null,
+    })
+
+    const { rerender } = render(<Searcher />)
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(searchAction).not.toHaveBeenCalled()
+
+    // Firebase resolves to "no user": idToken goes from `null` (unresolved)
+    // to `''` (resolved: anonymous).
+    ;(useUserContext as Mock).mockReturnValue({
+      updateIdToken: vi.fn(),
+      idToken: '',
+    })
+    rerender(<Searcher />)
+
+    await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(1))
+  })
 })

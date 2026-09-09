@@ -42,9 +42,12 @@ export function UserContextProvider({
     FirebaseUser | null | undefined
   >(undefined)
   // Can't read the idToken cookie here anymore now that it's httpOnly - it
-  // only ever serves as a trigger for effects elsewhere, so starting empty
-  // and letting the first auth callback populate it is fine.
-  const [idToken, setIdToken] = useState('')
+  // only ever serves as a trigger for effects elsewhere. Starts `null`
+  // (auth state not yet resolved) rather than `''`, so consumers like
+  // Searcher/ItemFetcher can tell "don't know yet" apart from "resolved:
+  // anonymous" and wait for the first onIdTokenChanged callback instead of
+  // firing once anonymously and again once the real state arrives.
+  const [idToken, setIdToken] = useState<string | null>(null)
   const [users, setUsers] = useState<UserT[]>([])
   const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')
 

@@ -28,6 +28,14 @@ export function ItemFetcher() {
   }
 
   useEffect(() => {
+    // idToken is `null` until Firebase's onIdTokenChanged fires for the
+    // first time (see user-context.tsx). Dispatching before that resolves
+    // means an already-logged-in user gets one anonymous-looking fetch
+    // followed by a second, authenticated one once idToken catches up.
+    // Waiting for it to resolve collapses that back down to one dispatch.
+    if (idToken === null) {
+      return
+    }
     const index = findIndexById(id)
     if (index >= 0 && !data.rows[index].stale) {
       const newData: Partial<DataT> = {}
