@@ -12,8 +12,10 @@ const mockRouterPush = vi.fn()
 const mockSetData = vi.fn()
 const mockDispatchMain = vi.fn()
 const mockInterceptLink = vi.fn()
+let mockPathParam: string | null = null
 const mockSearchParams = {
   toString: vi.fn(() => 'param1=value1&param2=value2'),
+  get: vi.fn((key: string) => (key === 'path' ? mockPathParam : null)),
 }
 
 let selectedFile: File | null = null
@@ -118,6 +120,7 @@ describe('WalkEditor update', () => {
     vi.clearAllMocks()
     selectedFile = null
     lastFormData = null
+    mockPathParam = null
     ;(useData as Mock).mockReturnValue([
       { current: defaultWalk, rows: [] },
       mockSetData,
@@ -173,10 +176,18 @@ describe('WalkEditor update', () => {
   })
 
   it('submits the encoded path from the URL when one is selected', async () => {
+    // Read via useSearchParams, not nuqs's useQueryState: nuqs broadcasts the
+    // raw (unparsed) value passed to any setter for a given URL key to every
+    // useQueryState hook subscribed to that same key, regardless of each
+    // hook's own parser. map.tsx's useQueryState('path', parseAsPath...) sets
+    // this key with an array of google.maps.LatLng instances, which would
+    // leak into a same-key useQueryState('path', parseAsString) hook here
+    // instead of the encoded string - reproduced in production as a corrupt
+    // `path` field (the LatLng array's own toString(), not the polyline
+    // encoding). Reading straight from useSearchParams sidesteps that.
+    mockPathParam = '_pyxEaktsYbcEqE'
     render(<WalkEditor mode="update" />, {
-      wrapper: withNuqsTestingAdapter({
-        searchParams: { path: '_pyxEaktsYbcEqE' },
-      }),
+      wrapper: withNuqsTestingAdapter(),
     })
     fireEvent.click(screen.getByTestId('submit-button'))
 
@@ -295,6 +306,7 @@ describe('WalkEditor create', () => {
     vi.clearAllMocks()
     selectedFile = null
     lastFormData = null
+    mockPathParam = null
     ;(useData as Mock).mockReturnValue([
       { current: null, rows: [] },
       mockSetData,
@@ -318,10 +330,9 @@ describe('WalkEditor create', () => {
   })
 
   it('enables the submit button once a path is present in the URL', () => {
+    mockPathParam = '_pyxEaktsYbcEqE'
     render(<WalkEditor mode="create" />, {
-      wrapper: withNuqsTestingAdapter({
-        searchParams: { path: '_pyxEaktsYbcEqE' },
-      }),
+      wrapper: withNuqsTestingAdapter(),
     })
     expect(screen.getByRole('button', { name: 'create' })).toBeEnabled()
   })
@@ -336,10 +347,9 @@ describe('WalkEditor create', () => {
   })
 
   it('submits the encoded path once the create button is enabled', async () => {
+    mockPathParam = '_pyxEaktsYbcEqE'
     render(<WalkEditor mode="create" />, {
-      wrapper: withNuqsTestingAdapter({
-        searchParams: { path: '_pyxEaktsYbcEqE' },
-      }),
+      wrapper: withNuqsTestingAdapter(),
     })
     const submitButton = screen.getByTestId('submit-button')
 

@@ -15,7 +15,6 @@ import {
   useRouter,
   useSearchParams,
 } from 'next/navigation'
-import { parseAsString, useQueryState } from 'nuqs'
 import React, {
   startTransition,
   useActionState,
@@ -99,7 +98,16 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     updateItemAction,
     initialState,
   )
-  const [encodedSearchPath] = useQueryState('path', parseAsString)
+  // Read directly from the URL via next/navigation, not nuqs's
+  // useQueryState: nuqs broadcasts the raw (unparsed) value passed to any
+  // setter for a URL key to every useQueryState hook subscribed to that
+  // same key, regardless of each hook's own parser. map.tsx's
+  // useQueryState('path', parseAsPath...) sets this key with an array of
+  // google.maps.LatLng instances, which would leak into a same-key
+  // useQueryState('path', parseAsString) hook here instead of the encoded
+  // string it expects - reproduced in production as a corrupted `path`
+  // field (the LatLng array's own toString(), not the polyline encoding).
+  const encodedSearchPath = searchParams.get('path')
 
   // フォーム入力の変更ハンドラー
   const handleInputChange = useCallback(
