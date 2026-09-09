@@ -65,7 +65,7 @@ export function Searcher() {
     // means an already-logged-in user gets one anonymous-looking search
     // followed by a second, authenticated one once idToken catches up.
     // Waiting for it to resolve collapses that back down to one dispatch.
-    if (idToken === null) {
+    if (idToken === undefined) {
       return
     }
     if (

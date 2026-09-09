@@ -17,7 +17,7 @@ import { SelfStatusT, UserT } from '@/types'
 
 type UserContextT = {
   users: UserT[]
-  idToken: string | null
+  idToken: string | null | undefined
   currentUser: FirebaseUser | null | undefined
   selfStatus: SelfStatusT
   setCurrentUser: (user: FirebaseUser | null) => void
@@ -25,7 +25,7 @@ type UserContextT = {
 }
 const initialState: UserContextT = {
   users: [],
-  idToken: null,
+  idToken: undefined,
   currentUser: null,
   selfStatus: 'anonymous',
   setCurrentUser: () => {},
@@ -47,7 +47,7 @@ export function UserContextProvider({
   // Searcher/ItemFetcher can tell "don't know yet" apart from "resolved:
   // anonymous" and wait for the first onIdTokenChanged callback instead of
   // firing once anonymously and again once the real state arrives.
-  const [idToken, setIdToken] = useState<string | null>(null)
+  const [idToken, setIdToken] = useState<string | null | undefined>(undefined)
   const [users, setUsers] = useState<UserT[]>([])
   const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')
 
@@ -60,14 +60,14 @@ export function UserContextProvider({
     const user = getAuth().currentUser
     if (!user) {
       await clearIdTokenAction()
-      setIdToken('')
+      setIdToken(null)
       setSelfStatus('anonymous')
       return
     }
-    const newIdToken = (await user.getIdToken()) ?? ''
+    const newIdToken = (await user.getIdToken()) ?? null
     const { error } = await setIdTokenAction(newIdToken)
     if (error) {
-      setIdToken('')
+      setIdToken(null)
       setSelfStatus('anonymous')
       return
     }

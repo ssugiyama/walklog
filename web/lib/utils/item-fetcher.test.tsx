@@ -35,12 +35,12 @@ describe('ItemFetcher', () => {
   })
 
   it('waits for auth state to resolve before dispatching, then dispatches exactly once for an already-logged-in user', async () => {
-    // idToken starts `null`: the auth state hasn't resolved yet (mirrors
+    // idToken starts `undefined`: the auth state hasn't resolved yet (mirrors
     // user-context.tsx's real initial value before Firebase's
     // onIdTokenChanged fires for the first time).
     ;(useUserContext as Mock).mockReturnValue({
       updateIdToken: vi.fn(),
-      idToken: null,
+      idToken: undefined, // auth state not yet resolved
     })
 
     const { rerender } = render(<ItemFetcher />)
@@ -64,7 +64,7 @@ describe('ItemFetcher', () => {
   it('dispatches exactly once for a user who is not logged in', async () => {
     ;(useUserContext as Mock).mockReturnValue({
       updateIdToken: vi.fn(),
-      idToken: null,
+      idToken: undefined, // auth state not yet resolved
     })
 
     const { rerender } = render(<ItemFetcher />)
@@ -72,11 +72,11 @@ describe('ItemFetcher', () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(getItemAction).not.toHaveBeenCalled()
 
-    // Firebase resolves to "no user": idToken goes from `null` (unresolved)
-    // to `''` (resolved: anonymous).
+    // Firebase resolves to "no user": idToken goes from `undefined` (unresolved)
+    // to `null` (resolved: anonymous).
     ;(useUserContext as Mock).mockReturnValue({
       updateIdToken: vi.fn(),
-      idToken: '',
+      idToken: null,
     })
     rerender(<ItemFetcher />)
 
