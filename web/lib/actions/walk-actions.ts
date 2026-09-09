@@ -500,6 +500,9 @@ export const updateItemAction = async (
   const willDeleteImage =
     formData.get('will_delete_image') === 'true' ? true : false
 
+  const decodedPath = walkPath ? decode(walkPath) : null
+  const hasValidPath = !!decodedPath && decodedPath.length >= 2
+
   // The client sends the raw file; the upload itself happens here so the
   // storage backend (local disk or R2) stays an implementation detail.
   const newImageFile = image instanceof File && image.size > 0 ? image : null
