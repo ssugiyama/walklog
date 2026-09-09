@@ -509,6 +509,25 @@ export const updateItemAction = async (
   const decodedPath = walkPath ? decode(walkPath) : null
   const hasValidPath = !!decodedPath && decodedPath.length >= 2
 
+  if (walkPath && !hasValidPath) {
+    // Diagnostic only: pins down whether a degenerate path means the client
+    // genuinely sent a short/empty string (walkPath.length is small), or
+    // sent the expected-length string but it decoded wrong regardless (a
+    // transport/encoding issue between client and here). Logging the raw
+    // string in full isn't safe/useful (it can be very long and isn't
+    // meaningful to a human), so a length plus edge previews is enough to
+    // tell those two cases apart on the next occurrence.
+    console.warn('updateItemAction received a degenerate path', {
+      id: id || null,
+      walkPathLength: walkPath.length,
+      walkPathPreview:
+        walkPath.length <= 40
+          ? walkPath
+          : `${walkPath.slice(0, 20)}...${walkPath.slice(-20)}`,
+      decodedPointCount: decodedPath?.length ?? 0,
+    })
+  }
+
   // The client sends the raw file; the upload itself happens here so the
   // storage backend (local disk or R2) stays an implementation detail.
   const newImageFile = image instanceof File && image.size > 0 ? image : null
