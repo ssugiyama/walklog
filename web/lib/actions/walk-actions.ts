@@ -500,6 +500,15 @@ export const updateItemAction = async (
   const willDeleteImage =
     formData.get('will_delete_image') === 'true' ? true : false
 
+  // A LINESTRING needs at least 2 points - PostGIS rejects anything shorter
+  // ("geometry requires more points") at the DB level. Decoding once here
+  // lets both the validation below and the props.path assignment further
+  // down treat a garbage/degenerate walkPath the same as "no path provided"
+  // instead of crashing the write with an invalid empty/single-point WKT
+  // string (observed in production for both create and update).
+  const decodedPath = walkPath ? decode(walkPath) : null
+  const hasValidPath = !!decodedPath && decodedPath.length >= 2
+
   // The client sends the raw file; the upload itself happens here so the
   // storage backend (local disk or R2) stays an implementation detail.
   const newImageFile = image instanceof File && image.size > 0 ? image : null
@@ -515,7 +524,7 @@ export const updateItemAction = async (
     validationErrors.push('Title is required')
   }
 
-  if (!id && (!walkPath || walkPath.trim() === '')) {
+  if (!id && !hasValidPath) {
     validationErrors.push('Path is required')
   }
 
@@ -553,8 +562,8 @@ export const updateItemAction = async (
     draft,
     uid,
   }
-  if (walkPath) {
-    props.path = decode(walkPath)
+  if (hasValidPath) {
+    props.path = decodedPath
     props.length =
       sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
   }

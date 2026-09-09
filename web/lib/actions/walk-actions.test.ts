@@ -561,6 +561,52 @@ describe('server actions', () => {
       expect(row.path).toEqual(existing.path)
     })
 
+    it('should update an existing walk without changing its path when path decodes to fewer than two points', async () => {
+      const existing = await insertWalk({
+        uid: 'testUid',
+        title: 'Original title',
+      })
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
+
+      formData.set('id', String(existing.id))
+      formData.set('title', 'Updated Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('draft', 'false')
+      // A single point (or a mangled string decoding to one) isn't a valid
+      // LINESTRING - reproduces the production crash where a degenerate
+      // `path` value was accepted, then failed at the DB with an empty
+      // `SRID=4326;LINESTRING()`.
+      formData.set('path', encode([DEFAULT_PATH[0]]))
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeNull()
+      expect(result.id).toBe(existing.id)
+
+      const [row] = await db
+        .select()
+        .from(walks)
+        .where(sql`id = ${existing.id}`)
+      expect(row).toEqual(
+        expect.objectContaining({ title: 'Updated Walk', draft: false }),
+      )
+      expect(row.path).toEqual(existing.path)
+    })
+
+    it('should return validation error if path decodes to fewer than two points on create', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
+
+      formData.set('title', 'New Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode([DEFAULT_PATH[0]]))
+
+      const result = await updateItemAction(prevState, formData, mockGetUid)
+
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toContain('Path is required')
+      expect(result.id).toBeNull()
+    })
+
     it('should return forbidden error when updating a walk owned by someone else', async () => {
       const existing = await insertWalk({ uid: 'otherUid' })
       const mockGetUid = vi.fn().mockResolvedValue('testUid')
