@@ -469,33 +469,8 @@ export const updateItemAction = async (
   const willDeleteImage =
     formData.get('will_delete_image') === 'true' ? true : false
 
-  // A LINESTRING needs at least 2 points - PostGIS rejects anything shorter
-  // ("geometry requires more points") at the DB level. Decoding once here
-  // lets both the validation below and the props.path assignment further
-  // down treat a garbage/degenerate walkPath the same as "no path provided"
-  // instead of crashing the write with an invalid empty/single-point WKT
-  // string (observed in production for both create and update).
   const decodedPath = walkPath ? decode(walkPath) : null
   const hasValidPath = !!decodedPath && decodedPath.length >= 2
-
-  if (walkPath && !hasValidPath) {
-    // Diagnostic only: pins down whether a degenerate path means the client
-    // genuinely sent a short/empty string (walkPath.length is small), or
-    // sent the expected-length string but it decoded wrong regardless (a
-    // transport/encoding issue between client and here). Logging the raw
-    // string in full isn't safe/useful (it can be very long and isn't
-    // meaningful to a human), so a length plus edge previews is enough to
-    // tell those two cases apart on the next occurrence.
-    console.warn('updateItemAction received a degenerate path', {
-      id: id || null,
-      walkPathLength: walkPath.length,
-      walkPathPreview:
-        walkPath.length <= 40
-          ? walkPath
-          : `${walkPath.slice(0, 20)}...${walkPath.slice(-20)}`,
-      decodedPointCount: decodedPath?.length ?? 0,
-    })
-  }
 
   // The client sends the raw file; the upload itself happens here so the
   // storage backend (local disk or R2) stays an implementation detail.
