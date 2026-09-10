@@ -35,7 +35,7 @@ type WalkFields = {
   date: string
   title: string
   comment: string
-  image: File | string | null
+  image: File | string | null | undefined
   will_delete_image: string
   draft: boolean
 }
@@ -48,7 +48,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     date: '',
     title: '',
     comment: '',
-    image: null,
+    image: undefined,
     will_delete_image: '',
     draft: false,
   })
@@ -62,18 +62,22 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const { updateIdToken, currentUser, users } = useUserContext()
   const [data, setData] = useData()
   const [localError, setLocalError] = useState<Error | null>(null)
+  // WalkT.id/.uid are non-optional (a saved walk always has both), so this
+  // placeholder for a not-yet-saved walk doesn't fully satisfy WalkT - only
+  // ever read in `mode === 'update'` branches elsewhere in this component
+  // (see handleSubmit, the redirect effect, cancelUrl), never in 'create'.
   let item: WalkT
   if (mode === 'update') {
     item = data.current
   } else {
     const today = moment().format('YYYY-MM-DD')
     item = {
-      id: null,
-      uid: null,
+      id: undefined,
+      uid: undefined,
       date: today,
       title: '',
       comment: '',
-      image: null,
+      image: undefined,
       draft: true,
     }
   }
