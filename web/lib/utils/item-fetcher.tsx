@@ -8,7 +8,6 @@ import { useUserContext } from './user-context'
 
 const initialGetItemState: GetItemState = {
   idTokenExpired: false,
-  current: null,
   serial: 0,
 }
 

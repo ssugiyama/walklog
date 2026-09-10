@@ -26,7 +26,7 @@ type UserContextT = {
 const initialState: UserContextT = {
   users: [],
   idToken: undefined,
-  currentUser: null,
+  currentUser: undefined,
   selfStatus: 'anonymous',
   setCurrentUser: () => {},
   updateIdToken: async () => {},
@@ -42,11 +42,12 @@ export function UserContextProvider({
     FirebaseUser | null | undefined
   >(undefined)
   // Can't read the idToken cookie here anymore now that it's httpOnly - it
-  // only ever serves as a trigger for effects elsewhere. Starts `null`
-  // (auth state not yet resolved) rather than `''`, so consumers like
-  // Searcher/ItemFetcher can tell "don't know yet" apart from "resolved:
-  // anonymous" and wait for the first onIdTokenChanged callback instead of
-  // firing once anonymously and again once the real state arrives.
+  // only ever serves as a trigger for effects elsewhere. Starts `undefined`
+  // (auth state not yet resolved), distinct from `null` (resolved: signed
+  // out), so consumers like Searcher/ItemFetcher can tell "don't know yet"
+  // apart from "resolved: anonymous" and wait for the first onIdTokenChanged
+  // callback instead of firing once anonymously and again once the real
+  // state arrives.
   const [idToken, setIdToken] = useState<string | null | undefined>(undefined)
   const [users, setUsers] = useState<UserT[]>([])
   const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')

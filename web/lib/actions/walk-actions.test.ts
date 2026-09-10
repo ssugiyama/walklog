@@ -438,7 +438,7 @@ describe('server actions', () => {
 
       expect(result.error).toBeInstanceOf(Error)
       expect(result.error.message).toContain('Date is required')
-      expect(result.id).toBeNull()
+      expect(result.id).toBeUndefined()
     })
 
     it('should return validation error if title is missing', async () => {
@@ -451,7 +451,7 @@ describe('server actions', () => {
 
       expect(result.error).toBeInstanceOf(Error)
       expect(result.error.message).toContain('Title is required')
-      expect(result.id).toBeNull()
+      expect(result.id).toBeUndefined()
     })
 
     it('should return validation error if path is missing', async () => {
@@ -464,7 +464,7 @@ describe('server actions', () => {
 
       expect(result.error).toBeInstanceOf(Error)
       expect(result.error.message).toContain('Path is required')
-      expect(result.id).toBeNull()
+      expect(result.id).toBeUndefined()
     })
 
     it('should return validation error if both date and title are missing', async () => {
@@ -477,7 +477,7 @@ describe('server actions', () => {
       expect(result.error.message).toMatch(
         /Date is required.*Title is required/,
       )
-      expect(result.id).toBeNull()
+      expect(result.id).toBeUndefined()
     })
 
     it('should create a new walk if id is not provided', async () => {
@@ -604,7 +604,7 @@ describe('server actions', () => {
 
       expect(result.error).toBeInstanceOf(Error)
       expect(result.error.message).toContain('Path is required')
-      expect(result.id).toBeNull()
+      expect(result.id).toBeUndefined()
     })
 
     it('should return forbidden error when updating a walk owned by someone else', async () => {
@@ -994,7 +994,7 @@ describe('server actions', () => {
       )
 
       expect(result.idTokenExpired).toBe(true)
-      expect(result.id).toBeNull()
+      expect(result.id).toBeUndefined()
     })
 
     it('denies posting for a pending user (auto-provisioned on first login)', async () => {

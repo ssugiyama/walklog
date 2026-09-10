@@ -54,7 +54,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   })
 
   const initialState = {
-    id: null,
+    id: undefined,
     error: null,
     idTokenExpired: false,
     serial: 0,

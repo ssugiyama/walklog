@@ -449,7 +449,7 @@ export const updateItemAction = async (
 ): Promise<typeof prevState> => {
   const db = await getDb()
   const state = { ...prevState }
-  state.id = null
+  state.id = undefined
   state.serial++
   const uid = await _getUid(state)
   if (state.idTokenExpired) {
@@ -563,7 +563,7 @@ export const updateItemAction = async (
     } catch (error) {
       console.error('updateItemAction error', error)
       state.error = error as Error
-      state.id = null
+      state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)
       }
@@ -582,7 +582,7 @@ export const updateItemAction = async (
     } catch (error) {
       console.error('updateItemAction create error', error)
       state.error = error as Error
-      state.id = null
+      state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)
       }
