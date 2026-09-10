@@ -84,8 +84,6 @@ const SearchBox = () => {
               return <span>Searching...</span>
             }
             switch (count) {
-              case null:
-                return <span>successfully saved</span>
               case 0:
                 return <span>No results</span>
               case 1:

@@ -202,7 +202,7 @@ export const clearIdTokenAction = async (): Promise<void> => {
 
 export const searchInternalAction = async (
   props: SearchProps,
-  uid: string,
+  uid: string | null,
 ): Promise<SearchState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
