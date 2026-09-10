@@ -12,11 +12,10 @@ export default class PolygonManager extends google.maps.MVCObject {
   private map: google.maps.Map
   private styles: google.maps.PolygonOptions
 
-  constructor(optOptions: PathManagerOptions | null = null) {
+  constructor(options: PathManagerOptions = {}) {
     super()
     this.polygons = {}
     this.cache = {}
-    const options = optOptions ?? {}
     this.setValues(options)
   }
 

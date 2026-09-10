@@ -40,7 +40,7 @@ const ToolBox = (props) => {
   const [selectedPath] = useQueryState('path', parseAsPath.withDefault([]))
   const autoGeolocation = mainState.autoGeolocation
   const [location, setLocation] = useState('')
-  const geocoder = useRef<google.maps.Geocoder>(null)
+  const geocoder = useRef<google.maps.Geocoder | undefined>(undefined)
   const length: number = (pathManager?.get('length') as number) ?? 0
   const config = useConfig()
   const appVersion = config.appVersion

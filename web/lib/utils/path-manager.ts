@@ -35,9 +35,8 @@ export default class PathManager extends google.maps.MVCObject {
     current: google.maps.PolylineOptions
   }
 
-  constructor(optOptions: PathManagerOptions | null = null) {
+  constructor(options: PathManagerOptions = {}) {
     super()
-    const options = optOptions ?? {}
     this.polylines = {}
     this.map = options.map
     this.styles = options.styles
