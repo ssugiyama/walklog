@@ -6,7 +6,7 @@ import { ConfigT, ShapeStyles } from '@/types'
 import defaultShapeStyles from '../../default-shape-styles.json'
 import defaultTheme from '../../default-theme.json'
 
-const ConfigContext = createContext<Promise<ConfigT> | null>(null)
+const ConfigContext = createContext<Promise<ConfigT> | undefined>(undefined)
 
 const readJsonConfig = async (
   url: string | undefined,

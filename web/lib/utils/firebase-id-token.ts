@@ -4,7 +4,7 @@ const JWKS_URL = new URL(
   'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com',
 )
 
-let jwks: ReturnType<typeof createRemoteJWKSet> | null = null
+let jwks: ReturnType<typeof createRemoteJWKSet> | undefined
 
 export type FirebaseIdTokenClaims = {
   uid: string
