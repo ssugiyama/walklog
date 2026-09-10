@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.1.0 - 2026-09-11
+
+- migrate from use-query-params to nuqs
+- push Cloudflare secrets from GitHub, enable Workers logs and caching
+- manage config in client only 
+- bump next to 16.3
+- bump typescript to 7
+- change `clearPaths` behavior
+- refactor path management
+- make the api calls more efficient
+- enforce null/undefined convention
+- update dependencies
+- fix bugs
+
 ## v1.0.0 - 2026-07-31
 
 - refactor: colocate components with their Next.js routes
