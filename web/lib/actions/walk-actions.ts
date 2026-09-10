@@ -470,12 +470,13 @@ export const updateItemAction = async (
   const willDeleteImage =
     formData.get('will_delete_image') === 'true' ? true : false
 
-  const decodedPath = walkPath ? decode(walkPath) : null
+  const decodedPath = walkPath ? decode(walkPath) : undefined
   const hasValidPath = !!decodedPath && decodedPath.length >= 2
 
   // The client sends the raw file; the upload itself happens here so the
   // storage backend (local disk or R2) stays an implementation detail.
-  const newImageFile = image instanceof File && image.size > 0 ? image : null
+  const newImageFile =
+    image instanceof File && image.size > 0 ? image : undefined
 
   // Manual validation to ensure consistent error messages
   const validationErrors = []
@@ -532,7 +533,7 @@ export const updateItemAction = async (
       sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
   }
 
-  let uploadedImage: string | null = null
+  let uploadedImage: string | undefined
   if (willDeleteImage) {
     props.image = null
   } else if (newImageFile) {
