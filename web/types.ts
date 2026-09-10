@@ -23,7 +23,7 @@ export type WalkT = {
   uid: string
   date: string
   title: string
-  comment: string
+  comment?: string
   distance?: number
   length?: number
   path?: Position[]

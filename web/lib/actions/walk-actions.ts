@@ -63,13 +63,14 @@ const asWalkT = (
 ): WalkT => {
   return {
     id: walk.id,
-    date: walk.date ? moment(walk.date).format('YYYY-MM-DD') : null,
+    // walks.date is NOT NULL - no null case to handle.
+    date: moment(walk.date).format('YYYY-MM-DD'),
     title: walk.title,
-    comment: walk.comment,
+    comment: walk.comment ?? undefined,
     draft: walk.draft,
-    image: walk.image,
+    image: walk.image ?? undefined,
     length: walk.length,
-    path: includePath && walk.path ? walk.path : null,
+    path: includePath && walk.path ? walk.path : undefined,
     distance: walk.distance,
     uid: walk.uid,
   }
