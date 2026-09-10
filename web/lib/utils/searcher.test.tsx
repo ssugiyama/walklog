@@ -97,8 +97,8 @@ describe('Searcher', () => {
     expect(searchAction).not.toHaveBeenCalled()
 
     // Firebase resolves the already-persisted login in one step: idToken
-    // goes straight from `null` to the real token, never passing through
-    // `''` (which means "resolved: anonymous", a different case).
+    // goes straight from `undefined` to the real token, never passing
+    // through `null` (which means "resolved: anonymous", a different case).
     ;(useUserContext as Mock).mockReturnValue({
       updateIdToken: vi.fn(),
       idToken: 'real-token-1',
