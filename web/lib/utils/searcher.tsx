@@ -60,7 +60,7 @@ export function Searcher() {
   const oldParams = new URLSearchParams(data.params)
 
   useEffect(() => {
-    // idToken is `null` until Firebase's onIdTokenChanged fires for the
+    // idToken is `undefined` until Firebase's onIdTokenChanged fires for the
     // first time (see user-context.tsx). Dispatching before that resolves
     // means an already-logged-in user gets one anonymous-looking search
     // followed by a second, authenticated one once idToken catches up.

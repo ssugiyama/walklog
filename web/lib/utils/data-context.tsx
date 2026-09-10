@@ -5,7 +5,6 @@ import { DataT } from '@/types'
 const initialData: DataT = {
   isPending: true,
   rows: [],
-  current: null,
   count: 0,
   offset: 0,
   showDistance: false,

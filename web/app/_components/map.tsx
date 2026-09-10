@@ -53,7 +53,7 @@ type MapRefs = {
   fetching?: boolean
   searchCenter?: google.maps.LatLngLiteral | google.maps.LatLng
   clickedItem?: WalkT
-  resizeIntervalID?: NodeJS.Timeout | null
+  resizeIntervalID?: NodeJS.Timeout
   elevationInfoWindow?: google.maps.InfoWindow
   marker?: google.maps.marker.AdvancedMarkerElement
   interceptLink?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
@@ -171,7 +171,7 @@ const GMap = (props) => {
     if (!rc.resizeIntervalID) {
       rc.resizeIntervalID = setTimeout(() => {
         google.maps.event.trigger(rc.map, 'resize')
-        rc.resizeIntervalID = null
+        rc.resizeIntervalID = undefined
       }, RESIZE_INTERVAL)
     }
   }

@@ -5,13 +5,13 @@ import { WalkT } from '@/types'
 import PolygonManager from './polygon-manager'
 
 type MapState = {
-  map: google.maps.Map | null
-  pathManager: PathManager | null
-  polygonManager: PolygonManager | null
-  elevationInfoWindow: google.maps.InfoWindow | null
-  pathInfoWindow: google.maps.InfoWindow | null
-  distanceWidget: google.maps.Circle | null
-  marker: google.maps.marker.AdvancedMarkerElement | null
+  map?: google.maps.Map
+  pathManager?: PathManager
+  polygonManager?: PolygonManager
+  elevationInfoWindow?: google.maps.InfoWindow
+  pathInfoWindow?: google.maps.InfoWindow
+  distanceWidget?: google.maps.Circle
+  marker?: google.maps.marker.AdvancedMarkerElement
   addPoint: (lat: number, lng: number, append: boolean) => void
   uploadPath: () => void
   downloadPath: () => void
@@ -21,13 +21,13 @@ type MapState = {
 }
 
 const initialState: MapState = {
-  map: null,
-  pathManager: null,
-  elevationInfoWindow: null,
-  polygonManager: null,
-  pathInfoWindow: null,
-  distanceWidget: null,
-  marker: null,
+  map: undefined,
+  pathManager: undefined,
+  elevationInfoWindow: undefined,
+  polygonManager: undefined,
+  pathInfoWindow: undefined,
+  distanceWidget: undefined,
+  marker: undefined,
   addPoint: () => {},
   uploadPath: () => {},
   downloadPath: () => {},

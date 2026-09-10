@@ -13,7 +13,7 @@ const createNodeDb = () =>
 
 type Db = ReturnType<typeof createNodeDb>
 
-let nodeDb: Db | null = null
+let nodeDb: Db | undefined
 
 // Hyperdrive terminates the real TLS connection to the origin database
 // itself and hands the Worker a plain local connection, so no ssl option is

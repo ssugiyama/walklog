@@ -63,13 +63,14 @@ const asWalkT = (
 ): WalkT => {
   return {
     id: walk.id,
-    date: walk.date ? moment(walk.date).format('YYYY-MM-DD') : null,
+    // walks.date is NOT NULL - no null case to handle.
+    date: moment(walk.date).format('YYYY-MM-DD'),
     title: walk.title,
-    comment: walk.comment,
+    comment: walk.comment ?? undefined,
     draft: walk.draft,
-    image: walk.image,
+    image: walk.image ?? undefined,
     length: walk.length,
-    path: includePath && walk.path ? walk.path : null,
+    path: includePath && walk.path ? walk.path : undefined,
     distance: walk.distance,
     uid: walk.uid,
   }
@@ -202,7 +203,7 @@ export const clearIdTokenAction = async (): Promise<void> => {
 
 export const searchInternalAction = async (
   props: SearchProps,
-  uid: string,
+  uid: string | null,
 ): Promise<SearchState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
@@ -448,7 +449,7 @@ export const updateItemAction = async (
 ): Promise<typeof prevState> => {
   const db = await getDb()
   const state = { ...prevState }
-  state.id = null
+  state.id = undefined
   state.serial++
   const uid = await _getUid(state)
   if (state.idTokenExpired) {
@@ -469,12 +470,13 @@ export const updateItemAction = async (
   const willDeleteImage =
     formData.get('will_delete_image') === 'true' ? true : false
 
-  const decodedPath = walkPath ? decode(walkPath) : null
+  const decodedPath = walkPath ? decode(walkPath) : undefined
   const hasValidPath = !!decodedPath && decodedPath.length >= 2
 
   // The client sends the raw file; the upload itself happens here so the
   // storage backend (local disk or R2) stays an implementation detail.
-  const newImageFile = image instanceof File && image.size > 0 ? image : null
+  const newImageFile =
+    image instanceof File && image.size > 0 ? image : undefined
 
   // Manual validation to ensure consistent error messages
   const validationErrors = []
@@ -531,7 +533,7 @@ export const updateItemAction = async (
       sql<number>`ST_Length(${coordinatesToWKT(props.path)}, true)/1000` as unknown as number
   }
 
-  let uploadedImage: string | null = null
+  let uploadedImage: string | undefined
   if (willDeleteImage) {
     props.image = null
   } else if (newImageFile) {
@@ -562,7 +564,7 @@ export const updateItemAction = async (
     } catch (error) {
       console.error('updateItemAction error', error)
       state.error = error as Error
-      state.id = null
+      state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)
       }
@@ -581,7 +583,7 @@ export const updateItemAction = async (
     } catch (error) {
       console.error('updateItemAction create error', error)
       state.error = error as Error
-      state.id = null
+      state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)
       }

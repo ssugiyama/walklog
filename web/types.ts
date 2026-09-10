@@ -16,7 +16,6 @@ export type SearchProps = {
   limit?: number
   offset?: number
   order?: string
-  draftUid?: string | null
 }
 
 export type WalkT = {
@@ -24,7 +23,7 @@ export type WalkT = {
   uid: string
   date: string
   title: string
-  comment: string
+  comment?: string
   distance?: number
   length?: number
   path?: Position[]

@@ -27,7 +27,7 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const [mainState, dispatchMain, interceptLink] = useMainContext()
   const { overlay } = mainState
   const config = useConfig()
-  const provider = useRef<GoogleAuthProvider | null>(null)
+  const provider = useRef<GoogleAuthProvider | undefined>(undefined)
   const [accountAnchorEl, setAccountAnchorEl] = useState<HTMLElement | null>(
     null,
   )

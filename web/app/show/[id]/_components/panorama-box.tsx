@@ -15,11 +15,11 @@ import { useMapContext } from '@/lib/utils/map-context'
 import { WalkT } from '@/types'
 
 type PanoramaRefs = {
-  panorama?: google.maps.StreetViewPanorama | null
-  streetViewService?: google.maps.StreetViewService | null
+  panorama?: google.maps.StreetViewPanorama
+  streetViewService?: google.maps.StreetViewService
   panoramaPointsAndHeadings?: Array<
     [google.maps.LatLng | google.maps.LatLngLiteral, number]
-  > | null
+  >
 }
 
 const PANORAMA_INTERVAL = 50
@@ -49,7 +49,6 @@ const PanoramaBox = () => {
   })
 
   const getPanoramaPointsAndHeadings = (path: google.maps.LatLng[]) => {
-    if (!path) return null
     const pph: Array<[google.maps.LatLng | google.maps.LatLngLiteral, number]> =
       []
     const count = path.length
