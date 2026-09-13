@@ -205,6 +205,63 @@ describe('server actions', () => {
       expect(result.count).toBe(1)
       expect(result.rows[0].title).toBe('Public walk')
     })
+
+    it('clamps limit to a hard maximum regardless of what is requested', async () => {
+      const now = new Date().toISOString()
+      await db.insert(walks).values(
+        Array.from({ length: 105 }, (_, i) => ({
+          date: '2023-05-15',
+          title: `Walk ${i}`,
+          draft: false,
+          uid: 'testUserId',
+          path: DEFAULT_PATH,
+          createdAt: now,
+          updatedAt: now,
+        })),
+      )
+
+      const result = await searchInternalAction({ limit: 500 }, 'testUserId')
+
+      expect(result.count).toBe(105)
+      expect(result.rows).toHaveLength(100)
+    })
+
+    it('falls back to the default limit for a non-numeric or non-positive limit', async () => {
+      await insertWalk({ title: 'Walk 1' })
+      await insertWalk({ title: 'Walk 2' })
+
+      const nanResult = await searchInternalAction({ limit: NaN }, 'testUserId')
+      const zeroResult = await searchInternalAction({ limit: 0 }, 'testUserId')
+      const negativeResult = await searchInternalAction(
+        { limit: -10 },
+        'testUserId',
+      )
+
+      expect(nanResult.rows).toHaveLength(2)
+      expect(zeroResult.rows).toHaveLength(2)
+      expect(negativeResult.rows).toHaveLength(2)
+    })
+
+    it('treats a negative offset as 0 instead of passing it to the database', async () => {
+      await insertWalk({ title: 'Walk 1' })
+
+      const result = await searchInternalAction({ offset: -5 }, 'testUserId')
+
+      expect(result.rows).toHaveLength(1)
+    })
+
+    it('returns an empty page without querying rows when offset is beyond count', async () => {
+      await insertWalk({ title: 'Walk 1' })
+
+      const result = await searchInternalAction(
+        { offset: 999999999 },
+        'testUserId',
+      )
+
+      expect(result.count).toBe(1)
+      expect(result.rows).toEqual([])
+      expect(result.offset).toBe(0)
+    })
   })
 
   describe('searchAction', () => {

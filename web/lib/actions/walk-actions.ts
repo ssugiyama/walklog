@@ -85,6 +85,31 @@ const asCityT = (area: AreaAttributes): CityT => {
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
+// searchInternalAction includes each row's full path geometry (needed to
+// draw every result on the map), and decoding that geometry from WKB is
+// CPU-bound work that scales with `limit`. props.limit/offset come straight
+// from the URL - a bookmarked or shared "load more" link (see
+// search-box.tsx/bottom-bar.tsx, which grow limit by 20 per page) replays
+// its accumulated limit as a single request instead of the incremental
+// fetch a live session does, so an unbounded limit lets a client (or just
+// an old link) force an arbitrarily large single-request decode that can
+// exceed the Workers CPU time limit. Clamp rather than reject so a
+// deep-scrolled/bookmarked link degrades to a smaller page instead of
+// breaking outright.
+const DEFAULT_SEARCH_LIMIT = 20
+const MAX_SEARCH_LIMIT = 100
+const MAX_SEARCH_OFFSET = 10000
+
+const clampSearchLimit = (value: number | undefined): number => {
+  if (!Number.isInteger(value) || value <= 0) return DEFAULT_SEARCH_LIMIT
+  return Math.min(value, MAX_SEARCH_LIMIT)
+}
+
+const clampSearchOffset = (value: number | undefined): number => {
+  if (!Number.isInteger(value) || value < 0) return 0
+  return Math.min(value, MAX_SEARCH_OFFSET)
+}
+
 const autoApproveUsers: boolean = !!process.env.AUTO_APPROVE_USERS
 
 type UserRow = typeof users.$inferSelect
@@ -360,10 +385,19 @@ export const searchInternalAction = async (
     where.push(eq(walks.draft, false))
   }
 
-  const limit = props.limit ?? 20
-  const offset = props.offset ?? 0
+  const limit = clampSearchLimit(props.limit)
+  const offset = clampSearchOffset(props.offset)
 
   const condition = and(...where)
+  const count = await db.$count(walks, condition)
+
+  state.count = count
+  if (offset >= count) {
+    state.offset = 0
+    state.rows = []
+    return state
+  }
+
   const result = await db
     .select(selectColumns)
     .from(walks)
@@ -371,9 +405,7 @@ export const searchInternalAction = async (
     .orderBy(order)
     .limit(limit)
     .offset(offset)
-  const count = await db.$count(walks, condition)
 
-  state.count = count
   state.offset = count > offset + limit ? offset + limit : 0
   state.rows = result.map((walk) => asWalkT(walk, true))
   return state
