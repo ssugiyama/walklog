@@ -1,8 +1,7 @@
 import { Position } from 'geojson'
 
 /* eslint no-bitwise: 'off' */
-function encodeFloat(f: number): number[] {
-  let n = Math.round(f * 100000)
+function encodeInt(n: number): number[] {
   n <<= 1
   if (n < 0) n = -n - 1
   const ar: number[] = []
@@ -19,14 +18,22 @@ function encodeFloat(f: number): number[] {
 }
 
 export const encode = (path: Position[]): string => {
-  let prevx = 0
-  let prevy = 0
+  // Round each coordinate to the target precision first, then take the
+  // delta between rounded values - not the other way around. round(a) -
+  // round(b) is not always round(a - b), so rounding the raw delta instead
+  // of pre-rounded coordinates makes this diverge from the standard Google
+  // polyline algorithm (and from google.maps.geometry.encoding.encodePath,
+  // which callers compare this output against) for high-precision input
+  // such as a dragged polyline vertex.
+  let prevLat = 0
+  let prevLng = 0
   return path
     .map((point) => {
-      const ar = encodeFloat(point[1] - prevy).concat(
-        encodeFloat(point[0] - prevx),
-      )
-      ;[prevx, prevy] = point
+      const lat = Math.round(point[1] * 100000)
+      const lng = Math.round(point[0] * 100000)
+      const ar = encodeInt(lat - prevLat).concat(encodeInt(lng - prevLng))
+      prevLat = lat
+      prevLng = lng
       return Buffer.from(ar).toString('ascii')
     })
     .join('')
