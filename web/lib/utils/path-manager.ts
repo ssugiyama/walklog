@@ -58,25 +58,31 @@ export default class PathManager extends google.maps.MVCObject {
       ],
     })
 
-    this.draw.on('ready', () => {
-      this.draw.on(
-        'finish',
-        (id: string, context: { action: string; mode: string }) => {
-          if (context.action !== 'draw') return
-          const feature: GeoJSONStoreFeatures<GeoJSONStoreGeometries> =
-            this.draw.getSnapshotFeature(id)
-          if (feature?.geometry.type === 'LineString') {
-            const path: google.maps.LatLng[] = feature.geometry.coordinates.map(
-              (coord: [number, number]) =>
-                new google.maps.LatLng(coord[1], coord[0]),
-            )
-            this.draw.clear()
-            this.draw.stop()
-            google.maps.event.trigger(this, 'drawfinish', path)
-          }
-        },
-      )
-    })
+    // Registered once here rather than inside a `this.draw.on('ready', ...)`
+    // callback: TerraDraw.start() re-fires 'ready' every time it transitions
+    // from stopped to started (the 'finish' handler below calls
+    // this.draw.stop(), so the next startDraw() re-triggers 'ready'), and
+    // each 'ready' callback would attach a brand-new 'finish' closure -
+    // terra-draw only dedupes listeners by reference, so those stack across
+    // draw sessions and a single finish fires all of them, creating one
+    // duplicate polyline per prior session.
+    this.draw.on(
+      'finish',
+      (id: string, context: { action: string; mode: string }) => {
+        if (context.action !== 'draw') return
+        const feature: GeoJSONStoreFeatures<GeoJSONStoreGeometries> =
+          this.draw.getSnapshotFeature(id)
+        if (feature?.geometry.type === 'LineString') {
+          const path: google.maps.LatLng[] = feature.geometry.coordinates.map(
+            (coord: [number, number]) =>
+              new google.maps.LatLng(coord[1], coord[0]),
+          )
+          this.draw.clear()
+          this.draw.stop()
+          google.maps.event.trigger(this, 'drawfinish', path)
+        }
+      },
+    )
     this.set('length', 0)
     this.set('prevSelection', null)
     this.set('prevCurrent', null)
