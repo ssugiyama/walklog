@@ -4,7 +4,6 @@ import { Mock } from 'vitest'
 import { searchAction } from '@/lib/actions/walk-actions'
 import { useConfig } from './config'
 import { useData } from './data-context'
-import { useMainContext } from './main-context'
 import Searcher from './searcher'
 import { useUserContext } from './user-context'
 
@@ -18,10 +17,6 @@ vi.mock('./data-context', () => ({
 
 vi.mock('./config', () => ({
   useConfig: vi.fn(),
-}))
-
-vi.mock('./main-context', () => ({
-  useMainContext: vi.fn(),
 }))
 
 vi.mock('./user-context', () => ({
@@ -40,7 +35,6 @@ vi.mock('next/navigation', () => ({
 
 describe('Searcher', () => {
   const mockSetData = vi.fn()
-  const mockDispatchMain = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -49,7 +43,6 @@ describe('Searcher', () => {
       mockSetData,
     ])
     ;(useConfig as Mock).mockReturnValue({ defaultCenter: '35,139' })
-    ;(useMainContext as Mock).mockReturnValue([{}, mockDispatchMain])
     ;(useUserContext as Mock).mockReturnValue({
       updateIdToken: vi.fn(),
       idToken: 'token-1',
@@ -137,23 +130,29 @@ describe('Searcher', () => {
     await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(1))
   })
 
-  it('shows a snackbar with the error message instead of updating data when searchAction fails', async () => {
+  it('passes searchState.error through to data instead of merging it as a new page of rows', async () => {
+    const error = new Error('Invalid limit: 500.')
     ;(searchAction as Mock).mockResolvedValue({
-      rows: [],
-      count: 0,
+      rows: [{ id: 1, title: 'Stale row' }],
+      count: 1,
       offset: 0,
       serial: 1,
-      error: new Error('Invalid limit: 500.'),
+      append: true,
+      error,
     })
 
     render(<Searcher />)
 
     await waitFor(() =>
-      expect(mockDispatchMain).toHaveBeenCalledWith({
-        type: 'OPEN_SNACKBAR',
-        payload: 'Invalid limit: 500.',
-      }),
+      expect(mockSetData).toHaveBeenCalledWith(
+        expect.objectContaining({ error }),
+      ),
     )
-    expect(mockSetData).not.toHaveBeenCalled()
+    // The append merge (unshifting the current rows onto themselves) is
+    // skipped on error, since searchState.rows here is just the stale
+    // previous page carried through unchanged, not a new one to prepend.
+    expect(mockSetData.mock.calls[0][0].rows).toEqual([
+      { id: 1, title: 'Stale row' },
+    ])
   })
 })

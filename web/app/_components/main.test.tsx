@@ -14,6 +14,7 @@ const defaultMainState = {
 const defaultData = {
   current: null,
   records: [],
+  error: null as Error | null,
 }
 
 // Mock dependencies
@@ -222,6 +223,22 @@ describe('Main Component', () => {
     expect(dispatchMain).toHaveBeenCalledWith({ type: 'CLOSE_SNACKBAR' })
 
     vi.useRealTimers()
+  })
+
+  test('replaces the whole app shell with the error screen when data.error is set', () => {
+    renderWithProviders(
+      <Main>
+        <div data-testid="main-children">Test Content</div>
+      </Main>,
+      { data: { ...defaultData, error: new Error('Invalid limit: 500.') } },
+    )
+
+    expect(screen.getByText('Invalid limit: 500.')).toBeInTheDocument()
+    expect(screen.queryByTestId('map')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('bottom-bar')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('main-children')).not.toBeInTheDocument()
+    // The error screen's own way out.
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/')
   })
 
   test('toolbox is rendered when toolBoxOpened is true', () => {
