@@ -88,15 +88,17 @@ const SEARCH_CACHE_TAG = 'searchTag'
 // searchInternalAction includes each row's full path geometry (needed to
 // draw every result on the map), and decoding that geometry from WKB is
 // CPU-bound work that scales with `limit`. props.limit/offset come straight
-// from the URL - a bookmarked or shared "load more" link (see
-// search-box.tsx/bottom-bar.tsx, which grow limit by 20 per page) replays
-// its accumulated limit as a single request instead of the incremental
-// fetch a live session does, so an unbounded limit lets a client (or just
-// an old link) force an arbitrarily large single-request decode that can
-// exceed the Workers CPU time limit. Reject rather than silently clamp: a
-// value outside these bounds means the caller's assumptions about what it
-// asked for and what it got have already diverged, and coercing it to some
-// other "valid" value would just make that divergence invisible.
+// from the URL with no bound on the request itself: the live UI keeps its
+// own "load more" requests small (searcher.tsx re-derives a ~20-row delta
+// from data.offset once a session has already fetched a page, and
+// search-box.tsx/bottom-bar.tsx never write an `offset` param at all), but
+// nothing stops a URL from being opened - fresh, so there's no prior
+// data.offset to derive a delta from - with an arbitrarily large limit
+// and/or offset typed or crafted directly, forcing a single-request decode
+// that can exceed the Workers CPU time limit. Reject rather than silently
+// clamp: a value outside these bounds means the caller's assumptions about
+// what it asked for and what it got have already diverged, and coercing it
+// to some other "valid" value would just make that divergence invisible.
 const DEFAULT_SEARCH_LIMIT = 20
 const MAX_SEARCH_LIMIT = 100
 const MAX_SEARCH_OFFSET = 10000
