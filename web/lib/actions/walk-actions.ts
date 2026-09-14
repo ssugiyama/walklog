@@ -85,6 +85,44 @@ const asCityT = (area: AreaAttributes): CityT => {
 
 const SEARCH_CACHE_TAG = 'searchTag'
 
+// searchInternalAction includes each row's full path geometry (needed to
+// draw every result on the map), and decoding that geometry from WKB is
+// CPU-bound work that scales with `limit`. props.limit/offset come straight
+// from the URL with no bound on the request itself: the live UI keeps its
+// own "load more" requests small (searcher.tsx re-derives a ~20-row delta
+// from data.offset once a session has already fetched a page, and
+// search-box.tsx/bottom-bar.tsx never write an `offset` param at all), but
+// nothing stops a URL from being opened - fresh, so there's no prior
+// data.offset to derive a delta from - with an arbitrarily large limit
+// and/or offset typed or crafted directly, forcing a single-request decode
+// that can exceed the Workers CPU time limit. Reject rather than silently
+// clamp: a value outside these bounds means the caller's assumptions about
+// what it asked for and what it got have already diverged, and coercing it
+// to some other "valid" value would just make that divergence invisible.
+const DEFAULT_SEARCH_LIMIT = 20
+const MAX_SEARCH_LIMIT = 100
+const MAX_SEARCH_OFFSET = 10000
+
+const validateSearchLimit = (value: number | undefined): number => {
+  if (value === undefined) return DEFAULT_SEARCH_LIMIT
+  if (!Number.isInteger(value) || value <= 0 || value > MAX_SEARCH_LIMIT) {
+    throw new Error(
+      `Invalid limit: ${value}. Must be an integer between 1 and ${MAX_SEARCH_LIMIT}.`,
+    )
+  }
+  return value
+}
+
+const validateSearchOffset = (value: number | undefined): number => {
+  if (value === undefined) return 0
+  if (!Number.isInteger(value) || value < 0 || value > MAX_SEARCH_OFFSET) {
+    throw new Error(
+      `Invalid offset: ${value}. Must be an integer between 0 and ${MAX_SEARCH_OFFSET}.`,
+    )
+  }
+  return value
+}
+
 const autoApproveUsers: boolean = !!process.env.AUTO_APPROVE_USERS
 
 type UserRow = typeof users.$inferSelect
@@ -360,10 +398,19 @@ export const searchInternalAction = async (
     where.push(eq(walks.draft, false))
   }
 
-  const limit = props.limit ?? 20
-  const offset = props.offset ?? 0
+  const limit = validateSearchLimit(props.limit)
+  const offset = validateSearchOffset(props.offset)
 
   const condition = and(...where)
+  const count = await db.$count(walks, condition)
+
+  state.count = count
+  if (offset >= count) {
+    state.offset = 0
+    state.rows = []
+    return state
+  }
+
   const result = await db
     .select(selectColumns)
     .from(walks)
@@ -371,9 +418,7 @@ export const searchInternalAction = async (
     .orderBy(order)
     .limit(limit)
     .offset(offset)
-  const count = await db.$count(walks, condition)
 
-  state.count = count
   state.offset = count > offset + limit ? offset + limit : 0
   state.rows = result.map((walk) => asWalkT(walk, true))
   return state
