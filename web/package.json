@@ -24,7 +24,7 @@
     "@mui/material-nextjs": "^9.3.0",
     "@opennextjs/cloudflare": "^1.20.6",
     "aws4fetch": "^1.0.20",
-    "drizzle-orm": "1.0.0-rc.4",
+    "drizzle-orm": "1.0.0-rc.5-5935859",
     "firebase": "^12.19.0",
     "jose": "^6.2.4",
     "jssha": "^3.3.1",
