@@ -93,21 +93,32 @@ const SEARCH_CACHE_TAG = 'searchTag'
 // its accumulated limit as a single request instead of the incremental
 // fetch a live session does, so an unbounded limit lets a client (or just
 // an old link) force an arbitrarily large single-request decode that can
-// exceed the Workers CPU time limit. Clamp rather than reject so a
-// deep-scrolled/bookmarked link degrades to a smaller page instead of
-// breaking outright.
+// exceed the Workers CPU time limit. Reject rather than silently clamp: a
+// value outside these bounds means the caller's assumptions about what it
+// asked for and what it got have already diverged, and coercing it to some
+// other "valid" value would just make that divergence invisible.
 const DEFAULT_SEARCH_LIMIT = 20
 const MAX_SEARCH_LIMIT = 100
 const MAX_SEARCH_OFFSET = 10000
 
-const clampSearchLimit = (value: number | undefined): number => {
-  if (!Number.isInteger(value) || value <= 0) return DEFAULT_SEARCH_LIMIT
-  return Math.min(value, MAX_SEARCH_LIMIT)
+const validateSearchLimit = (value: number | undefined): number => {
+  if (value === undefined) return DEFAULT_SEARCH_LIMIT
+  if (!Number.isInteger(value) || value <= 0 || value > MAX_SEARCH_LIMIT) {
+    throw new Error(
+      `Invalid limit: ${value}. Must be an integer between 1 and ${MAX_SEARCH_LIMIT}.`,
+    )
+  }
+  return value
 }
 
-const clampSearchOffset = (value: number | undefined): number => {
-  if (!Number.isInteger(value) || value < 0) return 0
-  return Math.min(value, MAX_SEARCH_OFFSET)
+const validateSearchOffset = (value: number | undefined): number => {
+  if (value === undefined) return 0
+  if (!Number.isInteger(value) || value < 0 || value > MAX_SEARCH_OFFSET) {
+    throw new Error(
+      `Invalid offset: ${value}. Must be an integer between 0 and ${MAX_SEARCH_OFFSET}.`,
+    )
+  }
+  return value
 }
 
 const autoApproveUsers: boolean = !!process.env.AUTO_APPROVE_USERS
@@ -385,8 +396,8 @@ export const searchInternalAction = async (
     where.push(eq(walks.draft, false))
   }
 
-  const limit = clampSearchLimit(props.limit)
-  const offset = clampSearchOffset(props.offset)
+  const limit = validateSearchLimit(props.limit)
+  const offset = validateSearchOffset(props.offset)
 
   const condition = and(...where)
   const count = await db.$count(walks, condition)
