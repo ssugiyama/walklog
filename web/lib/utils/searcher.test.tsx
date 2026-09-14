@@ -4,6 +4,7 @@ import { Mock } from 'vitest'
 import { searchAction } from '@/lib/actions/walk-actions'
 import { useConfig } from './config'
 import { useData } from './data-context'
+import { useMainContext } from './main-context'
 import Searcher from './searcher'
 import { useUserContext } from './user-context'
 
@@ -17,6 +18,10 @@ vi.mock('./data-context', () => ({
 
 vi.mock('./config', () => ({
   useConfig: vi.fn(),
+}))
+
+vi.mock('./main-context', () => ({
+  useMainContext: vi.fn(),
 }))
 
 vi.mock('./user-context', () => ({
@@ -35,6 +40,7 @@ vi.mock('next/navigation', () => ({
 
 describe('Searcher', () => {
   const mockSetData = vi.fn()
+  const mockDispatchMain = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -43,6 +49,7 @@ describe('Searcher', () => {
       mockSetData,
     ])
     ;(useConfig as Mock).mockReturnValue({ defaultCenter: '35,139' })
+    ;(useMainContext as Mock).mockReturnValue([{}, mockDispatchMain])
     ;(useUserContext as Mock).mockReturnValue({
       updateIdToken: vi.fn(),
       idToken: 'token-1',
@@ -128,5 +135,25 @@ describe('Searcher', () => {
     rerender(<Searcher />)
 
     await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(1))
+  })
+
+  it('shows a snackbar with the error message instead of updating data when searchAction fails', async () => {
+    ;(searchAction as Mock).mockResolvedValue({
+      rows: [],
+      count: 0,
+      offset: 0,
+      serial: 1,
+      error: new Error('Invalid limit: 500.'),
+    })
+
+    render(<Searcher />)
+
+    await waitFor(() =>
+      expect(mockDispatchMain).toHaveBeenCalledWith({
+        type: 'OPEN_SNACKBAR',
+        payload: 'Invalid limit: 500.',
+      }),
+    )
+    expect(mockSetData).not.toHaveBeenCalled()
   })
 })
