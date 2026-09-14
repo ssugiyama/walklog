@@ -5,6 +5,7 @@ import { searchAction } from '@/lib/actions/walk-actions'
 import { DataT } from '@/types'
 import { useConfig } from './config'
 import { useData } from './data-context'
+import { useMainContext } from './main-context'
 import { useUserContext } from './user-context'
 
 const initialSearchState = {
@@ -38,6 +39,7 @@ export function Searcher() {
   )
   const [data, setData] = useData()
   const { updateIdToken, idToken } = useUserContext()
+  const [, dispatchMain] = useMainContext()
   const defaultValues = {
     id: null,
     filter: '',
@@ -89,6 +91,18 @@ export function Searcher() {
     if (searchState.idTokenExpired) {
       startTransition(async () => {
         await updateIdToken()
+      })
+      return
+    }
+    if (searchState.error) {
+      // searchAction catches its own errors into state rather than
+      // throwing, precisely so a bad request (e.g. an out-of-range limit
+      // typed into the URL) surfaces this message instead of an opaque
+      // "Minified React error #441" - and so whatever was already on
+      // screen stays there instead of being replaced by empty results.
+      dispatchMain({
+        type: 'OPEN_SNACKBAR',
+        payload: searchState.error.message,
       })
       return
     }
