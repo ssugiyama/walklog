@@ -178,7 +178,7 @@ const verifyIdToken = async (
     if (error instanceof IdTokenExpiredError) {
       state.idTokenExpired = true
     } else {
-      state.error = error as Error
+      state.error = (error as Error).message
     }
     return null
   }
@@ -449,7 +449,7 @@ export const searchAction = async (
     const newState = await _searchInternalAction(props, uid)
     return Object.assign({ ...state }, newState)
   } catch (error) {
-    state.error = error as Error
+    state.error = (error as Error).message
     return state
   }
 }
@@ -561,7 +561,7 @@ export const updateItemAction = async (
   }
 
   if (validationErrors.length > 0) {
-    state.error = new Error(validationErrors.join(', '))
+    state.error = validationErrors.join(', ')
     return state
   }
 
@@ -604,7 +604,7 @@ export const updateItemAction = async (
       uploadedImage = await _saveImage(newImageFile, key)
     } catch (error) {
       console.error('updateItemAction saveImage error', error)
-      state.error = error as Error
+      state.error = (error as Error).message
       return state
     }
     props.image = uploadedImage
@@ -622,7 +622,7 @@ export const updateItemAction = async (
       state.id = id
     } catch (error) {
       console.error('updateItemAction error', error)
-      state.error = error as Error
+      state.error = (error as Error).message
       state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)
@@ -641,7 +641,7 @@ export const updateItemAction = async (
       state.id = walk?.id
     } catch (error) {
       console.error('updateItemAction create error', error)
-      state.error = error as Error
+      state.error = (error as Error).message
       state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)

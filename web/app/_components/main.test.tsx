@@ -14,7 +14,7 @@ const defaultMainState = {
 const defaultData = {
   current: null,
   records: [],
-  error: null as Error | null,
+  error: null as string | null,
 }
 
 // Mock dependencies
@@ -225,20 +225,31 @@ describe('Main Component', () => {
     vi.useRealTimers()
   })
 
-  test('replaces the whole app shell with the error screen when data.error is set', () => {
+  test('shows the error message alongside nav/map/bottom bar instead of replacing them', () => {
     renderWithProviders(
       <Main>
         <div data-testid="main-children">Test Content</div>
       </Main>,
-      { data: { ...defaultData, error: new Error('Invalid limit: 500.') } },
+      { data: { ...defaultData, error: 'Invalid limit: 500.' } },
     )
 
     expect(screen.getByText('Invalid limit: 500.')).toBeInTheDocument()
-    expect(screen.queryByTestId('map')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('bottom-bar')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('main-children')).not.toBeInTheDocument()
-    // The error screen's own way out.
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/')
+    // Nav, map and bottom bar all stay usable - only a Snackbar (which
+    // leaves the user stuck with no way to navigate) is what this
+    // replaces, not the app shell itself.
+    expect(screen.getByTestId('nav-bar')).toBeInTheDocument()
+    expect(screen.getByTestId('map')).toBeInTheDocument()
+    expect(screen.getByTestId('bottom-bar')).toBeInTheDocument()
+  })
+
+  test('does not show an error message when data.error is unset', () => {
+    renderWithProviders(
+      <Main>
+        <div>Test Content</div>
+      </Main>,
+    )
+
+    expect(screen.queryByText(/Invalid limit/)).not.toBeInTheDocument()
   })
 
   test('toolbox is rendered when toolBoxOpened is true', () => {

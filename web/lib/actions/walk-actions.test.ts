@@ -287,8 +287,8 @@ describe('server actions', () => {
         mockGetUid,
       )
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toMatch(/Invalid limit/)
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toMatch(/Invalid limit/)
     })
 
     it('should increment the serial number and reset error/idTokenExpired', async () => {
@@ -384,8 +384,8 @@ describe('server actions', () => {
         mockSearchInternalAction,
       )
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toBe('Invalid limit: 500.')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toBe('Invalid limit: 500.')
       // Previous results stay in place rather than being wiped out by the
       // failed request.
       expect(result.rows).toEqual([{ id: 1, title: 'Existing Walk' }])
@@ -529,8 +529,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Date is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Date is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -542,8 +542,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Title is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Title is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -555,8 +555,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Path is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Path is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -567,9 +567,7 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error.message).toMatch(
-        /Date is required.*Title is required/,
-      )
+      expect(result.error).toMatch(/Date is required.*Title is required/)
       expect(result.id).toBeUndefined()
     })
 
@@ -695,8 +693,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Path is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Path is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -812,7 +810,7 @@ describe('server actions', () => {
           mockDeleteImage,
         )
 
-        expect(result.error).toBeInstanceOf(Error)
+        expect(typeof result.error).toBe('string')
         expect(mockSaveImage).toHaveBeenCalled()
         expect(mockDeleteImage).toHaveBeenCalledWith(uploadedUrl)
       } finally {
@@ -834,8 +832,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Image must be an image file')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Image must be an image file')
     })
 
     it('should reject an image over 2MB', async () => {
@@ -852,8 +850,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Image size must be 2MB or less')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Image size must be 2MB or less')
     })
 
     it('should clear the image when will_delete_image is true', async () => {

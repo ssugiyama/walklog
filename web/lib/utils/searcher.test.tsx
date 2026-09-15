@@ -131,7 +131,7 @@ describe('Searcher', () => {
   })
 
   it('passes searchState.error through to data instead of merging it as a new page of rows', async () => {
-    const error = new Error('Invalid limit: 500.')
+    const error = 'Invalid limit: 500.'
     ;(searchAction as Mock).mockResolvedValue({
       rows: [{ id: 1, title: 'Stale row' }],
       count: 1,
