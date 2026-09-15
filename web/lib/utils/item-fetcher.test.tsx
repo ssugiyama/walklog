@@ -82,4 +82,23 @@ describe('ItemFetcher', () => {
 
     await waitFor(() => expect(getItemAction).toHaveBeenCalledTimes(1))
   })
+
+  it('passes getItemState.error through to data', async () => {
+    ;(useUserContext as Mock).mockReturnValue({
+      updateIdToken: vi.fn(),
+      idToken: null,
+    })
+    ;(getItemAction as Mock).mockResolvedValue({
+      error: 'Invalid id.',
+      serial: 1,
+    })
+
+    render(<ItemFetcher />)
+
+    await waitFor(() =>
+      expect(mockSetData).toHaveBeenCalledWith(
+        expect.objectContaining({ error: 'Invalid id.' }),
+      ),
+    )
+  })
 })

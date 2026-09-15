@@ -434,6 +434,25 @@ describe('server actions', () => {
 
       expect(result).toEqual({})
     })
+
+    it('returns the error message instead of throwing when the query fails', async () => {
+      const selectSpy = vi.spyOn(db, 'select').mockReturnValueOnce({
+        from: () => ({
+          where: () => ({
+            limit: () => Promise.reject(new Error('db select failed')),
+          }),
+        }),
+      } as unknown as ReturnType<typeof db.select>)
+
+      try {
+        const result = await getItemInternalAction(1, 'testUid')
+
+        expect(result.error).toBe('db select failed')
+        expect(result.current).toBeUndefined()
+      } finally {
+        selectSpy.mockRestore()
+      }
+    })
   })
 
   describe('getItemAction', () => {
@@ -504,6 +523,26 @@ describe('server actions', () => {
       ).rejects.toThrow('Failed to get UID')
       expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
       expect(mockGetItemInternalActionMock).not.toHaveBeenCalled()
+    })
+
+    it('returns the error instead of calling notFound() when getItemInternalAction fails without a current item', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
+      const mockGetItemInternalActionMock = vi
+        .fn()
+        .mockResolvedValue({ error: 'db select failed' })
+
+      // notFound() would throw (and reject this promise) if the missing
+      // `current` were mistaken for a genuine not-found instead of a
+      // failed lookup.
+      const result = await getItemAction(
+        prevState,
+        1,
+        mockGetUid,
+        mockGetItemInternalActionMock,
+      )
+
+      expect(result.error).toBe('db select failed')
+      expect(result.current).toBeUndefined()
     })
   })
 

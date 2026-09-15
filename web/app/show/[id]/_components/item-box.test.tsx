@@ -91,11 +91,16 @@ describe('ItemBox Component', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders error state when there is an error', () => {
+  it('shows the error message in the title area when there is an error', () => {
     ;(useData as Mock).mockReturnValue([{ error: 'Test error' }])
 
-    const { container } = render(<ItemBox />)
-    expect(container.firstChild).toBeNull()
+    render(<ItemBox />)
+
+    expect(screen.getByTestId('ItemBox')).toBeInTheDocument()
+    expect(screen.getByText('Test error')).toBeInTheDocument()
+    // The tabs/comment/elevation/streetview panel needs a real item and
+    // isn't shown alongside an error.
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })
 
   it('renders item details when data is available', () => {

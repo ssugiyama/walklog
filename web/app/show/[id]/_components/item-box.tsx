@@ -88,9 +88,11 @@ const ItemBox = () => {
   }, [item?.id])
 
   const itemWillRender = !data.isPending && item
-  const title = itemWillRender
-    ? `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`
-    : ''
+  const title = data.error
+    ? data.error
+    : itemWillRender
+      ? `${item.date} : ${item.title} (${item.length.toFixed(1)} km)`
+      : ''
   const image = item?.image
   const dataUser = users.find((u: UserT) => u.uid === item?.uid) ?? null
   const upUrl = `/?${searchParams.toString()}`
@@ -137,7 +139,7 @@ const ItemBox = () => {
   }
 
   return (
-    itemWillRender && (
+    (itemWillRender || data.error) && (
       <Box data-testid="ItemBox">
         <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
           <Fab
@@ -167,7 +169,7 @@ const ItemBox = () => {
           >
             <NavigationArrowForwardIcon />
           </IconButton>
-          {currentUser && item.uid && currentUser.uid === item.uid ? (
+          {currentUser && item?.uid && currentUser.uid === item.uid ? (
             <IconButton
               nativeButton={false}
               size="large"
@@ -178,7 +180,7 @@ const ItemBox = () => {
               <EditIcon />
             </IconButton>
           ) : null}
-          {currentUser && item.uid && currentUser.uid === item.uid ? (
+          {currentUser && item?.uid && currentUser.uid === item.uid ? (
             <IconButton
               nativeButton={true}
               disabled={isPending}
@@ -189,8 +191,12 @@ const ItemBox = () => {
               <DeleteIcon />
             </IconButton>
           ) : null}
-          <Typography variant="h6" sx={{ fontSize: '100%' }}>
-            {title ?? 'not found'}
+          <Typography
+            variant="h6"
+            sx={{ fontSize: '100%' }}
+            color={data.error ? 'error' : undefined}
+          >
+            {title || 'not found'}
           </Typography>
           <Box sx={{ textAlign: 'right' }}>
             {draft ? (
@@ -206,52 +212,54 @@ const ItemBox = () => {
             ) : null}
           </Box>
         </Paper>
-        <Paper>
-          <Tabs
-            value={tabValue}
-            onChange={tabChangeCB}
-            sx={{ margin: '4px 0' }}
-            textColor="secondary"
-            variant="fullWidth"
-          >
-            <Tab label="Comment" sx={{ textTransform: 'none' }} />
-            <Tab label="Elevation" sx={{ textTransform: 'none' }} />
-            <Tab label="StreetView" sx={{ textTransform: 'none' }} />
-          </Tabs>
-          <TabPanel value={tabValue} index={0}>
-            {image && (
-              <Box
-                sx={sxImageBox}
-                component="img"
-                src={image}
-                data-testid="item-image"
-              />
-            )}
-            <Typography
-              variant="body2"
-              component="div"
-              sx={{
-                textIndent: '1.2em',
-                lineHeight: '1.65',
-                letterSpacing: '.1em',
-                textAlign: 'justify',
-                '& a': {
-                  color: 'inherit',
-                },
-              }}
+        {itemWillRender && (
+          <Paper>
+            <Tabs
+              value={tabValue}
+              onChange={tabChangeCB}
+              sx={{ margin: '4px 0' }}
+              textColor="secondary"
+              variant="fullWidth"
             >
-              <ReactMarkdown>{item?.comment ?? ''}</ReactMarkdown>
-            </Typography>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <NoSsr>
-              <ElevationBox />
-            </NoSsr>
-          </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <PanoramaBox />
-          </TabPanel>
-        </Paper>
+              <Tab label="Comment" sx={{ textTransform: 'none' }} />
+              <Tab label="Elevation" sx={{ textTransform: 'none' }} />
+              <Tab label="StreetView" sx={{ textTransform: 'none' }} />
+            </Tabs>
+            <TabPanel value={tabValue} index={0}>
+              {image && (
+                <Box
+                  sx={sxImageBox}
+                  component="img"
+                  src={image}
+                  data-testid="item-image"
+                />
+              )}
+              <Typography
+                variant="body2"
+                component="div"
+                sx={{
+                  textIndent: '1.2em',
+                  lineHeight: '1.65',
+                  letterSpacing: '.1em',
+                  textAlign: 'justify',
+                  '& a': {
+                    color: 'inherit',
+                  },
+                }}
+              >
+                <ReactMarkdown>{item?.comment ?? ''}</ReactMarkdown>
+              </Typography>
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <NoSsr>
+                <ElevationBox />
+              </NoSsr>
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              <PanoramaBox />
+            </TabPanel>
+          </Paper>
+        )}
       </Box>
     )
   )

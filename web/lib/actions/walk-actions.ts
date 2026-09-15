@@ -476,21 +476,24 @@ export const getItemInternalAction = async (
   // "use cache" entry never resumes even after the leader completes, hanging
   // the request indefinitely. This is a single indexed PK lookup, so the
   // caching benefit isn't worth that risk.
-  const db = await getDb()
   const state: GetItemState = {}
+  try {
+    const db = await getDb()
+    const walk = await db
+      .select()
+      .from(walks)
+      .where(eq(walks.id, id))
+      .limit(1)
+      .then((rows) => rows[0])
+    if (!walk) {
+      return state
+    }
 
-  const walk = await db
-    .select()
-    .from(walks)
-    .where(eq(walks.id, id))
-    .limit(1)
-    .then((rows) => rows[0])
-  if (!walk) {
+    state.current = !walk.draft || walk.uid === uid ? asWalkT(walk, true) : null
     return state
+  } catch (error) {
+    return { ...state, error: (error as Error).message }
   }
-
-  state.current = !walk.draft || walk.uid === uid ? asWalkT(walk, true) : null
-  return state
 }
 
 export const getItemAction = async (
@@ -502,9 +505,22 @@ export const getItemAction = async (
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
+  state.error = null
   const uid = await _getUid(state)
-  const newState = await _getItemInternalAction(id, uid)
-  if (!newState.current && !newState.idTokenExpired) {
+  let newState: GetItemState
+  try {
+    newState = await _getItemInternalAction(id, uid)
+  } catch (error) {
+    // notFound()/forbidden()/unauthorized() work by throwing a special,
+    // digest-tagged error that Next.js's routing recognizes - it must
+    // propagate untouched, not get swallowed here as a generic message.
+    // _getItemInternalAction doesn't call any of those itself, but a test
+    // double standing in for it might; production callers never hit this
+    // catch for that reason since the real function already catches its
+    // own errors and returns them as state instead of throwing.
+    return { ...state, error: (error as Error).message }
+  }
+  if (!newState.current && !newState.idTokenExpired && !newState.error) {
     notFound()
   }
   return Object.assign({ ...state }, newState)

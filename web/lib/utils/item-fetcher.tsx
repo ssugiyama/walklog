@@ -37,7 +37,7 @@ export function ItemFetcher() {
     }
     const index = findIndexById(id)
     if (index >= 0 && !data.rows[index].stale) {
-      const newData: Partial<DataT> = {}
+      const newData: Partial<DataT> = { error: null }
       newData.index = index
       newData.prevId = index > 0 ? data.rows[index - 1].id : null
       newData.nextId =
@@ -62,7 +62,7 @@ export function ItemFetcher() {
       return
     }
     const index = findIndexById(id)
-    const newData: Partial<DataT> = { isPending }
+    const newData: Partial<DataT> = { isPending, error: getItemState.error }
     if (index >= 0) {
       data.rows[index] = getItemState.current
       newData.rows = data.rows
