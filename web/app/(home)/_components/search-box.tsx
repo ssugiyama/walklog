@@ -78,8 +78,15 @@ const SearchBox = () => {
     <Paper sx={{ p: 1 }} data-testid="SearchBox">
       <SearchForm />
       <Box sx={{ m: 1, display: 'flex' }}>
-        <Typography variant="body1" sx={{ display: 'inline-block' }}>
+        <Typography
+          variant="body1"
+          color={data.error ? 'error' : undefined}
+          sx={{ display: 'inline-block' }}
+        >
           {(() => {
+            if (data.error) {
+              return <span>{data.error}</span>
+            }
             if (data.isPending) {
               return <span>Searching...</span>
             }

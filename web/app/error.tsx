@@ -1,6 +1,25 @@
 'use client'
-import AppError from './_components/app-error'
+import ListIcon from '@mui/icons-material/List'
+import Fab from '@mui/material/Fab'
+import Paper from '@mui/material/Paper'
+import Typography from '@mui/material/Typography'
 
-export default function AppErrorBoundary({ error }: { error?: Error }) {
-  return <AppError error={error} />
+export default function AppError({ error }: { error?: Error }) {
+  return (
+    <Paper
+      sx={{ width: '100%', textAlign: 'center', padding: 2, minHeight: 100 }}
+    >
+      <Fab
+        sx={{ float: 'left', marginLeft: 1, marginTop: 1 }}
+        size="small"
+        color="primary"
+        component="a"
+        href="/"
+      >
+        <ListIcon />
+      </Fab>
+      <Typography variant="h6">Error</Typography>
+      <Typography variant="body1">{error?.message}</Typography>
+    </Paper>
+  )
 }

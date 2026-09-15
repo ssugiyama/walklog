@@ -14,7 +14,6 @@ import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
 import { MapContextProvider } from '@/lib/utils/map-context'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
-import AppError from './app-error'
 import BottomBar from './bottom-bar'
 import GMap from './map'
 import NavBar from './nav-bar'
@@ -134,18 +133,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
               }}
             >
               <NavBar ref={headerRef} sx={{ pt: 'env(safe-area-inset-top)' }} />
-              {data.error && (
-                // A search error (e.g. an out-of-range limit/offset) is
-                // caught into state rather than thrown - see
-                // searchAction/searcher.tsx - specifically so its message
-                // survives production instead of being stripped into an
-                // opaque "Minified React error #441". Shown here, below
-                // the nav and above the map, rather than replacing the
-                // whole shell: nav/map/bottom bar all stay usable, so this
-                // doesn't strand the user the way a Snackbar over a
-                // permanently-stuck "searching" list did either.
-                <AppError error={data.error} />
-              )}
               <GMap style={mapStyles} />
               <Box
                 style={{

@@ -245,183 +245,196 @@ export const searchInternalAction = async (
 ): Promise<SearchState> => {
   'use cache'
   cacheTag(SEARCH_CACHE_TAG)
-  const db = await getDb()
-  const selectColumns = {
-    ...getColumns(walks),
-    distance: sql<number>`0 as distance`,
-  }
   const state: SearchState = {
     count: 0,
     rows: [],
   }
-  const orderHash = {
-    newest_first: desc(walks.date),
-    oldest_first: asc(walks.date),
-    longest_first: desc(walks.length),
-    shortest_first: asc(walks.length),
-    easternmost_first: sql`st_xmax(${walks.path}) desc`,
-    westernmost_first: sql`st_xmin(${walks.path}) asc`,
-    southernmost_first: sql`st_ymin(${walks.path}) asc`,
-    northernmost_first: sql`st_ymax(${walks.path}) desc`,
-    nearest_first: sql`distance asc`,
-  }
+  // Everything below runs inside try/catch, not just the limit/offset
+  // validation: 'use cache' functions participate directly in the RSC
+  // render/prerender pipeline, so an exception that escapes one - even
+  // one already caught and re-thrown as a plain string by searchAction's
+  // own try/catch - gets treated as a render error and redacted to the
+  // generic "An error occurred in the Server Components render..."
+  // message in production, regardless of what searchAction does with it
+  // afterward. Returning the message as normal data instead of throwing
+  // is the only way it survives.
+  try {
+    const db = await getDb()
+    const selectColumns = {
+      ...getColumns(walks),
+      distance: sql<number>`0 as distance`,
+    }
+    const orderHash = {
+      newest_first: desc(walks.date),
+      oldest_first: asc(walks.date),
+      longest_first: desc(walks.length),
+      shortest_first: asc(walks.length),
+      easternmost_first: sql`st_xmax(${walks.path}) desc`,
+      westernmost_first: sql`st_xmin(${walks.path}) asc`,
+      southernmost_first: sql`st_ymin(${walks.path}) asc`,
+      northernmost_first: sql`st_ymax(${walks.path}) desc`,
+      nearest_first: sql`distance asc`,
+    }
 
-  const where: SQL[] = []
-  const order: ValueOf<typeof orderHash> =
-    orderHash[(props.order as keyof typeof orderHash) ?? 'newest_first']
+    const where: SQL[] = []
+    const order: ValueOf<typeof orderHash> =
+      orderHash[(props.order as keyof typeof orderHash) ?? 'newest_first']
 
-  if (props.date) {
-    where.push(eq(walks.date, props.date))
-  }
-  if (props.user) {
-    where.push(eq(walks.uid, props.user))
-  }
-  if (props.year) {
-    where.push(
-      sql`EXTRACT(YEAR FROM ${walks.date}) = ${parseInt(props.year, 10)}`,
-    )
-  }
-  if (props.month) {
-    where.push(
-      sql`EXTRACT(MONTH FROM ${walks.date}) = ${parseInt(props.month, 10)}`,
-    )
-  }
-  if (['neighborhood', 'start', 'end'].includes(props.filter)) {
-    const c = props.center.split(/,/)
-    const latitude = parseFloat(c[0]) ?? 0
-    const longitude = parseFloat(c[1]) ?? 0
-    const radius = parseFloat(props.radius)
-    const dlat = (radius * 180) / Math.PI / EARTH_RADIUS
-    const mlat = latitude > 0 ? latitude + dlat : latitude - dlat
-    const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
-    const center = getPoint(longitude, latitude)
-    const lb = getPoint(longitude - dlon, latitude - dlat)
-    const rt = getPoint(longitude + dlon, latitude + dlat)
-    let target
-    switch (props.filter) {
-      case 'neighborhood':
-        target = walks.path
-        break
-      case 'start':
-        target = sql`st_startpoint(${walks.path})`
-        break
-      default:
-        target = sql`st_endpoint(${walks.path})`
-        break
+    if (props.date) {
+      where.push(eq(walks.date, props.date))
     }
-    where.push(sql`st_makebox2d(${lb}, ${rt}) && ${target}`)
-    where.push(sql`st_distance(${target}, ${center}, true) <= ${radius}`)
-  } else if (props.filter === 'cities') {
-    if (!props.cities) {
-      state.count = 0
-      state.rows = []
-      return state
+    if (props.user) {
+      where.push(eq(walks.uid, props.user))
     }
-    const cities = props.cities.split(/,/)
-    where.push(
-      sql`EXISTS (SELECT * FROM areas WHERE jcode IN ${cities} AND path && the_geom AND ST_Intersects(path, the_geom))`,
-    )
-  } else if (props.filter === 'crossing') {
-    if (!props.path) {
-      state.count = 0
-      state.rows = []
-      return state
+    if (props.year) {
+      where.push(
+        sql`EXTRACT(YEAR FROM ${walks.date}) = ${parseInt(props.year, 10)}`,
+      )
     }
-    const linestring = decodePath(props.path)
-    where.push(sql`${walks.path} && ${linestring}`)
-    where.push(sql`ST_Intersects(${walks.path}, ${linestring})`)
-  } else if (props.filter === 'hausdorff') {
-    if (!props.path) {
-      state.count = 0
-      state.rows = []
-      return state
+    if (props.month) {
+      where.push(
+        sql`EXTRACT(MONTH FROM ${walks.date}) = ${parseInt(props.month, 10)}`,
+      )
     }
-    const maxDistance = props.max_distance ?? 4000
-    const linestring = decodePath(props.path)
-    const extent = getPathExtent(props.path)
-    const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
-    const mlat = Math.max(
-      Math.abs(extent.ymax + dlat),
-      Math.abs(extent.ymin - dlat),
-    )
-    const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
-    const lb = getPoint(extent.xmin - dlon, extent.ymin - dlat)
-    const rt = getPoint(extent.xmax + dlon, extent.ymax + dlat)
+    if (['neighborhood', 'start', 'end'].includes(props.filter)) {
+      const c = props.center.split(/,/)
+      const latitude = parseFloat(c[0]) ?? 0
+      const longitude = parseFloat(c[1]) ?? 0
+      const radius = parseFloat(props.radius)
+      const dlat = (radius * 180) / Math.PI / EARTH_RADIUS
+      const mlat = latitude > 0 ? latitude + dlat : latitude - dlat
+      const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
+      const center = getPoint(longitude, latitude)
+      const lb = getPoint(longitude - dlon, latitude - dlat)
+      const rt = getPoint(longitude + dlon, latitude + dlat)
+      let target
+      switch (props.filter) {
+        case 'neighborhood':
+          target = walks.path
+          break
+        case 'start':
+          target = sql`st_startpoint(${walks.path})`
+          break
+        default:
+          target = sql`st_endpoint(${walks.path})`
+          break
+      }
+      where.push(sql`st_makebox2d(${lb}, ${rt}) && ${target}`)
+      where.push(sql`st_distance(${target}, ${center}, true) <= ${radius}`)
+    } else if (props.filter === 'cities') {
+      if (!props.cities) {
+        state.count = 0
+        state.rows = []
+        return state
+      }
+      const cities = props.cities.split(/,/)
+      where.push(
+        sql`EXISTS (SELECT * FROM areas WHERE jcode IN ${cities} AND path && the_geom AND ST_Intersects(path, the_geom))`,
+      )
+    } else if (props.filter === 'crossing') {
+      if (!props.path) {
+        state.count = 0
+        state.rows = []
+        return state
+      }
+      const linestring = decodePath(props.path)
+      where.push(sql`${walks.path} && ${linestring}`)
+      where.push(sql`ST_Intersects(${walks.path}, ${linestring})`)
+    } else if (props.filter === 'hausdorff') {
+      if (!props.path) {
+        state.count = 0
+        state.rows = []
+        return state
+      }
+      const maxDistance = props.max_distance ?? 4000
+      const linestring = decodePath(props.path)
+      const extent = getPathExtent(props.path)
+      const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
+      const mlat = Math.max(
+        Math.abs(extent.ymax + dlat),
+        Math.abs(extent.ymin - dlat),
+      )
+      const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
+      const lb = getPoint(extent.xmin - dlon, extent.ymin - dlat)
+      const rt = getPoint(extent.xmax + dlon, extent.ymax + dlat)
 
-    selectColumns.distance = sql<number>`ST_HausdorffDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`
-    where.push(
-      sql`ST_Within(${walks.path}, ST_SetSRID(ST_MakeBox2d(${lb}, ${rt}), ${SRID}))`,
-    )
-    where.push(sql`ST_HausdorffDistance(
+      selectColumns.distance = sql<number>`ST_HausdorffDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`
+      where.push(
+        sql`ST_Within(${walks.path}, ST_SetSRID(ST_MakeBox2d(${lb}, ${rt}), ${SRID}))`,
+      )
+      where.push(sql`ST_HausdorffDistance(
       ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
       ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
     ) <= ${maxDistance}`)
-  } else if (props.filter === 'frechet') {
-    if (!props.path) {
-      state.count = 0
-      state.rows = []
-      return state
-    }
-    const maxDistance = props.max_distance ?? 4000
-    const linestring = decodePath(props.path)
-    const sp = getStartPoint(props.path)
-    const ep = getEndPoint(props.path)
-    const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
-    const mlat = Math.max(
-      Math.abs(sp[1] + dlat),
-      Math.abs(sp[1] - dlat),
-      Math.abs(ep[1] + dlat),
-      Math.abs(ep[1] - dlat),
-    )
-    const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
-    const slb = getPoint(sp[0] - dlon, sp[1] - dlat)
-    const srt = getPoint(sp[0] + dlon, sp[1] + dlat)
-    const elb = getPoint(ep[0] - dlon, ep[1] - dlat)
-    const ert = getPoint(ep[0] + dlon, ep[1] + dlat)
+    } else if (props.filter === 'frechet') {
+      if (!props.path) {
+        state.count = 0
+        state.rows = []
+        return state
+      }
+      const maxDistance = props.max_distance ?? 4000
+      const linestring = decodePath(props.path)
+      const sp = getStartPoint(props.path)
+      const ep = getEndPoint(props.path)
+      const dlat = (maxDistance * 180) / Math.PI / EARTH_RADIUS
+      const mlat = Math.max(
+        Math.abs(sp[1] + dlat),
+        Math.abs(sp[1] - dlat),
+        Math.abs(ep[1] + dlat),
+        Math.abs(ep[1] - dlat),
+      )
+      const dlon = dlat / Math.cos((mlat / 180) * Math.PI)
+      const slb = getPoint(sp[0] - dlon, sp[1] - dlat)
+      const srt = getPoint(sp[0] + dlon, sp[1] + dlat)
+      const elb = getPoint(ep[0] - dlon, ep[1] - dlat)
+      const ert = getPoint(ep[0] + dlon, ep[1] + dlat)
 
-    selectColumns.distance = sql<number>`ST_FrechetDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`
-    where.push(
-      sql`ST_Within(ST_StartPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${slb}, ${srt}), ${SRID}))`,
-    )
-    where.push(
-      sql`ST_Within(ST_EndPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${elb}, ${ert}), ${SRID}))`,
-    )
-    where.push(sql`ST_FrechetDistance(
+      selectColumns.distance = sql<number>`ST_FrechetDistance(ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer), ST_Transform(${linestring}, ${SRID_FOR_SIMILAR_SEARCH}::integer))/1000 as distance`
+      where.push(
+        sql`ST_Within(ST_StartPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${slb}, ${srt}), ${SRID}))`,
+      )
+      where.push(
+        sql`ST_Within(ST_EndPoint(${walks.path}), ST_SetSRID(ST_MakeBox2d(${elb}, ${ert}), ${SRID}))`,
+      )
+      where.push(sql`ST_FrechetDistance(
       ST_Transform(${walks.path}, ${SRID_FOR_SIMILAR_SEARCH}::integer),
       ST_Transform(ST_GeomFromText(${linestring}), ${SRID_FOR_SIMILAR_SEARCH}::integer)
     ) <= ${maxDistance}`)
-  }
+    }
 
-  if (uid !== null) {
-    where.push(or(eq(walks.draft, false), eq(walks.uid, uid)))
-  } else {
-    where.push(eq(walks.draft, false))
-  }
+    if (uid !== null) {
+      where.push(or(eq(walks.draft, false), eq(walks.uid, uid)))
+    } else {
+      where.push(eq(walks.draft, false))
+    }
 
-  const limit = validateSearchLimit(props.limit)
-  const offset = validateSearchOffset(props.offset)
+    const limit = validateSearchLimit(props.limit)
+    const offset = validateSearchOffset(props.offset)
 
-  const condition = and(...where)
-  const count = await db.$count(walks, condition)
+    const condition = and(...where)
+    const count = await db.$count(walks, condition)
 
-  state.count = count
-  if (offset >= count) {
-    state.offset = 0
-    state.rows = []
+    state.count = count
+    if (offset >= count) {
+      state.offset = 0
+      state.rows = []
+      return state
+    }
+
+    const result = await db
+      .select(selectColumns)
+      .from(walks)
+      .where(condition)
+      .orderBy(order)
+      .limit(limit)
+      .offset(offset)
+
+    state.offset = count > offset + limit ? offset + limit : 0
+    state.rows = result.map((walk) => asWalkT(walk, true))
     return state
+  } catch (error) {
+    return { ...state, error: (error as Error).message }
   }
-
-  const result = await db
-    .select(selectColumns)
-    .from(walks)
-    .where(condition)
-    .orderBy(order)
-    .limit(limit)
-    .offset(offset)
-
-  state.offset = count > offset + limit ? offset + limit : 0
-  state.rows = result.map((walk) => asWalkT(walk, true))
-  return state
 }
 
 export const searchAction = async (
