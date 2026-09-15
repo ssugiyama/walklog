@@ -93,9 +93,16 @@ export function Searcher() {
       return
     }
 
+    // searchAction catches its own errors into state rather than throwing,
+    // precisely so a bad request (e.g. an out-of-range limit typed into the
+    // URL) surfaces this message instead of an opaque "Minified React error
+    // #441". searchState.error flows into data.error below, where
+    // main.tsx swaps the whole app shell for a real error screen; skip the
+    // append merge in that case since searchState.rows is just the stale
+    // previous rows carried through unchanged, not a new page to prepend.
     const newData: DataT = { isPending, ...searchState }
     newData.params = searchParams.toString()
-    if (!isPending && searchState.append) {
+    if (!isPending && searchState.append && !searchState.error) {
       newData.rows.unshift(...data.rows)
     }
     setData(newData)
