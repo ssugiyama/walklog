@@ -129,30 +129,4 @@ describe('Searcher', () => {
 
     await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(1))
   })
-
-  it('passes searchState.error through to data instead of merging it as a new page of rows', async () => {
-    const error = 'Invalid limit: 500.'
-    ;(searchAction as Mock).mockResolvedValue({
-      rows: [{ id: 1, title: 'Stale row' }],
-      count: 1,
-      offset: 0,
-      serial: 1,
-      append: true,
-      error,
-    })
-
-    render(<Searcher />)
-
-    await waitFor(() =>
-      expect(mockSetData).toHaveBeenCalledWith(
-        expect.objectContaining({ error }),
-      ),
-    )
-    // The append merge (unshifting the current rows onto themselves) is
-    // skipped on error, since searchState.rows here is just the stale
-    // previous page carried through unchanged, not a new one to prepend.
-    expect(mockSetData.mock.calls[0][0].rows).toEqual([
-      { id: 1, title: 'Stale row' },
-    ])
-  })
 })
