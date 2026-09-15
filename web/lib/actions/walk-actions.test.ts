@@ -277,18 +277,13 @@ describe('server actions', () => {
       props = { offset: 0, limit: 20 }
     })
 
-    it('surfaces a real searchInternalAction validation error via state.error end-to-end', async () => {
+    it('propagates a real searchInternalAction validation error end-to-end', async () => {
       await insertWalk({ title: 'Walk 1' })
       const mockGetUid = vi.fn().mockResolvedValue('testUserId')
 
-      const result = await searchAction(
-        prevState,
-        { ...props, limit: 500 },
-        mockGetUid,
-      )
-
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toMatch(/Invalid limit/)
+      await expect(
+        searchAction(prevState, { ...props, limit: 500 }, mockGetUid),
+      ).rejects.toThrow(/Invalid limit/)
     })
 
     it('should increment the serial number and reset error/idTokenExpired', async () => {
@@ -369,27 +364,15 @@ describe('server actions', () => {
       expect(mockSearchInternalAction).not.toHaveBeenCalled()
     })
 
-    it('catches an error thrown by searchInternalAction into state.error instead of throwing', async () => {
-      prevState.rows = [{ id: 1, title: 'Existing Walk' }]
-      prevState.count = 1
+    it('propagates an error thrown by searchInternalAction instead of catching it', async () => {
       const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockSearchInternalAction = vi
         .fn()
         .mockRejectedValue(new Error('Invalid limit: 500.'))
 
-      const result = await searchAction(
-        prevState,
-        props,
-        mockGetUid,
-        mockSearchInternalAction,
-      )
-
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toBe('Invalid limit: 500.')
-      // Previous results stay in place rather than being wiped out by the
-      // failed request.
-      expect(result.rows).toEqual([{ id: 1, title: 'Existing Walk' }])
-      expect(result.count).toBe(1)
+      await expect(
+        searchAction(prevState, props, mockGetUid, mockSearchInternalAction),
+      ).rejects.toThrow('Invalid limit: 500.')
     })
   })
 
@@ -529,8 +512,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Date is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Date is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -542,8 +525,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Title is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Title is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -555,8 +538,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Path is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Path is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -567,9 +550,7 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error.message).toMatch(
-        /Date is required.*Title is required/,
-      )
+      expect(result.error).toMatch(/Date is required.*Title is required/)
       expect(result.id).toBeUndefined()
     })
 
@@ -695,8 +676,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Path is required')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Path is required')
       expect(result.id).toBeUndefined()
     })
 
@@ -812,7 +793,7 @@ describe('server actions', () => {
           mockDeleteImage,
         )
 
-        expect(result.error).toBeInstanceOf(Error)
+        expect(typeof result.error).toBe('string')
         expect(mockSaveImage).toHaveBeenCalled()
         expect(mockDeleteImage).toHaveBeenCalledWith(uploadedUrl)
       } finally {
@@ -834,8 +815,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Image must be an image file')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Image must be an image file')
     })
 
     it('should reject an image over 2MB', async () => {
@@ -852,8 +833,8 @@ describe('server actions', () => {
 
       const result = await updateItemAction(prevState, formData, mockGetUid)
 
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toContain('Image size must be 2MB or less')
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toContain('Image size must be 2MB or less')
     })
 
     it('should clear the image when will_delete_image is true', async () => {

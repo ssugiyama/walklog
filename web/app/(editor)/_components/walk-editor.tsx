@@ -221,7 +221,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     <Box data-testid="WalkEditor">
       <Paper sx={{ width: '100%', textAlign: 'center', padding: 2 }}>
         <Typography variant="body1" color="error">
-          {localError?.message ?? state?.error?.message}
+          {localError?.message ?? state?.error}
         </Typography>
         <form name="walk-form">
           <FormGroup row>

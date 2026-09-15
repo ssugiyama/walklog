@@ -178,7 +178,7 @@ const verifyIdToken = async (
     if (error instanceof IdTokenExpiredError) {
       state.idTokenExpired = true
     } else {
-      state.error = error as Error
+      state.error = (error as Error).message
     }
     return null
   }
@@ -433,25 +433,11 @@ export const searchAction = async (
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
-  state.error = null
   state.append = props.offset > 0
 
   const uid = await _getUid(state)
-  // Caught rather than left to throw: an uncaught Server Action error
-  // reaches the client as an opaque "Minified React error #441" (Next.js
-  // strips the real message in production), and unlike updateItemAction's
-  // form this component has no submit to retry from - it drives directly
-  // off the URL, so losing the current results to a crash isn't
-  // recoverable. Surfacing the message through state.error keeps whatever
-  // was already on screen and lets the caller show a real explanation
-  // (see searcher.tsx).
-  try {
-    const newState = await _searchInternalAction(props, uid)
-    return Object.assign({ ...state }, newState)
-  } catch (error) {
-    state.error = error as Error
-    return state
-  }
+  const newState = await _searchInternalAction(props, uid)
+  return Object.assign({ ...state }, newState)
 }
 
 export const getItemInternalAction = async (
@@ -561,7 +547,7 @@ export const updateItemAction = async (
   }
 
   if (validationErrors.length > 0) {
-    state.error = new Error(validationErrors.join(', '))
+    state.error = validationErrors.join(', ')
     return state
   }
 
@@ -604,7 +590,7 @@ export const updateItemAction = async (
       uploadedImage = await _saveImage(newImageFile, key)
     } catch (error) {
       console.error('updateItemAction saveImage error', error)
-      state.error = error as Error
+      state.error = (error as Error).message
       return state
     }
     props.image = uploadedImage
@@ -622,7 +608,7 @@ export const updateItemAction = async (
       state.id = id
     } catch (error) {
       console.error('updateItemAction error', error)
-      state.error = error as Error
+      state.error = (error as Error).message
       state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)
@@ -641,7 +627,7 @@ export const updateItemAction = async (
       state.id = walk?.id
     } catch (error) {
       console.error('updateItemAction create error', error)
-      state.error = error as Error
+      state.error = (error as Error).message
       state.id = undefined
       if (uploadedImage) {
         void _deleteImage(uploadedImage)

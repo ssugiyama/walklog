@@ -14,7 +14,6 @@ import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
 import { MapContextProvider } from '@/lib/utils/map-context'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
-import AppError from './app-error'
 import BottomBar from './bottom-bar'
 import GMap from './map'
 import NavBar from './nav-bar'
@@ -119,88 +118,72 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       <NuqsAdapter>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {data.error ? (
-            // A search error (e.g. an out-of-range limit/offset) is caught
-            // into state rather than thrown - see searchAction/searcher.tsx
-            // - specifically so its message survives production instead of
-            // being stripped into an opaque "Minified React error #441".
-            // Replacing the whole shell (not a Snackbar) matters here: the
-            // list stays permanently mid-"searching" otherwise, with no map
-            // or nav left to escape through, so this mirrors the real
-            // app/error.tsx boundary's full-screen treatment and gives the
-            // same way back out (the Fab linking to "/").
-            <AppError error={data.error} />
-          ) : (
-            <MapContextProvider>
-              <ToolBox open={toolBoxOpened} sx={toolBoxStyles} />
+          <MapContextProvider>
+            <ToolBox open={toolBoxOpened} sx={toolBoxStyles} />
+            <Box
+              component="main"
+              style={{
+                height: '100%',
+                flexDirection: 'column',
+                display: mainState.mode === 'map' ? 'flex' : 'block',
+                marginLeft: toolBoxOpened
+                  ? `calc(${TOOL_BOX_WIDTH}px + env(safe-area-inset-left))`
+                  : 0,
+                transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            >
+              <NavBar ref={headerRef} sx={{ pt: 'env(safe-area-inset-top)' }} />
+              <GMap style={mapStyles} />
               <Box
-                component="main"
                 style={{
-                  height: '100%',
-                  flexDirection: 'column',
-                  display: mainState.mode === 'map' ? 'flex' : 'block',
-                  marginLeft: toolBoxOpened
-                    ? `calc(${TOOL_BOX_WIDTH}px + env(safe-area-inset-left))`
-                    : 0,
-                  transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  display: mainState.mode === 'map' ? 'none' : 'block',
+                  paddingLeft: toolBoxOpened
+                    ? 8
+                    : 'calc(env(safe-area-inset-left) + 8px)',
+                  paddingRight: 'calc(env(safe-area-inset-right) + 8px)',
                 }}
               >
-                <NavBar
-                  ref={headerRef}
-                  sx={{ pt: 'env(safe-area-inset-top)' }}
-                />
-                <GMap style={mapStyles} />
-                <Box
-                  style={{
-                    display: mainState.mode === 'map' ? 'none' : 'block',
-                    paddingLeft: toolBoxOpened
-                      ? 8
-                      : 'calc(env(safe-area-inset-left) + 8px)',
-                    paddingRight: 'calc(env(safe-area-inset-right) + 8px)',
-                  }}
-                >
-                  <Box sx={{ paddingBottom: 5, mx: 'auto' }}>{children}</Box>
-                </Box>
-                <Fab
-                  size="small"
-                  aria-label="toggle view"
-                  color="secondary"
-                  onClick={toggleViewCB}
-                  sx={fabStyles}
-                >
-                  {mainState.mode === 'content' ? (
-                    <ExpandMoreIcon />
-                  ) : (
-                    <ExpandLessIcon />
-                  )}
-                </Fab>
-                <Box
-                  sx={{
-                    display: mainState.mode === 'map' ? 'flex' : 'none',
-                    pb: 'env(safe-area-inset-bottom)',
-                  }}
-                >
-                  <BottomBar />
-                </Box>
+                <Box sx={{ paddingBottom: 5, mx: 'auto' }}>{children}</Box>
               </Box>
               <Fab
                 size="small"
-                aria-label="share"
-                color="default"
-                onClick={shareCB}
-                sx={shareButtonStyles}
-                disabled={!!current?.draft}
+                aria-label="toggle view"
+                color="secondary"
+                onClick={toggleViewCB}
+                sx={fabStyles}
               >
-                <ShareIcon />
+                {mainState.mode === 'content' ? (
+                  <ExpandMoreIcon />
+                ) : (
+                  <ExpandLessIcon />
+                )}
               </Fab>
-              <Snackbar
-                open={mainState.message !== null}
-                message={mainState.message}
-                autoHideDuration={4000}
-                onClose={handleRequestClose}
-              />
-            </MapContextProvider>
-          )}
+              <Box
+                sx={{
+                  display: mainState.mode === 'map' ? 'flex' : 'none',
+                  pb: 'env(safe-area-inset-bottom)',
+                }}
+              >
+                <BottomBar />
+              </Box>
+            </Box>
+            <Fab
+              size="small"
+              aria-label="share"
+              color="default"
+              onClick={shareCB}
+              sx={shareButtonStyles}
+              disabled={!!current?.draft}
+            >
+              <ShareIcon />
+            </Fab>
+            <Snackbar
+              open={mainState.message !== null}
+              message={mainState.message}
+              autoHideDuration={4000}
+              onClose={handleRequestClose}
+            />
+          </MapContextProvider>
         </ThemeProvider>
       </NuqsAdapter>
     </Box>

@@ -35,7 +35,13 @@ export type WalkT = {
 export type BaseState = {
   serial?: number
   idTokenExpired?: boolean
-  error?: Error | null
+  // A plain string, not an Error: React's Flight protocol replaces any
+  // Error instance crossing the Server Action boundary with a fixed
+  // generic message in production builds ("The specific message is
+  // omitted..."), regardless of whether it was thrown or returned as
+  // state. A plain string isn't `instanceof Error`, so it isn't subject to
+  // that stripping and survives to the client intact.
+  error?: string | null
 }
 
 export type SearchState = BaseState & {
