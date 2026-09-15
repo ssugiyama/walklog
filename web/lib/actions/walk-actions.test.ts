@@ -214,42 +214,45 @@ describe('server actions', () => {
       expect(result.rows).toHaveLength(1)
     })
 
-    it('rejects a limit above the maximum instead of silently capping it', async () => {
+    it('returns an error instead of silently capping a limit above the maximum', async () => {
       await insertWalk({ title: 'Walk 1' })
 
-      await expect(
-        searchInternalAction({ limit: 500 }, 'testUserId'),
-      ).rejects.toThrow(/Invalid limit/)
+      const result = await searchInternalAction({ limit: 500 }, 'testUserId')
+
+      expect(result.error).toMatch(/Invalid limit/)
     })
 
-    it('rejects a non-numeric or non-positive limit instead of silently defaulting it', async () => {
+    it('returns an error instead of silently defaulting a non-numeric or non-positive limit', async () => {
       await insertWalk({ title: 'Walk 1' })
 
-      await expect(
-        searchInternalAction({ limit: NaN }, 'testUserId'),
-      ).rejects.toThrow(/Invalid limit/)
-      await expect(
-        searchInternalAction({ limit: 0 }, 'testUserId'),
-      ).rejects.toThrow(/Invalid limit/)
-      await expect(
-        searchInternalAction({ limit: -10 }, 'testUserId'),
-      ).rejects.toThrow(/Invalid limit/)
+      expect(
+        (await searchInternalAction({ limit: NaN }, 'testUserId')).error,
+      ).toMatch(/Invalid limit/)
+      expect(
+        (await searchInternalAction({ limit: 0 }, 'testUserId')).error,
+      ).toMatch(/Invalid limit/)
+      expect(
+        (await searchInternalAction({ limit: -10 }, 'testUserId')).error,
+      ).toMatch(/Invalid limit/)
     })
 
-    it('rejects a negative offset instead of silently treating it as 0', async () => {
+    it('returns an error instead of silently treating a negative offset as 0', async () => {
       await insertWalk({ title: 'Walk 1' })
 
-      await expect(
-        searchInternalAction({ offset: -5 }, 'testUserId'),
-      ).rejects.toThrow(/Invalid offset/)
+      const result = await searchInternalAction({ offset: -5 }, 'testUserId')
+
+      expect(result.error).toMatch(/Invalid offset/)
     })
 
-    it('rejects an offset above the maximum', async () => {
+    it('returns an error for an offset above the maximum', async () => {
       await insertWalk({ title: 'Walk 1' })
 
-      await expect(
-        searchInternalAction({ offset: 999999999 }, 'testUserId'),
-      ).rejects.toThrow(/Invalid offset/)
+      const result = await searchInternalAction(
+        { offset: 999999999 },
+        'testUserId',
+      )
+
+      expect(result.error).toMatch(/Invalid offset/)
     })
 
     it('returns an empty page without querying rows when offset is beyond count', async () => {
@@ -431,6 +434,25 @@ describe('server actions', () => {
 
       expect(result).toEqual({})
     })
+
+    it('returns the error message instead of throwing when the query fails', async () => {
+      const selectSpy = vi.spyOn(db, 'select').mockReturnValueOnce({
+        from: () => ({
+          where: () => ({
+            limit: () => Promise.reject(new Error('db select failed')),
+          }),
+        }),
+      } as unknown as ReturnType<typeof db.select>)
+
+      try {
+        const result = await getItemInternalAction(1, 'testUid')
+
+        expect(result.error).toBe('db select failed')
+        expect(result.current).toBeUndefined()
+      } finally {
+        selectSpy.mockRestore()
+      }
+    })
   })
 
   describe('getItemAction', () => {
@@ -501,6 +523,26 @@ describe('server actions', () => {
       ).rejects.toThrow('Failed to get UID')
       expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
       expect(mockGetItemInternalActionMock).not.toHaveBeenCalled()
+    })
+
+    it('returns the error instead of calling notFound() when getItemInternalAction fails without a current item', async () => {
+      const mockGetUid = vi.fn().mockResolvedValue('testUid')
+      const mockGetItemInternalActionMock = vi
+        .fn()
+        .mockResolvedValue({ error: 'db select failed' })
+
+      // notFound() would throw (and reject this promise) if the missing
+      // `current` were mistaken for a genuine not-found instead of a
+      // failed lookup.
+      const result = await getItemAction(
+        prevState,
+        1,
+        mockGetUid,
+        mockGetItemInternalActionMock,
+      )
+
+      expect(result.error).toBe('db select failed')
+      expect(result.current).toBeUndefined()
     })
   })
 

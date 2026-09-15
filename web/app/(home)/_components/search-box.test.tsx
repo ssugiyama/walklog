@@ -99,6 +99,26 @@ describe('SearchBox', () => {
     expect(screen.getByText('No results')).toBeInTheDocument()
   })
 
+  it('displays the error message instead of the count when data.error is set', () => {
+    ;(useData as Mock).mockReturnValue([
+      {
+        offset: 0,
+        count: 0,
+        rows: [],
+        error: 'Invalid limit: 500. Must be an integer between 1 and 100.',
+      },
+    ])
+
+    render(<SearchBox />)
+
+    expect(
+      screen.getByText(
+        'Invalid limit: 500. Must be an integer between 1 and 100.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('No results')).not.toBeInTheDocument()
+  })
+
   it('displays the correct count when count is greater than 0', () => {
     const mockRows = [
       {
