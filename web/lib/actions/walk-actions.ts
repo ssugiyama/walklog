@@ -433,11 +433,25 @@ export const searchAction = async (
   const state = { ...prevState }
   state.serial++
   state.idTokenExpired = false
+  state.error = null
   state.append = props.offset > 0
 
   const uid = await _getUid(state)
-  const newState = await _searchInternalAction(props, uid)
-  return Object.assign({ ...state }, newState)
+  // Caught rather than left to throw: an uncaught Server Action error
+  // reaches the client as an opaque "Minified React error #441" (Next.js
+  // strips the real message in production), and unlike updateItemAction's
+  // form this component has no submit to retry from - it drives directly
+  // off the URL, so losing the current results to a crash isn't
+  // recoverable. Surfacing the message through state.error keeps whatever
+  // was already on screen and lets the caller show a real explanation
+  // (see searcher.tsx).
+  try {
+    const newState = await _searchInternalAction(props, uid)
+    return Object.assign({ ...state }, newState)
+  } catch (error) {
+    state.error = (error as Error).message
+    return state
+  }
 }
 
 export const getItemInternalAction = async (

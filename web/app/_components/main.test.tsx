@@ -14,6 +14,7 @@ const defaultMainState = {
 const defaultData = {
   current: null,
   records: [],
+  error: null as string | null,
 }
 
 // Mock dependencies
@@ -222,6 +223,33 @@ describe('Main Component', () => {
     expect(dispatchMain).toHaveBeenCalledWith({ type: 'CLOSE_SNACKBAR' })
 
     vi.useRealTimers()
+  })
+
+  test('shows the error message alongside nav/map/bottom bar instead of replacing them', () => {
+    renderWithProviders(
+      <Main>
+        <div data-testid="main-children">Test Content</div>
+      </Main>,
+      { data: { ...defaultData, error: 'Invalid limit: 500.' } },
+    )
+
+    expect(screen.getByText('Invalid limit: 500.')).toBeInTheDocument()
+    // Nav, map and bottom bar all stay usable - only a Snackbar (which
+    // leaves the user stuck with no way to navigate) is what this
+    // replaces, not the app shell itself.
+    expect(screen.getByTestId('nav-bar')).toBeInTheDocument()
+    expect(screen.getByTestId('map')).toBeInTheDocument()
+    expect(screen.getByTestId('bottom-bar')).toBeInTheDocument()
+  })
+
+  test('does not show an error message when data.error is unset', () => {
+    renderWithProviders(
+      <Main>
+        <div>Test Content</div>
+      </Main>,
+    )
+
+    expect(screen.queryByText(/Invalid limit/)).not.toBeInTheDocument()
   })
 
   test('toolbox is rendered when toolBoxOpened is true', () => {

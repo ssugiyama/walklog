@@ -277,13 +277,18 @@ describe('server actions', () => {
       props = { offset: 0, limit: 20 }
     })
 
-    it('propagates a real searchInternalAction validation error end-to-end', async () => {
+    it('surfaces a real searchInternalAction validation error via state.error end-to-end', async () => {
       await insertWalk({ title: 'Walk 1' })
       const mockGetUid = vi.fn().mockResolvedValue('testUserId')
 
-      await expect(
-        searchAction(prevState, { ...props, limit: 500 }, mockGetUid),
-      ).rejects.toThrow(/Invalid limit/)
+      const result = await searchAction(
+        prevState,
+        { ...props, limit: 500 },
+        mockGetUid,
+      )
+
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toMatch(/Invalid limit/)
     })
 
     it('should increment the serial number and reset error/idTokenExpired', async () => {
@@ -364,15 +369,27 @@ describe('server actions', () => {
       expect(mockSearchInternalAction).not.toHaveBeenCalled()
     })
 
-    it('propagates an error thrown by searchInternalAction instead of catching it', async () => {
+    it('catches an error thrown by searchInternalAction into state.error instead of throwing', async () => {
+      prevState.rows = [{ id: 1, title: 'Existing Walk' }]
+      prevState.count = 1
       const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockSearchInternalAction = vi
         .fn()
         .mockRejectedValue(new Error('Invalid limit: 500.'))
 
-      await expect(
-        searchAction(prevState, props, mockGetUid, mockSearchInternalAction),
-      ).rejects.toThrow('Invalid limit: 500.')
+      const result = await searchAction(
+        prevState,
+        props,
+        mockGetUid,
+        mockSearchInternalAction,
+      )
+
+      expect(typeof result.error).toBe('string')
+      expect(result.error).toBe('Invalid limit: 500.')
+      // Previous results stay in place rather than being wiped out by the
+      // failed request.
+      expect(result.rows).toEqual([{ id: 1, title: 'Existing Walk' }])
+      expect(result.count).toBe(1)
     })
   })
 
