@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.1 - 2026-09-21
+
+- fix: increase bodySizeLimit of server actions
+- fix: suppress duplicated path creation
+- validate limit/offset
+- show readable errors
+- update minor dependencies
+
 ## v1.1.0 - 2026-09-11
 
 - migrate from use-query-params to nuqs
