@@ -1,20 +1,13 @@
 import type { Metadata, Viewport } from 'next'
 import { Roboto } from 'next/font/google'
+import {
+  resolveThemeColors,
+  toViewportThemeColor,
+} from '@/lib/utils/theme-color'
 import Body from './_components/body'
 
 export const viewport: Viewport = {
-  themeColor: [
-    {
-      media: '(prefers-color-scheme: light)',
-      color:
-        process.env.THEME_COLOR_LIGHT || process.env.THEME_COLOR || '#ffffff',
-    },
-    {
-      media: '(prefers-color-scheme: dark)',
-      color:
-        process.env.THEME_COLOR_DARK || process.env.THEME_COLOR || '#000000',
-    },
-  ],
+  themeColor: toViewportThemeColor(resolveThemeColors(process.env)),
 }
 
 const roboto = Roboto({
@@ -46,6 +39,6 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: process.env.SITE_NAME || 'Walklog',
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
   },
 }

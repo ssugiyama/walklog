@@ -129,9 +129,9 @@ Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript 
 | `NEXT_PUBLIC_APP_VERSION` | Version string | No |
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
-| `THEME_COLOR` | Theme color for UA in both light mode and dark mode| No |
-| `THEME_COLOR_LIGHT` | Theme color for UA in light mode | No |
-| `THEME_COLOR_DARK` | Theme color for UA in dark mode | No |
+| `THEME_COLOR` | Theme color for UA in both light mode and dark mode. Read at build time (the pages are prerendered), so set it before `build`, not only at runtime | No |
+| `THEME_COLOR_LIGHT` | Theme color for UA in light mode (also used for the PWA manifest `theme_color`/`background_color`); build-time like `THEME_COLOR` | No |
+| `THEME_COLOR_DARK` | Theme color for UA in dark mode; build-time like `THEME_COLOR` | No |
 | `DB_URL` | PostgreSQL connection string | Yes *|
 | `DB_SSL` | Enable SSL for the DB connection (`true`/`false`) | No |
 | `DB_SSL_REJECT_UNAUTHORIZED` | Reject unauthorized/self-signed certificates (`false` to allow) | No |
@@ -332,6 +332,11 @@ Server-only variables are pushed to Cloudflare via `wrangler secret put` before 
 | | `MAP_ID` |
 | | `SHAPE_STYLES_JSON_URL` |
 | | `THEME_JSON_URL` |
+| | `THEME_COLOR` |
+| | `THEME_COLOR_LIGHT` |
+| | `THEME_COLOR_DARK` |
+
+`THEME_COLOR*` aren't `NEXT_PUBLIC_*`, but they're also read while the pages are prerendered, so they're passed to the same build step under their own names (no `NEXT_PUBLIC_` prefix). Leaving them unset falls back to white (light) and black (dark).
 
 Any other variable from the reference table that your deployment needs (`SITE_NAME`, ...) isn't touched by CI and must still be set on Cloudflare manually with `wrangler secret put`, same as before. `DB_URL`/`DB_SSL`/`DB_SSL_CA` and `CF_WORKERS` are never set this way for Workers: the runtime reads the DB connection from the Hyperdrive binding instead of `DB_URL`/`DB_SSL*` (see `lib/drizzle/db.ts`), and `CF_WORKERS` is a fixed `vars` entry already committed in `wrangler.jsonc`.
 

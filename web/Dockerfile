@@ -12,6 +12,10 @@ ARG NEXT_PUBLIC_DEFAULT_ZOOM
 ARG NEXT_PUBLIC_MAP_ID
 ARG NEXT_PUBLIC_SHAPE_STYLES_JSON_URL
 ARG NEXT_PUBLIC_THEME_JSON_URL
+# Read while prerendering (app/layout.tsx, app/manifest.ts), so build-time too
+ARG THEME_COLOR
+ARG THEME_COLOR_LIGHT
+ARG THEME_COLOR_DARK
 
 # Install dependencies only when needed
 FROM base AS deps
