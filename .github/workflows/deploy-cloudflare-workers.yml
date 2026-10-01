@@ -75,6 +75,11 @@ jobs:
           NEXT_PUBLIC_MAP_ID: ${{ vars.MAP_ID }}
           NEXT_PUBLIC_SHAPE_STYLES_JSON_URL: ${{ vars.SHAPE_STYLES_JSON_URL }}
           NEXT_PUBLIC_THEME_JSON_URL: ${{ vars.THEME_JSON_URL }}
+          # Read by app/layout.tsx and app/manifest.ts while prerendering, so
+          # they must be present at build time, not via `wrangler secret put`.
+          THEME_COLOR: ${{ vars.THEME_COLOR }}
+          THEME_COLOR_LIGHT: ${{ vars.THEME_COLOR_LIGHT }}
+          THEME_COLOR_DARK: ${{ vars.THEME_COLOR_DARK }}
           # Not a wrangler.jsonc `var`: it changes every release, and
           # `wrangler types` would otherwise infer whatever value was present
           # at the last local `cf-typegen` run as NEXT_PUBLIC_APP_VERSION's

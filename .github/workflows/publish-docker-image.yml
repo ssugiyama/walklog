@@ -58,6 +58,9 @@ jobs:
             NEXT_PUBLIC_MAP_ID=${{ vars.MAP_ID }}
             NEXT_PUBLIC_SHAPE_STYLES_JSON_URL=${{ vars.SHAPE_STYLES_JSON_URL }}
             NEXT_PUBLIC_THEME_JSON_URL=${{ vars.THEME_JSON_URL }}
+            THEME_COLOR=${{ vars.THEME_COLOR }}
+            THEME_COLOR_LIGHT=${{ vars.THEME_COLOR_LIGHT }}
+            THEME_COLOR_DARK=${{ vars.THEME_COLOR_DARK }}
             NEXT_PUBLIC_APP_VERSION=${{ github.event.release.tag_name || inputs.app_version }}
         env:
           NODE_ENV: production
