@@ -19,7 +19,7 @@ jobs:
     - name: pnpm-setup
       uses: pnpm/action-setup@v6
       with:
-        version: 10
+        package_json_file: web/package.json
         run_install: true
     - name: run lint, formatter and typecheck (vp check)
       run: pnpm lint
