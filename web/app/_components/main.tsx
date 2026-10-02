@@ -113,9 +113,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     <Box
       sx={{
         height: '100%',
-        // html/body carry the theme color (see themeBackgroundCss), so paint
-        // the app area itself to keep that color from showing in the gutters.
-        backgroundColor: theme.palette.background.default,
       }}
     >
       <NuqsAdapter>
@@ -146,7 +143,17 @@ const Main = ({ children }: { children: React.ReactNode }) => {
                   paddingRight: 'calc(env(safe-area-inset-right) + 8px)',
                 }}
               >
-                <Box sx={{ paddingBottom: 5, mx: 'auto' }}>{children}</Box>
+                {/* html/body carry the theme color (see themeBackgroundCss),
+                    so give the content column its own background. */}
+                <Box
+                  sx={{
+                    paddingBottom: 5,
+                    mx: 'auto',
+                    backgroundColor: 'background.default',
+                  }}
+                >
+                  {children}
+                </Box>
               </Box>
               <Fab
                 size="small"
