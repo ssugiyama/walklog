@@ -1,0 +1,2 @@
+# The project lives in web/, so run the staged-file checks from there.
+cd web && ./node_modules/.bin/vp staged
