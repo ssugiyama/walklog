@@ -26,21 +26,16 @@ jobs:
       D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
     steps:
       - uses: actions/checkout@v7
-      - name: Use Node.js
-        uses: actions/setup-node@v7
+      - name: Setup Vite+ and install dependencies
+        uses: voidzero-dev/setup-vp@v1.21.1
         with:
-          node-version: '24.x'
-      - name: pnpm-setup
-        uses: pnpm/action-setup@v6
-        with:
-          package_json_file: web/package.json
-          run_install: |
-            - cwd: web
-              args: [--frozen-lockfile]
-      - name: run lint, formatter and typecheck (vp check)
-        run: pnpm lint
+          node-version: '24'
+          working-directory: web
+          cache: true
+      - name: run lint, formatter and typecheck
+        run: vp check
       - name: run test
-        run: pnpm test
+        run: vp run test
       - name: Set Cloudflare secrets/vars
         # Pushes every non-Hyperdrive-managed variable from the reference
         # table (README.md) to Cloudflare on each deploy, so GitHub
@@ -50,10 +45,10 @@ jobs:
         # Hyperdrive binding instead of DB_URL/DB_SSL* (see lib/drizzle/db.ts),
         # and CF_WORKERS is a fixed `vars` entry in wrangler.jsonc already.
         run: |
-          pnpm exec vp run render-wrangler-config
+          vp run render-wrangler-config
           for name in IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL; do
             value="${!name}"
-            echo "$value" | pnpm exec wrangler secret put "$name" --config .wrangler.generated.jsonc
+            echo "$value" | vp exec wrangler secret put "$name" --config .wrangler.generated.jsonc
           done
         env:
           IMAGE_STORAGE: ${{ vars.IMAGE_STORAGE }}
@@ -64,7 +59,7 @@ jobs:
           R2_PUBLIC_URL: ${{ vars.R2_PUBLIC_URL }}
 
       - name: Deploy to Cloudflare Workers
-        run: pnpm exec vp run deploy
+        run: vp run deploy
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_AUTH_DOMAIN }}
