@@ -100,7 +100,7 @@ const GMap = (props) => {
     rc.pathManager.applyPath([pt], append)
   }
   const uploadPath = () => {
-    setTimeout(() => void uploadRef.current.click(), 0)
+    setTimeout(() => uploadRef.current.click(), 0)
   }
   const downloadPath = () => {
     const content = rc.pathManager.selectionAsGeoJSON()
@@ -132,7 +132,7 @@ const GMap = (props) => {
   const pathChanged = () => {
     if (!rc.pathManager) return
     const nextPath = rc.pathManager.getSelectedLatLngArray()
-    setSearchPath(nextPath)
+    void setSearchPath(nextPath)
     if (nextPath) {
       const pair = rc.pathManager.searchPolyline(nextPath)
       const item = pair?.[1]
@@ -162,7 +162,7 @@ const GMap = (props) => {
       const pts = coordinates.map(
         (item) => new google.maps.LatLng(item[1], item[0]),
       )
-      setSearchPath(pts)
+      void setSearchPath(pts)
     })
     reader.readAsText(file)
   }
@@ -178,7 +178,7 @@ const GMap = (props) => {
 
   const addCity = (id: string) => {
     const newCities = Array.from(new Set(rc.cities.concat(id)))
-    setCities(newCities)
+    void setCities(newCities)
   }
 
   const defaultCenterLatLng = () => {
@@ -260,9 +260,8 @@ const GMap = (props) => {
         }, 0)
       },
     )
-    const { default: PolygonManager } = await import(
-      '@/lib/utils/polygon-manager'
-    )
+    const { default: PolygonManager } =
+      await import('@/lib/utils/polygon-manager')
     rc.polygonManager = new PolygonManager({
       map: rc.map,
       styles: rc.shapeStyles.polygons,
@@ -276,7 +275,7 @@ const GMap = (props) => {
         const index = citiesArray.indexOf(id)
         if (index >= 0) {
           citiesArray.splice(index, 1)
-          setCities(citiesArray)
+          void setCities(citiesArray)
         }
       },
     )
@@ -313,12 +312,12 @@ const GMap = (props) => {
     }
     rc.distanceWidget = new google.maps.Circle(circleOpts)
     google.maps.event.addListener(rc.distanceWidget, 'center_changed', () => {
-      setSearchCenter(rc.distanceWidget.getCenter())
+      void setSearchCenter(rc.distanceWidget.getCenter())
     })
     google.maps.event.addListener(rc.distanceWidget, 'radius_changed', () => {
       const r = rc.distanceWidget.getRadius()
       if (Math.abs(rc.radius - r) < PRECISION) return
-      setRadius(r)
+      void setRadius(r)
     })
     rc.elevationInfoWindow = new google.maps.InfoWindow()
     await google.maps.importLibrary('marker')

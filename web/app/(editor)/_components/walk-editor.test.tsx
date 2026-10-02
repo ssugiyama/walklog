@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React, { Activity } from 'react'
-import { Mock } from 'vitest'
+import type { Mock } from 'vite-plus/test'
 import { updateItemAction } from '@/lib/actions/walk-actions'
 import { useData } from '@/lib/utils/data-context'
 import WalkEditor from './walk-editor'
@@ -20,7 +20,8 @@ const mockSearchParams = {
 
 let selectedFile: File | null = null
 
-let lastFormData: { append: Mock; get: Mock; entries: Mock } | null = null
+type MockFn = ReturnType<typeof vi.fn>
+let lastFormData: { append: MockFn; get: MockFn; entries: MockFn } | null = null
 
 beforeAll(() => {
   global.FormData = vi.fn().mockImplementation(function () {

@@ -5,7 +5,7 @@ import { useData } from '@/lib/utils/data-context'
 import { useUserContext } from '@/lib/utils/user-context'
 import SearchBox from './search-box'
 import '@testing-library/jest-dom/vitest'
-import { Mock } from 'vitest'
+import { Mock } from 'vite-plus/test'
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),

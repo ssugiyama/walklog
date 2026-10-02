@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react'
 import React, { Activity } from 'react'
-import { Mock } from 'vitest'
+import { Mock } from 'vite-plus/test'
 import { searchAction } from '@/lib/actions/walk-actions'
 import { useConfig } from './config'
 import { useData } from './data-context'

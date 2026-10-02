@@ -12,21 +12,16 @@ jobs:
         working-directory: web
     steps:
     - uses: actions/checkout@v7
-    - name: Use Node.js
-      uses: actions/setup-node@v7
+    - name: Setup Vite+ and install dependencies
+      uses: voidzero-dev/setup-vp@v1.21.1
       with:
-        node-version: '24.x'
-    - name: pnpm-setup
-      uses: pnpm/action-setup@v6
-      with:
-        version: 10
-        run_install: true
-    - name: run typecheck
-      run: pnpm typecheck
-    - name: run lint & formatter check
-      run: pnpm lint
+        node-version: '24'
+        working-directory: web
+        cache: true
+    - name: run lint, formatter and typecheck
+      run: vp check
     - name: run test
-      run: pnpm test
+      run: vp run test
     - name: Upload coverage report
       uses: davelosert/vitest-coverage-report-action@v2
       with:

@@ -1,15 +1,23 @@
 allowBuilds:
-  '@firebase/util': true
+  "@firebase/util": true
   esbuild: true
   protobufjs: true
   sharp: true
   unrs-resolver: true
   workerd: true
-minimumReleaseAgeExclude:
-  - '@vitest/coverage-v8@5.0.3'
-  - '@vitest/mocker@5.0.3'
-  - '@vitest/pretty-format@5.0.3'
-  - '@vitest/spy@5.0.3'
-  - '@vitest/ui@5.0.3'
-  - '@vitest/utils@5.0.3'
-  - vitest@5.0.3
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.0.0
+  vitest: 5.0.1
+  vite-plus: 1.0.0
+  "@vitest/coverage-v8": 5.0.1
+  "@vitest/ui": 5.0.1
+overrides:
+  vite@*: "catalog:"
+  vitest@*: "catalog:"
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: "*"
+    vitest: "*"

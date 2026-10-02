@@ -115,32 +115,32 @@ const SearchForm = () => {
   const handleChange = {
     user: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setFormValue({ user: e.target.value })
+        void setFormValue({ user: e.target.value })
       },
       [setFormValue],
     ),
     month: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setFormValue({ month: Number(e.target.value) })
+        void setFormValue({ month: Number(e.target.value) })
       },
       [setFormValue],
     ),
     year: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setFormValue({ year: Number(e.target.value) })
+        void setFormValue({ year: Number(e.target.value) })
       },
       [setFormValue],
     ),
     order: useCallback(
       (e: React.ChangeEvent<{ value: string }>) => {
-        setFormValue({ order: e.target.value })
+        void setFormValue({ order: e.target.value })
       },
       [setFormValue],
     ),
   }
   const handleLimitCommited = useCallback(
     (value: number) => {
-      setFormValue({ limit: value })
+      void setFormValue({ limit: value })
     },
     [setFormValue],
   )

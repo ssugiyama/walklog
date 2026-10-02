@@ -4,15 +4,8 @@
     "dev": "next dev",
     "start": "next start",
     "start-in-docker": "node ./server.js",
-    "test": "vitest run --coverage.enabled true",
-    "lint": "biome check",
-    "typecheck": "tsc --noEmit",
-    "migrate": "drizzle-kit generate && drizzle-kit migrate",
-    "render-wrangler-config": "node scripts/render-wrangler-config.mjs",
-    "preview": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare populateCache local --config .wrangler.generated.jsonc && opennextjs-cloudflare preview --config .wrangler.generated.jsonc",
-    "deploy": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare deploy --config .wrangler.generated.jsonc",
-    "upload": "pnpm run render-wrangler-config && opennextjs-cloudflare build --config .wrangler.generated.jsonc && opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare upload --config .wrangler.generated.jsonc",
-    "cf-typegen": "pnpm run render-wrangler-config && wrangler types --config .wrangler.generated.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "test": "vp test run --coverage.enabled true",
+    "migrate": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -43,11 +36,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.4",
     "@electric-sql/pglite": "^0.5.4",
     "@electric-sql/pglite-postgis": "^0.2.4",
-    "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^9.39.2",
     "@googlemaps/jest-mocks": "^2.22.8",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -58,16 +48,14 @@
     "@types/pg": "^8.23.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.55.0",
-    "@typescript-eslint/parser": "^8.56.1",
-    "@vitest/coverage-v8": "^5.0.3",
-    "@vitest/ui": "^5.0.3",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
     "drizzle-kit": "1.0.0-rc.4",
-    "globals": "^17.7.0",
     "jsdom": "^29.1.1",
     "postgis": "link:@electric-sql/pglite/postgis",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:",
     "wrangler": "^4.114.0"
   },
   "packageManager": "pnpm@11.15.1"

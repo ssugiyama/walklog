@@ -42,8 +42,8 @@ pnpm dev
 # Run tests
 pnpm test
 
-# Run ESLint
-pnpm lint
+# Lint, format check and typecheck (vp check)
+vp check
 
 # Build for production
 pnpm build
