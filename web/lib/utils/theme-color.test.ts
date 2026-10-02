@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { resolveThemeColors, toViewportThemeColor } from './theme-color'
+import {
+  resolveThemeColors,
+  themeBackgroundCss,
+  toViewportThemeColor,
+} from './theme-color'
 
 describe('resolveThemeColors', () => {
   it('uses defaults when nothing is set', () => {
@@ -39,5 +43,20 @@ describe('toViewportThemeColor', () => {
       { media: '(prefers-color-scheme: light)', color: '#fff' },
       { media: '(prefers-color-scheme: dark)', color: '#000' },
     ])
+  })
+})
+
+describe('themeBackgroundCss', () => {
+  it('sets html and body to the light color with a dark media override', () => {
+    expect(themeBackgroundCss({ light: '#3874cb', dark: '#123456' })).toBe(
+      'html,html body{background-color:#3874cb}' +
+        '@media (prefers-color-scheme:dark){html,html body{background-color:#123456}}',
+    )
+  })
+
+  it('omits the dark override when both colors match', () => {
+    expect(themeBackgroundCss({ light: '#3874cb', dark: '#3874cb' })).toBe(
+      'html,html body{background-color:#3874cb}',
+    )
   })
 })

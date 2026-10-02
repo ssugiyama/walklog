@@ -113,6 +113,9 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     <Box
       sx={{
         height: '100%',
+        // html/body carry the theme color (see themeBackgroundCss), so paint
+        // the app area itself to keep that color from showing in the gutters.
+        backgroundColor: theme.palette.background.default,
       }}
     >
       <NuqsAdapter>

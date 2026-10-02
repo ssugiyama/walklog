@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Roboto } from 'next/font/google'
 import {
   resolveThemeColors,
+  themeBackgroundCss,
   toViewportThemeColor,
 } from '@/lib/utils/theme-color'
 import Body from './_components/body'
@@ -24,6 +25,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" style={{ height: '100%' }} className={roboto.variable}>
+      <head>
+        <style>{themeBackgroundCss(resolveThemeColors(process.env))}</style>
+      </head>
       <body style={{ margin: 0, height: '100%' }}>
         <Body>{children}</Body>
       </body>
