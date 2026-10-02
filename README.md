@@ -238,7 +238,7 @@ Use Supabase's **direct** connection string here (found in the Supabase dashboar
 export HYPERDRIVE_ID=<the id it printed>
 ```
 
-`pnpm run build`/`preview`/`deploy`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` (and `D1_DATABASE_ID`, see below) into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
+`vp run cf-build`/`preview`/`deploy`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` (and `D1_DATABASE_ID`, see below) into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
 
 #### Set Up Caching
 
@@ -250,7 +250,7 @@ pnpm exec wrangler d1 create walklog-tag-cache
 export D1_DATABASE_ID=<the id it printed>
 ```
 
-`pnpm run deploy`/`upload` run `opennextjs-cloudflare populateCache remote` before deploying, which (idempotently) creates the R2 bucket and the D1 `revalidations` table if they don't already exist - no separate migration step is needed. `pnpm run preview` runs the `local` variant instead, against wrangler's local emulated storage.
+`vp run deploy`/`upload` run `opennextjs-cloudflare populateCache remote` before deploying, which (idempotently) creates the R2 bucket and the D1 `revalidations` table if they don't already exist - no separate migration step is needed. `vp run preview` runs the `local` variant instead, against wrangler's local emulated storage.
 
 Time-based ISR (`revalidate: N`) isn't used anywhere in this app - only on-demand `revalidateTag`, which writes directly to the tag cache - so there's no revalidation queue to configure.
 
@@ -258,13 +258,13 @@ Time-based ISR (`revalidate: N`) isn't used anywhere in this app - only on-deman
 
 `web/wrangler.jsonc`'s `vars` only holds `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure.
 
-Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - `wrangler secret put` has no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before `wrangler` even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `pnpm run preview`/`deploy`/`upload`:
+Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - `wrangler secret put` has no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before `wrangler` even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run preview`/`deploy`/`upload`:
 
 ```bash
 cd web
 export NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
 # ...repeat for whichever other NEXT_PUBLIC_* variables your deployment needs
-pnpm run deploy
+vp run deploy
 ```
 
 Every other variable from the reference table (`SITE_NAME`, `R2_*`, etc.) is read from the Worker's runtime environment on each request instead, so it's set with `wrangler secret put`:
@@ -290,11 +290,11 @@ That local connection string can point anywhere reachable, including a local Pos
 
 #### Preview Locally, Then Deploy
 ```bash
-pnpm run preview  # builds and runs the app under the actual Workers runtime, locally
-pnpm run deploy   # publishes to Cloudflare Workers
+vp run preview  # builds and runs the app under the actual Workers runtime, locally
+vp run deploy   # publishes to Cloudflare Workers
 ```
 
-If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeScript types with `pnpm run cf-typegen`.
+If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeScript types with `vp run cf-typegen`.
 
 `wrangler.jsonc`'s `observability.enabled` turns on Workers Logs, so invocation logs for every request are queryable in the Cloudflare dashboard (Workers & Pages → walklog → Logs) after a deploy; `pnpm exec wrangler tail` also streams them live from the CLI.
 
@@ -321,7 +321,7 @@ Server-only variables are pushed to Cloudflare via `wrangler secret put` before 
 | | `R2_BUCKET_NAME` |
 | | `R2_PUBLIC_URL` |
 
-`NEXT_PUBLIC_*` variables are instead passed as build-time environment variables to the `pnpm run deploy` step itself, since they have to be present *before* the build runs, not after (`NEXT_PUBLIC_APP_VERSION` is set fresh from the release tag; everything else comes from a repository secret or variable named after the suffix):
+`NEXT_PUBLIC_*` variables are instead passed as build-time environment variables to the `vp run deploy` step itself, since they have to be present *before* the build runs, not after (`NEXT_PUBLIC_APP_VERSION` is set fresh from the release tag; everything else comes from a repository secret or variable named after the suffix):
 
 | Repository secret | Repository variable |
 |---|---|

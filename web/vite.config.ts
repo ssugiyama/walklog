@@ -50,6 +50,46 @@ export default defineConfig({
     ],
     options: { typeAware: true, typeCheck: true },
   },
+  run: {
+    // Cloudflare Workers pipeline. Not cached: the build inlines NEXT_PUBLIC_*
+    // env vars and deploy has side effects.
+    tasks: {
+      'render-wrangler-config': {
+        command: 'node scripts/render-wrangler-config.mjs',
+        cache: false,
+      },
+      'cf-build': {
+        command:
+          'opennextjs-cloudflare build --config .wrangler.generated.jsonc',
+        dependsOn: ['render-wrangler-config'],
+        cache: false,
+      },
+      preview: {
+        command:
+          'opennextjs-cloudflare populateCache local --config .wrangler.generated.jsonc && opennextjs-cloudflare preview --config .wrangler.generated.jsonc',
+        dependsOn: ['cf-build'],
+        cache: false,
+      },
+      deploy: {
+        command:
+          'opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare deploy --config .wrangler.generated.jsonc',
+        dependsOn: ['cf-build'],
+        cache: false,
+      },
+      upload: {
+        command:
+          'opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare upload --config .wrangler.generated.jsonc',
+        dependsOn: ['cf-build'],
+        cache: false,
+      },
+      'cf-typegen': {
+        command:
+          'wrangler types --config .wrangler.generated.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts',
+        dependsOn: ['render-wrangler-config'],
+        cache: false,
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
