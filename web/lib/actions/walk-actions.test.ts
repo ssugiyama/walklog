@@ -60,7 +60,7 @@ const client = db.$client as unknown as PGlite
 import { PGlite } from '@electric-sql/pglite'
 
 import { revalidateTag, updateTag } from 'next/cache'
-import { Mock } from 'vitest'
+import { Mock } from 'vite-plus/test'
 import {
   clearIdTokenAction,
   deleteItemAction,

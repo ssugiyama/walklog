@@ -1,7 +1,7 @@
 import { initialize } from '@googlemaps/jest-mocks'
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
-import { Mock } from 'vitest'
+import { Mock } from 'vite-plus/test'
 import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'
 import { useMapContext } from '@/lib/utils/map-context'

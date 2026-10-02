@@ -16,3 +16,4 @@ next-env.d.ts
 !.dev.vars.example
 cloudflare-env.d.ts
 .wrangler.generated.jsonc
+.vitest/

@@ -1,9 +1,13 @@
-// vitest.config.ts または vite.config.ts
-
 import path from 'path'
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vite-plus'
 
 export default defineConfig({
+  fmt: {},
+  lint: {
+    jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
+    rules: { 'vite-plus/prefer-vite-plus-imports': 'error' },
+    options: { typeAware: true, typeCheck: true },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),

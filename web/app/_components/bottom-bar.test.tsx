@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React from 'react'
-import { Mock } from 'vitest'
+import { Mock } from 'vite-plus/test'
 import { useConfig } from '@/lib/utils/config'
 import { useData } from '@/lib/utils/data-context'
 import { useMainContext } from '@/lib/utils/main-context'

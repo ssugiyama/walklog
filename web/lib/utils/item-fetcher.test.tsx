@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react'
 import React from 'react'
-import { Mock } from 'vitest'
+import { Mock } from 'vite-plus/test'
 import { getItemAction } from '@/lib/actions/walk-actions'
 import { useData } from './data-context'
 import ItemFetcher from './item-fetcher'

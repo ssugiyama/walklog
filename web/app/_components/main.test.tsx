@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { Mock } from 'vitest'
+import { Mock } from 'vite-plus/test'
 import { DataProvider, useData } from '@/lib/utils/data-context'
 import MainContext from '@/lib/utils/main-context'
 import Main from './main'
