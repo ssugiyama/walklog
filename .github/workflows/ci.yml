@@ -20,7 +20,9 @@ jobs:
       uses: pnpm/action-setup@v6
       with:
         package_json_file: web/package.json
-        run_install: true
+        run_install:
+          - cwd: web
+            args: [--frozen-lockfile]
     - name: run lint, formatter and typecheck (vp check)
       run: pnpm lint
     - name: run test
