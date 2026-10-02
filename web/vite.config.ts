@@ -90,6 +90,9 @@ export default defineConfig({
       },
     },
   },
+  staged: {
+    '*.{js,mjs,ts,tsx}': 'vp check --fix',
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),

@@ -353,6 +353,16 @@ pnpm dev
 
 Access the development server at http://localhost:3000
 
+### Pre-commit hook (optional)
+
+The repo ships a pre-commit hook (`.vite-hooks/pre-commit`) that runs `vp check --fix` on staged files via Vite+. Hooks are not installed by `pnpm install` because the project lives in `web/`, a subdirectory of the git root. Enable them once per clone, from the repository root:
+
+```bash
+./web/node_modules/.bin/vp hooks enable
+```
+
+Skip the hook for a single commit with `VP_GIT_HOOKS=0 git commit ...`.
+
 ### Project Structure
 ```
 walklog/
