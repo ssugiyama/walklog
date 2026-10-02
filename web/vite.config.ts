@@ -2,10 +2,52 @@ import path from 'path'
 import { defineConfig } from 'vite-plus'
 
 export default defineConfig({
-  fmt: {},
+  fmt: {
+    // Keep the style Biome used so the formatter switch is a no-op.
+    singleQuote: true,
+    semi: false,
+    printWidth: 80,
+    ignorePatterns: [
+      '.next/**',
+      'out/**',
+      'public/**',
+      'coverage/**',
+      '.open-next/**',
+      'pnpm-lock.yaml',
+      // Biome never formatted these
+      '**/*.md',
+      '**/*.yaml',
+      'wrangler.jsonc',
+    ],
+  },
   lint: {
     jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
-    rules: { 'vite-plus/prefer-vite-plus-imports': 'error' },
+    ignorePatterns: [
+      '.next/**',
+      'out/**',
+      'public/**',
+      'coverage/**',
+      '.open-next/**',
+      '*.config.*',
+    ],
+    rules: {
+      'vite-plus/prefer-vite-plus-imports': 'error',
+      // Ported from biome.json
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'typescript/no-explicit-any': 'error',
+      'require-await': 'error',
+      'no-unused-vars': ['error', { args: 'none' }],
+      // tsconfig has `strict: false`, so this rule can't work and only warns.
+      'typescript/no-useless-default-assignment': 'off',
+    },
+    overrides: [
+      { files: ['bin/**/*.js'], rules: { 'no-console': 'off' } },
+      // async mocks intentionally return promises without awaiting
+      {
+        files: ['**/*.test.{ts,tsx}'],
+        rules: { 'require-await': 'off', 'typescript/unbound-method': 'off' },
+      },
+    ],
     options: { typeAware: true, typeCheck: true },
   },
   resolve: {

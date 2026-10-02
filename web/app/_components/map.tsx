@@ -260,9 +260,8 @@ const GMap = (props) => {
         }, 0)
       },
     )
-    const { default: PolygonManager } = await import(
-      '@/lib/utils/polygon-manager'
-    )
+    const { default: PolygonManager } =
+      await import('@/lib/utils/polygon-manager')
     rc.polygonManager = new PolygonManager({
       map: rc.map,
       styles: rc.shapeStyles.polygons,

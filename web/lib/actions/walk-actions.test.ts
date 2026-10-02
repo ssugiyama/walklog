@@ -1,6 +1,4 @@
 import { eq, sql } from 'drizzle-orm'
-import defaultShapeStyles from '../../default-shape-styles.json'
-import defaultTheme from '../../default-theme.json'
 import { users, walks } from '../../lib/drizzle/schema'
 import { encode } from '../../lib/utils/path-encoder'
 
@@ -626,7 +624,10 @@ describe('server actions', () => {
       expect(result.error).toBeNull()
       expect(result.id).toEqual(expect.any(Number))
 
-      const [row] = await db.select().from(walks).where(sql`id = ${result.id}`)
+      const [row] = await db
+        .select()
+        .from(walks)
+        .where(sql`id = ${result.id}`)
       expect(row).toEqual(
         expect.objectContaining({
           title: 'New Walk',
