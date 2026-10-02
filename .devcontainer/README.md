@@ -43,7 +43,7 @@ pnpm dev
 pnpm test
 
 # Lint, format check and typecheck (vp check)
-pnpm lint
+vp check
 
 # Build for production
 pnpm build
