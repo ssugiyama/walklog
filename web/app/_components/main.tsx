@@ -141,6 +141,8 @@ const Main = ({ children }: { children: React.ReactNode }) => {
                     ? 8
                     : 'calc(env(safe-area-inset-left) + 8px)',
                   paddingRight: 'calc(env(safe-area-inset-right) + 8px)',
+                  paddingTop: 8,
+                  paddingBottom: 8,
                 }}
               >
                 {/* html/body carry the theme color (see themeBackgroundCss),
