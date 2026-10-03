@@ -1,4 +1,3 @@
-import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import str2bool from '@/lib/utils/str2bool'
@@ -21,7 +20,11 @@ let nodeDb: Db | undefined
 // options unsupported by Workers' TLS implementation - rejectUnauthorized,
 // ALPNProtocols - when tried directly against Supabase without Hyperdrive).
 const createWorkerDb = async (): Promise<Db> => {
-  const { env } = await getCloudflareContext({ async: true })
+  // Dynamic import: `cloudflare:workers` only resolves inside workerd, and a
+  // static import would crash the Node standalone server (Docker) at startup
+  // even though this branch is never taken there. Cast to string because
+  // the module's types only exist in the gitignored cloudflare-env.d.ts.
+  const { env } = await import('cloudflare:workers' as string)
   // Not typed against the ambient CloudflareEnv global: that's only merged
   // in by `wrangler types`/`pnpm run cf-typegen`, whose output is gitignored
   // (regenerated per-deployer, and depends on HYPERDRIVE_ID being set) - CI
