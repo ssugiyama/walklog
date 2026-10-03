@@ -1,3 +1,4 @@
+import './buffer-polyfill'
 import { Position } from 'geojson'
 import wkx from 'wkx'
 import { decode, encode } from './path-encoder'

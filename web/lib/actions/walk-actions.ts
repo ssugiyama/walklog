@@ -14,7 +14,6 @@ import {
 import moment from 'moment'
 import { nanoid } from 'nanoid'
 import { cacheTag, updateTag } from 'next/cache'
-import { ValueOf } from 'next/dist/shared/lib/constants'
 import { cookies } from 'next/headers'
 import { forbidden, notFound, unauthorized } from 'next/navigation'
 import {
@@ -277,7 +276,7 @@ export const searchInternalAction = async (
     }
 
     const where: SQL[] = []
-    const order: ValueOf<typeof orderHash> =
+    const order: (typeof orderHash)[keyof typeof orderHash] =
       orderHash[(props.order as keyof typeof orderHash) ?? 'newest_first']
 
     if (props.date) {

@@ -1,5 +1,8 @@
 import path from 'path'
 import { defineConfig } from 'vite-plus'
+import { cloudflare } from '@cloudflare/vite-plugin'
+import { kvDataAdapter } from '@vinext/cloudflare/cache/kv-data-adapter'
+import vinext from 'vinext'
 
 export default defineConfig({
   fmt: {
@@ -122,4 +125,37 @@ export default defineConfig({
       reportOnFailure: true,
     },
   },
+
+  // vinext app build (`build:vinext`/`dev:vinext`). Skipped under Vitest:
+  // the tests render components directly in jsdom and must not boot workerd.
+  plugins: process.env.VITEST
+    ? []
+    : [
+        vinext({
+          cache: { data: kvDataAdapter() },
+        }),
+        {
+          // wkx (lib/utils/geo-utils.ts, also used in the browser) calls
+          // require('util').inherits. Next.js's bundlers polyfill Node
+          // built-ins for the browser; Vite stubs them out, so point the
+          // client build at the npm `util` package instead. Server
+          // environments keep the real node:util from workerd.
+          name: 'walklog:client-util-polyfill',
+          applyToEnvironment: (environment) => environment.name === 'client',
+          resolveId(id, importer) {
+            if (id === 'util') {
+              return this.resolve('util/', importer, { skipSelf: true })
+            }
+          },
+        },
+        cloudflare({
+          // Rendered by scripts/render-wrangler-config.mjs (substitutes
+          // $HYPERDRIVE_ID), same as the wrangler CLI scripts use.
+          configPath: '.wrangler.generated.jsonc',
+          viteEnvironment: {
+            name: 'rsc',
+            childEnvironments: ['ssr'],
+          },
+        }),
+      ],
 })

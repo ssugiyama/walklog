@@ -17,3 +17,5 @@ next-env.d.ts
 cloudflare-env.d.ts
 .wrangler.generated.jsonc
 .vitest/
+/dist/
+.vinext/

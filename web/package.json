@@ -1,11 +1,16 @@
 {
+  "type": "module",
   "scripts": {
     "build": "NODE_ENV=production next build",
     "dev": "next dev",
     "start": "next start",
     "start-in-docker": "node ./server.js",
     "test": "vp test run --coverage.enabled true",
-    "migrate": "drizzle-kit generate && drizzle-kit migrate"
+    "migrate": "drizzle-kit generate && drizzle-kit migrate",
+    "dev:vinext": "node scripts/render-wrangler-config.mjs && vp dev --port 3001",
+    "build:vinext": "node scripts/render-wrangler-config.mjs && vp build",
+    "start:vinext": "wrangler dev --config dist/server/wrangler.json",
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -16,7 +21,9 @@
     "@mui/material": "^9.0.0",
     "@mui/material-nextjs": "^9.3.0",
     "@opennextjs/cloudflare": "^1.20.6",
+    "@vinext/cloudflare": "^1.0.1",
     "aws4fetch": "^1.0.20",
+    "buffer": "^6.0.3",
     "drizzle-orm": "1.0.0-rc.4",
     "firebase": "^12.19.0",
     "jose": "^6.2.4",
@@ -29,13 +36,17 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-markdown": "^10.1.0",
+    "react-server-dom-webpack": "19.2.6",
     "recharts": "^3.10.1",
     "terra-draw": "^1.32.3",
     "terra-draw-google-maps-adapter": "^1.5.0",
+    "util": "^0.12.5",
+    "vinext": "^1.0.1",
     "wkx": "^0.5.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.62.5",
     "@electric-sql/pglite": "^0.5.4",
     "@electric-sql/pglite-postgis": "^0.2.4",
     "@googlemaps/jest-mocks": "^2.22.8",
@@ -48,15 +59,18 @@
     "@types/pg": "^8.23.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-rsc": "^0.5.35",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "drizzle-kit": "1.0.0-rc.4",
     "jsdom": "^29.1.1",
     "postgis": "link:@electric-sql/pglite/postgis",
     "typescript": "^7.0.2",
+    "vite": "catalog:",
     "vite-plus": "catalog:",
     "vitest": "catalog:",
-    "wrangler": "^4.114.0"
+    "wrangler": "^4.147.0"
   },
   "packageManager": "pnpm@11.15.1"
 }
