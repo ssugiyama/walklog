@@ -41,9 +41,12 @@
       // Backs vinext's data cache (the `'use cache'` functions and
       // `cacheTag`/`updateTag` in lib/actions/walk-actions.ts - see
       // kvDataAdapter() in vite.config.ts). Binding name is fixed by
-      // @vinext/cloudflare's KV adapter. No id: wrangler provisions the
-      // namespace automatically on first deploy.
-      "binding": "VINEXT_KV_CACHE"
+      // @vinext/cloudflare's KV adapter. Run
+      // `wrangler kv namespace create walklog-cache` (see README.md), then
+      // `export KV_CACHE_ID=<the id it prints>` - same
+      // render-wrangler-config.mjs substitution as $HYPERDRIVE_ID above.
+      "binding": "VINEXT_KV_CACHE",
+      "id": "$KV_CACHE_ID"
     }
   ],
   "assets": {

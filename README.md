@@ -238,11 +238,19 @@ Use Supabase's **direct** connection string here (found in the Supabase dashboar
 export HYPERDRIVE_ID=<the id it printed>
 ```
 
-`vp run cf-build`/`cf-dev`/`preview`/`deploy`/`upload`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
+`vp run cf-build`/`cf-dev`/`preview`/`deploy`/`upload`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` (and `KV_CACHE_ID`, see below) into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
 
 #### Set Up Caching
 
-The `'use cache'` functions in `lib/actions/walk-actions.ts` (search results, the user list) persist their cached data, and the `updateTag` invalidation markers, in a KV namespace bound as `VINEXT_KV_CACHE` (see `kvDataAdapter()` in `vite.config.ts`). `wrangler.jsonc` leaves its id out, so wrangler provisions the namespace automatically on the first deploy - there's nothing to create by hand. `vp run preview` uses wrangler's local emulated KV instead.
+The `'use cache'` functions in `lib/actions/walk-actions.ts` (search results, the user list) persist their cached data, and the `updateTag` invalidation markers, in a KV namespace bound as `VINEXT_KV_CACHE` (see `kvDataAdapter()` in `vite.config.ts`). Create it once, the same way as Hyperdrive:
+
+```bash
+cd web
+pnpm exec wrangler kv namespace create walklog-cache
+export KV_CACHE_ID=<the id it printed>
+```
+
+`vp run preview` uses wrangler's local emulated KV instead, so the id only has to be set, not reachable.
 
 Cache keys include the build id, so every deploy starts with an empty cache rather than serving entries from the previous build.
 
@@ -302,6 +310,7 @@ If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeSc
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
 | `HYPERDRIVE_ID` | Same as `HYPERDRIVE_ID` above |
 | `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` | Same as above |
+| `KV_CACHE_ID` | Same as `KV_CACHE_ID` above |
 
 On every deploy, the workflow pushes a fixed set of values from repository secrets/variables of the same name, so GitHub is the source of truth instead of manual configuration - using two different mechanisms, matching the two categories from [Configure Environment Variables](#configure-environment-variables) above.
 
