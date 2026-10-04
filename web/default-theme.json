@@ -156,7 +156,7 @@
     }
   },
   "shape": {
-    "borderRadius": 4
+    "borderRadius": 8
   },
   "spacing": 8,
   "components": {
