@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, errors, jwtVerify } from 'jose'
+import { connection } from 'next/server'
 
 const JWKS_URL = new URL(
   'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com',
@@ -20,6 +21,13 @@ export class IdTokenExpiredError extends Error {}
 export const verifyFirebaseIdToken = async (
   idToken: string,
 ): Promise<FirebaseIdTokenClaims> => {
+  // jwtVerify reads the current time (the `exp` check and the remote JWKS
+  // cache), which Cache Components forbids while prerendering. With
+  // partialPrefetching, a page can be prerendered with cookies available -
+  // e.g. /show/[id]'s generateMetadata -> getItemAction -> getUid - so
+  // reaching here isn't enough to imply request time. Defer explicitly:
+  // checking a token against the clock is inherently per-request.
+  await connection()
   const projectId = process.env.FIREBASE_PROJECT_ID
   jwks ??= createRemoteJWKSet(JWKS_URL)
 
