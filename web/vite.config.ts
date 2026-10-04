@@ -1,4 +1,3 @@
-import { existsSync } from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite-plus'
 import { cloudflare } from '@cloudflare/vite-plugin'
@@ -17,11 +16,11 @@ export default defineConfig({
       'public/**',
       'coverage/**',
       'dist/**',
+      '.cloudflare/**',
       'pnpm-lock.yaml',
       // Biome never formatted these
       '**/*.md',
       '**/*.yaml',
-      'wrangler.jsonc',
     ],
   },
   lint: {
@@ -32,6 +31,7 @@ export default defineConfig({
       'public/**',
       'coverage/**',
       'dist/**',
+      '.cloudflare/**',
       '*.config.*',
     ],
     rules: {
@@ -58,45 +58,34 @@ export default defineConfig({
     // Cloudflare Workers pipeline. Not cached: the build inlines NEXT_PUBLIC_*
     // env vars and deploy has side effects.
     tasks: {
-      'render-wrangler-config': {
-        command: 'node scripts/render-wrangler-config.mjs',
-        cache: false,
-      },
-      // Builds the vinext Worker into dist/ (dist/server/wrangler.json is
-      // the deployable config the Cloudflare plugin derives from
-      // .wrangler.generated.jsonc).
+      // Builds the vinext Worker into dist/ (dist/server holds the Build
+      // Output that cf deploys).
       'cf-build': {
-        command: 'vp build',
-        dependsOn: ['render-wrangler-config'],
+        command: 'CF_WORKERS_BUILD=1 vp build',
         cache: false,
       },
       'cf-dev': {
         command: 'vp dev --port 3001',
-        dependsOn: ['render-wrangler-config'],
         cache: false,
       },
       preview: {
-        command: 'wrangler dev --config dist/server/wrangler.json',
+        command: 'vp preview',
         dependsOn: ['cf-build'],
         cache: false,
       },
       deploy: {
-        command:
-          'vinext-cloudflare deploy --skip-build --config dist/server/wrangler.json',
+        command: 'vinext-cloudflare deploy --skip-build',
         dependsOn: ['cf-build'],
         cache: false,
       },
       // Uploads a new Worker version without routing traffic to it.
       upload: {
-        command:
-          'vinext-cloudflare deploy --skip-build --no-promote --config dist/server/wrangler.json',
+        command: 'vinext-cloudflare deploy --skip-build --no-promote',
         dependsOn: ['cf-build'],
         cache: false,
       },
       'cf-typegen': {
-        command:
-          'wrangler types --config .wrangler.generated.jsonc --env-interface CloudflareEnv cloudflare-env.d.ts',
-        dependsOn: ['render-wrangler-config'],
+        command: 'cf workers types',
         cache: false,
       },
     },
@@ -157,14 +146,7 @@ export default defineConfig({
           },
         },
         cloudflare({
-          // Rendered by scripts/render-wrangler-config.mjs (substitutes
-          // $HYPERDRIVE_ID/$KV_CACHE_ID), which the cf-build task always
-          // runs first. Fall back to the committed template when it hasn't
-          // been rendered: `vp check` resolves this config too (in CI,
-          // without any ids set) and the plugin requires the file to exist.
-          configPath: existsSync('.wrangler.generated.jsonc')
-            ? '.wrangler.generated.jsonc'
-            : 'wrangler.jsonc',
+          // Reads cloudflare.config.ts.
           viteEnvironment: {
             name: 'rsc',
             childEnvironments: ['ssr'],
