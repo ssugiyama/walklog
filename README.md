@@ -129,9 +129,9 @@ Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript 
 | `NEXT_PUBLIC_APP_VERSION` | Version string | No |
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
-| `THEME_COLOR` | Theme color for UA in both light mode and dark mode. Read at build time (the pages are prerendered), so set it before `build`, not only at runtime | No |
-| `THEME_COLOR_LIGHT` | Theme color for UA in light mode (also used for the PWA manifest `theme_color`/`background_color`); build-time like `THEME_COLOR` | No |
-| `THEME_COLOR_DARK` | Theme color for UA in dark mode; build-time like `THEME_COLOR` | No |
+| `THEME_COLOR` | Theme color for UA in both light mode and dark mode. For Docker/`next build`, read at build time (the pages are prerendered), so set it before `build`; on Cloudflare Workers it's read at runtime instead | No |
+| `THEME_COLOR_LIGHT` | Theme color for UA in light mode (also used for the PWA manifest `theme_color`/`background_color`); read like `THEME_COLOR` | No |
+| `THEME_COLOR_DARK` | Theme color for UA in dark mode; read like `THEME_COLOR` | No |
 | `DB_URL` | PostgreSQL connection string | Yes *|
 | `DB_SSL` | Enable SSL for the DB connection (`true`/`false`) | No |
 | `DB_SSL_REJECT_UNAUTHORIZED` | Reject unauthorized/self-signed certificates (`false` to allow) | No |
@@ -217,7 +217,7 @@ pnpm start
 
 ### Option 3: Cloudflare Workers Deployment
 
-Deploys the app to Cloudflare Workers via [@opennextjs/cloudflare](https://opennext.js.org/cloudflare), using Supabase Postgres as the database. Firebase Auth and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
+Deploys the app to Cloudflare Workers via [vinext](https://github.com/cloudflare/vinext) (a Vite-based implementation of the Next.js API surface), using Supabase Postgres as the database. Firebase Auth and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
 
 #### Prerequisites
 - A Cloudflare account, with [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) logged in (`pnpm exec wrangler login`)
@@ -238,27 +238,27 @@ Use Supabase's **direct** connection string here (found in the Supabase dashboar
 export HYPERDRIVE_ID=<the id it printed>
 ```
 
-`vp run cf-build`/`preview`/`deploy`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` (and `D1_DATABASE_ID`, see below) into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
+`vp run cf-build`/`cf-dev`/`preview`/`deploy`/`upload`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` (and `KV_CACHE_ID`, see below) into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
 
 #### Set Up Caching
 
-The `'use cache'` functions in `lib/actions/walk-actions.ts` (search results, item lookups) need a place to persist cached data and track `revalidateTag` calls - without this they still work, but every call recomputes from scratch. `open-next.config.ts` wires these to an R2 bucket (`incrementalCache`) and a D1 database (`tagCache`), per [OpenNext's Cloudflare caching guide](https://opennext.js.org/cloudflare/caching). The R2 bucket (`walklog-cache`) is created automatically on first deploy; D1 needs to be created once, the same way as Hyperdrive:
+The `'use cache'` functions in `lib/actions/walk-actions.ts` (search results, the user list) persist their cached data, and the `updateTag` invalidation markers, in a KV namespace bound as `VINEXT_KV_CACHE` (see `kvDataAdapter()` in `vite.config.ts`). Create it once, the same way as Hyperdrive:
 
 ```bash
 cd web
-pnpm exec wrangler d1 create walklog-tag-cache
-export D1_DATABASE_ID=<the id it printed>
+pnpm exec wrangler kv namespace create walklog-cache
+export KV_CACHE_ID=<the id it printed>
 ```
 
-`vp run deploy`/`upload` run `opennextjs-cloudflare populateCache remote` before deploying, which (idempotently) creates the R2 bucket and the D1 `revalidations` table if they don't already exist - no separate migration step is needed. `vp run preview` runs the `local` variant instead, against wrangler's local emulated storage.
+`vp run preview` uses wrangler's local emulated KV instead, so the id only has to be set, not reachable.
 
-Time-based ISR (`revalidate: N`) isn't used anywhere in this app - only on-demand `revalidateTag`, which writes directly to the tag cache - so there's no revalidation queue to configure.
+Cache keys include the build id, so every deploy starts with an empty cache rather than serving entries from the previous build.
 
 #### Configure Environment Variables
 
 `web/wrangler.jsonc`'s `vars` only holds `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure.
 
-Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - `wrangler secret put` has no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before `wrangler` even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run preview`/`deploy`/`upload`:
+Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - `wrangler secret put` has no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before `wrangler` even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run cf-dev`/`preview`/`deploy`/`upload`:
 
 ```bash
 cd web
@@ -290,8 +290,10 @@ That local connection string can point anywhere reachable, including a local Pos
 
 #### Preview Locally, Then Deploy
 ```bash
+vp run cf-dev   # vinext dev server (HMR) with the Workers runtime, on port 3001
 vp run preview  # builds and runs the app under the actual Workers runtime, locally
 vp run deploy   # publishes to Cloudflare Workers
+vp run upload   # uploads a new Worker version without routing traffic to it
 ```
 
 If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeScript types with `vp run cf-typegen`.
@@ -304,11 +306,11 @@ If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeSc
 
 | Secret | Description |
 |--------|-------------|
-| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token with permission to edit Workers, Hyperdrive, D1, and R2 for this account |
+| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token with permission to edit Workers, Workers KV, and Hyperdrive for this account |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
 | `HYPERDRIVE_ID` | Same as `HYPERDRIVE_ID` above |
 | `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` | Same as above |
-| `D1_DATABASE_ID` | Same as `D1_DATABASE_ID` above |
+| `KV_CACHE_ID` | Same as `KV_CACHE_ID` above |
 
 On every deploy, the workflow pushes a fixed set of values from repository secrets/variables of the same name, so GitHub is the source of truth instead of manual configuration - using two different mechanisms, matching the two categories from [Configure Environment Variables](#configure-environment-variables) above.
 
@@ -320,6 +322,11 @@ Server-only variables are pushed to Cloudflare via `wrangler secret put` before 
 | `R2_SECRET_ACCESS_KEY` | `R2_ACCOUNT_ID` |
 | | `R2_BUCKET_NAME` |
 | | `R2_PUBLIC_URL` |
+| | `THEME_COLOR` |
+| | `THEME_COLOR_LIGHT` |
+| | `THEME_COLOR_DARK` |
+
+`THEME_COLOR*` are runtime variables on Workers: vinext renders `app/layout.tsx` and `app/manifest.ts` per request instead of prerendering them at build time. Leaving them unset falls back to white (light) and black (dark).
 
 `NEXT_PUBLIC_*` variables are instead passed as build-time environment variables to the `vp run deploy` step itself, since they have to be present *before* the build runs, not after (`NEXT_PUBLIC_APP_VERSION` is set fresh from the release tag; everything else comes from a repository secret or variable named after the suffix):
 
@@ -332,11 +339,6 @@ Server-only variables are pushed to Cloudflare via `wrangler secret put` before 
 | | `MAP_ID` |
 | | `SHAPE_STYLES_JSON_URL` |
 | | `THEME_JSON_URL` |
-| | `THEME_COLOR` |
-| | `THEME_COLOR_LIGHT` |
-| | `THEME_COLOR_DARK` |
-
-`THEME_COLOR*` aren't `NEXT_PUBLIC_*`, but they're also read while the pages are prerendered, so they're passed to the same build step under their own names (no `NEXT_PUBLIC_` prefix). Leaving them unset falls back to white (light) and black (dark).
 
 Any other variable from the reference table that your deployment needs (`SITE_NAME`, ...) isn't touched by CI and must still be set on Cloudflare manually with `wrangler secret put`, same as before. `DB_URL`/`DB_SSL`/`DB_SSL_CA` and `CF_WORKERS` are never set this way for Workers: the runtime reads the DB connection from the Hyperdrive binding instead of `DB_URL`/`DB_SSL*` (see `lib/drizzle/db.ts`), and `CF_WORKERS` is a fixed `vars` entry already committed in `wrangler.jsonc`.
 

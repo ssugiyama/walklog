@@ -23,7 +23,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       HYPERDRIVE_ID: ${{ secrets.HYPERDRIVE_ID }}
       CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: ${{ secrets.CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE }}
-      D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+      KV_CACHE_ID: ${{ secrets.KV_CACHE_ID }}
     steps:
       - uses: actions/checkout@v7
       - name: Setup Vite+ and install dependencies
@@ -46,7 +46,7 @@ jobs:
         # and CF_WORKERS is a fixed `vars` entry in wrangler.jsonc already.
         run: |
           vp run render-wrangler-config
-          for name in IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL; do
+          for name in IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL THEME_COLOR THEME_COLOR_LIGHT THEME_COLOR_DARK; do
             value="${!name}"
             echo "$value" | vp exec wrangler secret put "$name" --config .wrangler.generated.jsonc
           done
@@ -57,6 +57,11 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
           R2_PUBLIC_URL: ${{ vars.R2_PUBLIC_URL }}
+          # Read by app/layout.tsx and app/manifest.ts, which vinext renders
+          # per request rather than prerendering at build time.
+          THEME_COLOR: ${{ vars.THEME_COLOR }}
+          THEME_COLOR_LIGHT: ${{ vars.THEME_COLOR_LIGHT }}
+          THEME_COLOR_DARK: ${{ vars.THEME_COLOR_DARK }}
 
       - name: Deploy to Cloudflare Workers
         run: vp run deploy
@@ -70,11 +75,6 @@ jobs:
           NEXT_PUBLIC_MAP_ID: ${{ vars.MAP_ID }}
           NEXT_PUBLIC_SHAPE_STYLES_JSON_URL: ${{ vars.SHAPE_STYLES_JSON_URL }}
           NEXT_PUBLIC_THEME_JSON_URL: ${{ vars.THEME_JSON_URL }}
-          # Read by app/layout.tsx and app/manifest.ts while prerendering, so
-          # they must be present at build time, not via `wrangler secret put`.
-          THEME_COLOR: ${{ vars.THEME_COLOR }}
-          THEME_COLOR_LIGHT: ${{ vars.THEME_COLOR_LIGHT }}
-          THEME_COLOR_DARK: ${{ vars.THEME_COLOR_DARK }}
           # Not a wrangler.jsonc `var`: it changes every release, and
           # `wrangler types` would otherwise infer whatever value was present
           # at the last local `cf-typegen` run as NEXT_PUBLIC_APP_VERSION's

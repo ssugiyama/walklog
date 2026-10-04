@@ -1,5 +1,9 @@
+import { existsSync } from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite-plus'
+import { cloudflare } from '@cloudflare/vite-plugin'
+import { kvDataAdapter } from '@vinext/cloudflare/cache/kv-data-adapter'
+import vinext from 'vinext'
 
 export default defineConfig({
   fmt: {
@@ -12,7 +16,7 @@ export default defineConfig({
       'out/**',
       'public/**',
       'coverage/**',
-      '.open-next/**',
+      'dist/**',
       'pnpm-lock.yaml',
       // Biome never formatted these
       '**/*.md',
@@ -27,7 +31,7 @@ export default defineConfig({
       'out/**',
       'public/**',
       'coverage/**',
-      '.open-next/**',
+      'dist/**',
       '*.config.*',
     ],
     rules: {
@@ -58,27 +62,34 @@ export default defineConfig({
         command: 'node scripts/render-wrangler-config.mjs',
         cache: false,
       },
+      // Builds the vinext Worker into dist/ (dist/server/wrangler.json is
+      // the deployable config the Cloudflare plugin derives from
+      // .wrangler.generated.jsonc).
       'cf-build': {
-        command:
-          'opennextjs-cloudflare build --config .wrangler.generated.jsonc',
+        command: 'vp build',
+        dependsOn: ['render-wrangler-config'],
+        cache: false,
+      },
+      'cf-dev': {
+        command: 'vp dev --port 3001',
         dependsOn: ['render-wrangler-config'],
         cache: false,
       },
       preview: {
-        command:
-          'opennextjs-cloudflare populateCache local --config .wrangler.generated.jsonc && opennextjs-cloudflare preview --config .wrangler.generated.jsonc',
+        command: 'wrangler dev --config dist/server/wrangler.json',
         dependsOn: ['cf-build'],
         cache: false,
       },
       deploy: {
         command:
-          'opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare deploy --config .wrangler.generated.jsonc',
+          'vinext-cloudflare deploy --skip-build --config dist/server/wrangler.json',
         dependsOn: ['cf-build'],
         cache: false,
       },
+      // Uploads a new Worker version without routing traffic to it.
       upload: {
         command:
-          'opennextjs-cloudflare populateCache remote --config .wrangler.generated.jsonc && opennextjs-cloudflare upload --config .wrangler.generated.jsonc',
+          'vinext-cloudflare deploy --skip-build --no-promote --config dist/server/wrangler.json',
         dependsOn: ['cf-build'],
         cache: false,
       },
@@ -122,4 +133,42 @@ export default defineConfig({
       reportOnFailure: true,
     },
   },
+
+  // vinext app build (`build:vinext`/`dev:vinext`). Skipped under Vitest:
+  // the tests render components directly in jsdom and must not boot workerd.
+  plugins: process.env.VITEST
+    ? []
+    : [
+        vinext({
+          cache: { data: kvDataAdapter() },
+        }),
+        {
+          // wkx (lib/utils/geo-utils.ts, also used in the browser) calls
+          // require('util').inherits. Next.js's bundlers polyfill Node
+          // built-ins for the browser; Vite stubs them out, so point the
+          // client build at the npm `util` package instead. Server
+          // environments keep the real node:util from workerd.
+          name: 'walklog:client-util-polyfill',
+          applyToEnvironment: (environment) => environment.name === 'client',
+          resolveId(id, importer) {
+            if (id === 'util') {
+              return this.resolve('util/', importer, { skipSelf: true })
+            }
+          },
+        },
+        cloudflare({
+          // Rendered by scripts/render-wrangler-config.mjs (substitutes
+          // $HYPERDRIVE_ID/$KV_CACHE_ID), which the cf-build task always
+          // runs first. Fall back to the committed template when it hasn't
+          // been rendered: `vp check` resolves this config too (in CI,
+          // without any ids set) and the plugin requires the file to exist.
+          configPath: existsSync('.wrangler.generated.jsonc')
+            ? '.wrangler.generated.jsonc'
+            : 'wrangler.jsonc',
+          viteEnvironment: {
+            name: 'rsc',
+            childEnvironments: ['ssr'],
+          },
+        }),
+      ],
 })

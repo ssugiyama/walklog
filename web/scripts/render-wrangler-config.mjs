@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// wrangler.jsonc is committed with `$HYPERDRIVE_ID`/`$D1_DATABASE_ID`
+// wrangler.jsonc is committed with `$HYPERDRIVE_ID`/`$KV_CACHE_ID`
 // placeholders instead of real resource ids, since the ids themselves aren't
 // meaningful to share across deployments. This substitutes the real values
 // from env vars into a gitignored copy that the build/deploy/preview/
@@ -23,9 +23,10 @@ const hyperdriveId = requireEnv(
   'HYPERDRIVE_ID',
   'wrangler hyperdrive create walklog-db --connection-string=...',
 )
-const d1DatabaseId = requireEnv(
-  'D1_DATABASE_ID',
-  'wrangler d1 create walklog-tag-cache',
+
+const kvCacheId = requireEnv(
+  'KV_CACHE_ID',
+  'wrangler kv namespace create walklog-cache',
 )
 
 const template = readFileSync('wrangler.jsonc', 'utf-8')
@@ -33,5 +34,5 @@ writeFileSync(
   '.wrangler.generated.jsonc',
   template
     .replaceAll('$HYPERDRIVE_ID', hyperdriveId)
-    .replaceAll('$D1_DATABASE_ID', d1DatabaseId),
+    .replaceAll('$KV_CACHE_ID', kvCacheId),
 )
