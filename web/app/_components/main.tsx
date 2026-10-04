@@ -123,7 +123,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
             <Box
               component="main"
               style={{
-                height: '100%',
+                height: mainState.mode === 'map' ? '100%' : 'none',
                 flexDirection: 'column',
                 display: mainState.mode === 'map' ? 'flex' : 'block',
                 marginLeft: toolBoxOpened
@@ -145,17 +145,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
                   paddingBottom: 8,
                 }}
               >
-                {/* html/body carry the theme color (see themeBackgroundCss),
-                    so give the content column its own background. */}
-                <Box
-                  sx={{
-                    paddingBottom: 5,
-                    mx: 'auto',
-                    backgroundColor: 'background.default',
-                  }}
-                >
-                  {children}
-                </Box>
+                {children}
               </Box>
               <Fab
                 size="small"
