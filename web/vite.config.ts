@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite-plus'
 import { cloudflare } from '@cloudflare/vite-plugin'
@@ -157,8 +158,13 @@ export default defineConfig({
         },
         cloudflare({
           // Rendered by scripts/render-wrangler-config.mjs (substitutes
-          // $HYPERDRIVE_ID), same as the wrangler CLI scripts use.
-          configPath: '.wrangler.generated.jsonc',
+          // $HYPERDRIVE_ID/$KV_CACHE_ID), which the cf-build task always
+          // runs first. Fall back to the committed template when it hasn't
+          // been rendered: `vp check` resolves this config too (in CI,
+          // without any ids set) and the plugin requires the file to exist.
+          configPath: existsSync('.wrangler.generated.jsonc')
+            ? '.wrangler.generated.jsonc'
+            : 'wrangler.jsonc',
           viteEnvironment: {
             name: 'rsc',
             childEnvironments: ['ssr'],
