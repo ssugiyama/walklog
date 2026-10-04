@@ -44,13 +44,17 @@ jobs:
         # list: the Workers runtime reads the DB connection from the
         # Hyperdrive binding instead of DB_URL/DB_SSL* (see lib/drizzle/db.ts),
         # and CF_WORKERS is a fixed text binding in cloudflare.config.ts.
-        # Still wrangler: it reads the value from stdin, whereas
-        # `cf workers secrets update` takes it as a CLI argument.
+        #
+        # `versions secret bulk` rather than `secret put`: `secret put`
+        # deploys a new version and refuses to run while the latest version
+        # isn't the deployed one (e.g. after a `vp run upload` preview). This
+        # instead adds all the secrets in one new, undeployed version, which
+        # the deploy step below then inherits them from. Still wrangler: it
+        # takes the values on stdin, whereas `cf workers secrets update`
+        # takes each one as a CLI argument.
         run: |
-          for name in IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL THEME_COLOR THEME_COLOR_LIGHT THEME_COLOR_DARK; do
-            value="${!name}"
-            echo "$value" | vp exec wrangler secret put "$name" --name walklog
-          done
+          jq -n 'env | {IMAGE_STORAGE, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL, THEME_COLOR, THEME_COLOR_LIGHT, THEME_COLOR_DARK} | map_values(. // "")' \
+            | vp exec wrangler versions secret bulk --name walklog
         env:
           IMAGE_STORAGE: ${{ vars.IMAGE_STORAGE }}
           R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}

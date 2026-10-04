@@ -220,7 +220,7 @@ pnpm start
 Deploys the app to Cloudflare Workers via [vinext](https://github.com/cloudflare/vinext) (a Vite-based implementation of the Next.js API surface), using Supabase Postgres as the database. Firebase Auth and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
 
 #### Prerequisites
-- A Cloudflare account, with the [`cf`](https://www.npmjs.com/package/cf) CLI logged in (`pnpm exec cf auth login`). [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) is still used for `wrangler tail` and `wrangler secret put`, so log it in too (`pnpm exec wrangler login`)
+- A Cloudflare account, with the [`cf`](https://www.npmjs.com/package/cf) CLI logged in (`pnpm exec cf auth login`). [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) is still used for `wrangler tail`, Worker secrets and promoting versions, so log it in too (`pnpm exec wrangler login`)
 - A Supabase project with the PostGIS extension enabled (`create extension if not exists postgis;`), with migrations applied (`pnpm migrate` with `DB_URL` pointed at Supabase)
 
 #### Set Up Hyperdrive
@@ -276,6 +276,8 @@ pnpm exec wrangler secret put R2_ACCOUNT_ID --name walklog
 # ...repeat for whichever other server-only variables from the reference table your deployment needs
 ```
 
+`wrangler secret put` deploys a new version right away, so it fails while a non-promoted preview version (from `vp run upload`) is the latest one. In that case use `wrangler versions secret put` instead; the next deploy picks the secret up.
+
 `DB_URL` is the one exception among these - it's only used for the Docker/manual deployment path, not Workers (which reads the connection string from the Hyperdrive binding instead), so it doesn't need to be set here at all.
 
 Don't add either kind of variable to `cloudflare.config.ts` as a text binding, even as an empty placeholder: `cf workers types` infers a text binding's *literal* value as its TypeScript type (breaking code elsewhere that assigns other strings to it), and an empty string is not the same as unset for the app's `?? 'default'` fallbacks - a variable left genuinely unset still gets its built-in default, but one set to `""` would not.
@@ -314,7 +316,7 @@ If you change `cloudflare.config.ts` (e.g. add a binding), regenerate the local 
 
 On every deploy, the workflow pushes a fixed set of values from repository secrets/variables of the same name, so GitHub is the source of truth instead of manual configuration - using two different mechanisms, matching the two categories from [Configure Environment Variables](#configure-environment-variables) above.
 
-Server-only variables are pushed to Cloudflare via `wrangler secret put` (which takes the value on stdin) before the build runs:
+Server-only variables are pushed to Cloudflare via `wrangler versions secret bulk` before the build runs. It adds them all to one new, undeployed version, which the deploy then inherits them from. Plain `wrangler secret put` deploys immediately, so it refuses to run while a non-promoted preview version (`vp run upload`) is the latest one:
 
 | Repository secret | Repository variable |
 |---|---|
@@ -340,7 +342,7 @@ Server-only variables are pushed to Cloudflare via `wrangler secret put` (which 
 | | `SHAPE_STYLES_JSON_URL` |
 | | `THEME_JSON_URL` |
 
-Any other variable from the reference table that your deployment needs (`SITE_NAME`, ...) isn't touched by CI and must still be set on Cloudflare manually with `wrangler secret put`, same as before. `DB_URL`/`DB_SSL`/`DB_SSL_CA` and `CF_WORKERS` are never set this way for Workers: the runtime reads the DB connection from the Hyperdrive binding instead of `DB_URL`/`DB_SSL*` (see `lib/drizzle/db.ts`), and `CF_WORKERS` is a fixed `vars` entry already committed in `wrangler.jsonc`.
+Any other variable from the reference table that your deployment needs (`SITE_NAME`, ...) isn't touched by CI and must still be set on Cloudflare manually with `wrangler secret put`, same as before. `DB_URL`/`DB_SSL`/`DB_SSL_CA` and `CF_WORKERS` are never set this way for Workers: the runtime reads the DB connection from the Hyperdrive binding instead of `DB_URL`/`DB_SSL*` (see `lib/drizzle/db.ts`), and `CF_WORKERS` is a fixed text binding already committed in `cloudflare.config.ts`.
 
 Because CI overwrites these on every deploy, make sure the repository secrets/variables above hold real values *before* the first deploy after this workflow change - an unset one will overwrite the existing Cloudflare secret with an empty string (server-only group) or bake an empty value into the client bundle (`NEXT_PUBLIC_*` group).
 
