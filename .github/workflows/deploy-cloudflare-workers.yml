@@ -43,12 +43,13 @@ jobs:
         # DB_URL/DB_SSL/DB_SSL_CA and CF_WORKERS are deliberately not in this
         # list: the Workers runtime reads the DB connection from the
         # Hyperdrive binding instead of DB_URL/DB_SSL* (see lib/drizzle/db.ts),
-        # and CF_WORKERS is a fixed `vars` entry in wrangler.jsonc already.
+        # and CF_WORKERS is a fixed text binding in cloudflare.config.ts.
+        # Still wrangler: it reads the value from stdin, whereas
+        # `cf workers secrets update` takes it as a CLI argument.
         run: |
-          vp run render-wrangler-config
           for name in IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL THEME_COLOR THEME_COLOR_LIGHT THEME_COLOR_DARK; do
             value="${!name}"
-            echo "$value" | vp exec wrangler secret put "$name" --config .wrangler.generated.jsonc
+            echo "$value" | vp exec wrangler secret put "$name" --name walklog
           done
         env:
           IMAGE_STORAGE: ${{ vars.IMAGE_STORAGE }}
@@ -75,8 +76,8 @@ jobs:
           NEXT_PUBLIC_MAP_ID: ${{ vars.MAP_ID }}
           NEXT_PUBLIC_SHAPE_STYLES_JSON_URL: ${{ vars.SHAPE_STYLES_JSON_URL }}
           NEXT_PUBLIC_THEME_JSON_URL: ${{ vars.THEME_JSON_URL }}
-          # Not a wrangler.jsonc `var`: it changes every release, and
-          # `wrangler types` would otherwise infer whatever value was present
-          # at the last local `cf-typegen` run as NEXT_PUBLIC_APP_VERSION's
-          # literal TS type.
+          # Not a cloudflare.config.ts text binding: it changes every release,
+          # and `cf workers types` would otherwise infer whatever value was
+          # present at the last local `cf-typegen` run as
+          # NEXT_PUBLIC_APP_VERSION's literal TS type.
           NEXT_PUBLIC_APP_VERSION: ${{ github.event.release.tag_name || inputs.app_version }}

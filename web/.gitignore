@@ -7,12 +7,12 @@ public/uploads/**
 tsconfig.tsbuildinfo
 next-env.d.ts
 
-# wrangler files
+# wrangler (still used for `wrangler tail`/`secret put`) local state
 .wrangler
 .dev.vars*
 !.dev.vars.example
-cloudflare-env.d.ts
-.wrangler.generated.jsonc
 .vitest/
 /dist/
+# cf / @cloudflare/vite-plugin build output and generated types
+.cloudflare/
 .vinext/

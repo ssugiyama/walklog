@@ -14,7 +14,12 @@ const nextConfig = {
       bodySizeLimit: '3mb',
     },
   },
-  output: 'standalone',
+  // Standalone output is for the Docker image (`next build`). The
+  // Cloudflare build (`vp run cf-build`) sets CF_WORKERS_BUILD to skip it:
+  // vinext's standalone step expects the dist/client + dist/server layout,
+  // which @cloudflare/vite-plugin 2's Build Output (.cloudflare/output)
+  // no longer produces.
+  output: process.env.CF_WORKERS_BUILD ? undefined : 'standalone',
 }
 
 export default nextConfig

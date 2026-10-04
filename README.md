@@ -220,7 +220,7 @@ pnpm start
 Deploys the app to Cloudflare Workers via [vinext](https://github.com/cloudflare/vinext) (a Vite-based implementation of the Next.js API surface), using Supabase Postgres as the database. Firebase Auth and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
 
 #### Prerequisites
-- A Cloudflare account, with [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) logged in (`pnpm exec wrangler login`)
+- A Cloudflare account, with the [`cf`](https://www.npmjs.com/package/cf) CLI logged in (`pnpm exec cf auth login`). [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) is still used for `wrangler tail` and `wrangler secret put`, so log it in too (`pnpm exec wrangler login`)
 - A Supabase project with the PostGIS extension enabled (`create extension if not exists postgis;`), with migrations applied (`pnpm migrate` with `DB_URL` pointed at Supabase)
 
 #### Set Up Hyperdrive
@@ -229,16 +229,16 @@ Direct TLS connections from a Worker straight to Supabase (bypassing Hyperdrive)
 
 ```bash
 cd web
-pnpm exec wrangler hyperdrive create walklog-db --connection-string="postgres://postgres:password@db.xxxx.supabase.co:5432/postgres"
+pnpm exec cf hyperdrive create walklog-db --connection-string="postgres://postgres:password@db.xxxx.supabase.co:5432/postgres"
 ```
 
-Use Supabase's **direct** connection string here (found in the Supabase dashboard under Project Settings → Database), not the Supavisor pooler - Hyperdrive does its own pooling. The command prints an `id`, which isn't meaningful to share across deployments, so it isn't hardcoded in `wrangler.jsonc` - export it as an env var instead:
+Use Supabase's **direct** connection string here (found in the Supabase dashboard under Project Settings → Database), not the Supavisor pooler - Hyperdrive does its own pooling. The command prints an `id`, which isn't meaningful to share across deployments, so it isn't hardcoded in `cloudflare.config.ts` - export it as an env var instead:
 
 ```bash
 export HYPERDRIVE_ID=<the id it printed>
 ```
 
-`vp run cf-build`/`cf-dev`/`preview`/`deploy`/`upload`/`cf-typegen` all run `scripts/render-wrangler-config.mjs` first, which substitutes `HYPERDRIVE_ID` (and `KV_CACHE_ID`, see below) into a gitignored `.wrangler.generated.jsonc` that they then point wrangler at - `wrangler.jsonc` itself stays a generic, committable template.
+`cloudflare.config.ts` reads `HYPERDRIVE_ID` (and `KV_CACHE_ID`, see below) from the environment. They're required by `vp run cf-build` (and so `preview`/`deploy`/`upload`); `vp run cf-dev` and `vp check` fall back to placeholder ids, since local dev simulates KV and connects to Hyperdrive's local connection string instead.
 
 #### Set Up Caching
 
@@ -246,19 +246,19 @@ The `'use cache'` functions in `lib/actions/walk-actions.ts` (search results, th
 
 ```bash
 cd web
-pnpm exec wrangler kv namespace create walklog-cache
+pnpm exec cf kv namespaces create walklog-cache
 export KV_CACHE_ID=<the id it printed>
 ```
 
-`vp run preview` uses wrangler's local emulated KV instead, so the id only has to be set, not reachable.
+`vp run cf-dev`/`preview` use a locally simulated KV namespace instead, so they never touch the real one.
 
 Cache keys include the build id, so every deploy starts with an empty cache rather than serving entries from the previous build.
 
 #### Configure Environment Variables
 
-`web/wrangler.jsonc`'s `vars` only holds `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure.
+`web/cloudflare.config.ts` only declares one plain-text binding, `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure.
 
-Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - `wrangler secret put` has no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before `wrangler` even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run cf-dev`/`preview`/`deploy`/`upload`:
+Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - Worker secrets have no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before the deploy even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run cf-dev`/`preview`/`deploy`/`upload`:
 
 ```bash
 cd web
@@ -271,19 +271,19 @@ Every other variable from the reference table (`SITE_NAME`, `R2_*`, etc.) is rea
 
 ```bash
 cd web
-pnpm exec wrangler secret put SITE_NAME
-pnpm exec wrangler secret put R2_ACCOUNT_ID
+pnpm exec wrangler secret put SITE_NAME --name walklog
+pnpm exec wrangler secret put R2_ACCOUNT_ID --name walklog
 # ...repeat for whichever other server-only variables from the reference table your deployment needs
 ```
 
 `DB_URL` is the one exception among these - it's only used for the Docker/manual deployment path, not Workers (which reads the connection string from the Hyperdrive binding instead), so it doesn't need to be set here at all.
 
-Don't add either kind of variable to `wrangler.jsonc`'s `vars` even as empty placeholders: `wrangler types` infers a var's *literal* value as its TypeScript type (breaking code elsewhere that assigns other strings to it), and an empty string is not the same as unset for the app's `?? 'default'` fallbacks - a variable left genuinely unset still gets its built-in default, but one set to `""` would not.
+Don't add either kind of variable to `cloudflare.config.ts` as a text binding, even as an empty placeholder: `cf workers types` infers a text binding's *literal* value as its TypeScript type (breaking code elsewhere that assigns other strings to it), and an empty string is not the same as unset for the app's `?? 'default'` fallbacks - a variable left genuinely unset still gets its built-in default, but one set to `""` would not.
 
-`wrangler` needs the Hyperdrive binding emulated locally for both `preview` and `deploy` - it can't reach the real proxy from outside Cloudflare's network. Add this once to your local (gitignored) `web/.dev.vars` rather than passing it on every command:
+Local dev/preview can't reach the real Hyperdrive proxy from outside Cloudflare's network, so `cloudflare.config.ts` points the binding at a database directly via `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` (read from the shell environment when the config loads):
 
-```
-CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://postgres:password@db.xxxx.supabase.co:5432/postgres
+```bash
+export CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://postgres:password@db.xxxx.supabase.co:5432/postgres
 ```
 
 That local connection string can point anywhere reachable, including a local Postgres instead of Supabase directly, if you'd rather not hit production data while previewing.
@@ -296,9 +296,9 @@ vp run deploy   # publishes to Cloudflare Workers
 vp run upload   # uploads a new Worker version without routing traffic to it
 ```
 
-If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeScript types with `vp run cf-typegen`.
+If you change `cloudflare.config.ts` (e.g. add a binding), regenerate the local TypeScript types (into `.cloudflare/types`) with `vp run cf-typegen`.
 
-`wrangler.jsonc`'s `observability.enabled` turns on Workers Logs, so invocation logs for every request are queryable in the Cloudflare dashboard (Workers & Pages → walklog → Logs) after a deploy; `pnpm exec wrangler tail` also streams them live from the CLI.
+`cloudflare.config.ts`'s `observability.enabled` turns on Workers Logs, so invocation logs for every request are queryable in the Cloudflare dashboard (Workers & Pages → walklog → Logs) after a deploy; `pnpm exec wrangler tail` also streams them live from the CLI.
 
 #### CI Deployment
 
@@ -314,7 +314,7 @@ If you change `wrangler.jsonc` (e.g. add a binding), regenerate the local TypeSc
 
 On every deploy, the workflow pushes a fixed set of values from repository secrets/variables of the same name, so GitHub is the source of truth instead of manual configuration - using two different mechanisms, matching the two categories from [Configure Environment Variables](#configure-environment-variables) above.
 
-Server-only variables are pushed to Cloudflare via `wrangler secret put` before the build runs:
+Server-only variables are pushed to Cloudflare via `wrangler secret put` (which takes the value on stdin) before the build runs:
 
 | Repository secret | Repository variable |
 |---|---|

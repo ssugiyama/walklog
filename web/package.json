@@ -41,7 +41,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.62.5",
+    "@cloudflare/vite-plugin": "2.0.0-beta.sha-52b0dc0e9",
     "@electric-sql/pglite": "^0.5.4",
     "@electric-sql/pglite-postgis": "^0.2.4",
     "@googlemaps/jest-mocks": "^2.22.8",
@@ -58,6 +58,7 @@
     "@vitejs/plugin-rsc": "^0.5.35",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
+    "cf": "1.0.0-beta.12",
     "drizzle-kit": "1.0.0-rc.4",
     "jsdom": "^29.1.1",
     "postgis": "link:@electric-sql/pglite/postgis",
