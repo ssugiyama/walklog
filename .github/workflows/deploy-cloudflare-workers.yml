@@ -44,12 +44,16 @@ jobs:
         # list: the Workers runtime reads the DB connection from the
         # Hyperdrive binding instead of DB_URL/DB_SSL* (see lib/drizzle/db.ts),
         # and CF_WORKERS is a fixed `vars` entry in wrangler.jsonc already.
+        #
+        # `versions secret bulk` rather than `secret put`: `secret put`
+        # deploys a new version and refuses to run while the latest version
+        # isn't the deployed one (e.g. after a `vp run upload` preview). This
+        # instead adds all the secrets in one new, undeployed version, which
+        # the deploy step below then inherits them from.
         run: |
           vp run render-wrangler-config
-          for name in IMAGE_STORAGE R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME R2_PUBLIC_URL THEME_COLOR THEME_COLOR_LIGHT THEME_COLOR_DARK; do
-            value="${!name}"
-            echo "$value" | vp exec wrangler secret put "$name" --config .wrangler.generated.jsonc
-          done
+          jq -n 'env | {IMAGE_STORAGE, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL, THEME_COLOR, THEME_COLOR_LIGHT, THEME_COLOR_DARK} | map_values(. // "")' \
+            | vp exec wrangler versions secret bulk --config .wrangler.generated.jsonc
         env:
           IMAGE_STORAGE: ${{ vars.IMAGE_STORAGE }}
           R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
