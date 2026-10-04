@@ -6,11 +6,7 @@
     "start": "next start",
     "start-in-docker": "node ./server.js",
     "test": "vp test run --coverage.enabled true",
-    "migrate": "drizzle-kit generate && drizzle-kit migrate",
-    "dev:vinext": "node scripts/render-wrangler-config.mjs && vp dev --port 3001",
-    "build:vinext": "node scripts/render-wrangler-config.mjs && vp build",
-    "start:vinext": "wrangler dev --config dist/server/wrangler.json",
-    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
+    "migrate": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -20,7 +16,6 @@
     "@mui/icons-material": "^9.3.1",
     "@mui/material": "^9.0.0",
     "@mui/material-nextjs": "^9.3.0",
-    "@opennextjs/cloudflare": "^1.20.6",
     "@vinext/cloudflare": "^1.0.1",
     "aws4fetch": "^1.0.20",
     "buffer": "^6.0.3",
