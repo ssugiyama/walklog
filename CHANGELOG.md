@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.0 - 2026-10-07
+
+- set background color of body
+- migrate to Vite+
+- build and run the app with vinext instead of OpenNext
+- move the Workers config and tooling from wrangler to the cf CLI
+- fix padding of main components
+- change icon
+
 ## v1.1.1 - 2026-09-21
 
 - fix: increase bodySizeLimit of server actions
@@ -12,7 +21,7 @@
 
 - migrate from use-query-params to nuqs
 - push Cloudflare secrets from GitHub, enable Workers logs and caching
-- manage config in client only 
+- manage config in client only
 - bump next to 16.3
 - bump typescript to 7
 - change `clearPaths` behavior
