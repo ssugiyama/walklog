@@ -142,7 +142,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
                     : 'calc(env(safe-area-inset-left) + 8px)',
                   paddingRight: 'calc(env(safe-area-inset-right) + 8px)',
                   paddingTop: 8,
-                  paddingBottom: 8,
+                  paddingBottom: 32,
                 }}
               >
                 {children}
