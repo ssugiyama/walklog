@@ -25,6 +25,7 @@ import { idToShowUrl } from '@/lib/utils/meta-utils'
 import { parseAsLatLng, parseAsPath } from '@/lib/utils/nuqs-parsers'
 import type PathManager from '@/lib/utils/path-manager'
 import type PolygonManager from '@/lib/utils/polygon-manager'
+import { searchFilterSchema } from '@/lib/utils/search-params-schema'
 import { ShapeStyles, WalkT } from '@/types'
 import ConfirmModal, {
   APPEND_PATH_CONFIRM_INFO,
@@ -89,7 +90,8 @@ const GMap = (props) => {
   const uploadRef = useRef<HTMLInputElement | null>(null)
   const [confirmInfo, setConfirmInfo] = useState<ConfirmInfo>({ open: false })
   const searchParams = useSearchParams()
-  const filter = searchParams.get('filter')
+  const parsedFilter = searchFilterSchema.safeParse(searchParams.get('filter'))
+  const filter = parsedFilter.success ? parsedFilter.data : null
   rc.filter = filter
   rc.searchCenter = searchCenter
   rc.radius = radius

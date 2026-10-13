@@ -24,6 +24,10 @@ import {
 import { deleteImage, saveImage } from '@/lib/utils/image-storage'
 import { decode } from '@/lib/utils/path-encoder'
 import {
+  DEFAULT_SEARCH_LIMIT,
+  searchPropsSchema,
+} from '@/lib/utils/search-params-schema'
+import {
   BaseState,
   CityParams,
   CityT,
@@ -98,30 +102,6 @@ const SEARCH_CACHE_TAG = 'searchTag'
 // clamp: a value outside these bounds means the caller's assumptions about
 // what it asked for and what it got have already diverged, and coercing it
 // to some other "valid" value would just make that divergence invisible.
-const DEFAULT_SEARCH_LIMIT = 20
-const MAX_SEARCH_LIMIT = 100
-const MAX_SEARCH_OFFSET = 10000
-
-const validateSearchLimit = (value: number | undefined): number => {
-  if (value === undefined) return DEFAULT_SEARCH_LIMIT
-  if (!Number.isInteger(value) || value <= 0 || value > MAX_SEARCH_LIMIT) {
-    throw new Error(
-      `Invalid limit: ${value}. Must be an integer between 1 and ${MAX_SEARCH_LIMIT}.`,
-    )
-  }
-  return value
-}
-
-const validateSearchOffset = (value: number | undefined): number => {
-  if (value === undefined) return 0
-  if (!Number.isInteger(value) || value < 0 || value > MAX_SEARCH_OFFSET) {
-    throw new Error(
-      `Invalid offset: ${value}. Must be an integer between 0 and ${MAX_SEARCH_OFFSET}.`,
-    )
-  }
-  return value
-}
-
 const autoApproveUsers: boolean = !!process.env.AUTO_APPROVE_USERS
 
 type UserRow = typeof users.$inferSelect
@@ -258,6 +238,10 @@ export const searchInternalAction = async (
   // afterward. Returning the message as normal data instead of throwing
   // is the only way it survives.
   try {
+    const parsed = searchPropsSchema.safeParse(props)
+    if (!parsed.success) {
+      return { ...state, error: parsed.error.issues[0].message }
+    }
     const db = await getDb()
     const selectColumns = {
       ...getColumns(walks),
@@ -407,8 +391,8 @@ export const searchInternalAction = async (
       where.push(eq(walks.draft, false))
     }
 
-    const limit = validateSearchLimit(props.limit)
-    const offset = validateSearchOffset(props.offset)
+    const limit = parsed.data.limit ?? DEFAULT_SEARCH_LIMIT
+    const offset = parsed.data.offset ?? 0
 
     const condition = and(...where)
     const count = await db.$count(walks, condition)

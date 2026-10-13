@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { getItemAction } from '@/lib/actions/walk-actions'
 import ItemFetcher from '@/lib/utils/item-fetcher'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
+import { idParamSchema } from '@/lib/utils/search-params-schema'
 import ItemBox from './_components/item-box'
 
 // generateMetadata below reads params and cookies (via getItemAction), which
@@ -43,7 +44,11 @@ export async function generateMetadata({
     serial: 0,
   }
   const { id } = await params
-  const newState = await getItemAction(getItemState, Number(id))
+  const parsedId = idParamSchema.safeParse(id)
+  if (!parsedId.success) {
+    return {}
+  }
+  const newState = await getItemAction(getItemState, parsedId.data)
   if (!newState.current) {
     return {}
   }

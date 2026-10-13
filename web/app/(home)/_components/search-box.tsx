@@ -18,6 +18,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useData } from '@/lib/utils/data-context'
 import { idToShowUrl } from '@/lib/utils/meta-utils'
+import { indexParamSchema } from '@/lib/utils/search-params-schema'
 import { useUserContext } from '@/lib/utils/user-context'
 import { UserT } from '@/types'
 import SearchForm from './search-form'
@@ -37,10 +38,9 @@ const SearchBox = () => {
     [],
   )
   useEffect(() => {
-    const index = searchParams.get('index')
-    if (index !== null) {
-      const i = Number(index)
-      const id = rows[i]?.id
+    const parsedIndex = indexParamSchema.safeParse(searchParams.get('index'))
+    if (parsedIndex.success) {
+      const id = rows[parsedIndex.data]?.id
       if (id) {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.delete('index')
