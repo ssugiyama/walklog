@@ -86,18 +86,89 @@ export const areas = pgTable(
 )
 
 export const users = pgTable('users', {
-  uid: varchar({ length: 255 }).primaryKey(),
+  // TS keys follow better-auth's default field names; the physical column
+  // names are unchanged so existing data and bin/manage-users.js keep working.
+  id: varchar('uid', { length: 255 }).primaryKey(),
   email: varchar({ length: 255 }),
-  displayName: varchar('display_name', { length: 255 }),
-  photoURL: varchar('photo_url', { length: 512 }),
+  name: varchar('display_name', { length: 255 }),
+  image: varchar('photo_url', { length: 512 }),
+  emailVerified: boolean('email_verified').notNull().default(false),
   active: boolean().notNull().default(false),
-  createdAt: timestamp('created_at', {
-    withTimezone: true,
-    mode: 'string',
-  })
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 })
+
+export const session = pgTable(
+  'session',
+  {
+    id: text().primaryKey(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    token: text().notNull().unique(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ipAddress: text('ip_address'),
+    userAgent: text('user_agent'),
+    userId: varchar('user_id', { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [index('session_user_id_idx').on(table.userId)],
+)
+
+export const account = pgTable(
+  'account',
+  {
+    id: text().primaryKey(),
+    accountId: text('account_id').notNull(),
+    providerId: text('provider_id').notNull(),
+    userId: varchar('user_id', { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    idToken: text('id_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at', {
+      withTimezone: true,
+    }),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at', {
+      withTimezone: true,
+    }),
+    scope: text(),
+    password: text(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index('account_user_id_idx').on(table.userId)],
+)
+
+export const verification = pgTable(
+  'verification',
+  {
+    id: text().primaryKey(),
+    identifier: text().notNull(),
+    value: text().notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index('verification_identifier_idx').on(table.identifier)],
+)
 
 export const walks = pgTable(
   'walks',
