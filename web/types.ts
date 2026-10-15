@@ -34,7 +34,6 @@ export type WalkT = {
 
 export type BaseState = {
   serial?: number
-  idTokenExpired?: boolean
   // A plain string, not an Error: React's Flight protocol replaces any
   // Error instance crossing the Server Action boundary with a fixed
   // generic message in production builds ("The specific message is

@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { users, walks } from '../../lib/drizzle/schema'
 import { encode } from '../../lib/utils/path-encoder'
 
@@ -13,31 +13,19 @@ vi.mock('next/cache', () => ({
   updateTag: vi.fn(),
 }))
 
-let mockIdTokenCookie: string | undefined
-
-const mockCookieSet = vi.fn(
-  (name: string, value: string, _options?: unknown) => {
-    if (name === 'idToken') mockIdTokenCookie = value
-  },
-)
-const mockCookieDelete = vi.fn((name: string) => {
-  if (name === 'idToken') mockIdTokenCookie = undefined
-})
+let mockSession: { user: { id: string; active: boolean } } | null = null
+const mockGetSession = vi.fn(async (_args?: unknown) => mockSession)
 
 vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({
-    get: (name: string) =>
-      name === 'idToken' && mockIdTokenCookie
-        ? { value: mockIdTokenCookie }
-        : undefined,
-    set: mockCookieSet,
-    delete: mockCookieDelete,
-  })),
+  headers: vi.fn(async () => new Headers()),
 }))
 
-vi.mock('@/lib/utils/firebase-id-token', () => ({
-  verifyFirebaseIdToken: vi.fn().mockResolvedValue({ uid: 'testUserId' }),
-  IdTokenExpiredError: class IdTokenExpiredError extends Error {},
+vi.mock('next/server', () => ({
+  connection: vi.fn(async () => {}),
+}))
+
+vi.mock('@/lib/auth', () => ({
+  getAuth: vi.fn(async () => ({ api: { getSession: mockGetSession } })),
 }))
 
 // lib/actions/walk-actions.ts talks to a real drizzle db instance. Rather than
@@ -58,9 +46,7 @@ const client = db.$client as unknown as PGlite
 import { PGlite } from '@electric-sql/pglite'
 
 import { revalidateTag, updateTag } from 'next/cache'
-import { Mock } from 'vite-plus/test'
 import {
-  clearIdTokenAction,
   deleteItemAction,
   getCityAction,
   getItemAction,
@@ -69,13 +55,8 @@ import {
   getUsersAction,
   searchAction,
   searchInternalAction,
-  setIdTokenAction,
   updateItemAction,
 } from '@/lib/actions/walk-actions'
-import {
-  IdTokenExpiredError,
-  verifyFirebaseIdToken,
-} from '@/lib/utils/firebase-id-token'
 
 const SEARCH_CACHE_TAG = 'searchTag'
 const DEFAULT_PATH = [
@@ -132,7 +113,7 @@ describe('server actions', () => {
     await (client as unknown as PGlite).query(
       'TRUNCATE TABLE users RESTART IDENTITY CASCADE',
     )
-    mockIdTokenCookie = undefined
+    mockSession = null
     vi.clearAllMocks()
   })
 
@@ -272,7 +253,6 @@ describe('server actions', () => {
       prevState = {
         serial: 0,
         error: null,
-        idTokenExpired: false,
         append: false,
       }
       props = { offset: 0, limit: 20 }
@@ -292,7 +272,7 @@ describe('server actions', () => {
       expect(result.error).toMatch(/Invalid limit/)
     })
 
-    it('should increment the serial number and reset error/idTokenExpired', async () => {
+    it('should increment the serial number and reset error', async () => {
       const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockSearchInternalAction = vi
         .fn()
@@ -306,7 +286,6 @@ describe('server actions', () => {
       )
 
       expect(result.serial).toBe(1)
-      expect(result.idTokenExpired).toBe(false)
     })
 
     it('should set append to true if offset is greater than 0', async () => {
@@ -334,7 +313,7 @@ describe('server actions', () => {
 
       await searchAction(prevState, props, mockGetUid, mockSearchInternalAction)
 
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockGetUid).toHaveBeenCalledWith()
       expect(mockSearchInternalAction).toHaveBeenCalledWith(props, 'testUid')
     })
 
@@ -366,7 +345,7 @@ describe('server actions', () => {
       await expect(
         searchAction(prevState, props, mockGetUid, mockSearchInternalAction),
       ).rejects.toThrow('Failed to get UID')
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockGetUid).toHaveBeenCalledWith()
       expect(mockSearchInternalAction).not.toHaveBeenCalled()
     })
 
@@ -457,10 +436,10 @@ describe('server actions', () => {
     let prevState
 
     beforeEach(() => {
-      prevState = { serial: 0, error: null, idTokenExpired: false }
+      prevState = { serial: 0, error: null }
     })
 
-    it('should increment the serial number and reset error/idTokenExpired', async () => {
+    it('should increment the serial number and reset error', async () => {
       const mockGetUid = vi.fn().mockResolvedValue('testUid')
       const mockGetItemInternalActionMock = vi
         .fn()
@@ -474,7 +453,6 @@ describe('server actions', () => {
       )
 
       expect(result.serial).toBe(1)
-      expect(result.idTokenExpired).toBe(false)
     })
 
     it('should call getUid and getItemInternalAction with correct arguments', async () => {
@@ -490,7 +468,7 @@ describe('server actions', () => {
         mockGetItemInternalActionMock,
       )
 
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockGetUid).toHaveBeenCalledWith()
       expect(mockGetItemInternalActionMock).toHaveBeenCalledWith(1, 'testUid')
     })
 
@@ -519,7 +497,7 @@ describe('server actions', () => {
       await expect(
         getItemAction(prevState, 1, mockGetUid, mockGetItemInternalActionMock),
       ).rejects.toThrow('Failed to get UID')
-      expect(mockGetUid).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockGetUid).toHaveBeenCalledWith()
       expect(mockGetItemInternalActionMock).not.toHaveBeenCalled()
     })
 
@@ -549,7 +527,7 @@ describe('server actions', () => {
     let formData
 
     beforeEach(() => {
-      prevState = { serial: 0, error: null, id: null, idTokenExpired: false }
+      prevState = { serial: 0, error: null, id: null }
       formData = new Map()
     })
 
@@ -939,7 +917,6 @@ describe('server actions', () => {
         serial: 0,
         error: null,
         deleted: false,
-        idTokenExpired: false,
       }
     })
 
@@ -1039,15 +1016,15 @@ describe('server actions', () => {
     it('should return only active users with uid, displayName, and photoURL', async () => {
       await db.insert(users).values([
         {
-          uid: 'user1',
-          displayName: 'User One',
-          photoURL: 'http://example.com/user1.jpg',
+          id: 'user1',
+          name: 'User One',
+          image: 'http://example.com/user1.jpg',
           active: true,
         },
         {
-          uid: 'user2',
-          displayName: 'Pending User',
-          photoURL: 'http://example.com/user2.jpg',
+          id: 'user2',
+          name: 'Pending User',
+          image: 'http://example.com/user2.jpg',
           active: false,
         },
       ])
@@ -1072,142 +1049,61 @@ describe('server actions', () => {
   })
 
   describe('registration gate (getSelfStatusAction / getUid)', () => {
-    it('getSelfStatusAction returns anonymous when there is no id token', async () => {
-      mockIdTokenCookie = undefined
+    const post = async () => {
+      const formData = new Map()
+      formData.set('date', '2023-05-15')
+      formData.set('title', 'Test Walk')
+      formData.set('path', encode(DEFAULT_PATH))
+      return updateItemAction(
+        { serial: 0, error: null, id: null },
+        formData as unknown as FormData,
+      )
+    }
+
+    it('getSelfStatusAction returns anonymous when there is no session', async () => {
+      mockSession = null
 
       expect(await getSelfStatusAction()).toBe('anonymous')
     })
 
-    it('creates a pending user on first login and reports pending status', async () => {
-      mockIdTokenCookie = 'token'
+    it('getSelfStatusAction returns anonymous instead of throwing when getSession fails', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      mockGetSession.mockRejectedValueOnce(new Error('db down'))
+
+      expect(await getSelfStatusAction()).toBe('anonymous')
+    })
+
+    it('reports pending for a signed-in user who is not active', async () => {
+      mockSession = { user: { id: 'testUserId', active: false } }
 
       expect(await getSelfStatusAction()).toBe('pending')
-      const [row] = await db
-        .select()
-        .from(users)
-        .where(eq(users.uid, 'testUserId'))
-      expect(row.active).toBe(false)
     })
 
-    it('does not create a second row for the same uid on repeated calls', async () => {
-      mockIdTokenCookie = 'token'
-
-      await getSelfStatusAction()
-      await getSelfStatusAction()
-
-      const rows = await db
-        .select()
-        .from(users)
-        .where(eq(users.uid, 'testUserId'))
-      expect(rows).toHaveLength(1)
-    })
-
-    it('reports active status from the users table', async () => {
-      mockIdTokenCookie = 'token'
-      await db.insert(users).values({ uid: 'testUserId', active: true })
+    it('reports active for an active user', async () => {
+      mockSession = { user: { id: 'testUserId', active: true } }
 
       expect(await getSelfStatusAction()).toBe('active')
     })
 
-    it('sets idTokenExpired and skips the DB lookup when the token is expired', async () => {
-      mockIdTokenCookie = 'token'
-      ;(verifyFirebaseIdToken as Mock).mockRejectedValueOnce(
-        new IdTokenExpiredError('expired'),
-      )
-      const prevState = {
-        serial: 0,
-        error: null,
-        id: null,
-        idTokenExpired: false,
-      }
-      const formData = new Map()
+    it('denies posting without a session', async () => {
+      mockSession = null
 
-      const result = await updateItemAction(
-        prevState,
-        formData as unknown as FormData,
-      )
-
-      expect(result.idTokenExpired).toBe(true)
-      expect(result.id).toBeUndefined()
+      await expect(post()).rejects.toThrow('unauthorized')
     })
 
-    it('denies posting for a pending user (auto-provisioned on first login)', async () => {
-      mockIdTokenCookie = 'token'
-      const prevState = {
-        serial: 0,
-        error: null,
-        id: null,
-        idTokenExpired: false,
-      }
-      const formData = new Map()
-      formData.set('date', '2023-05-15')
-      formData.set('title', 'Test Walk')
-      formData.set('path', encode(DEFAULT_PATH))
+    it('denies posting for a pending user', async () => {
+      mockSession = { user: { id: 'testUserId', active: false } }
 
-      await expect(
-        updateItemAction(prevState, formData as unknown as FormData),
-      ).rejects.toThrow('unauthorized')
+      await expect(post()).rejects.toThrow('unauthorized')
     })
 
     it('allows posting for an active user', async () => {
-      mockIdTokenCookie = 'token'
-      await db.insert(users).values({ uid: 'testUserId', active: true })
-      const prevState = {
-        serial: 0,
-        error: null,
-        id: null,
-        idTokenExpired: false,
-      }
-      const formData = new Map()
-      formData.set('date', '2023-05-15')
-      formData.set('title', 'Test Walk')
-      formData.set('path', encode(DEFAULT_PATH))
+      mockSession = { user: { id: 'testUserId', active: true } }
 
-      const result = await updateItemAction(
-        prevState,
-        formData as unknown as FormData,
-      )
+      const result = await post()
 
       expect(result.error).toBeNull()
       expect(result.id).toEqual(expect.any(Number))
-    })
-  })
-
-  describe('setIdTokenAction / clearIdTokenAction', () => {
-    it('verifies the token and sets it as an httpOnly cookie', async () => {
-      const result = await setIdTokenAction('a-valid-token')
-
-      expect(result.error).toBe(false)
-      expect(mockCookieSet).toHaveBeenCalledWith(
-        'idToken',
-        'a-valid-token',
-        expect.objectContaining({
-          httpOnly: true,
-          sameSite: 'strict',
-          path: '/',
-        }),
-      )
-      expect(mockIdTokenCookie).toBe('a-valid-token')
-    })
-
-    it('does not set the cookie when the token fails verification', async () => {
-      ;(verifyFirebaseIdToken as Mock).mockRejectedValueOnce(
-        new Error('invalid'),
-      )
-
-      const result = await setIdTokenAction('a-bad-token')
-
-      expect(result.error).toBe(true)
-      expect(mockCookieSet).not.toHaveBeenCalled()
-    })
-
-    it('deletes the cookie', async () => {
-      mockIdTokenCookie = 'token'
-
-      await clearIdTokenAction()
-
-      expect(mockCookieDelete).toHaveBeenCalledWith('idToken')
-      expect(mockIdTokenCookie).toBeUndefined()
     })
   })
 })
