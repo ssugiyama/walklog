@@ -19,8 +19,6 @@ import { useSearchParams } from 'next/navigation'
 import React, {
   useActionState,
   useCallback,
-  useEffect,
-  useRef,
   useState,
   useTransition,
 } from 'react'
@@ -70,12 +68,10 @@ const ItemBox = () => {
 
   const initialDeleteState: DeleteItemState = {
     deleted: false,
-    idTokenExpired: false,
     serial: 0,
   }
-  const { updateIdToken } = useUserContext()
   const [isPending, startTransition] = useTransition()
-  const [deleteState, dispatchDelete] = useActionState(
+  const [, dispatchDelete] = useActionState(
     deleteItemAction,
     initialDeleteState,
   )
@@ -104,30 +100,6 @@ const ItemBox = () => {
     nextUrl = `/?${params.toString()}&index=${data.offset}`
   }
   const prevUrl = data.prevId && idToShowUrl(data.prevId, searchParams)
-  // Next.js Cache Componentsはページ遷移時に/show/[id]をアンマウントせず
-  // React Activityで非表示にするため、`deleteState`はページを再度開いた
-  // ときも保持される。そのままだとこのeffectが非表示→表示の遷移で
-  // 再実行され、トークン再取得後の再削除が確認ダイアログなしに再度走って
-  // しまうため、既に処理したserialをrefで記録して防ぐ。
-  const handledDeleteSerialRef = useRef(0)
-  useEffect(() => {
-    if (
-      deleteState &&
-      deleteState.serial > 0 &&
-      handledDeleteSerialRef.current !== deleteState.serial
-    ) {
-      handledDeleteSerialRef.current = deleteState.serial
-      if (deleteState.idTokenExpired) {
-        startTransition(() => {
-          void (async () => {
-            await updateIdToken()
-            dispatchDelete(item?.id)
-          })()
-        })
-      }
-    }
-  }, [deleteState?.serial])
-
   const sxImageBox = {
     float: { xs: 'none', sm: 'left' },
     width: 320,

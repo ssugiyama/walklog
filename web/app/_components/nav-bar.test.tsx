@@ -1,9 +1,7 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { onIdTokenChanged } from 'firebase/auth'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { Mock } from 'vite-plus/test'
-import { useConfig } from '@/lib/utils/config'
 import { useMainContext } from '@/lib/utils/main-context'
 import { useUserContext } from '@/lib/utils/user-context'
 import NavBar from './nav-bar'
@@ -16,16 +14,13 @@ vi.mock('@/lib/utils/user-context', () => ({
   useUserContext: vi.fn(),
 }))
 
-vi.mock('@/lib/utils/config', () => ({
-  useConfig: vi.fn(),
-}))
-
-vi.mock('firebase/auth', () => ({
-  getAuth: vi.fn(),
-  GoogleAuthProvider: vi.fn(),
-  signInWithPopup: vi.fn(),
-  signOut: vi.fn(),
-  onIdTokenChanged: vi.fn(() => vi.fn()),
+const mockSignInSocial = vi.fn()
+const mockSignOut = vi.fn()
+vi.mock('@/lib/auth-client', () => ({
+  authClient: {
+    signIn: { social: (...args: unknown[]) => mockSignInSocial(...args) },
+    signOut: (...args: unknown[]) => mockSignOut(...args),
+  },
 }))
 
 vi.mock(
@@ -35,10 +30,6 @@ vi.mock(
       return <div data-testid="walk-editor">Walk Editor</div>
     },
 )
-
-vi.mock('firebase/app', () => ({
-  initializeApp: vi.fn(),
-}))
 
 vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn(() => ({
@@ -54,13 +45,9 @@ vi.mock('use-query-params', () => ({
 describe('NavBar', () => {
   const mockDispatchMain = vi.fn()
   const mockPushWithGuard = vi.fn(() => vi.fn())
-  const mockSetCurrentUser = vi.fn()
-  const mockUpdateIdToken = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(onIdTokenChanged as Mock).mockReturnValue(vi.fn())
-
     ;(useMainContext as Mock).mockReturnValue([
       { overlay: false, toolBoxOpened: false },
       mockDispatchMain,
@@ -69,12 +56,7 @@ describe('NavBar', () => {
 
     ;(useUserContext as Mock).mockReturnValue({
       currentUser: null,
-      setCurrentUser: mockSetCurrentUser,
-      updateIdToken: mockUpdateIdToken,
-    })
-
-    ;(useConfig as Mock).mockReturnValue({
-      firebaseConfig: {},
+      selfStatus: 'anonymous',
     })
   })
 
@@ -106,8 +88,7 @@ describe('NavBar', () => {
   it('displays logout option when a user is logged in', () => {
     ;(useUserContext as Mock).mockReturnValue({
       currentUser: { displayName: 'Test User', photoURL: 'test-url' },
-      setCurrentUser: mockSetCurrentUser,
-      updateIdToken: mockUpdateIdToken,
+      selfStatus: 'active',
     })
 
     render(<NavBar />)
@@ -116,14 +97,41 @@ describe('NavBar', () => {
     expect(screen.getByText('logout')).toBeInTheDocument()
   })
 
-  it('syncs currentUser and the id token cookie whenever Firebase reports a token change', () => {
+  it('starts Google sign-in when "login with Google" is clicked', async () => {
+    mockSignInSocial.mockResolvedValue({ error: null })
     render(<NavBar />)
-    const listener = (onIdTokenChanged as Mock).mock.calls[0][1]
-    const fakeUser = { displayName: 'Test User' }
+    fireEvent.click(screen.getByTestId('account-button'))
+    fireEvent.click(screen.getByText('login with Google'))
+    await waitFor(() =>
+      expect(mockSignInSocial).toHaveBeenCalledWith({
+        provider: 'google',
+        callbackURL: '/',
+      }),
+    )
+  })
 
-    listener(fakeUser)
+  it('shows the error in a snackbar when sign-in fails', async () => {
+    mockSignInSocial.mockResolvedValue({ error: { message: 'boom' } })
+    render(<NavBar />)
+    fireEvent.click(screen.getByTestId('account-button'))
+    fireEvent.click(screen.getByText('login with Google'))
+    await waitFor(() =>
+      expect(mockDispatchMain).toHaveBeenCalledWith({
+        type: 'OPEN_SNACKBAR',
+        payload: 'boom',
+      }),
+    )
+  })
 
-    expect(mockSetCurrentUser).toHaveBeenCalledWith(fakeUser)
-    expect(mockUpdateIdToken).toHaveBeenCalled()
+  it('signs out when "logout" is clicked', async () => {
+    ;(useUserContext as Mock).mockReturnValue({
+      currentUser: { displayName: 'Test User', photoURL: 'test-url' },
+      selfStatus: 'active',
+    })
+    mockSignOut.mockResolvedValue({ error: null })
+    render(<NavBar />)
+    fireEvent.click(screen.getByTestId('account-button'))
+    fireEvent.click(screen.getByText('logout'))
+    await waitFor(() => expect(mockSignOut).toHaveBeenCalled())
   })
 })

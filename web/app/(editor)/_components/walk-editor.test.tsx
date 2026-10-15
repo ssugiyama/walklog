@@ -6,7 +6,6 @@ import { updateItemAction } from '@/lib/actions/walk-actions'
 import { useData } from '@/lib/utils/data-context'
 import WalkEditor from './walk-editor'
 
-const mockUpdateIdToken = vi.fn()
 const mockDeleteSelectedPath = vi.fn()
 const mockRouterPush = vi.fn()
 const mockSetData = vi.fn()
@@ -36,7 +35,6 @@ beforeAll(() => {
 
 vi.mock('@/lib/utils/user-context', () => ({
   useUserContext: () => ({
-    updateIdToken: mockUpdateIdToken,
     currentUser: { uid: 'test-uid' },
     users: [{ uid: 'test-uid', active: true }],
   }),

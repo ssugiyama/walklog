@@ -56,10 +56,9 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   const initialState = {
     id: undefined,
     error: null,
-    idTokenExpired: false,
     serial: 0,
   }
-  const { updateIdToken, currentUser, users } = useUserContext()
+  const { currentUser, users } = useUserContext()
   const [data, setData] = useData()
   const [localError, setLocalError] = useState<Error | null>(null)
   // WalkT.id/.uid are non-optional (a saved walk always has both), so this
@@ -178,26 +177,23 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   // リダイレクトしてしまうため、既に処理したserialをrefで記録して防ぐ。
   const redirectedSerialRef = useRef(0)
   useEffect(() => {
-    if (state.serial > 0) {
-      if (state.idTokenExpired) {
-        void (async () => {
-          await updateIdToken()
-          handleSubmit()
-        })()
-      } else if (state.id && redirectedSerialRef.current !== state.serial) {
-        redirectedSerialRef.current = state.serial
-        // フォーム送信が成功したらdirtyフラグをリセット
-        dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
+    if (
+      state.serial > 0 &&
+      state.id &&
+      redirectedSerialRef.current !== state.serial
+    ) {
+      redirectedSerialRef.current = state.serial
+      // フォーム送信が成功したらdirtyフラグをリセット
+      dispatchMain({ type: 'SET_IS_DIRTY', payload: false })
 
-        if (mode === 'update') {
-          const index = data.rows.findIndex((row) => row?.id === item.id)
-          if (index >= 0) {
-            data.rows[index].stale = true
-            setData({ rows: data.rows })
-          }
+      if (mode === 'update') {
+        const index = data.rows.findIndex((row) => row?.id === item.id)
+        if (index >= 0) {
+          data.rows[index].stale = true
+          setData({ rows: data.rows })
         }
-        router.push(idToShowUrl(state.id))
       }
+      router.push(idToShowUrl(state.id))
     }
   }, [state?.serial])
 

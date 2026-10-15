@@ -11,7 +11,6 @@ const initialSearchState = {
   rows: [],
   count: 0,
   offset: 0,
-  idTokenExpired: false,
   index: -1,
   serial: 0,
   append: false,
@@ -37,7 +36,12 @@ export function Searcher() {
     initialSearchState,
   )
   const [data, setData] = useData()
-  const { updateIdToken, idToken } = useUserContext()
+  const { currentUser } = useUserContext()
+  // `currentUser?.uid` alone can't tell "unresolved" (undefined) from
+  // "signed out" (null) - both read as undefined - so the effect below would
+  // never re-run when an anonymous visitor's session resolves.
+  const sessionKey =
+    currentUser === undefined ? undefined : (currentUser?.uid ?? null)
   const defaultValues = {
     id: null,
     filter: '',
@@ -60,12 +64,12 @@ export function Searcher() {
   const oldParams = new URLSearchParams(data.params)
 
   useEffect(() => {
-    // idToken is `undefined` until Firebase's onIdTokenChanged fires for the
-    // first time (see user-context.tsx). Dispatching before that resolves
-    // means an already-logged-in user gets one anonymous-looking search
-    // followed by a second, authenticated one once idToken catches up.
-    // Waiting for it to resolve collapses that back down to one dispatch.
-    if (idToken === undefined) {
+    // currentUser is `undefined` until the session resolves for the first
+    // time (see user-context.tsx). Dispatching before that means an
+    // already-logged-in user gets one anonymous-looking search followed by a
+    // second, authenticated one once the session arrives. Waiting for it to
+    // resolve collapses that back down to one dispatch.
+    if (currentUser === undefined) {
       return
     }
     if (
@@ -80,19 +84,12 @@ export function Searcher() {
     startTransition(() => {
       dispatchSearch(props)
     })
-  }, [searchParams, idToken])
+  }, [searchParams, sessionKey])
 
   useEffect(() => {
     if (searchState.serial <= 0) {
       return
     }
-    if (searchState.idTokenExpired) {
-      startTransition(async () => {
-        await updateIdToken()
-      })
-      return
-    }
-
     // searchAction catches its own errors into state rather than throwing,
     // precisely so a bad request (e.g. an out-of-range limit typed into the
     // URL) surfaces this message instead of an opaque "Minified React error
