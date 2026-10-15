@@ -16,3 +16,7 @@ next-env.d.ts
 # cf / @cloudflare/vite-plugin build output and generated types
 .cloudflare/
 .vinext/
+
+# Firebase service account / config (no longer used)
+admin.json
+firebase-config.json

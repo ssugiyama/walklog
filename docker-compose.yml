@@ -15,7 +15,6 @@ services:
       - DB_URL=postgresql://${POSTGRES_USER:-walklog}:${POSTGRES_PASSWORD:-walklog}@db:5432/${POSTGRES_DB:-walklog}
     volumes:
       - "./public/${IMAGE_PREFIX:-uploads}:/var/www/public/${IMAGE_PREFIX:-uploads}"
-      - ./web/firebase:/var/www/firebase
     ports:
       - 3000:3000
     links:

@@ -40,10 +40,6 @@ const getConfig = async (): Promise<ConfigT> => {
       process.env.NEXT_PUBLIC_MAP_TYPE_IDS ||
       'roadmap,hybrid,satellite,terrain',
     mapId: process.env.NEXT_PUBLIC_MAP_ID,
-    firebaseConfig: {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    },
     shapeStyles,
     theme,
   }
