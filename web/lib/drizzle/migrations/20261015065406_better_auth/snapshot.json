@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "52a453b7-8994-4db2-9312-534720b560dc",
-  "prevIds": [
-    "674f4f72-a839-4f29-9891-7dad8ed84447"
-  ],
+  "prevIds": ["674f4f72-a839-4f29-9891-7dad8ed84447"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -944,14 +942,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "uid"
-      ],
+      "columnsTo": ["uid"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "account_user_id_users_uid_fkey",
@@ -961,14 +955,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "uid"
-      ],
+      "columnsTo": ["uid"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "session_user_id_users_uid_fkey",
@@ -977,9 +967,7 @@
       "table": "session"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "account_pkey",
       "schema": "public",
@@ -987,9 +975,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "gid"
-      ],
+      "columns": ["gid"],
       "nameExplicit": false,
       "name": "areas_pkey",
       "schema": "public",
@@ -997,9 +983,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "session_pkey",
       "schema": "public",
@@ -1007,9 +991,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "uid"
-      ],
+      "columns": ["uid"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -1017,9 +999,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "verification_pkey",
       "schema": "public",
@@ -1027,9 +1007,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "walks_pkey",
       "schema": "public",
@@ -1038,9 +1016,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "token"
-      ],
+      "columns": ["token"],
       "nullsNotDistinct": false,
       "name": "session_token_key",
       "schema": "public",
