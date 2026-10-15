@@ -38,15 +38,30 @@ export function UserContextProvider({
 }) {
   const { data, isPending } = authClient.useSession()
   const sessionUser = (data as { user: SessionUserT } | null | undefined)?.user
+  // better-auth reports isPending=true on every refetch (tab focus, back
+  // online) while `data` is still null, which is the case for every signed-out
+  // visitor. Only the very first resolution should read as "pending";
+  // otherwise Searcher/ItemFetcher would see undefined -> null again and
+  // re-run their request on each tab switch.
+  const [resolved, setResolved] = useState(false)
+  if (!isPending && !resolved) {
+    setResolved(true)
+  }
   const currentUser = useMemo<CurrentUserT | null | undefined>(() => {
-    if (isPending) return undefined
+    if (isPending && !resolved) return undefined
     if (!sessionUser) return null
     return {
       uid: sessionUser.id,
       displayName: sessionUser.name,
       photoURL: sessionUser.image ?? '',
     }
-  }, [isPending, sessionUser?.id, sessionUser?.name, sessionUser?.image])
+  }, [
+    isPending,
+    resolved,
+    sessionUser?.id,
+    sessionUser?.name,
+    sessionUser?.image,
+  ])
   const [users, setUsers] = useState<UserT[]>([])
   const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')
 
