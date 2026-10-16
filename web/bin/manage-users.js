@@ -5,7 +5,7 @@
 // This runs under plain node (no bundler/TS support), so it can't import
 // lib/drizzle/ssl.ts (TypeScript, and it uses the `@/` path alias that only
 // Next's bundler resolves) - the ssl logic is duplicated here instead.
-const postgres = require('postgres')
+import postgres from 'postgres'
 
 const str2bool = (value) => {
   if (value === undefined || value === null) {
