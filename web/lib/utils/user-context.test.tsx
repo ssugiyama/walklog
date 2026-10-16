@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import React, { Suspense } from 'react'
+import { hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { Mock } from 'vite-plus/test'
 import { authClient } from '@/lib/auth-client'
@@ -124,5 +125,51 @@ describe('UserContextProvider', () => {
       </UserContextProvider>,
     )
     expect(html).toContain('pending')
+  })
+
+  it('does not mismatch when a consumer inside a Suspense boundary hydrates after the provider has already resolved', async () => {
+    ;(authClient.useSession as Mock).mockReturnValue({
+      data: { user: { id: 'u1', name: 'Me', image: null } },
+      isPending: false,
+    })
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    let ready = false
+    const Late = () => {
+      if (!ready) throw gate
+      return <Consumer />
+    }
+    const tree = (
+      <UserContextProvider>
+        <Suspense fallback={null}>
+          <Late />
+        </Suspense>
+      </UserContextProvider>
+    )
+    // Server HTML: the consumer renders without a session.
+    ready = true
+    const html = renderToString(tree)
+    ready = false
+
+    const container = document.createElement('div')
+    container.innerHTML = html
+    document.body.appendChild(container)
+    const errors: unknown[] = []
+    await act(async () => {
+      hydrateRoot(container, tree, {
+        onRecoverableError: (e) => errors.push(e),
+      })
+    })
+    // The provider is hydrated and has the session; only now does the
+    // suspended consumer hydrate.
+    ready = true
+    await act(async () => {
+      release()
+      await gate
+    })
+    expect(errors).toEqual([])
+    document.body.removeChild(container)
   })
 })

@@ -56,20 +56,7 @@ export function UserContextProvider({
   if (!isPending && !resolved) {
     setResolved(true)
   }
-  // The server never has a session, but the client's first render can already
-  // see a cached one. Report "pending" until hydrated so both render the same
-  // HTML and hydration doesn't mismatch (e.g. NavBar's avatar <img>). A
-  // useState+useEffect "mounted" flag isn't enough: NavBar sits inside a
-  // Suspense boundary that can hydrate after this provider's effects ran.
-  // useSyncExternalStore's server snapshot is used for every component while
-  // it hydrates, whenever that happens.
-  const mounted = useSyncExternalStore(
-    subscribeNever,
-    () => true,
-    () => false,
-  )
   const currentUser = useMemo<CurrentUserT | null | undefined>(() => {
-    if (!mounted) return undefined
     if (isPending && !resolved) return undefined
     if (!sessionUser) return null
     return {
@@ -78,7 +65,6 @@ export function UserContextProvider({
       photoURL: sessionUser.image ?? '',
     }
   }, [
-    mounted,
     isPending,
     resolved,
     sessionUser?.id,
@@ -112,5 +98,17 @@ export function UserContextProvider({
 }
 
 export function useUserContext() {
-  return useContext(UserContext)
+  const value = useContext(UserContext)
+  // The server never has a session, but a client component that hydrates
+  // later (e.g. NavBar inside a Suspense boundary) can read a context value
+  // that already has one, and would render different HTML (the avatar <img>).
+  // useSyncExternalStore's server snapshot is used for the component that
+  // calls it while that component hydrates, whenever that happens, so the
+  // gate has to live here in the consumer rather than in the provider.
+  const hydrated = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  )
+  return hydrated ? value : initialState
 }
