@@ -1,5 +1,12 @@
 'use client'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { getSelfStatusAction, getUsersAction } from '@/lib/actions/walk-actions'
 import { authClient } from '@/lib/auth-client'
 import { SelfStatusT, UserT } from '@/types'
@@ -31,6 +38,8 @@ const initialState: UserContextT = {
 }
 const UserContext = createContext(initialState)
 
+const subscribeNever = () => () => {}
+
 export function UserContextProvider({
   children,
 }: {
@@ -48,12 +57,17 @@ export function UserContextProvider({
     setResolved(true)
   }
   // The server never has a session, but the client's first render can already
-  // see a cached one. Report "pending" until mounted so both render the same
-  // HTML and hydration doesn't mismatch (e.g. NavBar's avatar <img>).
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // see a cached one. Report "pending" until hydrated so both render the same
+  // HTML and hydration doesn't mismatch (e.g. NavBar's avatar <img>). A
+  // useState+useEffect "mounted" flag isn't enough: NavBar sits inside a
+  // Suspense boundary that can hydrate after this provider's effects ran.
+  // useSyncExternalStore's server snapshot is used for every component while
+  // it hydrates, whenever that happens.
+  const mounted = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  )
   const currentUser = useMemo<CurrentUserT | null | undefined>(() => {
     if (!mounted) return undefined
     if (isPending && !resolved) return undefined
