@@ -47,7 +47,15 @@ export function UserContextProvider({
   if (!isPending && !resolved) {
     setResolved(true)
   }
+  // The server never has a session, but the client's first render can already
+  // see a cached one. Report "pending" until mounted so both render the same
+  // HTML and hydration doesn't mismatch (e.g. NavBar's avatar <img>).
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const currentUser = useMemo<CurrentUserT | null | undefined>(() => {
+    if (!mounted) return undefined
     if (isPending && !resolved) return undefined
     if (!sessionUser) return null
     return {
@@ -56,6 +64,7 @@ export function UserContextProvider({
       photoURL: sessionUser.image ?? '',
     }
   }, [
+    mounted,
     isPending,
     resolved,
     sessionUser?.id,

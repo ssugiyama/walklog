@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
+import { renderToString } from 'react-dom/server'
 import { Mock } from 'vite-plus/test'
 import { authClient } from '@/lib/auth-client'
 import { UserContextProvider, useUserContext } from './user-context'
@@ -107,5 +108,21 @@ describe('UserContextProvider', () => {
     // After the first resolution, "pending" must never be observed again.
     const firstResolved = seen.indexOf('anonymous')
     expect(seen.slice(firstResolved)).not.toContain('pending')
+  })
+
+  it('renders pending on the first pass even if the session is already cached, so hydration matches the server', () => {
+    // The server always renders without a session; if the client's first
+    // render used a cached session it would produce different HTML (the
+    // avatar <img> in NavBar) and hydration would fail.
+    ;(authClient.useSession as Mock).mockReturnValue({
+      data: { user: { id: 'u1', name: 'Me', image: null } },
+      isPending: false,
+    })
+    const html = renderToString(
+      <UserContextProvider>
+        <Consumer />
+      </UserContextProvider>,
+    )
+    expect(html).toContain('pending')
   })
 })
