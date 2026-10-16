@@ -16,7 +16,9 @@ export default defineConfig({
     user: username,
     password: password,
     database: pathname.slice(1),
-    ssl,
+    // drizzle-kit turns SSL on when the `ssl` key is absent (an `undefined`
+    // value is dropped when it parses the config), so disable it explicitly.
+    ssl: ssl ?? false,
   },
   // Print all statements
   verbose: true,
