@@ -183,8 +183,7 @@ describe('ItemBox Component', () => {
     expect(window.confirm).toHaveBeenCalledWith('Are you sure to delete?')
   })
 
-  it('does not silently retry the delete again when the page is hidden and re-shown by Activity', async () => {
-    const mockUpdateIdToken = vi.fn()
+  it('does not delete again when the page is hidden and re-shown by Activity', async () => {
     window.confirm = vi.fn(() => true)
     ;(useData as Mock).mockReturnValue([
       {
@@ -198,12 +197,10 @@ describe('ItemBox Component', () => {
         { uid: 'user1', displayName: 'Test User', photoURL: 'test-photo.jpg' },
       ],
       currentUser: { uid: 'user1' },
-      updateIdToken: mockUpdateIdToken,
     })
     ;(deleteItemAction as Mock).mockResolvedValue({
       serial: 1,
-      idTokenExpired: true,
-      deleted: false,
+      deleted: true,
     })
 
     const { rerender } = render(
@@ -213,11 +210,7 @@ describe('ItemBox Component', () => {
     )
 
     fireEvent.click(screen.getByTestId('delete-button'))
-
-    // The initial delete call comes back with an expired token, which
-    // triggers one automatic retry after refreshing the token.
-    await waitFor(() => expect(mockUpdateIdToken).toHaveBeenCalledTimes(1))
-    await waitFor(() => expect(deleteItemAction).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(deleteItemAction).toHaveBeenCalledTimes(1))
 
     // Simulate Next.js Cache Components hiding then re-showing the cached
     // /show/[id] route via React's <Activity> when the user reopens it.
@@ -235,7 +228,6 @@ describe('ItemBox Component', () => {
     await waitFor(() =>
       expect(screen.getByTestId('ItemBox')).toBeInTheDocument(),
     )
-    expect(mockUpdateIdToken).toHaveBeenCalledTimes(1)
-    expect(deleteItemAction).toHaveBeenCalledTimes(2)
+    expect(deleteItemAction).toHaveBeenCalledTimes(1)
   })
 })

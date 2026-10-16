@@ -44,7 +44,7 @@ export default defineConfig({
       // instead of a module-level singleton, since Workers forbids reusing
       // a TCP socket across requests. This is the only var that belongs
       // here: it's a fixed property of this deployment target, not
-      // per-deployer config. Everything else (SITE_NAME, FIREBASE_*, R2_*,
+      // per-deployer config. Everything else (SITE_NAME, BETTER_AUTH_*, GOOGLE_CLIENT_*, R2_*,
       // ...) is set as a Worker secret instead - see README.md.
       CF_WORKERS: bindings.text('true'),
       // Hyperdrive terminates the actual TLS connection to Supabase and

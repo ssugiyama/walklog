@@ -44,8 +44,7 @@ describe('Searcher', () => {
     ])
     ;(useConfig as Mock).mockReturnValue({ defaultCenter: '35,139' })
     ;(useUserContext as Mock).mockReturnValue({
-      updateIdToken: vi.fn(),
-      idToken: 'token-1',
+      currentUser: { uid: 'u1' },
     })
     ;(searchAction as Mock).mockResolvedValue({
       rows: [],
@@ -82,12 +81,10 @@ describe('Searcher', () => {
   })
 
   it('waits for auth state to resolve before dispatching, then dispatches exactly once for an already-logged-in user', async () => {
-    // idToken starts `undefined`: the auth state hasn't resolved yet (mirrors
-    // user-context.tsx's real initial value before Firebase's
-    // onIdTokenChanged fires for the first time).
+    // currentUser starts `undefined`: the session hasn't resolved yet
+    // (mirrors user-context.tsx's real initial value).
     ;(useUserContext as Mock).mockReturnValue({
-      updateIdToken: vi.fn(),
-      idToken: undefined, // auth state not yet resolved
+      currentUser: undefined, // session not yet resolved
     })
 
     const { rerender } = render(<Searcher />)
@@ -96,12 +93,12 @@ describe('Searcher', () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(searchAction).not.toHaveBeenCalled()
 
-    // Firebase resolves the already-persisted login in one step: idToken
-    // goes straight from `undefined` to the real token, never passing
-    // through `null` (which means "resolved: anonymous", a different case).
+    // The session resolves the already-persisted login in one step:
+    // currentUser goes straight from `undefined` to the real user, never
+    // passing through `null` (which means "resolved: anonymous", a
+    // different case).
     ;(useUserContext as Mock).mockReturnValue({
-      updateIdToken: vi.fn(),
-      idToken: 'real-token-1',
+      currentUser: { uid: 'u1' },
     })
     rerender(<Searcher />)
 
@@ -110,8 +107,7 @@ describe('Searcher', () => {
 
   it('dispatches exactly once for a user who is not logged in', async () => {
     ;(useUserContext as Mock).mockReturnValue({
-      updateIdToken: vi.fn(),
-      idToken: undefined, // auth state not yet resolved
+      currentUser: undefined, // session not yet resolved
     })
 
     const { rerender } = render(<Searcher />)
@@ -119,11 +115,10 @@ describe('Searcher', () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(searchAction).not.toHaveBeenCalled()
 
-    // Firebase resolves to "no user": idToken goes from undefined (unresolved)
-    // to `null` (resolved: anonymous).
+    // The session resolves to "no user": currentUser goes from `undefined`
+    // (unresolved) to `null` (resolved: anonymous).
     ;(useUserContext as Mock).mockReturnValue({
-      updateIdToken: vi.fn(),
-      idToken: null,
+      currentUser: null,
     })
     rerender(<Searcher />)
 

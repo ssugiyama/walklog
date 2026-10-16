@@ -12,4 +12,7 @@ export default str2bool(process.env.DB_SSL)
         ? Buffer.from(process.env.DB_SSL_CERT, 'base64').toString('utf-8')
         : undefined,
     }
-  : undefined
+  : // `false`, not `undefined`: drizzle-kit loads this module through a CJS
+    // interop that turns a default export of `undefined` into the (truthy)
+    // module object, which would silently enable SSL.
+    false

@@ -40,7 +40,6 @@ export async function generateMetadata({
 }) {
   const getItemState = {
     error: null,
-    idTokenExpired: false,
     serial: 0,
   }
   const { id } = await params

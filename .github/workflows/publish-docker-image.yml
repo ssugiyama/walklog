@@ -49,8 +49,6 @@ jobs:
           tags: ${{ steps.web_meta.outputs.tags }}
           labels: ${{ steps.web_meta.outputs.labels }}
           build-args: |
-            NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
-            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ vars.FIREBASE_AUTH_DOMAIN }}
             NEXT_PUBLIC_GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
             NEXT_PUBLIC_MAP_TYPE_IDS=${{ vars.MAP_TYPE_IDS }}
             NEXT_PUBLIC_DEFAULT_CENTER=${{ vars.DEFAULT_CENTER }}

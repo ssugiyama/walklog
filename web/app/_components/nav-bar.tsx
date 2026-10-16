@@ -7,18 +7,10 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
-import { initializeApp } from 'firebase/app'
-import {
-  GoogleAuthProvider,
-  getAuth,
-  onIdTokenChanged,
-  signInWithPopup,
-  signOut,
-} from 'firebase/auth'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useConfig } from '@/lib/utils/config'
+import React, { useCallback, useState } from 'react'
+import { authClient } from '@/lib/auth-client'
 import { useMainContext } from '@/lib/utils/main-context'
 import { useUserContext } from '@/lib/utils/user-context'
 
@@ -26,13 +18,10 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
   const searchParams = useSearchParams()
   const [mainState, dispatchMain, interceptLink] = useMainContext()
   const { overlay } = mainState
-  const config = useConfig()
-  const provider = useRef<GoogleAuthProvider | undefined>(undefined)
   const [accountAnchorEl, setAccountAnchorEl] = useState<HTMLElement | null>(
     null,
   )
-  const { currentUser, setCurrentUser, selfStatus, updateIdToken } =
-    useUserContext()
+  const { currentUser, selfStatus } = useUserContext()
   const canPost = selfStatus === 'active'
   const handleMenuOpen =
     (setter: typeof setAccountAnchorEl) =>
@@ -52,30 +41,27 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
     [],
   )
 
-  const handleLogin = useCallback((_ev: React.MouseEvent<HTMLLIElement>) => {
-    signInWithPopup(getAuth(), provider.current).catch((error: Error) => {
-      dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
-    })
-  }, [])
-  const handleLogout = useCallback((_ev: React.MouseEvent<HTMLLIElement>) => {
-    signOut(getAuth()).catch((error: Error) => {
-      dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
-    })
-  }, [])
-  useEffect(() => {
-    if (!config.firebaseConfig) return
-
-    initializeApp(config.firebaseConfig)
-    provider.current = new GoogleAuthProvider()
-    // onIdTokenChanged (rather than onAuthStateChanged) also fires on
-    // Firebase's own silent background token refresh, not just sign-in/out,
-    // so the httpOnly session cookie gets renewed proactively instead of
-    // waiting for a request to fail with an expired token first.
-    return onIdTokenChanged(getAuth(), (user) => {
-      setCurrentUser(user)
-      void updateIdToken()
-    })
-  }, [config.firebaseConfig, updateIdToken])
+  const handleLogin = useCallback(
+    async (_ev: React.MouseEvent<HTMLLIElement>) => {
+      const { error } = await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/',
+      })
+      if (error) {
+        dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
+      }
+    },
+    [],
+  )
+  const handleLogout = useCallback(
+    async (_ev: React.MouseEvent<HTMLLIElement>) => {
+      const { error } = await authClient.signOut()
+      if (error) {
+        dispatchMain({ type: 'OPEN_SNACKBAR', payload: error.message })
+      }
+    },
+    [],
+  )
   const closeAllMenus = () => {
     setAccountAnchorEl(null)
   }
@@ -139,6 +125,9 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
           {currentUser ? (
             <img
               alt="user profile"
+              // Google's avatar host answers 429 to requests that carry a
+              // referrer (e.g. from localhost), so don't send one.
+              referrerPolicy="no-referrer"
               style={{ width: 24, borderRadius: '50%' }}
               src={currentUser.photoURL}
             />

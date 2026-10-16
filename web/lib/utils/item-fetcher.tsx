@@ -7,7 +7,6 @@ import { useData } from './data-context'
 import { useUserContext } from './user-context'
 
 const initialGetItemState: GetItemState = {
-  idTokenExpired: false,
   serial: 0,
 }
 
@@ -17,7 +16,12 @@ export function ItemFetcher() {
     getItemAction,
     initialGetItemState,
   )
-  const { updateIdToken, idToken } = useUserContext()
+  const { currentUser } = useUserContext()
+  // `currentUser?.uid` alone can't tell "unresolved" (undefined) from
+  // "signed out" (null) - both read as undefined - so the effect below would
+  // never re-run when an anonymous visitor's session resolves.
+  const sessionKey =
+    currentUser === undefined ? undefined : (currentUser?.uid ?? null)
   const params = useParams()
   const id = params.id ? Number(params.id) : null
   const [data, setData] = useData()
@@ -27,12 +31,12 @@ export function ItemFetcher() {
   }
 
   useEffect(() => {
-    // idToken is `undefined` until Firebase's onIdTokenChanged fires for the
-    // first time (see user-context.tsx). Dispatching before that resolves
-    // means an already-logged-in user gets one anonymous-looking fetch
-    // followed by a second, authenticated one once idToken catches up.
-    // Waiting for it to resolve collapses that back down to one dispatch.
-    if (idToken === undefined) {
+    // currentUser is `undefined` until the session resolves for the first
+    // time (see user-context.tsx). Dispatching before that means an
+    // already-logged-in user gets one anonymous-looking fetch followed by a
+    // second, authenticated one once the session arrives. Waiting for it to
+    // resolve collapses that back down to one dispatch.
+    if (currentUser === undefined) {
       return
     }
     const index = findIndexById(id)
@@ -49,16 +53,10 @@ export function ItemFetcher() {
         dispatchGetItem(id)
       })
     }
-  }, [id, idToken])
+  }, [id, sessionKey])
 
   useEffect(() => {
     if (getItemState.serial <= 0) {
-      return
-    }
-    if (getItemState.idTokenExpired) {
-      startTransition(async () => {
-        await updateIdToken()
-      })
       return
     }
     const index = findIndexById(id)

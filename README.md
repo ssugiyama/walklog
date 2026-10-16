@@ -6,7 +6,7 @@ Walklog is a web application for managing and tracking walking paths with map vi
 
 - Interactive map interface for viewing and creating walking routes
 - Path recording and management
-- User authentication via Firebase
+- User authentication via Better Auth (Google sign-in)
 - Image upload and storage
 - Geographic data visualization
 - Admin user management
@@ -16,7 +16,7 @@ Walklog is a web application for managing and tracking walking paths with map vi
 
 - Node.js (version 14 or higher)
 - PostgreSQL with PostGIS extension
-- Firebase project with authentication enabled
+- Google OAuth client (Google Cloud Console)
 - Google Maps API key
 - Docker (optional, for containerized deployment)
 
@@ -42,16 +42,13 @@ You can obtain Japanese geographic data from either:
 - Visit http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-N03.html
 - Download data and convert to SHP format
 
-### 3. Firebase Configuration
+### 3. Google OAuth Configuration
 
-1. Create a Firebase project at https://console.firebase.google.com
-2. Create a web app in your Firebase project
-3. Enable Google Authentication in Firebase Console
-4. Create a service account for Firebase Admin SDK
-5. Download the following files:
-   - Firebase web app configuration JSON
-   - Service account credentials JSON
-6. Place both files in an arbitrary directory
+1. In the Google Cloud Console, open APIs & Services → Credentials and create an OAuth client ID of type "Web application"
+2. Add these Authorized redirect URIs:
+   - `<BASE_URL>/api/auth/callback/google` (production)
+   - `http://localhost:3000/api/auth/callback/google` (local development)
+3. Note the client ID and client secret; they go into `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` below
 
 ### 4. Environment Variables
 
@@ -78,9 +75,10 @@ IMAGE_PREFIX=uploads
 AUTO_APPROVE_USERS=
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
-FIREBASE_PROJECT_ID=your-firebase-project-id
-NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+BETTER_AUTH_SECRET=generate-with-openssl-rand-base64-32
+BETTER_AUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=your-google-oauth-client-id
+GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 NEXT_PUBLIC_GOOGLE_API_KEY=your-google-maps-api-key
 IMAGE_STORAGE=
 R2_ACCOUNT_ID=your-r2-account-id
@@ -116,9 +114,10 @@ Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript 
 | `R2_SECRET_ACCESS_KEY` | R2 S3-compatible API secret access key (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_BUCKET_NAME` | R2 bucket name (required when `IMAGE_STORAGE=R2`) | No † |
 | `R2_PUBLIC_URL` | Public base URL for the R2 bucket (r2.dev subdomain or custom domain, required when `IMAGE_STORAGE=R2`) | No † |
-| `FIREBASE_PROJECT_ID` | Firebase project ID | Yes |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase Web API key (Authentication) | Yes |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain, e.g. `your-project.firebaseapp.com` | Yes |
+| `BETTER_AUTH_SECRET` | Secret used to sign sessions (generate with `openssl rand -base64 32`) | Yes |
+| `BETTER_AUTH_URL` | Public base URL of the app, e.g. `https://walklog.example.com` | Yes |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | Yes |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Yes |
 | `NEXT_PUBLIC_SHAPE_STYLES_JSON_URL` | URL to fetch shape styles configuration JSON from over the network; falls back to the bundled default when unset | No |
 | `NEXT_PUBLIC_GOOGLE_API_KEY` | Google Maps JavaScript API key | Yes |
 | `NEXT_PUBLIC_MAP_TYPE_IDS` | Comma-separated map types (`roadmap,hybrid,satellite,terrain,gsi`) | No |
@@ -155,10 +154,10 @@ cd web
 node --env-file=.env bin/manage-users.js list-pending
 
 # Approve a user (allow them to create/edit walks)
-node --env-file=.env bin/manage-users.js approve firebase-uid
+node --env-file=.env bin/manage-users.js approve user-id
 
 # Revoke a user's approval
-node --env-file=.env bin/manage-users.js rm firebase-uid
+node --env-file=.env bin/manage-users.js rm user-id
 ```
 
 ## Deployment Options
@@ -217,7 +216,7 @@ pnpm start
 
 ### Option 3: Cloudflare Workers Deployment
 
-Deploys the app to Cloudflare Workers via [vinext](https://github.com/cloudflare/vinext) (a Vite-based implementation of the Next.js API surface), using Supabase Postgres as the database. Firebase Auth and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
+Deploys the app to Cloudflare Workers via [vinext](https://github.com/cloudflare/vinext) (a Vite-based implementation of the Next.js API surface), using Supabase Postgres as the database. Better Auth (Google sign-in) and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
 
 #### Prerequisites
 - A Cloudflare account, with the [`cf`](https://www.npmjs.com/package/cf) CLI logged in (`pnpm exec cf auth login`). [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) is still used for `wrangler tail`, Worker secrets and promoting versions, so log it in too (`pnpm exec wrangler login`)
@@ -258,11 +257,11 @@ Cache keys include the build id, so every deploy starts with an empty cache rath
 
 `web/cloudflare.config.ts` only declares one plain-text binding, `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure.
 
-Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - Worker secrets have no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before the deploy even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run cf-dev`/`preview`/`deploy`/`upload`:
+Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_GOOGLE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - Worker secrets have no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before the deploy even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run cf-dev`/`preview`/`deploy`/`upload`:
 
 ```bash
 cd web
-export NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
+export NEXT_PUBLIC_GOOGLE_API_KEY=your-google-maps-api-key
 # ...repeat for whichever other NEXT_PUBLIC_* variables your deployment needs
 vp run deploy
 ```
@@ -320,6 +319,8 @@ Server-only variables are pushed to Cloudflare via `wrangler versions secret bul
 
 | Repository secret | Repository variable |
 |---|---|
+| `BETTER_AUTH_SECRET` | `BETTER_AUTH_URL` |
+| `GOOGLE_CLIENT_SECRET` | `GOOGLE_CLIENT_ID` |
 | `R2_ACCESS_KEY_ID` | `IMAGE_STORAGE` |
 | `R2_SECRET_ACCESS_KEY` | `R2_ACCOUNT_ID` |
 | | `R2_BUCKET_NAME` |
@@ -334,7 +335,6 @@ Server-only variables are pushed to Cloudflare via `wrangler versions secret bul
 
 | Repository secret | Repository variable |
 |---|---|
-| `FIREBASE_API_KEY` | `FIREBASE_AUTH_DOMAIN` |
 | `GOOGLE_API_KEY` | `MAP_TYPE_IDS` |
 | | `DEFAULT_CENTER` |
 | | `DEFAULT_ZOOM` |
@@ -385,10 +385,10 @@ walklog/
 - Check DB_URL format: `postgres://user:password@host:port/database`
 - Ensure PostGIS extension is enabled
 
-**Firebase Authentication Issues**
-- Verify Firebase configuration files are correctly placed
-- Check that Google Authentication is enabled in Firebase Console
-- Ensure service account has proper permissions
+**Authentication Issues**
+- Verify `BETTER_AUTH_URL` matches the URL you open the app at
+- Check that `<BASE_URL>/api/auth/callback/google` is listed as an authorized redirect URI of the Google OAuth client
+- Ensure `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set
 
 **Map Not Loading**
 - Verify `NEXT_PUBLIC_GOOGLE_API_KEY` is set correctly

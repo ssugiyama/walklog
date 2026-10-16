@@ -1,102 +1,114 @@
 'use client'
-import { User as FirebaseUser, getAuth } from 'firebase/auth'
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
+  useSyncExternalStore,
 } from 'react'
-import {
-  clearIdTokenAction,
-  getSelfStatusAction,
-  getUsersAction,
-  setIdTokenAction,
-} from '@/lib/actions/walk-actions'
+import { getSelfStatusAction, getUsersAction } from '@/lib/actions/walk-actions'
+import { authClient } from '@/lib/auth-client'
 import { SelfStatusT, UserT } from '@/types'
+
+export type CurrentUserT = {
+  uid: string
+  displayName: string
+  photoURL: string
+}
+
+// The fields of better-auth's session user this app reads. Typed here rather
+// than inferred: with TypeScript 7 and better-auth 1.7, `useSession().data`
+// is inferred as `never`, so the narrowing below is done by hand.
+type SessionUserT = { id: string; name: string; image?: string | null }
 
 type UserContextT = {
   users: UserT[]
-  idToken: string | null | undefined
-  currentUser: FirebaseUser | null | undefined
+  // `undefined`: the session hasn't resolved yet; `null`: resolved, signed
+  // out. Consumers like Searcher/ItemFetcher use the difference to wait for
+  // the first resolution instead of firing once anonymously and again once
+  // the real state arrives.
+  currentUser: CurrentUserT | null | undefined
   selfStatus: SelfStatusT
-  setCurrentUser: (user: FirebaseUser | null) => void
-  updateIdToken: () => Promise<void>
 }
 const initialState: UserContextT = {
   users: [],
-  idToken: undefined,
   currentUser: undefined,
   selfStatus: 'anonymous',
-  setCurrentUser: () => {},
-  updateIdToken: async () => {},
 }
 const UserContext = createContext(initialState)
+
+const subscribeNever = () => () => {}
 
 export function UserContextProvider({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [currentUser, setCurrentUser] = useState<
-    FirebaseUser | null | undefined
-  >(undefined)
-  // Can't read the idToken cookie here anymore now that it's httpOnly - it
-  // only ever serves as a trigger for effects elsewhere. Starts `undefined`
-  // (auth state not yet resolved), distinct from `null` (resolved: signed
-  // out), so consumers like Searcher/ItemFetcher can tell "don't know yet"
-  // apart from "resolved: anonymous" and wait for the first onIdTokenChanged
-  // callback instead of firing once anonymously and again once the real
-  // state arrives.
-  const [idToken, setIdToken] = useState<string | null | undefined>(undefined)
+  const { data, isPending } = authClient.useSession()
+  const sessionUser = (data as { user: SessionUserT } | null | undefined)?.user
+  // better-auth reports isPending=true on every refetch (tab focus, back
+  // online) while `data` is still null, which is the case for every signed-out
+  // visitor. Only the very first resolution should read as "pending";
+  // otherwise Searcher/ItemFetcher would see undefined -> null again and
+  // re-run their request on each tab switch.
+  const [resolved, setResolved] = useState(false)
+  if (!isPending && !resolved) {
+    setResolved(true)
+  }
+  const currentUser = useMemo<CurrentUserT | null | undefined>(() => {
+    if (isPending && !resolved) return undefined
+    if (!sessionUser) return null
+    return {
+      uid: sessionUser.id,
+      displayName: sessionUser.name,
+      photoURL: sessionUser.image ?? '',
+    }
+  }, [
+    isPending,
+    resolved,
+    sessionUser?.id,
+    sessionUser?.name,
+    sessionUser?.image,
+  ])
   const [users, setUsers] = useState<UserT[]>([])
   const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')
-
-  // Reads getAuth().currentUser directly rather than closing over the
-  // `currentUser` state: this is also called from the onIdTokenChanged
-  // listener on Firebase's own silent background token refresh, where the
-  // User object is mutated in place rather than replaced, so a stale React
-  // closure could hand back an already-expired token.
-  const updateIdToken = useCallback(async () => {
-    const user = getAuth().currentUser
-    if (!user) {
-      await clearIdTokenAction()
-      setIdToken(null)
-      setSelfStatus('anonymous')
-      return
-    }
-    const newIdToken = (await user.getIdToken()) ?? null
-    const { error } = await setIdTokenAction(newIdToken)
-    if (error) {
-      setIdToken(null)
-      setSelfStatus('anonymous')
-      return
-    }
-    setIdToken(newIdToken)
-    setSelfStatus(await getSelfStatusAction())
-  }, [])
 
   useEffect(() => {
     void (async () => {
       setUsers(await getUsersAction())
     })()
   }, [])
+
+  useEffect(() => {
+    if (!currentUser) {
+      setSelfStatus('anonymous')
+      return
+    }
+    void (async () => {
+      setSelfStatus(await getSelfStatusAction())
+    })()
+  }, [currentUser?.uid])
+
   return (
-    <UserContext.Provider
-      value={{
-        users,
-        currentUser,
-        setCurrentUser,
-        idToken,
-        selfStatus,
-        updateIdToken,
-      }}
-    >
+    <UserContext.Provider value={{ users, currentUser, selfStatus }}>
       {children}
     </UserContext.Provider>
   )
 }
 
 export function useUserContext() {
-  return useContext(UserContext)
+  const value = useContext(UserContext)
+  // The server never has a session, but a client component that hydrates
+  // later (e.g. NavBar inside a Suspense boundary) can read a context value
+  // that already has one, and would render different HTML (the avatar <img>).
+  // useSyncExternalStore's server snapshot is used for the component that
+  // calls it while that component hydrates, whenever that happens, so the
+  // gate has to live here in the consumer rather than in the provider.
+  const hydrated = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  )
+  return hydrated ? value : initialState
 }

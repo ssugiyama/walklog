@@ -14,13 +14,10 @@ import {
 import moment from 'moment'
 import { nanoid } from 'nanoid'
 import { cacheTag, updateTag } from 'next/cache'
-import { cookies } from 'next/headers'
+import { headers } from 'next/headers'
 import { forbidden, notFound, unauthorized } from 'next/navigation'
-import {
-  FirebaseIdTokenClaims,
-  IdTokenExpiredError,
-  verifyFirebaseIdToken,
-} from '@/lib/utils/firebase-id-token'
+import { connection } from 'next/server'
+import { getAuth } from '@/lib/auth'
 import { deleteImage, saveImage } from '@/lib/utils/image-storage'
 import { decode } from '@/lib/utils/path-encoder'
 import {
@@ -28,7 +25,6 @@ import {
   searchPropsSchema,
 } from '@/lib/utils/search-params-schema'
 import {
-  BaseState,
   CityParams,
   CityT,
   DeleteItemState,
@@ -102,67 +98,6 @@ const SEARCH_CACHE_TAG = 'searchTag'
 // clamp: a value outside these bounds means the caller's assumptions about
 // what it asked for and what it got have already diverged, and coercing it
 // to some other "valid" value would just make that divergence invisible.
-const autoApproveUsers: boolean = !!process.env.AUTO_APPROVE_USERS
-
-type UserRow = typeof users.$inferSelect
-
-// Not exported: takes a verified token claim, so it must never be reachable
-// as a server action directly from the client.
-const getOrCreateUser = async (
-  claim: FirebaseIdTokenClaims,
-): Promise<UserRow> => {
-  const db = await getDb()
-  const existing = await db
-    .select()
-    .from(users)
-    .where(eq(users.uid, claim.uid))
-    .limit(1)
-    .then((rows) => rows[0])
-  if (existing) return existing
-  const created = await db
-    .insert(users)
-    .values({
-      uid: claim.uid,
-      email: claim.email ?? null,
-      displayName: claim.name ?? null,
-      photoURL: claim.picture ?? null,
-      active: autoApproveUsers,
-    })
-    .onConflictDoNothing()
-    .returning()
-    .then((rows) => rows[0])
-  return (
-    created ??
-    (await db
-      .select()
-      .from(users)
-      .where(eq(users.uid, claim.uid))
-      .limit(1)
-      .then((rows) => rows[0]))
-  )
-}
-
-const verifyIdToken = async (
-  state: BaseState,
-): Promise<FirebaseIdTokenClaims | null> => {
-  const cookieStore = await cookies()
-  state.idTokenExpired = false
-  const idToken = cookieStore.get('idToken')
-  if (!idToken?.value) {
-    return null
-  }
-  try {
-    return await verifyFirebaseIdToken(idToken.value)
-  } catch (error) {
-    if (error instanceof IdTokenExpiredError) {
-      state.idTokenExpired = true
-    } else {
-      state.error = (error as Error).message
-    }
-    return null
-  }
-}
-
 // Verified inert, not assumed: `'use cache: private'` results are never
 // stored server-side and are only ever cached in the browser via the
 // router's runtime prefetching of a *rendered* segment. getUid is called
@@ -170,52 +105,35 @@ const verifyIdToken = async (
 // getItemAction, updateItemAction, deleteItemAction), never rendered, so
 // there is no prefetchable segment for the browser to cache and this
 // always executes fresh. No directive needed.
-const getUid = async (state: BaseState): Promise<string | null> => {
-  const claim = await verifyIdToken(state)
-  if (!claim) {
-    return null
+// Both `getSession` and `headers()` read request-scoped data, which Cache
+// Components forbids while prerendering. With partialPrefetching a page can
+// be prerendered with cookies available (e.g. /show/[id]'s generateMetadata
+// -> getItemAction -> getUid), so reaching here doesn't imply request time:
+// defer explicitly. A failing session lookup is treated as anonymous so
+// search and item fetching keep working.
+const getSessionUser = async () => {
+  await connection()
+  try {
+    const auth = await getAuth()
+    const session = await auth.api.getSession({ headers: await headers() })
+    return session?.user ?? undefined
+  } catch (error) {
+    console.error('failed to get session', error)
+    return undefined
   }
-  const user = await getOrCreateUser(claim)
-  if (!user.active) {
-    return null
-  }
-  return claim.uid
+}
+
+const getUid = async (): Promise<string | null> => {
+  const user = await getSessionUser()
+  return user?.active ? user.id : null
 }
 
 export const getSelfStatusAction = async (): Promise<SelfStatusT> => {
-  const claim = await verifyIdToken({})
-  if (!claim) {
+  const user = await getSessionUser()
+  if (!user) {
     return 'anonymous'
   }
-  const user = await getOrCreateUser(claim)
   return user.active ? 'active' : 'pending'
-}
-
-export const setIdTokenAction = async (
-  idToken: string,
-): Promise<{ error: boolean }> => {
-  try {
-    await verifyFirebaseIdToken(idToken)
-  } catch {
-    return { error: true }
-  }
-  const cookieStore = await cookies()
-  // No maxAge: this is a session cookie, so it never disappears on its own
-  // before the JWT itself expires. Expiry is judged solely by verifying the
-  // JWT's `exp` claim (see verifyIdToken), which is what drives the
-  // idTokenExpired refresh flow.
-  cookieStore.set('idToken', idToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
-  })
-  return { error: false }
-}
-
-export const clearIdTokenAction = async (): Promise<void> => {
-  const cookieStore = await cookies()
-  cookieStore.delete('idToken')
 }
 
 export const searchInternalAction = async (
@@ -428,11 +346,10 @@ export const searchAction = async (
 ): Promise<typeof prevState> => {
   const state = { ...prevState }
   state.serial++
-  state.idTokenExpired = false
   state.error = null
   state.append = props.offset > 0
 
-  const uid = await _getUid(state)
+  const uid = await _getUid()
   // Caught rather than left to throw: an uncaught Server Action error
   // reaches the client as an opaque "Minified React error #441" (Next.js
   // strips the real message in production), and unlike updateItemAction's
@@ -487,9 +404,8 @@ export const getItemAction = async (
 ): Promise<GetItemState> => {
   const state = { ...prevState }
   state.serial++
-  state.idTokenExpired = false
   state.error = null
-  const uid = await _getUid(state)
+  const uid = await _getUid()
   let newState: GetItemState
   try {
     newState = await _getItemInternalAction(id, uid)
@@ -503,7 +419,7 @@ export const getItemAction = async (
     // own errors and returns them as state instead of throwing.
     return { ...state, error: (error as Error).message }
   }
-  if (!newState.current && !newState.idTokenExpired && !newState.error) {
+  if (!newState.current && !newState.error) {
     notFound()
   }
   return Object.assign({ ...state }, newState)
@@ -522,10 +438,7 @@ export const updateItemAction = async (
   const state = { ...prevState }
   state.id = undefined
   state.serial++
-  const uid = await _getUid(state)
-  if (state.idTokenExpired) {
-    return state
-  }
+  const uid = await _getUid()
   if (!uid) {
     unauthorized()
   }
@@ -683,10 +596,7 @@ export const deleteItemAction = async (
   const state = { ...prevState }
   state.deleted = false
   state.serial++
-  const uid = await _getUid(state)
-  if (state.idTokenExpired) {
-    return state
-  }
+  const uid = await _getUid()
   if (!uid) {
     unauthorized()
   }
@@ -750,9 +660,9 @@ export const getUsersAction = async (): Promise<UserT[]> => {
   const db = await getDb()
   const rows = await db.select().from(users).where(eq(users.active, true))
   return rows.map((user) => ({
-    uid: user.uid,
-    displayName: user.displayName,
-    photoURL: user.photoURL,
+    uid: user.id,
+    displayName: user.name ?? '',
+    photoURL: user.image ?? '',
     active: user.active,
   }))
 }
