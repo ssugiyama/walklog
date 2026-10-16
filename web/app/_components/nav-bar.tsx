@@ -125,6 +125,9 @@ const NavBar = (props: React.ComponentProps<typeof AppBar>) => {
           {currentUser ? (
             <img
               alt="user profile"
+              // Google's avatar host answers 429 to requests that carry a
+              // referrer (e.g. from localhost), so don't send one.
+              referrerPolicy="no-referrer"
               style={{ width: 24, borderRadius: '50%' }}
               src={currentUser.photoURL}
             />
