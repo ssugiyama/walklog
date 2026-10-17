@@ -58,7 +58,7 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
     error: null,
     serial: 0,
   }
-  const { currentUser, users } = useUserContext()
+  const { currentUser, selfStatus } = useUserContext()
   const [data, setData] = useData()
   const [localError, setLocalError] = useState<Error | null>(null)
   // WalkT.id/.uid are non-optional (a saved walk always has both), so this
@@ -200,11 +200,12 @@ const WalkEditor = ({ mode }: { mode: 'update' | 'create' }) => {
   if (currentUser === null) {
     unauthorized()
   }
-  if (currentUser === undefined) {
+  // selfStatus comes from the DB (getSelfStatusAction), unlike `users`, which
+  // is a cached list that is still empty right after a direct page load.
+  if (currentUser === undefined || selfStatus === undefined) {
     return null
   }
-  const dataUser = users.find((u) => u.uid === currentUser.uid) ?? null
-  if (!dataUser?.active) {
+  if (selfStatus !== 'active') {
     forbidden()
   }
 

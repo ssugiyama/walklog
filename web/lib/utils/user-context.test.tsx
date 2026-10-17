@@ -16,9 +16,11 @@ vi.mock('@/lib/actions/walk-actions', () => ({
 }))
 
 const seen: (string | undefined)[] = []
+const statuses: (string | undefined)[] = []
 
 const Consumer = () => {
-  const { currentUser } = useUserContext()
+  const { currentUser, selfStatus } = useUserContext()
+  statuses.push(selfStatus)
   const label =
     currentUser === undefined
       ? 'pending'
@@ -39,6 +41,7 @@ const renderProvider = () =>
 describe('UserContextProvider', () => {
   beforeEach(() => {
     seen.length = 0
+    statuses.length = 0
   })
 
   it('is pending until the session resolves, then anonymous', async () => {
@@ -171,5 +174,27 @@ describe('UserContextProvider', () => {
     })
     expect(errors).toEqual([])
     document.body.removeChild(container)
+  })
+
+  it('keeps selfStatus undefined until the status has been fetched for a signed-in user', async () => {
+    ;(authClient.useSession as Mock).mockReturnValue({
+      data: { user: { id: 'u1', name: 'Me', image: null } },
+      isPending: false,
+    })
+    renderProvider()
+    await waitFor(() => expect(statuses).toContain('active'))
+    // Never 'anonymous' on the way there: that would read as "not approved".
+    expect(statuses.slice(0, statuses.indexOf('active'))).not.toContain(
+      'anonymous',
+    )
+  })
+
+  it('resolves selfStatus to anonymous for a signed-out visitor', async () => {
+    ;(authClient.useSession as Mock).mockReturnValue({
+      data: null,
+      isPending: false,
+    })
+    renderProvider()
+    await waitFor(() => expect(statuses).toContain('anonymous'))
   })
 })

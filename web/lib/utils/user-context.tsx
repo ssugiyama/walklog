@@ -29,12 +29,15 @@ type UserContextT = {
   // the first resolution instead of firing once anonymously and again once
   // the real state arrives.
   currentUser: CurrentUserT | null | undefined
-  selfStatus: SelfStatusT
+  // `undefined`: not known yet (the session or the status fetch is still in
+  // flight). Callers that gate access on it must wait rather than treat it as
+  // "not approved".
+  selfStatus: SelfStatusT | undefined
 }
 const initialState: UserContextT = {
   users: [],
   currentUser: undefined,
-  selfStatus: 'anonymous',
+  selfStatus: undefined,
 }
 const UserContext = createContext(initialState)
 
@@ -72,7 +75,7 @@ export function UserContextProvider({
     sessionUser?.image,
   ])
   const [users, setUsers] = useState<UserT[]>([])
-  const [selfStatus, setSelfStatus] = useState<SelfStatusT>('anonymous')
+  const [selfStatus, setSelfStatus] = useState<SelfStatusT | undefined>()
 
   useEffect(() => {
     void (async () => {
@@ -80,15 +83,21 @@ export function UserContextProvider({
     })()
   }, [])
 
+  // Keyed on the session (not just the uid) so the anonymous resolution
+  // (undefined -> null) also re-runs this.
+  const sessionKey =
+    currentUser === undefined ? undefined : (currentUser?.uid ?? null)
   useEffect(() => {
-    if (!currentUser) {
+    if (sessionKey === undefined) return
+    if (sessionKey === null) {
       setSelfStatus('anonymous')
       return
     }
+    setSelfStatus(undefined)
     void (async () => {
       setSelfStatus(await getSelfStatusAction())
     })()
-  }, [currentUser?.uid])
+  }, [sessionKey])
 
   return (
     <UserContext.Provider value={{ users, currentUser, selfStatus }}>

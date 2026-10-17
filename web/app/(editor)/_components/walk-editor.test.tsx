@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React, { Activity } from 'react'
 import type { Mock } from 'vite-plus/test'
+import { forbidden } from 'next/navigation'
 import { updateItemAction } from '@/lib/actions/walk-actions'
 import { useData } from '@/lib/utils/data-context'
 import WalkEditor from './walk-editor'
@@ -33,11 +34,23 @@ beforeAll(() => {
   })
 })
 
+// `users` (the cached list of active users) is deliberately empty by default:
+// the editor must decide access from `selfStatus`, not from that list, which
+// is still [] when /new is opened directly.
+type MockUserContext = {
+  currentUser: { uid: string } | null | undefined
+  users: { uid: string; active: boolean }[]
+  selfStatus: 'anonymous' | 'pending' | 'active' | undefined
+}
+const defaultUserContext: MockUserContext = {
+  currentUser: { uid: 'test-uid' },
+  users: [],
+  selfStatus: 'active',
+}
+let mockUserContext: MockUserContext = defaultUserContext
+
 vi.mock('@/lib/utils/user-context', () => ({
-  useUserContext: () => ({
-    currentUser: { uid: 'test-uid' },
-    users: [{ uid: 'test-uid', active: true }],
-  }),
+  useUserContext: () => mockUserContext,
 }))
 
 vi.mock('@/lib/utils/data-context', () => ({
@@ -360,5 +373,44 @@ describe('WalkEditor create', () => {
       'id',
       expect.anything(),
     )
+  })
+})
+
+describe('WalkEditor access', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockPathParam = null
+    ;(useData as Mock).mockReturnValue([
+      { current: null, rows: [] },
+      mockSetData,
+    ])
+  })
+  afterEach(() => {
+    mockUserContext = defaultUserContext
+  })
+
+  const renderCreate = () =>
+    render(<WalkEditor mode="create" />, {
+      wrapper: withNuqsTestingAdapter(),
+    })
+
+  it('waits without forbidding while the self status is still loading', () => {
+    mockUserContext = { ...defaultUserContext, selfStatus: undefined }
+    const { container } = renderCreate()
+    expect(forbidden).not.toHaveBeenCalled()
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('lets an active user in even if the cached users list does not include them yet', () => {
+    mockUserContext = { ...defaultUserContext, users: [] }
+    renderCreate()
+    expect(forbidden).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument()
+  })
+
+  it('forbids a user who is not approved yet', () => {
+    mockUserContext = { ...defaultUserContext, selfStatus: 'pending' }
+    renderCreate()
+    expect(forbidden).toHaveBeenCalled()
   })
 })
