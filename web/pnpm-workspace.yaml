@@ -9,7 +9,7 @@ catalog:
   vitest: 5.0.3
   vite-plus: 1.1.0
   "@vitest/coverage-v8": 5.0.3
-  "@vitest/ui": 5.0.3
+  "@vitest/ui": 5.0.5
 minimumReleaseAgeExclude:
   - drizzle-kit@1.0.0-rc.5
   - drizzle-orm@1.0.0-rc.5
