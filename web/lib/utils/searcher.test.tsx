@@ -1,13 +1,13 @@
 import { render, waitFor } from '@testing-library/react'
 import React, { Activity } from 'react'
 import { Mock } from 'vite-plus/test'
-import { searchAction } from '@/lib/actions/walk-actions'
+import { searchAction } from '@/lib/api/actions'
 import { useConfig } from './config'
 import { useData } from './data-context'
 import Searcher from './searcher'
 import { useUserContext } from './user-context'
 
-vi.mock('@/lib/actions/walk-actions', () => ({
+vi.mock('@/lib/api/actions', () => ({
   searchAction: vi.fn(),
 }))
 
@@ -29,7 +29,7 @@ vi.mock('./user-context', () => ({
 // `searchParams`) will treat every render as a param change and loop forever.
 const mockSearchParams = new URLSearchParams()
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/lib/utils/navigation', () => ({
   useSearchParams: () => mockSearchParams,
 }))
 

@@ -1,12 +1,12 @@
 import { render, waitFor } from '@testing-library/react'
 import React from 'react'
 import { Mock } from 'vite-plus/test'
-import { getItemAction } from '@/lib/actions/walk-actions'
+import { getItemAction } from '@/lib/api/actions'
 import { useData } from './data-context'
 import ItemFetcher from './item-fetcher'
 import { useUserContext } from './user-context'
 
-vi.mock('@/lib/actions/walk-actions', () => ({
+vi.mock('@/lib/api/actions', () => ({
   getItemAction: vi.fn(),
 }))
 
@@ -18,7 +18,7 @@ vi.mock('./user-context', () => ({
   useUserContext: vi.fn(),
 }))
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/lib/utils/navigation', () => ({
   useParams: () => ({ id: '2' }),
 }))
 

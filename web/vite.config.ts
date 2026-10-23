@@ -5,6 +5,8 @@ import { kvDataAdapter } from '@vinext/cloudflare/cache/kv-data-adapter'
 import vinext from 'vinext'
 
 export default defineConfig({
+  // Client env vars keep their Next.js names (inlined at build time).
+  envPrefix: 'NEXT_PUBLIC_',
   fmt: {
     // Keep the style Biome used so the formatter switch is a no-op.
     singleQuote: true,

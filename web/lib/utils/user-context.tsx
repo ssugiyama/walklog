@@ -1,4 +1,3 @@
-'use client'
 import {
   createContext,
   useContext,
@@ -7,7 +6,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react'
-import { getSelfStatusAction, getUsersAction } from '@/lib/actions/walk-actions'
+import { getSelfStatusAction, getUsersAction } from '@/lib/api/actions'
 import { authClient } from '@/lib/auth-client'
 import { SelfStatusT, UserT } from '@/types'
 
