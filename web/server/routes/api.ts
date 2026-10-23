@@ -1,7 +1,6 @@
 import { zValidator } from '@hono/zod-validator'
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
-import { csrf } from 'hono/csrf'
 import { createMiddleware } from 'hono/factory'
 import { z } from 'zod'
 import { getAuth } from '@/lib/auth'
@@ -52,18 +51,31 @@ const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 // better-auth does its own origin validation.
 const AUTH_PATH = /^(\/api)?\/auth(\/|$)/
 
-const checkForm = csrf()
+const originHost = (origin: string) => {
+  try {
+    return new URL(origin).host
+  } catch {
+    return undefined
+  }
+}
 
-// hono's csrf() only inspects form-like content types, so JSON requests and
-// DELETE would pass. Browsers always send Origin on cross-origin writes, and
-// Sec-Fetch-Site covers the rare request that omits it.
+// Same rule as Next.js Server Actions: only the host is compared, so a
+// TLS-terminating proxy (https Origin, http request URL) still works.
+const requestHost = (c: Context) =>
+  c.req.header('x-forwarded-host')?.split(',')[0].trim() ||
+  c.req.header('host') ||
+  new URL(c.req.url).host
+
+// Covers every write (JSON and DELETE too), which is why hono's csrf(), whose
+// check is scheme-strict and form-only, is not used. Browsers always send
+// Origin on cross-origin writes; Sec-Fetch-Site covers requests without it.
 const sameOriginOnly = createMiddleware((c, next) => {
   if (SAFE_METHODS.includes(c.req.method) || AUTH_PATH.test(c.req.path)) {
     return next()
   }
   const origin = c.req.header('origin')
   if (origin !== undefined) {
-    if (origin !== new URL(c.req.url).origin) {
+    if (originHost(origin) !== requestHost(c)) {
       throw new HttpError(403, 'Forbidden')
     }
   } else {
@@ -72,7 +84,7 @@ const sameOriginOnly = createMiddleware((c, next) => {
       throw new HttpError(403, 'Forbidden')
     }
   }
-  return checkForm(c, next)
+  return next()
 })
 
 // Paths carry no `/api` prefix; createApp mounts this with `route('/api')`.
@@ -108,7 +120,9 @@ export const createApiRoutes = (platform: Platform) =>
     })
     .post('/items', bodyLimit({ maxSize: MAX_BODY_SIZE }), async (c) => {
       const uid = await getUid(c.req.raw.headers)
-      const formData = await c.req.raw.formData()
+      const formData = await c.req.raw.formData().catch(() => {
+        throw new HttpError(400, 'Invalid form data')
+      })
       return c.json(await updateItem(formData, uid, platform.cache(c)))
     })
     .delete('/items/:id', zValidator('param', idParam), async (c) => {

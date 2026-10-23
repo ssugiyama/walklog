@@ -50,6 +50,7 @@ beforeEach(() => {
   mockSession = null
   vi.mocked(getItem).mockReset()
   vi.mocked(deleteItem).mockReset()
+  vi.mocked(updateItem).mockClear()
 })
 
 describe('GET /api/items/:id', () => {
@@ -122,6 +123,37 @@ describe('CSRF', () => {
     expect(res.status).toBe(403)
   })
 
+  it('allows an https Origin when the request URL is http (proxy)', async () => {
+    vi.mocked(deleteItem).mockResolvedValue(undefined)
+    const res = await app.request('http://example.com/api/items/1', {
+      method: 'DELETE',
+      headers: { Origin: 'https://example.com' },
+    })
+    expect(res.status).toBe(200)
+  })
+
+  it('compares Origin to X-Forwarded-Host when present', async () => {
+    vi.mocked(deleteItem).mockResolvedValue(undefined)
+    const ok = await app.request('http://internal:3000/api/items/1', {
+      method: 'DELETE',
+      headers: {
+        Host: 'internal:3000',
+        'X-Forwarded-Host': 'example.com, other',
+        Origin: 'https://example.com',
+      },
+    })
+    expect(ok.status).toBe(200)
+    const bad = await app.request('http://internal:3000/api/items/1', {
+      method: 'DELETE',
+      headers: {
+        Host: 'internal:3000',
+        'X-Forwarded-Host': 'example.com',
+        Origin: 'https://internal:3000',
+      },
+    })
+    expect(bad.status).toBe(403)
+  })
+
   it('does not check auth routes', async () => {
     const res = await app.request('/api/auth/sign-in/social', {
       method: 'POST',
@@ -146,6 +178,20 @@ describe('POST /api/items', () => {
     })
     expect(res.status).toBe(413)
     expect(updateItem).not.toHaveBeenCalled()
+  })
+})
+
+describe('POST /api/items malformed body', () => {
+  it('returns 400 for an unparsable multipart body', async () => {
+    const res = await app.request('/api/items', {
+      method: 'POST',
+      headers: {
+        ...sameOrigin,
+        'Content-Type': 'multipart/form-data; boundary=x',
+      },
+      body: 'not multipart',
+    })
+    expect(res.status).toBe(400)
   })
 })
 
