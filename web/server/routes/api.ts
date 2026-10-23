@@ -139,7 +139,8 @@ export const createApiRoutes = (platform: Platform) =>
     .get('/items/:id', zValidator('param', idParam), async (c) => {
       const uid = await getUid(c.req.raw.headers)
       const current = await getItem(c.req.valid('param').id, uid)
-      if (current === undefined) {
+      // null is someone else's draft: same 404 so its id is not revealed.
+      if (!current) {
         throw new HttpError(404, 'Not Found')
       }
       return c.json({ current })

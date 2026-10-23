@@ -94,8 +94,15 @@ export const getItemAction = async (
       state.error = await readError(res)
       return state
     }
-    const { current } = (await res.json()) as { current: WalkT }
-    state.current = current
+    const { current } = await res.json()
+    // The route answers 404 for a missing item or someone else's draft;
+    // this guards against a null slipping through anyway.
+    if (!current) {
+      throw new HttpError(404, 'Not Found')
+    }
+    // JSON typing turns WalkT's optional fields into serialized forms; the
+    // payload is a WalkT as produced by the service.
+    state.current = current as WalkT
     return state
   } catch (error) {
     if (error instanceof HttpError) {
@@ -112,6 +119,7 @@ export const updateItemAction = async (
 ): Promise<UpdateItemState> => {
   const state = { ...prevState }
   state.id = undefined
+  state.error = null
   state.serial++
   try {
     // Multipart bodies have no typed `form` input on this route, and $url()
@@ -125,7 +133,7 @@ export const updateItemAction = async (
       state.error = await readError(res)
       return state
     }
-    const body = (await res.json()) as { id?: number; error?: string }
+    const body: { id?: number; error?: string } = await res.json()
     if (body.error) {
       state.error = body.error
     }
@@ -172,6 +180,7 @@ export const getCityAction = async (params: CityParams): Promise<CityT[]> => {
   if (!res.ok) {
     throw new Error(await readError(res))
   }
+  // Serialized-vs-domain typing only: the payload is the service's CityT[].
   return (await res.json()) as CityT[]
 }
 

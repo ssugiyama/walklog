@@ -61,11 +61,11 @@ describe('GET /api/items/:id', () => {
     expect(res.status).toBe(404)
   })
 
-  it('returns current: null for someone else draft', async () => {
+  it('returns 404 for someone else draft', async () => {
     vi.mocked(getItem).mockResolvedValue(null)
     const res = await app.request('/api/items/1')
-    expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ current: null })
+    expect(res.status).toBe(404)
+    expect(await res.json()).toEqual({ error: 'Not Found' })
   })
 
   it('rejects a malformed id', async () => {

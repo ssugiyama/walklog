@@ -66,6 +66,14 @@ describe('getItemAction', () => {
     })
   })
 
+  it('rejects with HttpError(404) when current is null', async () => {
+    fetchMock.mockResolvedValue(json({ current: null }))
+    await expect(getItemAction({ serial: 1 }, 1)).rejects.toMatchObject({
+      name: 'HttpError',
+      status: 404,
+    })
+  })
+
   it('returns current on success', async () => {
     fetchMock.mockResolvedValue(json({ current: { id: 3 } }))
     const state = await getItemAction({ serial: 1 }, 3)
@@ -90,10 +98,19 @@ describe('updateItemAction', () => {
     expect(state.serial).toBe(2)
   })
 
-  it('returns the saved id', async () => {
+  it('returns the saved id, clears a stale error and POSTs multipart', async () => {
     fetchMock.mockResolvedValue(json({ id: 9 }))
-    const state = await updateItemAction({ serial: 1 }, new FormData())
+    const formData = new FormData()
+    const state = await updateItemAction(
+      { serial: 1, error: 'old error' },
+      formData,
+    )
     expect(state.id).toBe(9)
+    expect(state.error).toBeNull()
+    expect(fetchMock).toHaveBeenCalledWith('/api/items', {
+      method: 'POST',
+      body: formData,
+    })
   })
 
   it('rejects with HttpError(401) when unauthorized', async () => {
