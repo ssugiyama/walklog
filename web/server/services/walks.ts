@@ -266,6 +266,12 @@ const runSearch = async (
   }
 }
 
+class SearchError extends Error {
+  constructor(readonly result: SearchResult) {
+    super(result.error)
+  }
+}
+
 export const search = (
   props: SearchProps,
   uid: string | null,
@@ -278,8 +284,16 @@ export const search = (
       tags: ['search'],
       ttlSeconds: 900,
     },
-    () => runSearch(props, uid),
-  )
+    async () => {
+      const result = await runSearch(props, uid)
+      // Throw so an error result is not cached; converted back below.
+      if (result.error) throw new SearchError(result)
+      return result
+    },
+  ).catch((error) => {
+    if (error instanceof SearchError) return error.result
+    throw error
+  })
 
 // undefined: no such walk, null: someone else's draft.
 export const getItem = async (
@@ -300,6 +314,15 @@ export const getItem = async (
 }
 
 // Manual validation replaces Zod schema for better error message control
+
+// Extension is derived from the MIME type, never from the client file name.
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+  'image/avif': '.avif',
+}
 
 type ImageDeps = {
   saveImage: typeof saveImage
@@ -342,6 +365,9 @@ export const updateItem = async (
 
   if (!date || date.trim() === '') {
     validationErrors.push('Date is required')
+  } else if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    // The date is part of the storage key, so it must not be free-form.
+    validationErrors.push('Date is invalid')
   }
 
   if (!title || title.trim() === '') {
@@ -353,7 +379,7 @@ export const updateItem = async (
   }
 
   if (newImageFile) {
-    if (!newImageFile.type?.startsWith('image/')) {
+    if (!(newImageFile.type in IMAGE_EXTENSIONS)) {
       validationErrors.push('Image must be an image file')
     } else if (newImageFile.size > 2 * 1024 * 1024) {
       validationErrors.push('Image size must be 2MB or less')
@@ -400,8 +426,7 @@ export const updateItem = async (
     props.image = null
   } else if (newImageFile) {
     const imagePrefix = process.env.IMAGE_PREFIX ?? 'images'
-    const match = newImageFile.name.match(/\.\w+$/)
-    const ext = match ? match[0] : ''
+    const ext = IMAGE_EXTENSIONS[newImageFile.type]
     const key = `${imagePrefix}/${uid}-${date}-${nanoid(4)}${ext}`
     try {
       uploadedImage = await deps.saveImage(newImageFile, key)

@@ -250,6 +250,24 @@ describe('walk services', () => {
       expect(after.count).toBe(before.count - 1)
     })
 
+    it('does not cache an error result', async () => {
+      const cache = memoryCache()
+      await insertWalk({ title: 'Walk 1' })
+      const spy = vi.spyOn(db, 'select').mockImplementationOnce(() => {
+        throw new Error('db down')
+      })
+      const props = { date: '2023-05-15' }
+      try {
+        const failed = await search(props, 'testUid', cache)
+        expect(failed.error).toBe('db down')
+      } finally {
+        spy.mockRestore()
+      }
+      const ok = await search(props, 'testUid', cache)
+      expect(ok.error).toBeUndefined()
+      expect(ok.count).toBe(1)
+    })
+
     it('serves a cached result until the tag is bumped', async () => {
       const cache = memoryCache()
       await insertWalk({ title: 'Walk 1' })
@@ -607,6 +625,63 @@ describe('walk services', () => {
       expect(result.error).toContain('Image must be an image file')
     })
 
+    it('rejects a traversal date and does not save the image', async () => {
+      const mockSaveImage = vi.fn()
+      const file = new File([new Uint8Array([1])], 'a.jpg', {
+        type: 'image/jpeg',
+      })
+      formData.set('title', 'Test Walk')
+      formData.set('date', '../../x')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      const result = await updateItem(formData, 'testUid', cache, {
+        saveImage: mockSaveImage,
+        deleteImage: vi.fn(),
+      })
+
+      expect(result.error).toContain('Date is invalid')
+      expect(mockSaveImage).not.toHaveBeenCalled()
+    })
+
+    it('rejects an svg image', async () => {
+      const mockSaveImage = vi.fn()
+      const file = new File(['<svg/>'], 'a.svg', { type: 'image/svg+xml' })
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      const result = await updateItem(formData, 'testUid', cache, {
+        saveImage: mockSaveImage,
+        deleteImage: vi.fn(),
+      })
+
+      expect(result.error).toContain('Image must be an image file')
+      expect(mockSaveImage).not.toHaveBeenCalled()
+    })
+
+    it('derives the key extension from the MIME type, not the file name', async () => {
+      const mockSaveImage = vi.fn().mockResolvedValue('/uploads/x.png')
+      const file = new File([new Uint8Array([1])], 'x.html', {
+        type: 'image/png',
+      })
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      await updateItem(formData, 'testUid', cache, {
+        saveImage: mockSaveImage,
+        deleteImage: vi.fn(),
+      })
+
+      expect(mockSaveImage).toHaveBeenCalledWith(
+        file,
+        expect.stringMatching(/\/testUid-2023-05-15-mocked-nanoid\.png$/),
+      )
+    })
+
     it('should reject an image over 2MB', async () => {
       const existing = await insertWalk({ uid: 'testUid' })
       const file = new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'big.jpg', {
@@ -788,10 +863,14 @@ describe('walk services', () => {
     })
 
     it('getSelfStatus returns anonymous instead of throwing when getSession fails', async () => {
-      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       mockGetSession.mockRejectedValueOnce(new Error('db down'))
 
-      expect(await getSelfStatus(noHeaders)).toBe('anonymous')
+      try {
+        expect(await getSelfStatus(noHeaders)).toBe('anonymous')
+      } finally {
+        errorSpy.mockRestore()
+      }
     })
 
     it('passes the request headers to getSession', async () => {
