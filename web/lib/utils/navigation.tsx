@@ -13,6 +13,7 @@ import {
 
 // Plain query-string codec for the router. TanStack's default JSON-parses
 // values (e.g. `year=2024` becomes a number); the app needs raw strings.
+// Repeated keys keep only the last value.
 export function parseSearch(searchStr: string): Record<string, string> {
   return Object.fromEntries(new URLSearchParams(searchStr))
 }
@@ -51,10 +52,14 @@ export function useRouter(): {
   )
 }
 
-type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }
+type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string
+  // Same as next/link: `false` keeps the scroll position on navigation.
+  scroll?: boolean
+}
 
 export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
-  { href, onClick, target, ...rest },
+  { href, onClick, target, scroll, ...rest },
   ref,
 ) {
   const navigate = useNavigate()
@@ -73,7 +78,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       return
     }
     e.preventDefault()
-    void navigate({ href })
+    void navigate({ href, resetScroll: scroll !== false })
   }
   return (
     <a ref={ref} href={href} target={target} onClick={handleClick} {...rest} />

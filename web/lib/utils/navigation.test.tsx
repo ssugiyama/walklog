@@ -17,6 +17,9 @@ import {
   useSearchParams,
 } from './navigation'
 
+// jsdom does not implement scrollTo, which the router calls on navigation.
+window.scrollTo = vi.fn()
+
 function renderAt(initial: string, ui: React.ReactNode) {
   const root = createRootRoute({ component: () => <>{ui}</> })
   const splat = createRoute({
@@ -134,7 +137,25 @@ describe('Link', () => {
   it('does not navigate on modified click', async () => {
     const { history } = renderAt('/', <Link href="/show/1">go</Link>)
     const a = await screen.findByText('go')
+    // jsdom cannot follow links; swallow the default action to keep output
+    // clean (runs after the Link's own handler).
+    const swallow = (e: Event) => e.preventDefault()
+    window.addEventListener('click', swallow)
     fireEvent.click(a, { ctrlKey: true })
+    window.removeEventListener('click', swallow)
     expect(history.location.pathname).toBe('/')
+  })
+
+  it('does not render scroll as a DOM attribute and still navigates', async () => {
+    const { history } = renderAt(
+      '/',
+      <Link href="/show/1" scroll={false}>
+        go
+      </Link>,
+    )
+    const a = await screen.findByText('go')
+    expect(a.hasAttribute('scroll')).toBe(false)
+    await userEvent.click(a)
+    expect(history.location.pathname).toBe('/show/1')
   })
 })
