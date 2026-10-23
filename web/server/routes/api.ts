@@ -59,30 +59,56 @@ const originHost = (origin: string) => {
   }
 }
 
-// Same rule as Next.js Server Actions: only the host is compared, so a
-// TLS-terminating proxy (https Origin, http request URL) still works.
+// Only used when BETTER_AUTH_URL is unset (local dev). Same rule as Next.js
+// Server Actions: host only, so a TLS-terminating proxy still works. The
+// headers are request-controlled, hence the configured origin is preferred.
 const requestHost = (c: Context) =>
   c.req.header('x-forwarded-host')?.split(',')[0].trim() ||
   c.req.header('host') ||
   new URL(c.req.url).host
 
+// Read at request time so tests can stub it.
+const configuredOrigin = () => {
+  const url = process.env.BETTER_AUTH_URL
+  if (!url) return undefined
+  try {
+    return new URL(url).origin
+  } catch {
+    return undefined
+  }
+}
+
+const FORM_CONTENT_TYPE =
+  /^\s*(application\/x-www-form-urlencoded|multipart\/form-data|text\/plain)/i
+
+const isAllowedOrigin = (c: Context, origin: string) => {
+  const expected = configuredOrigin()
+  if (expected !== undefined) {
+    return origin === expected
+  }
+  return originHost(origin) === requestHost(c)
+}
+
 // Covers every write (JSON and DELETE too), which is why hono's csrf(), whose
-// check is scheme-strict and form-only, is not used. Browsers always send
-// Origin on cross-origin writes; Sec-Fetch-Site covers requests without it.
+// check is form-only, is not used. Browsers always send Origin on cross-origin
+// writes; Sec-Fetch-Site covers requests without it. With neither, only
+// non-form content types pass (a cross-site form cannot send those).
 const sameOriginOnly = createMiddleware((c, next) => {
   if (SAFE_METHODS.includes(c.req.method) || AUTH_PATH.test(c.req.path)) {
     return next()
   }
   const origin = c.req.header('origin')
+  const site = c.req.header('sec-fetch-site')
   if (origin !== undefined) {
-    if (originHost(origin) !== requestHost(c)) {
+    if (!isAllowedOrigin(c, origin)) {
       throw new HttpError(403, 'Forbidden')
     }
-  } else {
-    const site = c.req.header('sec-fetch-site')
-    if (site !== undefined && site !== 'same-origin' && site !== 'none') {
+  } else if (site !== undefined) {
+    if (site !== 'same-origin' && site !== 'none') {
       throw new HttpError(403, 'Forbidden')
     }
+  } else if (FORM_CONTENT_TYPE.test(c.req.header('content-type') ?? '')) {
+    throw new HttpError(403, 'Forbidden')
   }
   return next()
 })

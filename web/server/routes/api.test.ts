@@ -48,6 +48,7 @@ const multipart = (extra: Record<string, string> = {}) => {
 
 beforeEach(() => {
   mockSession = null
+  vi.stubEnv('BETTER_AUTH_URL', '')
   vi.mocked(getItem).mockReset()
   vi.mocked(deleteItem).mockReset()
   vi.mocked(updateItem).mockClear()
@@ -152,6 +153,49 @@ describe('CSRF', () => {
       },
     })
     expect(bad.status).toBe(403)
+  })
+
+  it('requires an exact origin match when BETTER_AUTH_URL is set', async () => {
+    vi.stubEnv('BETTER_AUTH_URL', 'https://example.com')
+    vi.mocked(deleteItem).mockResolvedValue(undefined)
+    const url = 'http://internal:3000/api/items/1'
+    const ok = await app.request(url, {
+      method: 'DELETE',
+      headers: { Origin: 'https://example.com' },
+    })
+    expect(ok.status).toBe(200)
+    const wrongScheme = await app.request(url, {
+      method: 'DELETE',
+      headers: { Origin: 'http://example.com' },
+    })
+    expect(wrongScheme.status).toBe(403)
+    const spoofed = await app.request(url, {
+      method: 'DELETE',
+      headers: {
+        Host: 'evil.com',
+        'X-Forwarded-Host': 'evil.com',
+        Origin: 'https://evil.com',
+      },
+    })
+    expect(spoofed.status).toBe(403)
+  })
+
+  it('rejects a form content type without Origin or Sec-Fetch-Site', async () => {
+    const res = await app.request('/api/items', {
+      method: 'POST',
+      body: multipart(),
+    })
+    expect(res.status).toBe(403)
+    expect(updateItem).not.toHaveBeenCalled()
+  })
+
+  it('lets JSON without Origin or Sec-Fetch-Site through', async () => {
+    const res = await app.request('/api/cities', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jcodes: [] }),
+    })
+    expect(res.status).not.toBe(403)
   })
 
   it('does not check auth routes', async () => {
