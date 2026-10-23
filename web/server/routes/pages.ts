@@ -39,7 +39,9 @@ export const createPageRoutes = (platform: Platform) => {
 
   const page = async (c: Context, head: HeadData) => {
     const template = await platform.getTemplate(c)
-    return c.html(injectHead(template, renderHead(head, env())))
+    return c.html(
+      injectHead(template, renderHead(head, env(), new URL(c.req.url).origin)),
+    )
   }
 
   app.get('/manifest.webmanifest', (c) => {
