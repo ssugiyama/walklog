@@ -379,7 +379,7 @@ export const updateItem = async (
   }
 
   if (newImageFile) {
-    if (!(newImageFile.type in IMAGE_EXTENSIONS)) {
+    if (!Object.hasOwn(IMAGE_EXTENSIONS, newImageFile.type)) {
       validationErrors.push('Image must be an image file')
     } else if (newImageFile.size > 2 * 1024 * 1024) {
       validationErrors.push('Image size must be 2MB or less')

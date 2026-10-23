@@ -644,6 +644,23 @@ describe('walk services', () => {
       expect(mockSaveImage).not.toHaveBeenCalled()
     })
 
+    it('rejects inherited object keys as MIME types', async () => {
+      const mockSaveImage = vi.fn()
+      const file = new File(['x'], 'a.jpg', { type: 'constructor' })
+      formData.set('title', 'Test Walk')
+      formData.set('date', '2023-05-15')
+      formData.set('path', encode(DEFAULT_PATH))
+      formData.set('image', file)
+
+      const result = await updateItem(formData, 'testUid', cache, {
+        saveImage: mockSaveImage,
+        deleteImage: vi.fn(),
+      })
+
+      expect(result.error).toContain('Image must be an image file')
+      expect(mockSaveImage).not.toHaveBeenCalled()
+    })
+
     it('rejects an svg image', async () => {
       const mockSaveImage = vi.fn()
       const file = new File(['<svg/>'], 'a.svg', { type: 'image/svg+xml' })
