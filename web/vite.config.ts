@@ -1,8 +1,13 @@
 import path from 'path'
 import { defineConfig } from 'vite-plus'
 import { cloudflare } from '@cloudflare/vite-plugin'
-import { kvDataAdapter } from '@vinext/cloudflare/cache/kv-data-adapter'
-import vinext from 'vinext'
+import react from '@vitejs/plugin-react'
+import { honoDev } from './vite/hono-dev'
+
+// `node` builds the client into dist/client for server.ts (Docker) and runs
+// the app in the Vite dev server; otherwise the app runs as a Cloudflare
+// Worker (worker.ts, configured in cloudflare.config.ts).
+const nodeTarget = process.env.WALKLOG_TARGET === 'node'
 
 export default defineConfig({
   // Client env vars keep their Next.js names (inlined at build time).
@@ -60,8 +65,8 @@ export default defineConfig({
     // Cloudflare Workers pipeline. Not cached: the build inlines NEXT_PUBLIC_*
     // env vars and deploy has side effects.
     tasks: {
-      // Builds the vinext Worker into dist/ (dist/server holds the Build
-      // Output that cf deploys).
+      // Builds the client assets and the Worker (worker.ts) into the Build
+      // Output that cf deploys.
       'cf-build': {
         command: 'CF_WORKERS_BUILD=1 vp build',
         cache: false,
@@ -76,13 +81,13 @@ export default defineConfig({
         cache: false,
       },
       deploy: {
-        command: 'vinext-cloudflare deploy --skip-build',
+        command: 'cf deploy --prebuilt',
         dependsOn: ['cf-build'],
         cache: false,
       },
       // Uploads a new Worker version without routing traffic to it.
       upload: {
-        command: 'vinext-cloudflare deploy --skip-build --no-promote',
+        command: 'cf workers versions create --prebuilt',
         dependsOn: ['cf-build'],
         cache: false,
       },
@@ -106,8 +111,8 @@ export default defineConfig({
     // ブラウザ環境（React や Vue などのコンポーネントテスト用）
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
-    // pglite (used by app/lib/walk-actions.test.ts) can take several seconds to
-    // boot its WASM postgres + postgis extension on a cold run.
+    // pglite (used by server/services/walks.test.ts) can take several seconds
+    // to boot its WASM postgres + postgis extension on a cold run.
     hookTimeout: 20000,
     testTimeout: 20000,
     exclude: [
@@ -125,20 +130,44 @@ export default defineConfig({
     },
   },
 
-  // vinext app build (`build:vinext`/`dev:vinext`). Skipped under Vitest:
-  // the tests render components directly in jsdom and must not boot workerd.
+  // Node server bundle (`vp pack`, part of `vp run build`): server.ts into
+  // dist/node/server.js. package.json dependencies stay external and are
+  // loaded from node_modules at runtime.
+  pack: {
+    entry: ['server.ts'],
+    outDir: 'dist/node',
+    format: 'esm',
+    platform: 'node',
+    fixedExtension: false,
+    dts: false,
+    alias: { '@': path.resolve(__dirname, '.') },
+    // Only imported (dynamically) on Workers; see lib/drizzle/db.ts.
+    deps: { neverBundle: ['cloudflare:workers'] },
+  },
+  build: nodeTarget ? { outDir: 'dist/client' } : undefined,
+  environments: process.env.VITEST
+    ? undefined
+    : {
+        client: {
+          // Browser code shared with the server (lib/utils/geo-utils.ts,
+          // elevation-box.tsx) reads non-public process.env keys. As under
+          // Next.js they are unset in the browser; server environments keep
+          // reading the real env at runtime.
+          define: { 'process.env': '{}' },
+        },
+      },
+
+  // Skipped under Vitest: the tests render components directly in jsdom and
+  // must not boot workerd.
   plugins: process.env.VITEST
     ? []
     : [
-        vinext({
-          cache: { data: kvDataAdapter() },
-        }),
+        react(),
         {
           // wkx (lib/utils/geo-utils.ts, also used in the browser) calls
-          // require('util').inherits. Next.js's bundlers polyfill Node
-          // built-ins for the browser; Vite stubs them out, so point the
-          // client build at the npm `util` package instead. Server
-          // environments keep the real node:util from workerd.
+          // require('util').inherits. Vite stubs out Node built-ins for the
+          // browser, so point the client build at the npm `util` package
+          // instead. Server environments keep the real node:util.
           name: 'walklog:client-util-polyfill',
           applyToEnvironment: (environment) => environment.name === 'client',
           resolveId(id, importer) {
@@ -147,12 +176,7 @@ export default defineConfig({
             }
           },
         },
-        cloudflare({
-          // Reads cloudflare.config.ts.
-          viteEnvironment: {
-            name: 'rsc',
-            childEnvironments: ['ssr'],
-          },
-        }),
+        // Reads cloudflare.config.ts.
+        nodeTarget ? honoDev() : cloudflare(),
       ],
 })

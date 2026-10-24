@@ -22,21 +22,18 @@ const requireEnv = (name: string, createCommand: string): string => {
 export default defineConfig({
   worker: defineWorker({
     name: 'walklog',
-    entrypoint: 'vinext/server/fetch-handler',
+    entrypoint: './worker.ts',
     compatibilityDate: '2026-07-27',
     compatibilityFlags: ['nodejs_compat', 'global_fetch_strictly_public'],
     observability: { enabled: true },
     assets: {
-      // "/*" routes everything to the Worker by default (needed because a
-      // Server Action POST to a path that also matches a static/prerendered
-      // asset, e.g. `/`, would otherwise be served directly by the assets
-      // layer without ever invoking the Worker, and 500 before our code
-      // runs). The negative rule excludes hashed `_next/static/*` build
-      // assets, which are immutable and never a Server Action target, so
-      // those are served straight from Cloudflare's edge asset cache (see
-      // public/_headers) instead of paying for a Worker invocation on every
-      // request.
-      runWorkerFirst: ['/*', '!/_next/static/*'],
+      // Pages need the Worker so it can inject <head> (title, OGP, theme)
+      // into index.html, and /api/* is the Worker, so "/*" goes to the
+      // Worker first; static files it doesn't handle fall back to ASSETS in
+      // worker.ts. Vite's hashed build output under /assets/* is never a
+      // page or API path, so it is served straight from Cloudflare's edge
+      // asset cache (see public/_headers) without a Worker invocation.
+      runWorkerFirst: ['/*', '!/assets/*'],
     },
     env: {
       ASSETS: bindings.assets(),
@@ -65,11 +62,9 @@ export default defineConfig({
               .CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE,
         },
       }),
-      // Backs vinext's data cache (the `'use cache'` functions and
-      // `cacheTag`/`updateTag` in lib/actions/walk-actions.ts - see
-      // kvDataAdapter() in vite.config.ts). Binding name is fixed by
-      // @vinext/cloudflare's KV adapter.
-      VINEXT_KV_CACHE: bindings.kv({
+      // Backs the search/city/user cache (kvCache in server/cache/kv.ts,
+      // wired up in worker.ts).
+      CACHE_KV: bindings.kv({
         id: requireEnv('KV_CACHE_ID', 'cf kv namespaces create walklog-cache'),
       }),
     },

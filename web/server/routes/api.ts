@@ -4,6 +4,7 @@ import { bodyLimit } from 'hono/body-limit'
 import { createMiddleware } from 'hono/factory'
 import { z } from 'zod'
 import { getAuth } from '@/lib/auth'
+import { deleteImage, saveImage } from '@/lib/utils/image-storage'
 import { idParamSchema } from '@/lib/utils/search-params-schema'
 import { HttpError } from '@/server/http-error'
 import type { Platform } from '@/server/platform'
@@ -19,6 +20,23 @@ import {
 
 // Image limit is 2MB; the rest of the multipart body gets 1MB of headroom.
 const MAX_BODY_SIZE = 3 * 1024 * 1024
+
+// updateItem fires old-image cleanup without awaiting it. Workers may cut
+// such work off once the response is sent, so hand it to waitUntil there;
+// Node has no ExecutionContext (the getter throws) and just lets it run.
+const backgroundDeleteImage =
+  (c: Context) =>
+  (urlOrKey: string): Promise<void> => {
+    const pending = deleteImage(urlOrKey).catch((error) => {
+      console.error('deleteImage error', error)
+    })
+    try {
+      c.executionCtx.waitUntil(pending)
+    } catch {
+      // Node: no ExecutionContext
+    }
+    return pending
+  }
 
 // Shape only: value-level validation (and its messages) lives in the service.
 const searchBodySchema = z.object({
@@ -150,7 +168,12 @@ export const createApiRoutes = (platform: Platform) =>
       const formData = await c.req.raw.formData().catch(() => {
         throw new HttpError(400, 'Invalid form data')
       })
-      return c.json(await updateItem(formData, uid, platform.cache(c)))
+      return c.json(
+        await updateItem(formData, uid, platform.cache(c), {
+          saveImage,
+          deleteImage: backgroundDeleteImage(c),
+        }),
+      )
     })
     .delete('/items/:id', zValidator('param', idParam), async (c) => {
       const uid = await getUid(c.req.raw.headers)

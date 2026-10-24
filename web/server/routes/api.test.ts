@@ -27,6 +27,12 @@ vi.mock('@/server/services/walks', async (importOriginal) => {
   }
 })
 
+vi.mock('@/lib/utils/image-storage', () => ({
+  saveImage: vi.fn(),
+  deleteImage: vi.fn(async () => undefined),
+}))
+
+import { deleteImage } from '@/lib/utils/image-storage'
 import { getItem, deleteItem, updateItem } from '@/server/services/walks'
 
 const cache = memoryCache()
@@ -256,5 +262,43 @@ describe('pending user', () => {
       body: multipart(),
     })
     expect(res.status).toBe(401)
+  })
+})
+
+describe('old image cleanup', () => {
+  // updateItem fires deleteImage without awaiting it; on Workers the route
+  // must hand that promise to waitUntil so it is not cut off.
+  const cleanupInUpdate = () =>
+    vi
+      .mocked(updateItem)
+      .mockImplementationOnce(async (_fd, _uid, _cache, deps) => {
+        void deps.deleteImage('/uploads/old.jpg')
+        return { id: 1 }
+      })
+
+  it('passes the cleanup to waitUntil when there is an ExecutionContext', async () => {
+    cleanupInUpdate()
+    const waitUntil = vi.fn()
+    const res = await app.request(
+      '/api/items',
+      { method: 'POST', headers: sameOrigin, body: multipart() },
+      {},
+      { waitUntil, passThroughOnException: () => {}, props: {} },
+    )
+    expect(res.status).toBe(200)
+    expect(deleteImage).toHaveBeenCalledWith('/uploads/old.jpg')
+    expect(waitUntil).toHaveBeenCalledTimes(1)
+    expect(waitUntil.mock.calls[0][0]).toBeInstanceOf(Promise)
+  })
+
+  it('still runs the cleanup without an ExecutionContext (Node)', async () => {
+    cleanupInUpdate()
+    const res = await app.request('/api/items', {
+      method: 'POST',
+      headers: sameOrigin,
+      body: multipart(),
+    })
+    expect(res.status).toBe(200)
+    expect(deleteImage).toHaveBeenCalledWith('/uploads/old.jpg')
   })
 })
