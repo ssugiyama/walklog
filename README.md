@@ -14,7 +14,7 @@ Walklog is a web application for managing and tracking walking paths with map vi
 
 ## Prerequisites
 
-- Node.js (version 14 or higher)
+- Node.js 24 (the Docker image uses `node:24`)
 - PostgreSQL with PostGIS extension
 - Google OAuth client (Google Cloud Console)
 - Google Maps API key
@@ -100,7 +100,7 @@ THEME_COLOR="#3874cb"
 
 #### Environment Variables Reference
 
-Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript bundle at build time (standard Next.js behavior), unlike the rest which are read from the server's runtime environment on each request. This distinction matters for the [Cloudflare Workers](#configure-environment-variables) deployment path.
+Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript bundle at build time (Vite `envPrefix`; the names are kept from the Next.js era), unlike the rest which are read from the server's runtime environment on each request. This distinction matters for the [Cloudflare Workers](#configure-environment-variables) deployment path.
 
 | Variable | Description | Required |
 |----------|-------------|----------|
@@ -128,9 +128,9 @@ Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript 
 | `NEXT_PUBLIC_APP_VERSION` | Version string | No |
 | `SRID` | Spatial Reference System ID for coordinates | No |
 | `SRID_FOR_SIMILAR_SEARCH` | SRID for similarity searches | No |
-| `THEME_COLOR` | Theme color for UA in both light mode and dark mode. For Docker/`next build`, read at build time (the pages are prerendered), so set it before `build`; on Cloudflare Workers it's read at runtime instead | No |
-| `THEME_COLOR_LIGHT` | Theme color for UA in light mode (also used for the PWA manifest `theme_color`/`background_color`); read like `THEME_COLOR` | No |
-| `THEME_COLOR_DARK` | Theme color for UA in dark mode; read like `THEME_COLOR` | No |
+| `THEME_COLOR` | Theme color for UA in both light mode and dark mode. Read by the server at runtime on each request (HTML head and PWA manifest), on Docker and Cloudflare Workers alike | No |
+| `THEME_COLOR_LIGHT` | Theme color for UA in light mode (also used for the PWA manifest `theme_color`/`background_color`); read at runtime like `THEME_COLOR` | No |
+| `THEME_COLOR_DARK` | Theme color for UA in dark mode; read at runtime like `THEME_COLOR` | No |
 | `DB_URL` | PostgreSQL connection string | Yes *|
 | `DB_SSL` | Enable SSL for the DB connection (`true`/`false`) | No |
 | `DB_SSL_REJECT_UNAUTHORIZED` | Reject unauthorized/self-signed certificates (`false` to allow) | No |
@@ -166,8 +166,12 @@ node --env-file=.env bin/manage-users.js rm user-id
 
 #### Migrate DB
 
+The production image is lean and does not contain the migration tooling (`drizzle-kit`), so run migrations from a host checkout against the compose database (publish the `db` port or point `DB_URL` at it):
+
 ```bash
-docker-compose run --rm web sh -c 'pnpm migrate'
+cd web
+pnpm install
+DB_URL=postgresql://walklog:walklog@localhost:5432/walklog pnpm migrate
 ```
 
 #### Setup Area Database
@@ -182,6 +186,8 @@ docker-compose up -d
 ```
 
 The application will be available at http://localhost:3000
+
+Uploaded images (`IMAGE_STORAGE` other than `R2`) are written to `/app/public/uploads` in the container, which `docker-compose.yml` bind-mounts from `./public/uploads` on the host, so they survive container recreation. The `NEXT_PUBLIC_*` variables are build arguments of `web/Dockerfile` (see `.github/workflows/publish-docker-image.yml`); everything else is read at container start.
 
 ### Option 2: Manual Deployment
 
@@ -210,13 +216,15 @@ cd /path/to/work_dir
 cd web
 export NODE_ENV=production
 pnpm install
-pnpm build
-pnpm start
+pnpm build   # client -> dist/client, server -> dist/node/server.js
+node --env-file=.env dist/node/server.js   # `pnpm start` does not load .env files
 ```
+
+The server listens on `PORT` (default 3000) and must be started from `web/` (it resolves `dist/client` and `public/uploads` against the working directory; set `UPLOAD_DIR` to store uploads elsewhere).
 
 ### Option 3: Cloudflare Workers Deployment
 
-Deploys the app to Cloudflare Workers via [vinext](https://github.com/cloudflare/vinext) (a Vite-based implementation of the Next.js API surface), using Supabase Postgres as the database. Better Auth (Google sign-in) and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
+Deploys the Hono app (`web/worker.ts`) and the Vite-built client to Cloudflare Workers via `@cloudflare/vite-plugin`, using Supabase Postgres as the database. Better Auth (Google sign-in) and R2 image storage work unchanged; this is an additional deployment target alongside Docker, not a replacement.
 
 #### Prerequisites
 - A Cloudflare account, with the [`cf`](https://www.npmjs.com/package/cf) CLI logged in (`pnpm exec cf auth login`). [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) is still used for `wrangler tail`, Worker secrets and promoting versions, so log it in too (`pnpm exec wrangler login`)
@@ -241,7 +249,7 @@ export HYPERDRIVE_ID=<the id it printed>
 
 #### Set Up Caching
 
-The `'use cache'` functions in `lib/actions/walk-actions.ts` (search results, the user list) persist their cached data, and the `updateTag` invalidation markers, in a KV namespace bound as `VINEXT_KV_CACHE` (see `kvDataAdapter()` in `vite.config.ts`). Create it once, the same way as Hyperdrive:
+The server-side cache for search results and the user list is stored in a KV namespace bound as `CACHE_KV` (see `kvCache()` in `worker.ts`; the Node server uses an in-memory cache instead). Create it once, the same way as Hyperdrive:
 
 ```bash
 cd web
@@ -251,13 +259,11 @@ export KV_CACHE_ID=<the id it printed>
 
 `vp run cf-dev`/`preview` use a locally simulated KV namespace instead, so they never touch the real one.
 
-Cache keys include the build id, so every deploy starts with an empty cache rather than serving entries from the previous build.
-
 #### Configure Environment Variables
 
 `web/cloudflare.config.ts` only declares one plain-text binding, `CF_WORKERS=true` - a fixed property of this deployment target, not something you configure.
 
-Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_GOOGLE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by `lib/utils/config.tsx`, a client component, so it's inlined into the JavaScript bundle at build time - Worker secrets have no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before the deploy even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run cf-dev`/`preview`/`deploy`/`upload`:
+Every `NEXT_PUBLIC_*` variable from the [reference table](#environment-variables-reference) (`NEXT_PUBLIC_GOOGLE_API_KEY`, `NEXT_PUBLIC_DEFAULT_CENTER`, etc.) is consumed by client code, so it's inlined into the JavaScript bundle at build time - Worker secrets have no effect on these, since the Worker never reads them at request time and the value is already baked into the built assets before the deploy even runs. Set them the same way you would for local development - fill in `web/.env`/`web/.env.local` per [step 4](#4-environment-variables), or export them in your shell - before running `vp run cf-dev`/`preview`/`deploy`/`upload`:
 
 ```bash
 cd web
@@ -291,11 +297,13 @@ That local connection string can point anywhere reachable, including a local Pos
 
 #### Preview Locally, Then Deploy
 ```bash
-vp run cf-dev   # vinext dev server (HMR) with the Workers runtime, on port 3001
+vp run cf-dev   # Vite dev server (HMR) with the Workers runtime, on port 3001
 vp run preview  # builds and runs the app under the actual Workers runtime, locally
 vp run deploy   # publishes to Cloudflare Workers
 vp run upload   # uploads a new Worker version without routing traffic to it
 ```
+
+`vp run preview` (via `cf-build`) requires `HYPERDRIVE_ID` and `KV_CACHE_ID` to be set even locally (placeholder values such as `000...` are fine). In local preview only the `.dev.vars` entries declared as bindings in `cloudflare.config.ts` reach the Worker, so `SITE_NAME`/`SITE_DESCRIPTION` show their defaults there; on a deployed Worker they come from `wrangler secret put` as described above.
 
 If you change `cloudflare.config.ts` (e.g. add a binding), regenerate the local TypeScript types (into `.cloudflare/types`) with `vp run cf-typegen`.
 
@@ -329,7 +337,7 @@ Server-only variables are pushed to Cloudflare via `wrangler versions secret bul
 | | `THEME_COLOR_LIGHT` |
 | | `THEME_COLOR_DARK` |
 
-`THEME_COLOR*` are runtime variables on Workers: vinext renders `app/layout.tsx` and `app/manifest.ts` per request instead of prerendering them at build time. Leaving them unset falls back to white (light) and black (dark).
+`THEME_COLOR*` are runtime variables (the server renders the HTML head and the manifest per request). Leaving them unset falls back to white (light) and black (dark).
 
 `NEXT_PUBLIC_*` variables are instead passed as build-time environment variables to the `vp run deploy` step itself, since they have to be present *before* the build runs, not after (`NEXT_PUBLIC_APP_VERSION` is set fresh from the release tag; everything else comes from a repository secret or variable named after the suffix):
 
@@ -352,7 +360,7 @@ Because CI overwrites these on every deploy, make sure the repository secrets/va
 ```bash
 cd web
 pnpm install
-pnpm dev
+pnpm dev   # Hono server + Vite dev server with HMR
 ```
 
 Access the development server at http://localhost:3000
@@ -370,7 +378,7 @@ Skip the hook for a single commit with `VP_GIT_HOOKS=0 git commit ...`.
 ### Project Structure
 ```
 walklog/
-├── web/            # Next.js application
+├── web/            # Hono server + Vite React SPA (TanStack Router)
 ├── db/             # Database scripts and migrations
 ├── docker-compose.yml
 └── README.md

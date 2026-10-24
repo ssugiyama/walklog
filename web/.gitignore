@@ -1,11 +1,9 @@
-.next/**
 .env.*
 coverage/**
 node_modules/**
 public/uploads/**
 !.env
 tsconfig.tsbuildinfo
-next-env.d.ts
 
 # wrangler (still used for `wrangler tail`/`secret put`) local state
 .wrangler
@@ -15,7 +13,6 @@ next-env.d.ts
 /dist/
 # cf / @cloudflare/vite-plugin build output and generated types
 .cloudflare/
-.vinext/
 
 # Firebase service account / config (no longer used)
 admin.json

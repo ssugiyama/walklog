@@ -10,7 +10,7 @@ import { honoDev } from './vite/hono-dev'
 const nodeTarget = process.env.WALKLOG_TARGET === 'node'
 
 export default defineConfig({
-  // Client env vars keep their Next.js names (inlined at build time).
+  // Client env vars keep their NEXT_PUBLIC_ names (inlined at build time).
   envPrefix: 'NEXT_PUBLIC_',
   fmt: {
     // Keep the style Biome used so the formatter switch is a no-op.
@@ -18,8 +18,6 @@ export default defineConfig({
     semi: false,
     printWidth: 80,
     ignorePatterns: [
-      '.next/**',
-      'out/**',
       'public/**',
       'coverage/**',
       'dist/**',
@@ -33,8 +31,6 @@ export default defineConfig({
   lint: {
     jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
     ignorePatterns: [
-      '.next/**',
-      'out/**',
       'public/**',
       'coverage/**',
       'dist/**',
@@ -115,13 +111,7 @@ export default defineConfig({
     // to boot its WASM postgres + postgis extension on a cold run.
     hookTimeout: 20000,
     testTimeout: 20000,
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/.next/**',
-      '**/out/**',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
     coverage: {
       // you can include other reporters, but 'json-summary' is required, json is recommended
       reporter: ['text', 'json-summary', 'json'],
