@@ -6,14 +6,14 @@ RUN corepack enable pnpm
 # Install all dependencies (the build needs the dev ones too)
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
 RUN pnpm install --frozen-lockfile
 
 # Install only what the server needs at run time (dist/node/server.js keeps
 # its package.json dependencies external)
 FROM base AS prod-deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
 RUN pnpm install --frozen-lockfile --prod
 
 # Build the client (dist/client) and the Node server (dist/node)

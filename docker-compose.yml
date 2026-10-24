@@ -14,7 +14,7 @@ services:
     environment:
       - DB_URL=postgresql://${POSTGRES_USER:-walklog}:${POSTGRES_PASSWORD:-walklog}@db:5432/${POSTGRES_DB:-walklog}
     volumes:
-      - "./public/${IMAGE_PREFIX:-uploads}:/app/public/${IMAGE_PREFIX:-uploads}"
+      - "./public/uploads:/app/public/uploads"
     ports:
       - 3000:3000
     links:

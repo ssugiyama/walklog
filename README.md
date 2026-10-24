@@ -71,7 +71,7 @@ Edit `web/.env` or add `web/.env.local` with your configuration:
 ```bash
 SITE_NAME=Walklog
 SITE_DESCRIPTION=Web application for managing your walking logs
-IMAGE_PREFIX=uploads
+IMAGE_PREFIX=images
 AUTO_APPROVE_USERS=
 SRID=4326
 SRID_FOR_SIMILAR_SEARCH=32662
@@ -106,7 +106,7 @@ Every `NEXT_PUBLIC_*` variable below is inlined into the client-side JavaScript 
 |----------|-------------|----------|
 | `SITE_NAME` | Display name for the application | Yes |
 | `SITE_DESCRIPTION` | Site description for meta tags | Yes |
-| `IMAGE_PREFIX` | Prefix for image storage paths | Yes |
+| `IMAGE_PREFIX` | Sub-directory / key prefix for stored images (under the upload root for local disk, and the object key prefix for R2). Read from the runtime environment; defaults to `images` when unset | No |
 | `AUTO_APPROVE_USERS` | If set, new users are automatically approved (active) on first login instead of requiring manual approval | No |
 | `IMAGE_STORAGE` | Image upload backend: `R2` for Cloudflare R2, anything else (including unset) for local disk | No |
 | `R2_ACCOUNT_ID` | Cloudflare account ID (required when `IMAGE_STORAGE=R2`) | No † |
@@ -187,7 +187,13 @@ docker-compose up -d
 
 The application will be available at http://localhost:3000
 
-Uploaded images (`IMAGE_STORAGE` other than `R2`) are written to `/app/public/uploads` in the container, which `docker-compose.yml` bind-mounts from `./public/uploads` on the host, so they survive container recreation. The `NEXT_PUBLIC_*` variables are build arguments of `web/Dockerfile` (see `.github/workflows/publish-docker-image.yml`); everything else is read at container start.
+Uploaded images (`IMAGE_STORAGE` other than `R2`) are written to `/app/public/uploads/<IMAGE_PREFIX>/...` in the container, and `docker-compose.yml` bind-mounts `./public/uploads` on the host to `/app/public/uploads`, so they survive container recreation. The container runs as uid 1000 (`node`), so the host directory must be writable by it. Create it before the first `docker compose up` (Docker would otherwise create it as root and uploads fail with EACCES); a root-owned directory that already exists needs the same fix:
+
+```bash
+mkdir -p public/uploads && sudo chown 1000:1000 public/uploads
+```
+
+ The `NEXT_PUBLIC_*` variables are build arguments of `web/Dockerfile` (see `.github/workflows/publish-docker-image.yml`); everything else is read at container start.
 
 ### Option 2: Manual Deployment
 
