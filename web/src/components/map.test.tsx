@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { withNuqsTestingAdapter } from 'nuqs/adapters/testing'
 import React from 'react'
 import '@testing-library/jest-dom'
@@ -45,6 +45,10 @@ vi.mock('@/lib/utils/navigation', async () => ({
     push: vi.fn(),
     replace: vi.fn(),
   })),
+  // Marks what GMap hands to the router wrapper.
+  useWithRouter: vi.fn(() => (node: React.ReactNode) => (
+    <div data-testid="with-router">{node}</div>
+  )),
 }))
 
 vi.mock('@googlemaps/js-api-loader', () => ({
@@ -119,5 +123,28 @@ describe('Map Component', () => {
     await waitFor(() => {
       expect(mockSetState).toHaveBeenCalled()
     })
+  })
+
+  it('renders the path info window content inside the router wrapper', async () => {
+    ;(useMainContext as Mock).mockReturnValue([
+      { autoGeolocation: true, mode: 'default' },
+      vi.fn(),
+    ])
+    render(<GMap />, { wrapper: withNuqsTestingAdapter() })
+    await waitFor(() => {
+      expect(mockSetState).toHaveBeenCalled()
+    })
+    const domready = vi
+      .mocked(google.maps.event.addListener)
+      .mock.calls.find(([, name]) => name === 'domready')
+    expect(domready).toBeDefined()
+    const container = document.createElement('div')
+    container.id = 'path-info-window-content'
+    document.body.appendChild(container)
+    act(() => (domready[2] as () => void)())
+    const wrapped = await screen.findByTestId('with-router')
+    expect(container).toContainElement(wrapped)
+    expect(wrapped.textContent).toMatch(/^geolocation at /)
+    container.remove()
   })
 })

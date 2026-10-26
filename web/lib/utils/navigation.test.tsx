@@ -7,6 +7,7 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router'
+import { createRoot } from 'react-dom/client'
 import {
   Link,
   parseSearch,
@@ -15,6 +16,7 @@ import {
   usePathname,
   useRouter,
   useSearchParams,
+  useWithRouter,
 } from './navigation'
 
 // jsdom does not implement scrollTo, which the router calls on navigation.
@@ -157,5 +159,45 @@ describe('Link', () => {
     expect(a.hasAttribute('scroll')).toBe(false)
     await userEvent.click(a)
     expect(history.location.pathname).toBe('/show/1')
+  })
+})
+
+describe('Link outside a router', () => {
+  it('falls back to native navigation without throwing or warning', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(<Link href="/show/1">go</Link>)
+    let prevented: boolean | undefined
+    // Runs after the Link's own handler; jsdom cannot follow links, so
+    // swallow the default action once it has been observed.
+    const observe = (e: Event) => {
+      prevented = e.defaultPrevented
+      e.preventDefault()
+    }
+    window.addEventListener('click', observe)
+    fireEvent.click(screen.getByText('go'))
+    window.removeEventListener('click', observe)
+    expect(prevented).toBe(false)
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+})
+
+describe('useWithRouter', () => {
+  it('lets a Link in a separate React root navigate the router', async () => {
+    let withRouter: ReturnType<typeof useWithRouter> | undefined
+    function Probe() {
+      withRouter = useWithRouter()
+      return <p>probe</p>
+    }
+    const { history } = renderAt('/', <Probe />)
+    await screen.findByText('probe')
+    const container = document.createElement('div')
+    document.body.appendChild(container)
+    const root = createRoot(container)
+    act(() => root.render(withRouter?.(<Link href="/show/2">detached</Link>)))
+    await userEvent.click(screen.getByText('detached'))
+    expect(history.location.pathname).toBe('/show/2')
+    act(() => root.unmount())
+    container.remove()
   })
 })

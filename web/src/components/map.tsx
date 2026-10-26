@@ -2,7 +2,7 @@ import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 import { Box, Button } from '@mui/material'
 import { LineString } from 'geojson'
 import moment from 'moment'
-import { Link, useSearchParams } from '@/lib/utils/navigation'
+import { Link, useSearchParams, useWithRouter } from '@/lib/utils/navigation'
 import {
   parseAsArrayOf,
   parseAsFloat,
@@ -55,6 +55,7 @@ type MapRefs = {
   elevationInfoWindow?: google.maps.InfoWindow
   marker?: google.maps.marker.AdvancedMarkerElement
   interceptLink?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
+  withRouter?: (node: React.ReactNode) => React.ReactNode
   initialized: boolean
 }
 
@@ -93,6 +94,7 @@ const GMap = (props) => {
   rc.searchCenter = searchCenter
   rc.radius = radius
   rc.interceptLink = interceptLink
+  rc.withRouter = useWithRouter()
 
   const addPoint = (lat: number, lng: number, append: boolean) => {
     const pt = new google.maps.LatLng(lat, lng)
@@ -296,7 +298,8 @@ const GMap = (props) => {
       const root = createRoot(
         document.getElementById('path-info-window-content'),
       )
-      root.render(content)
+      // A separate root does not see the app's router context.
+      root.render(rc.withRouter(content))
     })
     google.maps.event.addListener(rc.pathInfoWindow, 'closeclick', () => {
       if (rc.autoGeolocation) {

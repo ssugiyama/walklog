@@ -1,13 +1,17 @@
 import {
+  RouterContextProvider,
   useLocation,
   useNavigate,
+  useRouter as useTanstackRouter,
   useParams as useRouterParams,
   useRouterState,
 } from '@tanstack/react-router'
 import {
   type AnchorHTMLAttributes,
   type MouseEvent,
+  type ReactNode,
   forwardRef,
+  useCallback,
   useMemo,
 } from 'react'
 
@@ -52,6 +56,22 @@ export function useRouter(): {
   )
 }
 
+// A tree rendered with its own createRoot() (e.g. a Google Maps info window)
+// does not inherit React context. Wrap it with the returned function so its
+// Links navigate through the app's router.
+export function useWithRouter(): (node: ReactNode) => ReactNode {
+  const router = useTanstackRouter({ warn: false })
+  return useCallback(
+    (node: ReactNode) =>
+      router ? (
+        <RouterContextProvider router={router}>{node}</RouterContextProvider>
+      ) : (
+        node
+      ),
+    [router],
+  )
+}
+
 type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string
   // Same as next/link: `false` keeps the scroll position on navigation.
@@ -62,10 +82,13 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   { href, onClick, target, scroll, ...rest },
   ref,
 ) {
-  const navigate = useNavigate()
+  // Without a router (outside <RouterProvider>) the click falls back to a
+  // native page load.
+  const router = useTanstackRouter({ warn: false })
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(e)
     if (
+      !router ||
       e.defaultPrevented ||
       e.button !== 0 ||
       e.metaKey ||
@@ -78,7 +101,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       return
     }
     e.preventDefault()
-    void navigate({ href, resetScroll: scroll !== false })
+    void router.navigate({ href, resetScroll: scroll !== false })
   }
   return (
     <a ref={ref} href={href} target={target} onClick={handleClick} {...rest} />
