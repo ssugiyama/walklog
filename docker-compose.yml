@@ -11,10 +11,14 @@ services:
   web:
     restart: always
     build: web
+    # Runtime settings (SITE_NAME, THEME_COLOR*, BETTER_AUTH_*, ...); see
+    # README step 4. DB_URL below overrides any value in this file.
+    env_file:
+      - ./web/.env
     environment:
       - DB_URL=postgresql://${POSTGRES_USER:-walklog}:${POSTGRES_PASSWORD:-walklog}@db:5432/${POSTGRES_DB:-walklog}
     volumes:
-      - "./public/${IMAGE_PREFIX:-uploads}:/var/www/public/${IMAGE_PREFIX:-uploads}"
+      - "./public/uploads:/app/public/uploads"
     ports:
       - 3000:3000
     links:

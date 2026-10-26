@@ -1,0 +1,13 @@
+node_modules
+dist
+.next
+.cloudflare
+.wrangler
+.vitest
+coverage
+.env
+.env.*
+.dev.vars*
+public/uploads
+Dockerfile
+.dockerignore

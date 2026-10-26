@@ -10,7 +10,7 @@ vi.mock('@/lib/auth-client', () => ({
   authClient: { useSession: vi.fn() },
 }))
 
-vi.mock('@/lib/actions/walk-actions', () => ({
+vi.mock('@/lib/api/actions', () => ({
   getUsersAction: vi.fn().mockResolvedValue([]),
   getSelfStatusAction: vi.fn().mockResolvedValue('active'),
 }))

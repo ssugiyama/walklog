@@ -1,4 +1,3 @@
-'use client'
 import { createContext, Dispatch, useContext, useState } from 'react'
 import type PathManager from '@/lib/utils/path-manager'
 import { WalkT } from '@/types'

@@ -1,0 +1,144 @@
+import { render, screen } from '@testing-library/react'
+import { useRouter } from '@/lib/utils/navigation'
+import React from 'react'
+import { useData } from '@/lib/utils/data-context'
+import { useUserContext } from '@/lib/utils/user-context'
+import SearchBox from './search-box'
+import '@testing-library/jest-dom/vitest'
+import { Mock } from 'vite-plus/test'
+
+vi.mock('@/lib/utils/navigation', async () => ({
+  Link: (await import('@/lib/utils/mock-link')).MockLink,
+  useRouter: vi.fn(),
+  useSearchParams: vi.fn(() => ({
+    get: vi.fn((key) => (key === 'index' ? '0' : null)),
+  })),
+}))
+
+vi.mock('@/lib/utils/user-context', () => ({
+  useUserContext: vi.fn(),
+}))
+
+vi.mock('@/lib/utils/data-context', () => ({
+  useData: vi.fn(),
+}))
+
+vi.mock('@/lib/utils/map-context', () => ({
+  useMapContext: vi.fn(() => [
+    {
+      pathManager: {},
+    },
+  ]),
+}))
+
+vi.mock('@/lib/utils/config', () => ({
+  useConfig: vi.fn(() => ({})),
+}))
+
+vi.mock('./search-form', () => ({
+  default: function MockSearchForm() {
+    return <div data-testid="search-form">Search Form</div>
+  },
+}))
+
+describe('SearchBox', () => {
+  const mockRouterReplace = vi.fn()
+
+  beforeEach(() => {
+    ;(useRouter as Mock).mockReturnValue({
+      replace: mockRouterReplace,
+    })
+
+    ;(useUserContext as Mock).mockReturnValue({
+      users: [],
+    })
+
+    ;(useData as Mock).mockReturnValue([
+      {
+        offset: 0,
+        count: 0,
+        rows: [],
+      },
+    ])
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('renders the SearchBox component', () => {
+    render(<SearchBox />)
+    expect(screen.getByTestId('SearchBox')).toBeInTheDocument()
+  })
+
+  it('calls router.replace when index is present in searchParams', () => {
+    const mockRows = [
+      {
+        id: 1,
+        uid: 'user1',
+        date: '2023-01-01',
+        title: 'Test Walk',
+        length: 5,
+      },
+    ]
+    ;(useData as Mock).mockReturnValue([
+      {
+        offset: 0,
+        count: 1,
+        rows: mockRows,
+      },
+    ])
+
+    render(<SearchBox />)
+    expect(mockRouterReplace).toHaveBeenCalledWith(
+      expect.stringContaining('/show/1'),
+    )
+  })
+
+  it('displays "No results" when count is 0', () => {
+    render(<SearchBox />)
+    expect(screen.getByText('No results')).toBeInTheDocument()
+  })
+
+  it('displays the error message instead of the count when data.error is set', () => {
+    ;(useData as Mock).mockReturnValue([
+      {
+        offset: 0,
+        count: 0,
+        rows: [],
+        error: 'Invalid limit: 500. Must be an integer between 1 and 100.',
+      },
+    ])
+
+    render(<SearchBox />)
+
+    expect(
+      screen.getByText(
+        'Invalid limit: 500. Must be an integer between 1 and 100.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('No results')).not.toBeInTheDocument()
+  })
+
+  it('displays the correct count when count is greater than 0', () => {
+    const mockRows = [
+      {
+        id: '1',
+        uid: 'user1',
+        date: '2023-01-01',
+        title: 'Test Walk',
+        length: 5,
+      },
+    ]
+    ;(useData as Mock).mockReturnValue([
+      {
+        offset: 0,
+        count: 1,
+        rows: mockRows,
+      },
+    ])
+
+    render(<SearchBox />)
+    expect(screen.getByText('1 / 1 item')).toBeInTheDocument()
+  })
+})
