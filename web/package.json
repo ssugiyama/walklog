@@ -2,7 +2,7 @@
   "type": "module",
   "scripts": {
     "build": "WALKLOG_TARGET=node vp build && vp pack",
-    "dev": "WALKLOG_TARGET=node vp dev",
+    "dev": "WALKLOG_TARGET=node vp dev --port 3000 --strictPort",
     "start": "node dist/node/server.js",
     "test": "vp test run --coverage.enabled true",
     "migrate": "drizzle-kit generate && drizzle-kit migrate"

@@ -1,3 +1,4 @@
+import { rmSync } from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite-plus'
 import { cloudflare } from '@cloudflare/vite-plugin'
@@ -163,6 +164,23 @@ export default defineConfig({
           resolveId(id, importer) {
             if (id === 'util') {
               return this.resolve('util/', importer, { skipSelf: true })
+            }
+          },
+        },
+        {
+          // public/uploads holds user uploads (IMAGE_STORAGE=local), served
+          // by server.ts from the real upload dir. Keep them out of the
+          // client build so they are neither duplicated into dist/client nor
+          // published as Workers static assets.
+          name: 'walklog:exclude-uploads',
+          apply: 'build',
+          applyToEnvironment: (environment) => environment.name === 'client',
+          writeBundle(options) {
+            if (options.dir) {
+              rmSync(path.join(options.dir, 'uploads'), {
+                recursive: true,
+                force: true,
+              })
             }
           },
         },
