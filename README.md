@@ -193,7 +193,17 @@ Uploaded images (`IMAGE_STORAGE` other than `R2`) are written to `/app/public/up
 mkdir -p public/uploads && sudo chown 1000:1000 public/uploads
 ```
 
- The `NEXT_PUBLIC_*` variables are build arguments of `web/Dockerfile` (see `.github/workflows/publish-docker-image.yml`); everything else is read at container start.
+The `NEXT_PUBLIC_*` variables are build arguments of `web/Dockerfile` (see `.github/workflows/publish-docker-image.yml`); everything else is read at container start. `docker-compose.yml` passes `web/.env` (see [step 4](#4-environment-variables)) to the `web` service with `env_file`, so it must exist; `web/.env.local` is not read by Docker. `DB_URL` is always set by `docker-compose.yml` itself and overrides any value in `web/.env`.
+
+#### Upgrading from the Next.js image
+
+The image now runs a Hono server instead of Next.js. When updating an existing Docker deployment:
+
+- `THEME_COLOR`, `THEME_COLOR_LIGHT`, `THEME_COLOR_DARK`, `SITE_NAME` and `SITE_DESCRIPTION` are read from the container's runtime environment, not baked in at build time. Make sure they are in `web/.env` (now loaded via `env_file`) or otherwise passed to the container, or the defaults are used.
+- The uploads volume moved: it is now `./public/uploads:/app/public/uploads` (the old compose file mounted `./public/${IMAGE_PREFIX:-uploads}` at `/var/www/public/...`). Update any customised compose file accordingly.
+- The container runs as uid 1000 (`node`) instead of 1001, so re-own the host uploads directory: `sudo chown -R 1000:1000 public/uploads`.
+- `start-in-docker` and the Next.js standalone `server.js` are gone; the container command is `node dist/node/server.js`. Update any custom `command:`/entrypoint override.
+- Cloudflare Workers only: the KV binding was renamed from `VINEXT_KV_CACHE` to `CACHE_KV` (see [Set Up Caching](#set-up-caching)).
 
 ### Option 2: Manual Deployment
 
