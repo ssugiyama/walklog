@@ -34,9 +34,12 @@ describe('renderHead', () => {
     const html = renderHead(
       { ogTitle: 't', ogUrl: '/show/1', ogImage: 'http://i/x.png' },
       {},
+      'http://req.example',
     )
     expect(html).toContain('property="og:image" content="http://i/x.png"')
-    expect(html).toContain('property="og:url" content="/show/1"')
+    expect(html).toContain(
+      'property="og:url" content="http://req.example/show/1"',
+    )
     expect(html).toContain('<link rel="manifest" href="/manifest.webmanifest">')
     expect(html).toContain('apple-mobile-web-app-status-bar-style')
   })

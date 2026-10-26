@@ -31,7 +31,7 @@ const safeOrigin = (url?: string) => {
   }
 }
 
-// Crawlers need absolute og:image URLs. BETTER_AUTH_URL is the public origin
+// Crawlers need absolute og:image / og:url URLs. BETTER_AUTH_URL is the public origin
 // when set (behind a proxy the request URL may be internal).
 const absoluteUrl = (
   path: string,
@@ -64,7 +64,11 @@ export const renderHead = (
     meta('name', 'description', head.description),
     meta('property', 'og:title', head.ogTitle),
     meta('property', 'og:description', head.ogTitle && head.description),
-    meta('property', 'og:url', head.ogUrl),
+    meta(
+      'property',
+      'og:url',
+      head.ogUrl && absoluteUrl(head.ogUrl, env, requestOrigin),
+    ),
     meta(
       'property',
       'og:image',

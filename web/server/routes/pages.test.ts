@@ -50,7 +50,7 @@ describe('page routes', () => {
     expect(res.status).toBe(200)
     expect(html).toContain('2026-01-02 : T (2.0 km)')
     expect(html).toContain('og:image" content="http://img/x.png"')
-    expect(html).toContain('og:url" content="/show/1"')
+    expect(html).toContain('og:url" content="http://localhost/show/1"')
   })
 
   it('falls back to the default head when missing, invalid or failing', async () => {
@@ -100,6 +100,13 @@ describe('page routes', () => {
     )
   })
 
+  it('emits an absolute og:url on the home page', async () => {
+    vi.stubEnv('SITE_DESCRIPTION', 'desc')
+    vi.stubEnv('BETTER_AUTH_URL', 'https://walk.example.com')
+    const html = await (await app.request('/')).text()
+    expect(html).toContain('og:url" content="https://walk.example.com/"')
+  })
+
   it('resolves relative item images against BETTER_AUTH_URL', async () => {
     vi.stubEnv('BETTER_AUTH_URL', 'https://walk.example.com/some/path')
     vi.mocked(getItem).mockResolvedValue({
@@ -114,6 +121,7 @@ describe('page routes', () => {
     expect(html).toContain(
       'og:image" content="https://walk.example.com/uploads/a.png"',
     )
+    expect(html).toContain('og:url" content="https://walk.example.com/show/1"')
   })
 
   it('falls back to the default og:image when the item has none', async () => {
