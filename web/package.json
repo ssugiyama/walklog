@@ -36,7 +36,7 @@
     "terra-draw-google-maps-adapter": "^1.5.0",
     "util": "^0.12.5",
     "wkx": "^0.5.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "2.0.0-beta.sha-52b0dc0e9",
