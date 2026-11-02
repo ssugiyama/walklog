@@ -17,7 +17,7 @@
     "@hono/zod-validator": "^0.9.1",
     "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.0.0",
-    "@tanstack/react-router": "^1.170.45",
+    "@tanstack/react-router": "^1.170.46",
     "aws4fetch": "^1.0.20",
     "better-auth": "^1.7.7",
     "buffer": "^6.0.3",
