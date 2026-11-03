@@ -56,6 +56,16 @@ type MapRefs = {
   marker?: google.maps.marker.AdvancedMarkerElement
   interceptLink?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
   withRouter?: (node: React.ReactNode) => React.ReactNode
+  // Google Maps listeners are registered once in initMap and outlive the
+  // render they were created in, so they must reach the URL setters and
+  // params through here. A setter captured at init keeps that render's
+  // pathname (nuqs's TanStack adapter navigates to `pathname + query`), so
+  // after moving from / to /edit/1 it would navigate back to /.
+  setSearchPath?: (path: google.maps.LatLng[] | undefined) => unknown
+  setSearchCenter?: (center: google.maps.LatLng) => unknown
+  setRadius?: (radius: number) => unknown
+  setCities?: (cities: string[]) => unknown
+  searchParams?: URLSearchParams
   initialized: boolean
 }
 
@@ -95,6 +105,11 @@ const GMap = (props) => {
   rc.radius = radius
   rc.interceptLink = interceptLink
   rc.withRouter = useWithRouter()
+  rc.setSearchPath = setSearchPath
+  rc.setSearchCenter = setSearchCenter
+  rc.setRadius = setRadius
+  rc.setCities = setCities
+  rc.searchParams = searchParams
 
   const addPoint = (lat: number, lng: number, append: boolean) => {
     const pt = new google.maps.LatLng(lat, lng)
@@ -133,7 +148,7 @@ const GMap = (props) => {
   const pathChanged = () => {
     if (!rc.pathManager) return
     const nextPath = rc.pathManager.getSelectedLatLngArray()
-    void setSearchPath(nextPath)
+    void rc.setSearchPath(nextPath)
     if (nextPath) {
       const pair = rc.pathManager.searchPolyline(nextPath)
       const item = pair?.[1]
@@ -163,7 +178,7 @@ const GMap = (props) => {
       const pts = coordinates.map(
         (item) => new google.maps.LatLng(item[1], item[0]),
       )
-      void setSearchPath(pts)
+      void rc.setSearchPath(pts)
     })
     reader.readAsText(file)
   }
@@ -179,7 +194,7 @@ const GMap = (props) => {
 
   const addCity = (id: string) => {
     const newCities = Array.from(new Set(rc.cities.concat(id)))
-    void setCities(newCities)
+    void rc.setCities(newCities)
   }
 
   const defaultCenterLatLng = () => {
@@ -276,7 +291,7 @@ const GMap = (props) => {
         const index = citiesArray.indexOf(id)
         if (index >= 0) {
           citiesArray.splice(index, 1)
-          void setCities(citiesArray)
+          void rc.setCities(citiesArray)
         }
       },
     )
@@ -288,7 +303,7 @@ const GMap = (props) => {
         content = `geolocation at ${moment().format('HH:mm')}`
       } else {
         const item = rc.clickedItem
-        const url = idToShowUrl(item.id, searchParams)
+        const url = idToShowUrl(item.id, rc.searchParams)
         content = (
           <Button component={Link} href={url} onClick={rc.interceptLink}>
             {item.date}: {item.title}
@@ -314,12 +329,12 @@ const GMap = (props) => {
     }
     rc.distanceWidget = new google.maps.Circle(circleOpts)
     google.maps.event.addListener(rc.distanceWidget, 'center_changed', () => {
-      void setSearchCenter(rc.distanceWidget.getCenter())
+      void rc.setSearchCenter(rc.distanceWidget.getCenter())
     })
     google.maps.event.addListener(rc.distanceWidget, 'radius_changed', () => {
       const r = rc.distanceWidget.getRadius()
       if (Math.abs(rc.radius - r) < PRECISION) return
-      void setRadius(r)
+      void rc.setRadius(r)
     })
     rc.elevationInfoWindow = new google.maps.InfoWindow()
     await google.maps.importLibrary('marker')
