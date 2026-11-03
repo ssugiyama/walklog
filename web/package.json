@@ -19,7 +19,7 @@
     "@mui/material": "^9.0.0",
     "@tanstack/react-router": "^1.170.46",
     "aws4fetch": "^1.0.20",
-    "better-auth": "^1.7.7",
+    "better-auth": "^1.7.14",
     "buffer": "^6.0.3",
     "drizzle-orm": "1.0.0-rc.5",
     "hono": "^4.13.13",
