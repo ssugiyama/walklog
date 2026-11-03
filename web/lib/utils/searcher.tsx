@@ -1,5 +1,5 @@
 import { useSearchParams } from '@/lib/utils/navigation'
-import { useActionState, useEffect, useTransition } from 'react'
+import { useActionState, useEffect, useMemo, useTransition } from 'react'
 import { searchAction } from '@/lib/api/actions'
 import { DataT } from '@/types'
 import { useConfig } from './config'
@@ -26,6 +26,18 @@ const watchKeys = [
   'radius',
   'cities',
 ]
+
+// Only these filters search by the drawn path; for the rest a path edit
+// (e.g. drawing on the map) must neither trigger nor change the search.
+const PATH_FILTERS = ['crossing', 'hausdorff', 'frechet']
+
+const searchRelevantParams = (searchParams: URLSearchParams) => {
+  const params = new URLSearchParams(searchParams)
+  if (!PATH_FILTERS.includes(params.get('filter') ?? '')) {
+    params.delete('path')
+  }
+  return params
+}
 
 export function Searcher() {
   const config = useConfig()
@@ -55,7 +67,12 @@ export function Searcher() {
     cities: '',
     path: '',
   }
-  const searchParams = useSearchParams()
+  const urlSearchParams = useSearchParams()
+  const searchParams = useMemo(
+    () => searchRelevantParams(urlSearchParams),
+    [urlSearchParams],
+  )
+  const searchKey = searchParams.toString()
   const props = { ...defaultValues }
   searchParams.forEach((value, key) => {
     props[key] = ['limit', 'offset'].includes(key) ? Number(value) : value
@@ -83,7 +100,7 @@ export function Searcher() {
     startTransition(() => {
       dispatchSearch(props)
     })
-  }, [searchParams, sessionKey])
+  }, [searchKey, sessionKey])
 
   useEffect(() => {
     if (searchState.serial <= 0) {

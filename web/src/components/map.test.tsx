@@ -10,6 +10,22 @@ import { useMainContext } from '@/lib/utils/main-context'
 import { useMapContext } from '@/lib/utils/map-context'
 import GMap from './map'
 
+// Lets a test swap useQueryState out; the real one is used otherwise.
+const nuqsOverride = vi.hoisted(() => ({
+  useQueryState: undefined as undefined | ((key: string) => unknown),
+}))
+
+vi.mock('nuqs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('nuqs')>()
+  return {
+    ...actual,
+    useQueryState: ((...args: Parameters<typeof actual.useQueryState>) =>
+      nuqsOverride.useQueryState
+        ? nuqsOverride.useQueryState(args[0])
+        : actual.useQueryState(...args)) as typeof actual.useQueryState,
+  }
+})
+
 vi.mock('@/lib/utils/main-context', () => ({
   useMainContext: vi.fn(),
 }))
@@ -146,5 +162,49 @@ describe('Map Component', () => {
     expect(container).toContainElement(wrapped)
     expect(wrapped.textContent).toMatch(/^geolocation at /)
     container.remove()
+  })
+
+  it('map listeners use the latest URL setters, not the ones from init', async () => {
+    // nuqs's TanStack adapter bakes the current pathname into each setter,
+    // so a setter kept from the first render would navigate /edit/1 back
+    // to /. Hand out a fresh setter per render to tell them apart.
+    // The path effect hands the (empty) URL path to PathManager.
+    google.maps.geometry = {
+      encoding: { encodePath: vi.fn(() => '') },
+    } as unknown as typeof google.maps.geometry
+    const setters: Record<string, Mock[]> = {}
+    nuqsOverride.useQueryState = (key) => {
+      const setter = vi.fn()
+      ;(setters[key] ??= []).push(setter)
+      // Same shapes as the real parsers' defaults.
+      const value = { path: [], radius: 1000 }[key] ?? null
+      return [value, setter]
+    }
+    try {
+      const { rerender } = render(<GMap />, {
+        wrapper: withNuqsTestingAdapter(),
+      })
+      await waitFor(() => expect(mockSetState).toHaveBeenCalled())
+      rerender(<GMap />)
+
+      const listener = (name: string) =>
+        vi
+          .mocked(google.maps.event.addListener)
+          .mock.calls.find(([, n]) => n === name)[2] as () => void
+      act(() => {
+        listener('length_changed')()
+        listener('center_changed')()
+      })
+
+      for (const key of ['path', 'center']) {
+        const latest = setters[key].at(-1)
+        expect(latest).toHaveBeenCalled()
+        for (const old of setters[key].slice(0, -1)) {
+          expect(old).not.toHaveBeenCalled()
+        }
+      }
+    } finally {
+      nuqsOverride.useQueryState = undefined
+    }
   })
 })
