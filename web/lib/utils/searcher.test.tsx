@@ -27,10 +27,11 @@ vi.mock('./user-context', () => ({
 // referentially stable object across re-renders when the URL hasn't changed,
 // so the mock must match that or the effect below (which depends on
 // `searchParams`) will treat every render as a param change and loop forever.
-const mockSearchParams = new URLSearchParams()
+// Tests that change the URL swap in a new instance, like a navigation would.
+const mockNavigation = { searchParams: new URLSearchParams() }
 
 vi.mock('@/lib/utils/navigation', () => ({
-  useSearchParams: () => mockSearchParams,
+  useSearchParams: () => mockNavigation.searchParams,
 }))
 
 describe('Searcher', () => {
@@ -38,6 +39,7 @@ describe('Searcher', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockNavigation.searchParams = new URLSearchParams()
     ;(useData as Mock).mockReturnValue([
       { rows: [], offset: 0, params: '' },
       mockSetData,
@@ -150,4 +152,36 @@ describe('Searcher', () => {
       { id: 1, title: 'Stale row' },
     ])
   })
+
+  it.each(['', 'neighborhood', 'cities'])(
+    'does not re-dispatch when only path changes under filter=%j',
+    async (filter) => {
+      mockNavigation.searchParams = new URLSearchParams({ filter })
+      const { rerender } = render(<Searcher />)
+      await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(1))
+      // path is not part of these searches, so it is not sent either.
+      expect((searchAction as Mock).mock.calls[0][1].path).toBe('')
+
+      mockNavigation.searchParams = new URLSearchParams({ filter, path: 'abc' })
+      rerender(<Searcher />)
+
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(searchAction).toHaveBeenCalledTimes(1)
+    },
+  )
+
+  it.each(['crossing', 'hausdorff', 'frechet'])(
+    're-dispatches when path changes under filter=%j',
+    async (filter) => {
+      mockNavigation.searchParams = new URLSearchParams({ filter })
+      const { rerender } = render(<Searcher />)
+      await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(1))
+
+      mockNavigation.searchParams = new URLSearchParams({ filter, path: 'abc' })
+      rerender(<Searcher />)
+
+      await waitFor(() => expect(searchAction).toHaveBeenCalledTimes(2))
+      expect((searchAction as Mock).mock.calls[1][1].path).toBe('abc')
+    },
+  )
 })
