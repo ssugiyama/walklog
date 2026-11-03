@@ -33,7 +33,7 @@
     "react-markdown": "^10.1.0",
     "recharts": "^3.10.1",
     "terra-draw": "^1.32.3",
-    "terra-draw-google-maps-adapter": "^1.5.0",
+    "terra-draw-google-maps-adapter": "^1.7.0",
     "util": "^0.12.5",
     "wkx": "^0.5.0",
     "zod": "^4.6.6"
