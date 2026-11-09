@@ -65,13 +65,13 @@ importers:
         version: 1.0.20
       better-auth:
         specifier: ^1.7.14
-        version: 1.7.14(@opentelemetry/api@1.9.0)(drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)))(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))(pg@8.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5)
+        version: 1.7.14(@opentelemetry/api@1.9.0)(drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)))(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))(pg@8.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
       drizzle-orm:
         specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
+        version: 1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
       hono:
         specifier: ^4.13.13
         version: 4.13.13
@@ -122,11 +122,11 @@ importers:
         specifier: 2.0.0-beta.sha-52b0dc0e9
         version: 2.0.0-beta.sha-52b0dc0e9(@types/node@24.10.1)(@voidzero-dev/vite-plus-core@1.4.0(@types/node@24.10.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.0))(workerd@1.20261001.1)
       '@electric-sql/pglite':
-        specifier: ^0.5.4
-        version: 0.5.4
+        specifier: ^0.5.15
+        version: 0.5.15
       '@electric-sql/pglite-postgis':
-        specifier: ^0.2.4
-        version: 0.2.4(@electric-sql/pglite@0.5.4)
+        specifier: ^0.2.15
+        version: 0.2.15(@electric-sql/pglite@0.5.15)
       '@googlemaps/jest-mocks':
         specifier: ^2.22.8
         version: 2.22.8
@@ -171,7 +171,7 @@ importers:
         version: 1.0.0-beta.12(@types/node@24.10.1)
       drizzle-kit:
         specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))
+        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1(@noble/hashes@2.4.0)
@@ -529,13 +529,13 @@ packages:
   '@date-fns/tz@1.4.1':
     resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
 
-  '@electric-sql/pglite-postgis@0.2.4':
-    resolution: {integrity: sha512-bHtSmAwPCvIboJ0gnPhOtQMpel8uLSGj91tTpaHOLhrsRwFZG60ZbHCimuWg+BLCRVzHswEMrShV8QyhAxhFmQ==}
+  '@electric-sql/pglite-postgis@0.2.15':
+    resolution: {integrity: sha512-SiRHnKPk6MDjbKmYPwOPGKBJteLoy4iPyfJVaBFj0EBM2IjQuoKAZh4zW1GxM2WXwCjO/JOq+C3OrJ1XDN8UlA==}
     peerDependencies:
-      '@electric-sql/pglite': 0.5.4
+      '@electric-sql/pglite': 0.5.15
 
-  '@electric-sql/pglite@0.5.4':
-    resolution: {integrity: sha512-yYZUyyXrHU7tPlCjwZQJ6hIG9DscdCCn7Uk0mYKwC1FeHX286AbcmFveMiRBEak8e9iPupjsoVImN3yJZVed2g==}
+  '@electric-sql/pglite@0.5.15':
+    resolution: {integrity: sha512-ERZWgaRTxueGV4cvL1tfpAOzFCWTXoUtbCBqnf2FhHDVs/so9eAKaanvrwWF9Dntx7BYsmFQujVQ0/B4S8Mmiw==}
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -3696,12 +3696,12 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
 
-  '@better-auth/drizzle-adapter@1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))':
+  '@better-auth/drizzle-adapter@1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))':
     dependencies:
       '@better-auth/core': 1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5)
       '@better-auth/utils': 0.5.1
     optionalDependencies:
-      drizzle-orm: 1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
+      drizzle-orm: 1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
 
   '@better-auth/kysely-adapter@1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(kysely@0.29.7)':
     dependencies:
@@ -3864,11 +3864,11 @@ snapshots:
   '@date-fns/tz@1.4.1':
     optional: true
 
-  '@electric-sql/pglite-postgis@0.2.4(@electric-sql/pglite@0.5.4)':
+  '@electric-sql/pglite-postgis@0.2.15(@electric-sql/pglite@0.5.15)':
     dependencies:
-      '@electric-sql/pglite': 0.5.4
+      '@electric-sql/pglite': 0.5.15
 
-  '@electric-sql/pglite@0.5.4': {}
+  '@electric-sql/pglite@0.5.15': {}
 
   '@emnapi/runtime@1.11.3':
     dependencies:
@@ -4917,10 +4917,10 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  better-auth@1.7.14(@opentelemetry/api@1.9.0)(drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)))(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))(pg@8.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5):
+  better-auth@1.7.14(@opentelemetry/api@1.9.0)(drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)))(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))(pg@8.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5):
     dependencies:
       '@better-auth/core': 1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5)
-      '@better-auth/drizzle-adapter': 1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))
+      '@better-auth/drizzle-adapter': 1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))
       '@better-auth/kysely-adapter': 1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)(kysely@0.29.7)
       '@better-auth/memory-adapter': 1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)
       '@better-auth/mongo-adapter': 1.7.14(@better-auth/core@1.7.14(@better-auth/utils@0.5.1)(@better-fetch/fetch@1.3.3)(@opentelemetry/api@1.9.0)(better-call@1.4.4(zod@4.6.7))(jose@6.2.14)(kysely@0.29.7)(nanostores@1.5.5))(@better-auth/utils@0.5.1)
@@ -4937,8 +4937,8 @@ snapshots:
       nanostores: 1.5.5
       zod: 4.6.7
     optionalDependencies:
-      drizzle-kit: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))
-      drizzle-orm: 1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
+      drizzle-kit: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7))
+      drizzle-orm: 1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
       pg: 8.18.0
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
@@ -5133,13 +5133,13 @@ snapshots:
       '@babel/runtime': 7.29.10
       csstype: 3.2.3
 
-  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)):
+  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)):
     optionalDependencies:
-      drizzle-orm: 1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
+      drizzle-orm: 1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7)
 
-  drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.4)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7):
+  drizzle-orm@1.0.0-rc.5(@electric-sql/pglite@0.5.15)(@opentelemetry/api@1.9.0)(@sinclair/typebox@0.34.49)(@types/pg@8.23.1)(pg@8.18.0)(postgres@3.4.9)(zod@4.6.7):
     optionalDependencies:
-      '@electric-sql/pglite': 0.5.4
+      '@electric-sql/pglite': 0.5.15
       '@opentelemetry/api': 1.9.0
       '@sinclair/typebox': 0.34.49
       '@types/pg': 8.23.1
