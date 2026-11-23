@@ -49,7 +49,10 @@ const SearchBox = () => {
   const moreUrl = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('limit', (offset + 20).toString())
-    return `?${params.toString()}`
+    // Must start with '/': Link sends any other href through a native page
+    // load, which would discard the loaded rows instead of letting Searcher
+    // fetch only the next page and append it.
+    return `/?${params.toString()}`
   }, [searchParams, offset])
 
   const userObjs: Record<string, UserT> = {}
