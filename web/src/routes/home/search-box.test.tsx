@@ -141,4 +141,26 @@ describe('SearchBox', () => {
     render(<SearchBox />)
     expect(screen.getByText('1 / 1 item')).toBeInTheDocument()
   })
+
+  it('links "more" to an absolute home URL so Link navigates client-side', async () => {
+    // Link only routes hrefs starting with '/' through the router; a bare
+    // '?limit=...' would fall back to a full page load.
+    const { useSearchParams } = await import('@/lib/utils/navigation')
+    ;(useSearchParams as Mock).mockReturnValue(
+      new URLSearchParams('user=u1&limit=20'),
+    )
+    ;(useData as Mock).mockReturnValue([
+      {
+        offset: 20,
+        count: 50,
+        rows: [],
+      },
+    ])
+
+    render(<SearchBox />)
+    expect(screen.getByRole('link', { name: /more/ })).toHaveAttribute(
+      'href',
+      '/?user=u1&limit=40',
+    )
+  })
 })
