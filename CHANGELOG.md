@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.0 - 2026-11-28
+
+- migrate from Next.js to Hono + React SPA (TanStack Router)
+- replace Firebase Auth with Better Auth (Google sign-in)
+- fix: /new returns forbidden for active users
+- update minor dependencies
+
 ## v1.2.0 - 2026-10-07
 
 - set background color of body
